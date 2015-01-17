@@ -1,0 +1,53 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: Inconsolata, sans-serif;
+	background: #111;
+	color: #FFF;
+}
+
+p {
+	line-height: 1.5;
+}
+
+.tablist {
+	position: fixed;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: 200px;
+	padding: 20px;
+	overflow: auto;
+}
+
+.tablist p {
+	cursor: pointer;
+}
+
+.tablist p:hover {
+	color: #AAA;
+}
+
+.messagebox {
+	position: fixed;
+	left: 200px;
+	top: 0;
+	bottom: 0;
+	right: 200px;
+	padding: 20px;
+	overflow: auto;
+	z-index: 1;
+}
+
+.userlist {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	width: 200px;
+	padding: 20px;
+	overflow: auto;
+}
