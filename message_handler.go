@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/khlieng/irc/storage"
+	"github.com/khlieng/name_pending/storage"
 )
 
 func handleMessages(irc *IRC, session *Session) {

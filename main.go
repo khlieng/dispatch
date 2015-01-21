@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/net/websocket"
 
-	"github.com/khlieng/irc/storage"
+	"github.com/khlieng/name_pending/storage"
 )
 
 var (
