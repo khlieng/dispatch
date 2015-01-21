@@ -1,6 +1,7 @@
 var Reflux = require('reflux');
 
-var actions = require('../actions/message.js');
+var serverStore = require('../stores/server');
+var actions = require('../actions/message');
 
 var messages = {};
 

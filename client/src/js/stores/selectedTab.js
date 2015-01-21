@@ -1,8 +1,8 @@
 var Reflux = require('reflux');
 var _ = require('lodash');
 
-var actions = require('../actions/tab.js');
-var channelActions = require('../actions/channel.js');
+var actions = require('../actions/tab');
+var channelActions = require('../actions/channel');
 
 var selectedTab = {};
 

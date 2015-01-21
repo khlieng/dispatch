@@ -2,10 +2,10 @@ var React = require('react');
 var Reflux = require('reflux');
 var _ = require('lodash');
 
-var serverStore = require('../stores/server.js');
-var channelStore = require('../stores/channel.js');
-var selectedTabStore = require('../stores/selectedTab.js');
-var tabActions = require('../actions/tab.js');
+var serverStore = require('../stores/server');
+var channelStore = require('../stores/channel');
+var selectedTabStore = require('../stores/selectedTab');
+var tabActions = require('../actions/tab');
 
 var TabList = React.createClass({
 	mixins: [

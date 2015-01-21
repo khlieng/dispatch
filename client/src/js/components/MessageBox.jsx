@@ -2,8 +2,8 @@ var React = require('react');
 var Reflux = require('reflux');
 var _ = require('lodash');
 
-var messageStore = require('../stores/message.js');
-var selectedTabStore = require('../stores/selectedTab.js');
+var messageStore = require('../stores/message');
+var selectedTabStore = require('../stores/selectedTab');
 
 var MessageBox = React.createClass({
 	mixins: [

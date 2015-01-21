@@ -1,6 +1,6 @@
 var Reflux = require('reflux');
 
-var socket = require('../socket.js')('/ws');
+var socket = require('../socket');
 
 var serverActions = Reflux.createActions([
 	'connect',

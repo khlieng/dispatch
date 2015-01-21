@@ -2,8 +2,8 @@ var React = require('react');
 var Reflux = require('reflux');
 var _ = require('lodash');
 
-var channelStore = require('../stores/channel.js');
-var selectedTabStore = require('../stores/selectedTab.js');
+var channelStore = require('../stores/channel');
+var selectedTabStore = require('../stores/selectedTab');
 
 var UserList = React.createClass({
 	mixins: [

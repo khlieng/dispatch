@@ -1,9 +1,9 @@
 var React = require('react');
 var Reflux = require('reflux');
 
-var selectedTabStore = require('../stores/selectedTab.js');
-var messageActions = require('../actions/message.js');
-var channelActions = require('../actions/channel.js');
+var selectedTabStore = require('../stores/selectedTab');
+var messageActions = require('../actions/message');
+var channelActions = require('../actions/channel');
 
 function dispatchCommand(cmd, channel, server) {
 	var params = cmd.slice(1).split(' ');

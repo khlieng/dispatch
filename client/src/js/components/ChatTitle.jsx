@@ -1,8 +1,8 @@
 var React = require('react');
 var Reflux = require('reflux');
 
-var channelStore = require('../stores/channel.js');
-var selectedTabStore = require('../stores/selectedTab.js');
+var channelStore = require('../stores/channel');
+var selectedTabStore = require('../stores/selectedTab');
 
 var ChatTitle = React.createClass({
     mixins: [
