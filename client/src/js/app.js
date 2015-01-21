@@ -1,70 +1,21 @@
 var React = require('react');
-var _ = require('lodash');
 
-var sock = require('./socket')('/ws');
+var socket = require('./socket');
 var util = require('./util');
 var App = require('./components/App.jsx');
-var messageActions = require('./actions/message.js');
 var tabActions = require('./actions/tab.js');
 var serverActions = require('./actions/server.js');
 var channelActions = require('./actions/channel.js');
 
-React.render(<App />, document.body);
-
 var uuid = localStorage.uuid || (localStorage.uuid = util.UUID());
+var nick = 'test' + Math.floor(Math.random() * 99999);
 
-tabActions.select('irc.freenode.net');
+socket.on('connect', function() {
+	socket.send('uuid', uuid);
 
-sock.on('connect', function() {
-	sock.send('uuid', uuid);
-
-	serverActions.connect({
-		server: 'irc.freenode.net',
-		nick: 'test' + Math.floor(Math.random() * 99999),
-		username: 'user'
-	});
-
-	channelActions.join({
-		server: 'irc.freenode.net',
-		channels: [ '#stuff' ]
-	});
+	serverActions.connect('irc.freenode.net', nick, 'username');
+	channelActions.join(['#stuff'], 'irc.freenode.net');
+	tabActions.select('irc.freenode.net');
 });
 
-channelActions.joined.listen(function(user, server, channel) {
-	messageActions.add({
-		server: server,
-		from: '',
-		to: channel,
-		message: user + ' joined the channel',
-		type: 'info'
-	});
-});
-
-channelActions.parted.listen(function(user, server, channel) {
-	messageActions.add({
-		server: server,
-		from: '',
-		to: channel,
-		message: user + ' left the channel',
-		type: 'info'
-	});
-});
-
-sock.on('message', function(data) {
-	messageActions.add(data);
-});
-
-sock.on('pm', function(data) {
-	messageActions.add(data);
-});
-
-sock.on('motd', function(data) {
-	_.each(data.content.split('\n'), function(line) {
-		messageActions.add({
-			server: data.server,
-			from: '',
-			to: data.server,
-			message: line
-		});
-	});
-});
+React.render(<App />, document.body);

@@ -18,10 +18,10 @@ var selectedTabStore = Reflux.createStore({
 		this.trigger(selectedTab);
 	},
 
-	part: function(data) {
+	part: function(channels, server) {
 		var self = this;
-		if (data.server === selectedTab.server) {
-			_.each(data.channels, function(channel) {
+		if (server === selectedTab.server) {
+			_.each(channels, function(channel) {
 				if (channel === selectedTab.channel) {
 					delete selectedTab.channel;
 					self.trigger(selectedTab);

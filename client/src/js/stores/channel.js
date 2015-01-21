@@ -19,25 +19,25 @@ var channelStore = Reflux.createStore({
 		this.listenToMany(actions);
 	},
 
-	joined: function(user, server, channel) {
+	part: function(partChannels, server) {
+		_.each(partChannels, function(channel) {
+			delete channels[server][channel];
+		});
+		this.trigger(channels);
+	},
+
+	addUser: function(user, server, channel) {
 		initChannel(server, channel);
 		channels[server][channel].users.push(user);
 		this.trigger(channels);
 	},
 
-	part: function(data) {
-		_.each(data.channels, function(channel) {
-			delete channels[data.server][channel];
-		});
-		this.trigger(channels);
-	},
-
-	parted: function(user, server, channel) {
+	removeUser: function(user, server, channel) {
 		_.pull(channels[server][channel].users, user);
 		this.trigger(channels);
 	},
 
-	quit: function(user, server) {
+	removeUserAll: function(user, server) {
 		_.each(channels[server], function(channel) {
 			_.pull(channel.users, user);
 		});

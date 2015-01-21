@@ -11,19 +11,13 @@ function dispatchCommand(cmd, channel, server) {
 	switch (params[0].toLowerCase()) {
 		case 'join':
 			if (params[1]) {
-				channelActions.join({
-					server: server,
-					channels: [params[1]]
-				});
+				channelActions.join(params[1], server);
 			}
 			break;
 
 		case 'part':
 			if (channel) {
-				channelActions.part({
-					server: server,
-					channels: [channel]
-				});
+				channelActions.part([channel], server);
 			}
 			break;
 	}

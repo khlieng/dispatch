@@ -1,47 +1,54 @@
 var Reflux = require('reflux');
+var _ = require('lodash');
 
-var sock = require('../socket.js')('/ws');
+var socket = require('../socket.js');
 
 var channelActions = Reflux.createActions([
 	'join',
-	'joined',
 	'part',
-	'parted',
-	'quit',
+	'addUser',
+	'removeUser',
+	'removeUserAll',
 	'setUsers',
 	'setTopic',
 	'load'
 ]);
 
-channelActions.join.preEmit = function(data) {
-	sock.send('join', data);
+channelActions.join.preEmit = function(channels, server) {
+	socket.send('join', {
+		server: server,
+		channels: channels
+	});
 };
 
-channelActions.part.preEmit = function(data) {
-	sock.send('part', data);
+channelActions.part.preEmit = function(channels, server) {
+	socket.send('part', {
+		server: server,
+		channels: channels
+	});
 };
 
-sock.on('join', function(data) {
-	channelActions.joined(data.user, data.server, data.channels[0]);
+socket.on('join', function(data) {
+	channelActions.addUser(data.user, data.server, data.channels[0]);
 });
 
-sock.on('part', function(data) {
-	channelActions.parted(data.user, data.server, data.channels[0]);
+socket.on('part', function(data) {
+	channelActions.removeUser(data.user, data.server, data.channels[0]);
 });
 
-sock.on('quit', function(data) {
-	channelActions.quit(data.user, data.server);
+socket.on('quit', function(data) {
+	channelActions.removeUserAll(data.user, data.server);
 });
 
-sock.on('users', function(data) {
+socket.on('users', function(data) {
 	channelActions.setUsers(data.users, data.server, data.channel);
 });
 
-sock.on('topic', function(data) {
+socket.on('topic', function(data) {
 	channelActions.setTopic(data.topic, data.server, data.channel);
 });
 
-sock.on('channels', function(data) {
+socket.on('channels', function(data) {
 	channelActions.load(data);
 });
 
