@@ -1,4 +1,5 @@
 var Reflux = require('reflux');
+
 var actions = require('../actions/server.js');
 
 var servers = {};

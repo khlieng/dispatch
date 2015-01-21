@@ -5,63 +5,98 @@ import (
 )
 
 type ChannelStore struct {
-	data map[string]map[string][]string
-	lock sync.Mutex
+	users    map[string]map[string][]string
+	userLock sync.Mutex
+
+	topic     map[string]map[string]string
+	topicLock sync.Mutex
 }
 
 func NewChannelStore() *ChannelStore {
 	return &ChannelStore{
-		data: make(map[string]map[string][]string),
+		users: make(map[string]map[string][]string),
+		topic: make(map[string]map[string]string),
 	}
 }
 
 func (c *ChannelStore) GetUsers(server, channel string) []string {
-	c.lock.Lock()
+	c.userLock.Lock()
 
-	users := make([]string, len(c.data[server][channel]))
-	copy(users, c.data[server][channel])
+	users := make([]string, len(c.users[server][channel]))
+	copy(users, c.users[server][channel])
 
-	c.lock.Unlock()
+	c.userLock.Unlock()
 
 	return users
 }
 
 func (c *ChannelStore) SetUsers(users []string, server, channel string) {
-	c.lock.Lock()
+	c.userLock.Lock()
 
-	if _, ok := c.data[server]; !ok {
-		c.data[server] = make(map[string][]string)
+	if _, ok := c.users[server]; !ok {
+		c.users[server] = make(map[string][]string)
 	}
 
-	c.data[server][channel] = users
+	c.users[server][channel] = users
 
-	c.lock.Unlock()
+	c.userLock.Unlock()
 }
 
 func (c *ChannelStore) AddUser(user, server, channel string) {
-	c.lock.Lock()
+	c.userLock.Lock()
 
-	if _, ok := c.data[server]; !ok {
-		c.data[server] = make(map[string][]string)
+	if _, ok := c.users[server]; !ok {
+		c.users[server] = make(map[string][]string)
 	}
 
-	if users, ok := c.data[server][channel]; ok {
-		c.data[server][channel] = append(users, user)
+	if users, ok := c.users[server][channel]; ok {
+		c.users[server][channel] = append(users, user)
 	} else {
-		c.data[server][channel] = []string{user}
+		c.users[server][channel] = []string{user}
 	}
 
-	c.lock.Unlock()
+	c.userLock.Unlock()
 }
 
 func (c *ChannelStore) RemoveUser(user, server, channel string) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.userLock.Lock()
+	c.removeUser(user, server, channel)
+	c.userLock.Unlock()
+}
 
-	for i, u := range c.data[server][channel] {
+func (c *ChannelStore) RemoveUserAll(user, server string) {
+	c.userLock.Lock()
+
+	for channel, _ := range c.users[server] {
+		c.removeUser(user, server, channel)
+	}
+
+	c.userLock.Unlock()
+}
+
+func (c *ChannelStore) GetTopic(server, channel string) string {
+	c.topicLock.Lock()
+	defer c.topicLock.Unlock()
+
+	return c.topic[server][channel]
+}
+
+func (c *ChannelStore) SetTopic(topic, server, channel string) {
+	c.topicLock.Lock()
+
+	if _, ok := c.topic[server]; !ok {
+		c.topic[server] = make(map[string]string)
+	}
+
+	c.topic[server][channel] = topic
+	c.topicLock.Unlock()
+}
+
+func (c *ChannelStore) removeUser(user, server, channel string) {
+	for i, u := range c.users[server][channel] {
 		if u == user {
-			users := c.data[server][channel]
-			c.data[server][channel] = append(users[:i], users[i+1:]...)
+			users := c.users[server][channel]
+			c.users[server][channel] = append(users[:i], users[i+1:]...)
 			return
 		}
 	}

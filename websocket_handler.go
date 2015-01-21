@@ -48,6 +48,7 @@ func handleWS(ws *websocket.Conn) {
 				channels := session.user.GetChannels()
 				for i, channel := range channels {
 					channels[i].Users = channelStore.GetUsers(channel.Server, channel.Name)
+					channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
 				}
 
 				session.sendJSON("channels", channels)
@@ -104,6 +105,17 @@ func handleWS(ws *websocket.Conn) {
 
 			if irc, ok := session.getIRC(data.Server); ok {
 				irc.Part(data.Channels...)
+			}
+
+		case "quit":
+			var data Quit
+
+			json.Unmarshal(req.Request, &data)
+
+			if irc, ok := session.getIRC(data.Server); ok {
+				channelStore.RemoveUserAll(irc.nick, data.Server)
+				session.user.RemoveServer(data.Server)
+				irc.Quit()
 			}
 
 		case "chat":

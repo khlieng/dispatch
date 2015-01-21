@@ -1,11 +1,31 @@
 var Reflux = require('reflux');
+
 var actions = require('../actions/message.js');
 
 var messages = {};
 
+function addMessage(message, dest) {
+	if (!(dest in messages)) {
+		messages[dest] = [message];
+	} else {
+		messages[dest].push(message);
+	}
+}
+
 var messageStore = Reflux.createStore({
 	init: function() {
 		this.listenToMany(actions);
+	},
+
+	send: function(message, to, server) {
+		addMessage({
+			server: server,
+			from: 'self',
+			to: to,
+			message: message
+		}, to);
+
+		this.trigger(messages);
 	},
 
 	add: function(message) {
@@ -13,13 +33,8 @@ var messageStore = Reflux.createStore({
 		if (message.from.indexOf('.') !== -1) {
 			dest = message.server;
 		}
-		
-		if (!(dest in messages)) {
-			messages[dest] = [message];
-		} else {
-			messages[dest].push(message);
-		}
 
+		addMessage(message, dest);
 		this.trigger(messages);
 	},
 

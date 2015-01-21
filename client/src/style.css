@@ -1,12 +1,21 @@
 * {
 	margin: 0;
 	padding: 0;
+	box-sizing: border-box;
 }
 
 body {
 	font-family: Inconsolata, sans-serif;
 	background: #111;
 	color: #FFF;
+}
+
+input {
+	font: 16px Inconsolata, sans-serif;
+	background: rgba(0,0,0,0.25);
+	color: #FFF;
+	outline: none;
+	border: none;
 }
 
 p {
@@ -19,7 +28,7 @@ p {
 	top: 0;
 	bottom: 0;
 	right: 200px;
-	padding: 20px;
+	padding: 15px;
 	overflow: auto;
 }
 
@@ -31,23 +40,64 @@ p {
 	color: #AAA;
 }
 
-.messagebox {
+.chat-title-bar {
 	position: fixed;
 	left: 200px;
 	top: 0;
-	bottom: 0;
 	right: 200px;
-	padding: 20px;
+	height: 50px;
+	padding: 0 15px;
+	line-height: 50px;
+	background: rgba(0,0,0,0.25);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.chat-title {
+	
+}
+
+.messagebox {
+	position: fixed;
+	left: 200px;
+	top: 50px;
+	bottom: 50px;
+	right: 200px;
+	padding: 15px;
 	overflow: auto;
 	z-index: 1;
+}
+
+.message {
+
+}
+
+.message-info {
+	color: #666;
+}
+
+.message-input-wrap {
+	position: fixed;
+	left: 200px;
+	bottom: 0px;
+	right: 0;
+	height: 50px;
+	z-index: 1;
+}
+
+.message-input {
+	width: 100%;
+	height: 100%;
+	padding: 15px;
 }
 
 .userlist {
 	position: fixed;
 	top: 0;
-	bottom: 0;
+	bottom: 50px;
 	right: 0;
 	width: 200px;
-	padding: 20px;
+	padding: 15px;
 	overflow: auto;
 }

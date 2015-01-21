@@ -18,6 +18,7 @@ type Channel struct {
 	Server string   `json:"server"`
 	Name   string   `json:"name"`
 	Users  []string `json:"users"`
+	Topic  string   `json:"topic,omitempty"`
 }
 
 type User struct {
@@ -99,7 +100,7 @@ func (u User) GetChannels() []Channel {
 }
 
 func (u User) AddServer(server Server) {
-	db.Update(func(tx *bolt.Tx) error {
+	go db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Servers"))
 		data, _ := json.Marshal(server)
 
@@ -110,7 +111,7 @@ func (u User) AddServer(server Server) {
 }
 
 func (u User) AddChannel(channel Channel) {
-	db.Update(func(tx *bolt.Tx) error {
+	go db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Channels"))
 		data, _ := json.Marshal(channel)
 
@@ -121,16 +122,25 @@ func (u User) AddChannel(channel Channel) {
 }
 
 func (u User) RemoveServer(address string) {
-	db.Update(func(tx *bolt.Tx) error {
-		tx.Bucket([]byte("Channels")).Delete([]byte(u.UUID + ":" + address))
+	go db.Update(func(tx *bolt.Tx) error {
+		serverID := []byte(u.UUID + ":" + address)
+
+		tx.Bucket([]byte("Servers")).Delete(serverID)
+
+		b := tx.Bucket([]byte("Channels"))
+		c := b.Cursor()
+
+		for k, _ := c.Seek(serverID); bytes.HasPrefix(k, serverID); k, _ = c.Next() {
+			b.Delete(k)
+		}
 
 		return nil
 	})
 }
 
 func (u User) RemoveChannel(server, channel string) {
-	db.Update(func(tx *bolt.Tx) error {
-		tx.Bucket([]byte("Servers")).Delete([]byte(u.UUID + ":" + server + ":" + channel))
+	go db.Update(func(tx *bolt.Tx) error {
+		tx.Bucket([]byte("Channels")).Delete([]byte(u.UUID + ":" + server + ":" + channel))
 
 		return nil
 	})

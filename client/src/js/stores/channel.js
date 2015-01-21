@@ -1,5 +1,6 @@
 var Reflux = require('reflux');
 var _ = require('lodash');
+
 var actions = require('../actions/channel.js');
 
 var channels = {};
@@ -36,9 +37,21 @@ var channelStore = Reflux.createStore({
 		this.trigger(channels);
 	},
 
+	quit: function(user, server) {
+		_.each(channels[server], function(channel) {
+			_.pull(channel.users, user);
+		});
+		this.trigger(channels);
+	},
+
 	setUsers: function(users, server, channel) {
 		initChannel(server, channel);
 		channels[server][channel].users = users;
+		this.trigger(channels);
+	},
+
+	setTopic: function(topic, server, channel) {
+		channels[server][channel].topic = topic;
 		this.trigger(channels);
 	},
 
@@ -46,6 +59,7 @@ var channelStore = Reflux.createStore({
 		_.each(storedChannels, function(channel) {
 			initChannel(channel.server, channel.name);
 			channels[channel.server][channel.name].users = channel.users;
+			channels[channel.server][channel.name].topic = channel.topic;
 		});
 		this.trigger(channels);
 	},

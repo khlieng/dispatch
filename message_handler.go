@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"fmt"
+	"log"
 	"strings"
 
 	"github.com/khlieng/irc/storage"
@@ -16,7 +16,7 @@ func handleMessages(irc *IRC, session *Session) {
 	for msg := range irc.Messages {
 		switch msg.Command {
 		case JOIN:
-			user := parseUser(msg.Prefix)
+			user := msg.Prefix
 
 			session.sendJSON("join", Join{
 				Server:   irc.Host,
@@ -34,7 +34,7 @@ func handleMessages(irc *IRC, session *Session) {
 			}
 
 		case PART:
-			user := parseUser(msg.Prefix)
+			user := msg.Prefix
 
 			session.sendJSON("part", Join{
 				Server:   irc.Host,
@@ -65,15 +65,18 @@ func handleMessages(irc *IRC, session *Session) {
 			}
 
 		case QUIT:
-			/*
-				session.sendJSON("quit", Quit{
-					Server: irc.Host,
-					User: user,
-				})
-			*/
+			user := msg.Prefix
+
+			session.sendJSON("quit", Quit{
+				Server: irc.Host,
+				User:   user,
+			})
+
+			channelStore.RemoveUserAll(user, irc.Host)
 
 		case RPL_WELCOME,
 			RPL_YOURHOST,
+			RPL_CREATED,
 			RPL_LUSERCLIENT,
 			RPL_LUSEROP,
 			RPL_LUSERUNKNOWN,
@@ -91,6 +94,8 @@ func handleMessages(irc *IRC, session *Session) {
 				Channel: msg.Params[1],
 				Topic:   msg.Trailing,
 			})
+
+			channelStore.SetTopic(msg.Trailing, irc.Host, msg.Params[1])
 
 		case RPL_NAMREPLY:
 			users := strings.Split(msg.Trailing, " ")
@@ -138,10 +143,5 @@ func handleMessages(irc *IRC, session *Session) {
 }
 
 func printMessage(msg *Message, irc *IRC) {
-	fmt.Printf("%s: %s %s %s\n", irc.nick, msg.Prefix, msg.Command, msg.Params)
-
-	if msg.Trailing != "" {
-		fmt.Println(msg.Trailing)
-	}
-	fmt.Println()
+	log.Println(irc.nick+":", msg.Prefix, msg.Command, msg.Params, msg.Trailing)
 }

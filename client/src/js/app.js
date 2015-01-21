@@ -26,7 +26,7 @@ sock.on('connect', function() {
 
 	channelActions.join({
 		server: 'irc.freenode.net',
-		channels: [ '#stuff', '#go-nuts' ]
+		channels: [ '#stuff' ]
 	});
 });
 
@@ -35,7 +35,8 @@ channelActions.joined.listen(function(user, server, channel) {
 		server: server,
 		from: '',
 		to: channel,
-		message: user + ' joined the channel'
+		message: user + ' joined the channel',
+		type: 'info'
 	});
 });
 
@@ -44,7 +45,8 @@ channelActions.parted.listen(function(user, server, channel) {
 		server: server,
 		from: '',
 		to: channel,
-		message: user + ' left the channel'
+		message: user + ' left the channel',
+		type: 'info'
 	});
 });
 
@@ -54,15 +56,6 @@ sock.on('message', function(data) {
 
 sock.on('pm', function(data) {
 	messageActions.add(data);
-});
-
-sock.on('topic', function(data) {
-	messageActions.add({
-		server: data.server,
-		from: '',
-		to: data.channel,
-		message: data.topic
-	});
 });
 
 sock.on('motd', function(data) {

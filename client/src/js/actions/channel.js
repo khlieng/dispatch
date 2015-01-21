@@ -1,4 +1,5 @@
 var Reflux = require('reflux');
+
 var sock = require('../socket.js')('/ws');
 
 var channelActions = Reflux.createActions([
@@ -6,7 +7,9 @@ var channelActions = Reflux.createActions([
 	'joined',
 	'part',
 	'parted',
+	'quit',
 	'setUsers',
+	'setTopic',
 	'load'
 ]);
 
@@ -26,8 +29,16 @@ sock.on('part', function(data) {
 	channelActions.parted(data.user, data.server, data.channels[0]);
 });
 
+sock.on('quit', function(data) {
+	channelActions.quit(data.user, data.server);
+});
+
 sock.on('users', function(data) {
 	channelActions.setUsers(data.users, data.server, data.channel);
+});
+
+sock.on('topic', function(data) {
+	channelActions.setTopic(data.topic, data.server, data.channel);
 });
 
 sock.on('channels', function(data) {
