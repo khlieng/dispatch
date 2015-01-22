@@ -6,10 +6,13 @@ var actions = require('../actions/message');
 var messages = {};
 
 function addMessage(message, dest) {
-	if (!(dest in messages)) {
-		messages[dest] = [message];
+	if (!(message.server in messages)) {
+		messages[message.server] = {};
+		messages[message.server][dest] = [message];
+	} else if (!(dest in messages[message.server])) {
+		messages[message.server][dest] = [message];
 	} else {
-		messages[dest].push(message);
+		messages[message.server][dest].push(message);
 	}
 }
 

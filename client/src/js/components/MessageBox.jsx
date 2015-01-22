@@ -31,17 +31,22 @@ var MessageBox = React.createClass({
 	},
 
 	render: function() {
-		var tab = this.state.selectedTab.channel || this.state.selectedTab.server;
-		var messages = _.map(this.state.messages[tab], function(message) {
-			var messageClass = 'message';
-			switch (message.type) {
-				case 'info':
-					messageClass += ' message-info';
-					break;
-			}
-			return <p className={messageClass}>{message.from ? message.from + ': ' : null}{message.message}</p>;
-		});
+		var tab = this.state.selectedTab;
+		var dest = tab.channel || tab.server;
+		var messages;
 
+		if (this.state.messages[tab.server] && dest) {
+			messages = _.map(this.state.messages[tab.server][dest], function(message) {
+				var messageClass = 'message';
+				switch (message.type) {
+					case 'info':
+						messageClass += ' message-info';
+						break;
+				}
+				return <p className={messageClass}>{message.from ? message.from + ': ' : null}{message.message}</p>;
+			});
+		}
+		
 		return (
 			<div className="messagebox">{messages}</div>
 		);
