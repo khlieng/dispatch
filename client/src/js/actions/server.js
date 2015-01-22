@@ -4,7 +4,8 @@ var socket = require('../socket');
 
 var serverActions = Reflux.createActions([
 	'connect',
-	'disconnect'
+	'disconnect',
+	'load'
 ]);
 
 serverActions.connect.preEmit = function(server, nick, username) {
@@ -18,5 +19,9 @@ serverActions.connect.preEmit = function(server, nick, username) {
 serverActions.disconnect.preEmit = function(server) {
 	socket.send('quit', { server: server });
 };
+
+socket.on('servers', function(data) {
+	serverActions.load(data);
+});
 
 module.exports = serverActions;

@@ -1,4 +1,5 @@
 var Reflux = require('reflux');
+var _ = require('lodash');
 
 var socket = require('../socket');
 

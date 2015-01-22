@@ -2,21 +2,18 @@ var React = require('react');
 var Reflux = require('reflux');
 var _ = require('lodash');
 
-var serverStore = require('../stores/server');
 var channelStore = require('../stores/channel');
 var selectedTabStore = require('../stores/selectedTab');
 var tabActions = require('../actions/tab');
 
 var TabList = React.createClass({
 	mixins: [
-		Reflux.connect(serverStore, 'servers'),
 		Reflux.connect(channelStore, 'channels'),
 		Reflux.connect(selectedTabStore, 'selectedTab')
 	],
 
 	getInitialState: function() {
 		return {
-			servers: serverStore.getState(),
 			channels: channelStore.getState(),
 			selectedTab: selectedTabStore.getState()
 		};

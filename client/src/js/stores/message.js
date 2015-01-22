@@ -21,7 +21,7 @@ var messageStore = Reflux.createStore({
 	send: function(message, to, server) {
 		addMessage({
 			server: server,
-			from: 'self',
+			from: serverStore.getNick(server),
 			to: to,
 			message: message
 		}, to);

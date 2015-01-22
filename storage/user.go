@@ -8,10 +8,10 @@ import (
 )
 
 type Server struct {
-	Address  string
-	Nick     string
-	Username string
-	Realname string
+	Address  string `json:"address"`
+	Nick     string `json:"nick"`
+	Username string `json:"username"`
+	Realname string `json:"realname"`
 }
 
 type Channel struct {

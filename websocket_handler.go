@@ -52,6 +52,7 @@ func handleWS(ws *websocket.Conn) {
 				}
 
 				session.sendJSON("channels", channels)
+				session.sendJSON("servers", session.user.GetServers())
 			} else {
 				session = NewSession()
 				session.user = storage.NewUser(UUID)
