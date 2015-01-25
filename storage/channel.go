@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"strings"
 	"sync"
 )
 
@@ -74,6 +75,20 @@ func (c *ChannelStore) RemoveUserAll(user, server string) {
 	c.userLock.Unlock()
 }
 
+func (c *ChannelStore) SetMode(server, channel, user, add, remove string) {
+	c.userLock.Lock()
+
+	if strings.Contains(add, "o") {
+		c.rename(server, channel, user, "@"+user)
+	} else if strings.Contains(add, "v") {
+		c.rename(server, channel, user, "+"+user)
+	} else if strings.IndexAny(remove, "ov") > -1 {
+		c.rename(server, channel, user, user)
+	}
+
+	c.userLock.Unlock()
+}
+
 func (c *ChannelStore) GetTopic(server, channel string) string {
 	c.topicLock.Lock()
 	defer c.topicLock.Unlock()
@@ -92,8 +107,21 @@ func (c *ChannelStore) SetTopic(topic, server, channel string) {
 	c.topicLock.Unlock()
 }
 
+func (c *ChannelStore) rename(server, channel, oldNick, newNick string) {
+	for i, u := range c.users[server][channel] {
+		u = strings.TrimLeft(u, "@+")
+
+		if u == oldNick {
+			c.users[server][channel][i] = newNick
+			return
+		}
+	}
+}
+
 func (c *ChannelStore) removeUser(user, server, channel string) {
 	for i, u := range c.users[server][channel] {
+		u = strings.TrimLeft(u, "@+")
+
 		if u == user {
 			users := c.users[server][channel]
 			c.users[server][channel] = append(users[:i], users[i+1:]...)

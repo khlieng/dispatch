@@ -11,7 +11,7 @@ function dispatchCommand(cmd, channel, server) {
 	switch (params[0].toLowerCase()) {
 		case 'join':
 			if (params[1]) {
-				channelActions.join(params[1], server);
+				channelActions.join([params[1]], server);
 			}
 			break;
 

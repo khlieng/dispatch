@@ -14,7 +14,7 @@ var Chat = React.createClass({
                 <MessageInput />
                 <UserList />
             </div>
-        )
+        );
     }
 });
 

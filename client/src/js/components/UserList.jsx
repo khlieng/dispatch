@@ -26,7 +26,7 @@ var UserList = React.createClass({
 			var channel = this.state.channels[tab.server][tab.channel];
 			if (channel) {
 				users = _.map(channel.users, function(user) {
-					return <p>{user}</p>;
+					return <p>{user.renderName}</p>;
 				});
 			}
 		}

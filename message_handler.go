@@ -48,6 +48,19 @@ func handleMessages(irc *IRC, session *Session) {
 				session.user.RemoveChannel(irc.Host, msg.Params[0])
 			}
 
+		case MODE:
+			target := msg.Params[0]
+			if len(msg.Params) > 2 && isChannel(target) {
+				mode := parseMode(msg.Params[1])
+				mode.Server = irc.Host
+				mode.Channel = target
+				mode.User = msg.Params[2]
+
+				session.sendJSON("mode", mode)
+
+				channelStore.SetMode(irc.Host, target, msg.Params[2], mode.Add, mode.Remove)
+			}
+
 		case PRIVMSG, NOTICE:
 			if msg.Params[0] == irc.nick {
 				session.sendJSON("pm", Chat{
@@ -100,9 +113,9 @@ func handleMessages(irc *IRC, session *Session) {
 		case RPL_NAMREPLY:
 			users := strings.Split(msg.Trailing, " ")
 
-			for i, user := range users {
+			/*for i, user := range users {
 				users[i] = strings.TrimLeft(user, "@+")
-			}
+			}*/
 
 			userBuffer := userBuffers[msg.Params[2]]
 			userBuffers[msg.Params[2]] = append(userBuffer, users...)
@@ -140,6 +153,29 @@ func handleMessages(irc *IRC, session *Session) {
 			printMessage(msg, irc)
 		}
 	}
+}
+
+func parseMode(mode string) *Mode {
+	m := Mode{}
+	add := false
+
+	for _, c := range mode {
+		if c == '+' {
+			add = true
+		} else if c == '-' {
+			add = false
+		} else if add {
+			m.Add += string(c)
+		} else {
+			m.Remove += string(c)
+		}
+	}
+
+	return &m
+}
+
+func isChannel(s string) bool {
+	return strings.IndexAny(s, "&#+!") == 0
 }
 
 func printMessage(msg *Message, irc *IRC) {

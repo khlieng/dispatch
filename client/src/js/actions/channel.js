@@ -11,6 +11,7 @@ var channelActions = Reflux.createActions([
 	'removeUserAll',
 	'setUsers',
 	'setTopic',
+	'setMode',
 	'load'
 ]);
 
@@ -46,6 +47,10 @@ socket.on('users', function(data) {
 
 socket.on('topic', function(data) {
 	channelActions.setTopic(data.topic, data.server, data.channel);
+});
+
+socket.on('mode', function(data) {
+	channelActions.setMode(data);
 });
 
 socket.on('channels', function(data) {

@@ -26,6 +26,14 @@ type Join struct {
 	Channels []string `json:"channels"`
 }
 
+type Mode struct {
+	Server  string `json:"server"`
+	Channel string `json:"channel"`
+	User    string `json:"user"`
+	Add     string `json:"add"`
+	Remove  string `json:"remove"`
+}
+
 type Quit struct {
 	Server string `json:"server"`
 	User   string `json:"user"`
