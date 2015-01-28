@@ -6,16 +6,14 @@
 
 body {
 	font-family: Inconsolata, sans-serif;
-	background: #111;
-	color: #FFF;
+	background: #f0f0f0;
 }
 
 input {
 	font: 16px Inconsolata, sans-serif;
-	background: rgba(0,0,0,0.25);
-	color: #FFF;
-	outline: none;
 	border: none;
+	border-top: 1px solid #DDD;
+	outline: none;
 }
 
 p {
@@ -27,9 +25,11 @@ p {
 	left: 0;
 	top: 0;
 	bottom: 0;
-	right: 200px;
+	width: 200px;
 	padding: 15px;
 	overflow: auto;
+	background: #272626;
+	color: #FFF;
 }
 
 .tablist p {
@@ -37,25 +37,24 @@ p {
 }
 
 .tablist p:hover {
-	color: #AAA;
 }
 
 .chat-title-bar {
 	position: fixed;
 	left: 200px;
 	top: 0;
-	right: 200px;
+	right: 0;
 	height: 50px;
 	padding: 0 15px;
 	line-height: 50px;
-	background: rgba(0,0,0,0.25);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	border-bottom: 1px solid #DDD;
 }
 
 .chat-title {
-	
+	font-size: 24px;
 }
 
 .messagebox {
@@ -94,10 +93,11 @@ p {
 
 .userlist {
 	position: fixed;
-	top: 0;
+	top: 50px;
 	bottom: 50px;
 	right: 0;
 	width: 200px;
 	padding: 15px;
 	overflow: auto;
+	border-left: 1px solid #DDD;
 }

@@ -52,10 +52,25 @@ function updateRenderName(user) {
 
 function sortUsers(server, channel) {
 	channels[server][channel].users.sort(function(a, b) {
-		if (a.renderName < b.renderName) {
+		a = a.renderName.toLowerCase();
+		b = b.renderName.toLowerCase();
+
+		if (a[0] === '@' && b[0] !== '@') {
 			return -1;
 		}
-		if (a.renderName > b.renderName) {
+		if (b[0] === '@' && a[0] !== '@') {
+			return 1;
+		}
+		if (a[0] === '+' && b[0] !== '+') {
+			return -1;
+		}
+		if (b[0] === '+' && a[0] !== '+') {
+			return 1;
+		}
+		if (a < b) {
+			return -1;
+		}
+		if (a > b) {
 			return 1;
 		}
 		return 0;
