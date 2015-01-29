@@ -162,8 +162,11 @@ func (i *IRC) Whois(nick string) {
 }
 
 func (i *IRC) Quit() {
-	i.Write("QUIT")
-	i.conn.Close()
+	go func() {
+		i.ready.Wait()
+		i.write("QUIT")
+		i.conn.Close()
+	}()
 }
 
 func (i *IRC) Write(data string) {
