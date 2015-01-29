@@ -65,11 +65,18 @@ func (s *Session) sendJSON(t string, v interface{}) {
 	s.out <- res
 }
 
+func (s *Session) sendError(err error, server string) {
+	s.sendJSON("error", Error{
+		Server:  server,
+		Message: err.Error(),
+	})
+}
+
 func (s *Session) write() {
 	for res := range s.out {
 		s.wsLock.Lock()
 		for _, ws := range s.ws {
-			ws.In <- res
+			ws.Out <- res
 		}
 		s.wsLock.Unlock()
 	}

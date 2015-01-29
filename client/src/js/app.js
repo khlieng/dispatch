@@ -14,8 +14,14 @@ socket.on('connect', function() {
 	socket.send('uuid', uuid);
 
 	serverActions.connect('irc.freenode.net', nick, 'username');
+	serverActions.connect('irc.quakenet.org', nick, 'username');
+
 	channelActions.join(['#stuff'], 'irc.freenode.net');
-	tabActions.select('irc.freenode.net');
+	channelActions.join(['#herp'], 'irc.quakenet.org');
+});
+
+socket.on('error', function(error) {
+	console.log(error.server + ': ' + error.message);
 });
 
 React.render(<App />, document.body);

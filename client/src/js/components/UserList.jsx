@@ -22,7 +22,7 @@ var UserList = React.createClass({
 		var users = null;
 		var tab = this.state.selectedTab;
 
-		if (tab.channel) {
+		if (tab.channel && this.state.channels[tab.server]) {
 			var channel = this.state.channels[tab.server][tab.channel];
 			if (channel) {
 				users = _.map(channel.users, function(user) {

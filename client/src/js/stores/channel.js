@@ -2,6 +2,7 @@ var Reflux = require('reflux');
 var _ = require('lodash');
 
 var actions = require('../actions/channel');
+var serverActions = require('../actions/server');
 
 var channels = {};
 
@@ -80,6 +81,7 @@ function sortUsers(server, channel) {
 var channelStore = Reflux.createStore({
 	init: function() {
 		this.listenToMany(actions);
+		this.listenTo(serverActions.connect, 'addServer');
 	},
 
 	part: function(partChannels, server) {
@@ -159,6 +161,13 @@ var channelStore = Reflux.createStore({
 		});
 
 		this.trigger(channels);
+	},
+
+	addServer: function(server) {
+		if (!(server in channels)) {
+			channels[server] = {};
+			this.trigger(channels);
+		}
 	},
 
 	getState: function() {

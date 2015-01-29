@@ -1,6 +1,6 @@
 var Reflux = require('reflux');
 
-var serverStore = require('../stores/server');
+var serverStore = require('./server');
 var actions = require('../actions/message');
 
 var messages = {};
@@ -26,7 +26,8 @@ var messageStore = Reflux.createStore({
 			server: server,
 			from: serverStore.getNick(server),
 			to: to,
-			message: message
+			message: message,
+			time: new Date()
 		}, to);
 
 		this.trigger(messages);
@@ -37,6 +38,8 @@ var messageStore = Reflux.createStore({
 		if (message.from.indexOf('.') !== -1) {
 			dest = message.server;
 		}
+
+		message.time = new Date();
 
 		addMessage(message, dest);
 		this.trigger(messages);

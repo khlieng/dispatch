@@ -2,6 +2,7 @@ var React = require('react');
 var Reflux = require('reflux');
 var _ = require('lodash');
 
+var util = require('../util');
 var messageStore = require('../stores/message');
 var selectedTabStore = require('../stores/selectedTab');
 
@@ -38,12 +39,20 @@ var MessageBox = React.createClass({
 		if (this.state.messages[tab.server] && dest) {
 			messages = _.map(this.state.messages[tab.server][dest], function(message) {
 				var messageClass = 'message';
+
 				switch (message.type) {
 					case 'info':
 						messageClass += ' message-info';
 						break;
 				}
-				return <p className={messageClass}>{message.from ? message.from + ': ' : null}{message.message}</p>;
+
+				return (
+					<p className={messageClass}>
+						<span className="message-time">{util.timestamp(message.time)}</span>
+						{ message.from ? <span className="message-sender">{message.from}</span> : null }
+						{message.message}
+					</p>
+				);
 			});
 		}
 		

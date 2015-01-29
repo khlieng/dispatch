@@ -21,16 +21,41 @@ var TabList = React.createClass({
 
 	render: function() {
 		var self = this;
+		var tabClass;
+		var selected = this.state.selectedTab;
+
 		var tabs = _.map(this.state.channels, function(server, address) {
-			var channels = _.map(server, function(channel, name) {
-				return <p onClick={tabActions.select.bind(null, address, name)}>{name}</p>;
+			var channels = _.map(server, function(channel, name) {				
+				if (address === selected.server &&
+					name === selected.channel) {
+					tabClass = 'selected';
+				} else {
+					tabClass = '';
+				}
+
+				return <p className={tabClass} onClick={tabActions.select.bind(null, address, name)}>{name}</p>;
 			});
-			channels.unshift(<p onClick={tabActions.select.bind(null, address, null)}>{address}</p>);
+
+			if (address === selected.server &&
+				selected.channel === null) {
+				tabClass = 'tab-server selected';
+			} else {
+				tabClass = 'tab-server';
+			}
+
+			channels.unshift(<p className={tabClass} onClick={tabActions.select.bind(null, address, null)}>{address}</p>);
+
 			return channels;
 		});
 
 		return (
-			<div className="tablist">{tabs}</div>
+			<div className="tablist">
+				<button className="button-connect">Add Network</button>
+				{tabs}
+				<div className="side-buttons">
+					<button>Settings</button>
+				</div>
+			</div>
 		);
 	}
 });

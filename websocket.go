@@ -7,18 +7,18 @@ import (
 type WebSocket struct {
 	conn *websocket.Conn
 
-	In chan []byte
+	Out chan []byte
 }
 
 func NewWebSocket(ws *websocket.Conn) *WebSocket {
 	return &WebSocket{
 		conn: ws,
-		In:   make(chan []byte, 32),
+		Out:  make(chan []byte, 32),
 	}
 }
 
 func (w *WebSocket) write() {
-	for data := range w.In {
+	for data := range w.Out {
 		w.conn.Write(data)
 	}
 }

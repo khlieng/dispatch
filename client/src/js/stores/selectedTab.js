@@ -5,6 +5,11 @@ var actions = require('../actions/tab');
 var channelActions = require('../actions/channel');
 
 var selectedTab = {};
+var stored = localStorage.selectedTab;
+
+if (stored) {
+	selectedTab = JSON.parse(stored);
+}
 
 var selectedTabStore = Reflux.createStore({
 	init: function() {
@@ -34,6 +39,10 @@ var selectedTabStore = Reflux.createStore({
 	getState: function() {
 		return selectedTab;
 	}
+});
+
+selectedTabStore.listen(function(selected) {
+	localStorage.selectedTab = JSON.stringify(selected);
 });
 
 module.exports = selectedTabStore;

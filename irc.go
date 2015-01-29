@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"sync"
+	"time"
 )
 
 const (
@@ -54,6 +56,8 @@ type Message struct {
 type IRC struct {
 	conn   net.Conn
 	reader *bufio.Reader
+	out    chan string
+	ready  sync.WaitGroup
 
 	Messages  chan *Message
 	Server    string
@@ -71,10 +75,11 @@ func NewIRC(nick, username string) *IRC {
 		Username: username,
 		Realname: nick,
 		Messages: make(chan *Message, 32),
+		out:      make(chan string, 32),
 	}
 }
 
-func (i *IRC) Connect(address string) {
+func (i *IRC) Connect(address string) error {
 	if idx := strings.Index(address, ":"); idx < 0 {
 		i.Host = address
 
@@ -88,13 +93,24 @@ func (i *IRC) Connect(address string) {
 	}
 	i.Server = address
 
+	dialer := &net.Dialer{Timeout: 5 * time.Second}
+
 	if i.TLS {
 		if i.TLSConfig == nil {
 			i.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 		}
-		i.conn, _ = tls.Dial("tcp", address, i.TLSConfig)
+
+		if conn, err := tls.DialWithDialer(dialer, "tcp", address, i.TLSConfig); err != nil {
+			return err
+		} else {
+			i.conn = conn
+		}
 	} else {
-		i.conn, _ = net.Dial("tcp", address)
+		if conn, err := dialer.Dial("tcp", address); err != nil {
+			return err
+		} else {
+			i.conn = conn
+		}
 	}
 
 	i.reader = bufio.NewReader(i.conn)
@@ -102,19 +118,23 @@ func (i *IRC) Connect(address string) {
 	i.Nick(i.nick)
 	i.User(i.Username, i.Realname)
 
+	i.ready.Add(1)
+	go i.send()
 	go i.recv()
+
+	return nil
 }
 
 func (i *IRC) Pass(password string) {
-	i.Write("PASS " + password)
+	i.write("PASS " + password)
 }
 
 func (i *IRC) Nick(nick string) {
-	i.Write("NICK " + nick)
+	i.write("NICK " + nick)
 }
 
 func (i *IRC) User(username, realname string) {
-	i.Writef("USER %s 0 * :%s", username, realname)
+	i.writef("USER %s 0 * :%s", username, realname)
 }
 
 func (i *IRC) Join(channels ...string) {
@@ -147,11 +167,26 @@ func (i *IRC) Quit() {
 }
 
 func (i *IRC) Write(data string) {
-	fmt.Fprint(i.conn, data+"\r\n")
+	i.out <- data + "\r\n"
 }
 
 func (i *IRC) Writef(format string, a ...interface{}) {
+	i.out <- fmt.Sprintf(format+"\r\n", a...)
+}
+
+func (i *IRC) write(data string) {
+	fmt.Fprint(i.conn, data+"\r\n")
+}
+
+func (i *IRC) writef(format string, a ...interface{}) {
 	fmt.Fprintf(i.conn, format+"\r\n", a...)
+}
+
+func (i *IRC) send() {
+	i.ready.Wait()
+	for message := range i.out {
+		fmt.Fprint(i.conn, message)
+	}
 }
 
 func (i *IRC) recv() {
@@ -167,7 +202,10 @@ func (i *IRC) recv() {
 
 		switch msg.Command {
 		case PING:
-			i.Write("PONG :" + msg.Trailing)
+			i.write("PONG :" + msg.Trailing)
+
+		case RPL_WELCOME:
+			i.ready.Done()
 		}
 
 		i.Messages <- msg
