@@ -140,12 +140,13 @@ p {
 }
 
 .message {
-	padding-left: 50px;
-	text-indent: -50px;
+	margin-bottom: 5px;
+	padding-left: 55px;
+	text-indent: -55px;
 }
 
 .message span {
-	margin-right: 10px;
+	margin-right: 15px;
 }
 
 .message-info {
@@ -182,8 +183,17 @@ p {
 	bottom: 50px;
 	right: 0;
 	width: 200px;
-	padding: 15px;
+	padding: 15px 0px;
 	overflow: auto;
 	border-left: 1px solid #DDD;
 	overflow-x: hidden;
+}
+
+.userlist p {
+	padding: 0px 15px;
+	cursor: pointer;
+}
+
+.userlist p:hover {
+	background: #DDD;
 }

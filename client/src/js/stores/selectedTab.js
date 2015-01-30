@@ -36,6 +36,14 @@ var selectedTabStore = Reflux.createStore({
 		}
 	},
 
+	getServer: function() {
+		return selectedTab.server;
+	},
+
+	getChannel: function() {
+		return selectedTab.channel;
+	},
+
 	getState: function() {
 		return selectedTab;
 	}

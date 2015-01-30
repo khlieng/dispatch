@@ -25,8 +25,8 @@ var ChatTitle = React.createClass({
 
         if (tab.channel && this.state.channels[tab.server]) {
             var channel = this.state.channels[tab.server][tab.channel];
+            title = tab.channel
             if (channel) {
-                title = tab.channel
                 usercount = channel.users.length;
                 topic = channel.topic || '';
             }

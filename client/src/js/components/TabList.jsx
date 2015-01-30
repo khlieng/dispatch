@@ -3,18 +3,21 @@ var Reflux = require('reflux');
 var _ = require('lodash');
 
 var channelStore = require('../stores/channel');
+var privateChatStore = require('../stores/privateChat');
 var selectedTabStore = require('../stores/selectedTab');
 var tabActions = require('../actions/tab');
 
 var TabList = React.createClass({
 	mixins: [
 		Reflux.connect(channelStore, 'channels'),
+		Reflux.connect(privateChatStore, 'privateChats'),
 		Reflux.connect(selectedTabStore, 'selectedTab')
 	],
 
 	getInitialState: function() {
 		return {
 			channels: channelStore.getState(),
+			privateChats: privateChatStore.getState(),
 			selectedTab: selectedTabStore.getState()
 		};
 	},
@@ -34,6 +37,17 @@ var TabList = React.createClass({
 				}
 
 				return <p className={tabClass} onClick={tabActions.select.bind(null, address, name)}>{name}</p>;
+			});
+
+			_.each(self.state.privateChats[address], function(chat, nick) {
+				if (address === selected.server &&
+					nick === selected.channel) {
+					tabClass = 'selected';
+				} else {
+					tabClass = '';
+				}
+				
+				channels.push(<p className={tabClass} onClick={tabActions.select.bind(null, address, nick)}>{nick}</p>);	
 			});
 
 			if (address === selected.server &&
