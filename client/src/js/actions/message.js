@@ -28,7 +28,6 @@ socket.on('pm', function(data) {
 socket.on('join', function(data) {
 	messageActions.add({
 		server: data.server,
-		from: '',
 		to: data.channels[0],
 		message: data.user + ' joined the channel',
 		type: 'info'
@@ -38,7 +37,6 @@ socket.on('join', function(data) {
 socket.on('part', function(data) {
 	messageActions.add({
 		server: data.server,
-		from: '',
 		to: data.channels[0],
 		message: data.user + ' left the channel',
 		type: 'info'
@@ -46,7 +44,7 @@ socket.on('part', function(data) {
 });
 
 socket.on('quit', function(data) {
-	messageActions.broadcast(data.user + ' has quit', data.server);
+	messageActions.broadcast(data.user + ' quit', data.server);
 });
 
 socket.on('nick', function(data) {
@@ -57,7 +55,6 @@ socket.on('motd', function(data) {
 	_.each(data.content.split('\n'), function(line) {
 		messageActions.add({
 			server: data.server,
-			from: '',
 			to: data.server,
 			message: line
 		});

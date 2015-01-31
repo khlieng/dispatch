@@ -37,7 +37,7 @@ var messageStore = Reflux.createStore({
 
 	add: function(message) {
 		var dest = message.to || message.from;
-		if (message.from.indexOf('.') !== -1) {
+		if (message.from && message.from.indexOf('.') !== -1) {
 			dest = message.server;
 		}
 
@@ -51,7 +51,6 @@ var messageStore = Reflux.createStore({
 		_.each(channelStore.getChannels(server), function(channel, channelName) {
 			addMessage({
 				server: server,
-				from: '',
 				to: channelName,
 				message: message,
 				type: 'info',
