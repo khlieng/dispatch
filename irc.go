@@ -12,6 +12,7 @@ import (
 
 const (
 	PING    = "PING"
+	NICK    = "NICK"
 	JOIN    = "JOIN"
 	PART    = "PART"
 	MODE    = "MODE"

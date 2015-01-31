@@ -21,6 +21,12 @@ type Connect struct {
 	Username string `json:"username"`
 }
 
+type Nick struct {
+	Server string `json:"server"`
+	Old    string `json:"old"`
+	New    string `json:"new"`
+}
+
 type Join struct {
 	Server   string   `json:"server"`
 	User     string   `json:"user"`

@@ -5,7 +5,8 @@ var socket = require('../socket');
 
 var messageActions = Reflux.createActions([
 	'send',
-	'add'
+	'add',
+	'broadcast'
 ]);
 
 messageActions.send.preEmit = function(message, to, server) {
@@ -42,6 +43,14 @@ socket.on('part', function(data) {
 		message: data.user + ' left the channel',
 		type: 'info'
 	});
+});
+
+socket.on('quit', function(data) {
+	messageActions.broadcast(data.user + ' has quit', data.server);
+});
+
+socket.on('nick', function(data) {
+	messageActions.broadcast(data.old + ' changed nick to ' + data.new, data.server);
 });
 
 socket.on('motd', function(data) {

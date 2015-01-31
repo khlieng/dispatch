@@ -9,6 +9,7 @@ var channelActions = Reflux.createActions([
 	'addUser',
 	'removeUser',
 	'removeUserAll',
+	'renameUser',
 	'setUsers',
 	'setTopic',
 	'setMode',
@@ -39,6 +40,10 @@ socket.on('part', function(data) {
 
 socket.on('quit', function(data) {
 	channelActions.removeUserAll(data.user, data.server);
+});
+
+socket.on('nick', function(data) {
+	channelActions.renameUser(data.old, data.new, data.server);
 });
 
 socket.on('users', function(data) {

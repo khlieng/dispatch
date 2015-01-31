@@ -2,7 +2,7 @@ var React = require('react');
 var Reflux = require('reflux');
 var _ = require('lodash');
 
-var UserListItem = require('../components/UserListItem.jsx');
+var UserListItem = require('./UserListItem.jsx');
 var channelStore = require('../stores/channel');
 var selectedTabStore = require('../stores/selectedTab');
 
@@ -23,6 +23,12 @@ var UserList = React.createClass({
 		var users = null;
 		var tab = this.state.selectedTab;
 
+		var style = {};
+
+		if (!tab.channel || tab.channel[0] !== '#') {
+			style.display = 'none';
+		}
+
 		if (tab.channel && this.state.channels[tab.server]) {
 			var channel = this.state.channels[tab.server][tab.channel];
 			if (channel) {
@@ -33,7 +39,7 @@ var UserList = React.createClass({
 		}
 
 		return (
-			<div className="userlist">{users}</div>
+			<div className="userlist" style={style}>{users}</div>
 		);
 	}
 });

@@ -1,6 +1,8 @@
 var Reflux = require('reflux');
+var _ = require('lodash');
 
 var serverStore = require('./server');
+var channelStore = require('./channel');
 var actions = require('../actions/message');
 
 var messages = {};
@@ -42,6 +44,20 @@ var messageStore = Reflux.createStore({
 		message.time = new Date();
 
 		addMessage(message, dest);
+		this.trigger(messages);
+	},
+
+	broadcast: function(message, server) {
+		_.each(channelStore.getChannels(server), function(channel, channelName) {
+			addMessage({
+				server: server,
+				from: '',
+				to: channelName,
+				message: message,
+				type: 'info',
+				time: new Date()
+			}, channelName);
+		});
 		this.trigger(messages);
 	},
 

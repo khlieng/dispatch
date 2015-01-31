@@ -75,6 +75,12 @@ func (c *ChannelStore) RemoveUserAll(user, server string) {
 	c.userLock.Unlock()
 }
 
+func (c *ChannelStore) RenameUser(oldNick, newNick, server string) {
+	c.userLock.Lock()
+	c.renameAll(server, oldNick, newNick)
+	c.userLock.Unlock()
+}
+
 func (c *ChannelStore) SetMode(server, channel, user, add, remove string) {
 	c.userLock.Lock()
 
@@ -115,6 +121,12 @@ func (c *ChannelStore) rename(server, channel, oldNick, newNick string) {
 			c.users[server][channel][i] = newNick
 			return
 		}
+	}
+}
+
+func (c *ChannelStore) renameAll(server, oldNick, newNick string) {
+	for channel, _ := range c.users[server] {
+		c.rename(server, channel, oldNick, newNick)
 	}
 }
 

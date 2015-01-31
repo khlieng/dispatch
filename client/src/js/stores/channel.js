@@ -110,6 +110,18 @@ var channelStore = Reflux.createStore({
 		this.trigger(channels);
 	},
 
+	renameUser: function(oldNick, newNick, server) {
+		_.each(channels[server], function(channel, channelName) {
+			var user = _.find(channel.users, { nick: oldNick });
+			if (user) {
+				user.nick = newNick;
+				updateRenderName(user);
+				sortUsers(server, channelName);
+			}
+		});
+		this.trigger(channels);
+	},
+
 	setUsers: function(users, server, channel) {
 		initChannel(server, channel);
 		var chan = channels[server][channel];
@@ -168,6 +180,10 @@ var channelStore = Reflux.createStore({
 			channels[server] = {};
 			this.trigger(channels);
 		}
+	},
+
+	getChannels: function(server) {
+		return channels[server];
 	},
 
 	getState: function() {

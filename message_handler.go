@@ -15,6 +15,17 @@ func handleMessages(irc *IRC, session *Session) {
 
 	for msg := range irc.Messages {
 		switch msg.Command {
+		case NICK:
+			printMessage(msg, irc)
+
+			session.sendJSON("nick", Nick{
+				Server: irc.Host,
+				Old:    msg.Prefix,
+				New:    msg.Trailing,
+			})
+
+			channelStore.RenameUser(msg.Prefix, msg.Trailing, irc.Host)
+
 		case JOIN:
 			user := msg.Prefix
 
