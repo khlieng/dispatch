@@ -72,9 +72,9 @@ type Userlist struct {
 }
 
 type MOTD struct {
-	Server  string `json:"server"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	Server  string   `json:"server"`
+	Title   string   `json:"title"`
+	Content []string `json:"content"`
 }
 
 type Error struct {

@@ -34,7 +34,7 @@ socket.on('pm', function(data) {
 });
 
 socket.on('motd', function(data) {
-	_.each(data.content.split('\n'), function(line) {
+	_.each(data.content, function(line) {
 		messageActions.add({
 			server: data.server,
 			to: data.server,

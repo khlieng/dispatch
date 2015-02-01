@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"log"
 	"strings"
 
@@ -11,7 +10,6 @@ import (
 func handleMessages(irc *IRC, session *Session) {
 	userBuffers := make(map[string][]string)
 	var motd MOTD
-	var motdContent bytes.Buffer
 
 	for msg := range irc.Messages {
 		switch msg.Command {
@@ -151,15 +149,11 @@ func handleMessages(irc *IRC, session *Session) {
 			motd.Title = msg.Trailing
 
 		case RPL_MOTD:
-			motdContent.WriteString(msg.Trailing)
-			motdContent.WriteRune('\n')
+			motd.Content = append(motd.Content, msg.Trailing)
 
 		case RPL_ENDOFMOTD:
-			motd.Content = motdContent.String()
-
 			session.sendJSON("motd", motd)
 
-			motdContent.Reset()
 			motd = MOTD{}
 
 		default:
