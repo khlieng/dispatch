@@ -33,6 +33,11 @@ type Join struct {
 	Channels []string `json:"channels"`
 }
 
+type Part struct {
+	Join
+	Reason string `json:"reason,omitempty"`
+}
+
 type Mode struct {
 	Server  string `json:"server"`
 	Channel string `json:"channel"`
@@ -44,6 +49,7 @@ type Mode struct {
 type Quit struct {
 	Server string `json:"server"`
 	User   string `json:"user"`
+	Reason string `json:"reason,omitempty"`
 }
 
 type Chat struct {

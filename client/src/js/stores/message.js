@@ -8,6 +8,8 @@ var actions = require('../actions/message');
 var messages = {};
 
 function addMessage(message, dest) {
+	message.time = new Date();
+
 	if (!(message.server in messages)) {
 		messages[message.server] = {};
 		messages[message.server][dest] = [message];
@@ -28,8 +30,7 @@ var messageStore = Reflux.createStore({
 			server: server,
 			from: serverStore.getNick(server),
 			to: to,
-			message: message,
-			time: new Date()
+			message: message
 		}, to);
 
 		this.trigger(messages);
@@ -41,22 +42,31 @@ var messageStore = Reflux.createStore({
 			dest = message.server;
 		}
 
-		message.time = new Date();
-
 		addMessage(message, dest);
 		this.trigger(messages);
 	},
 
-	broadcast: function(message, server) {
+	broadcast: function(message, server, user) {
 		_.each(channelStore.getChannels(server), function(channel, channelName) {
-			addMessage({
-				server: server,
-				to: channelName,
-				message: message,
-				type: 'info',
-				time: new Date()
-			}, channelName);
+			if (!user || (user && _.find(channel.users, { nick: user }))) {
+				addMessage({
+					server: server,
+					to: channelName,
+					message: message,
+					type: 'info'
+				}, channelName);
+			}
 		});
+		this.trigger(messages);
+	},
+
+	inform: function(message, server, channel) {
+		addMessage({
+			server: server,
+			to: channel,
+			message: message,
+			type: 'info'
+		}, channel);
 		this.trigger(messages);
 	},
 

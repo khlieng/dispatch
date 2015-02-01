@@ -6,7 +6,8 @@ var socket = require('../socket');
 var messageActions = Reflux.createActions([
 	'send',
 	'add',
-	'broadcast'
+	'broadcast',
+	'inform'
 ]);
 
 messageActions.send.preEmit = function(message, to, server) {
@@ -16,49 +17,5 @@ messageActions.send.preEmit = function(message, to, server) {
 		message: message
 	});
 };
-
-socket.on('message', function(data) {
-	messageActions.add(data);
-});
-
-socket.on('pm', function(data) {
-	messageActions.add(data);
-});
-
-socket.on('join', function(data) {
-	messageActions.add({
-		server: data.server,
-		to: data.channels[0],
-		message: data.user + ' joined the channel',
-		type: 'info'
-	});
-});
-
-socket.on('part', function(data) {
-	messageActions.add({
-		server: data.server,
-		to: data.channels[0],
-		message: data.user + ' left the channel',
-		type: 'info'
-	});
-});
-
-socket.on('quit', function(data) {
-	messageActions.broadcast(data.user + ' quit', data.server);
-});
-
-socket.on('nick', function(data) {
-	messageActions.broadcast(data.old + ' changed nick to ' + data.new, data.server);
-});
-
-socket.on('motd', function(data) {
-	_.each(data.content.split('\n'), function(line) {
-		messageActions.add({
-			server: data.server,
-			to: data.server,
-			message: line
-		});
-	});
-});
 
 module.exports = messageActions;

@@ -1,5 +1,6 @@
 var React = require('react');
 
+require('./irc');
 var socket = require('./socket');
 var util = require('./util');
 var App = require('./components/App.jsx');

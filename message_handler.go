@@ -16,8 +16,6 @@ func handleMessages(irc *IRC, session *Session) {
 	for msg := range irc.Messages {
 		switch msg.Command {
 		case NICK:
-			printMessage(msg, irc)
-
 			session.sendJSON("nick", Nick{
 				Server: irc.Host,
 				Old:    msg.Prefix,
@@ -47,10 +45,13 @@ func handleMessages(irc *IRC, session *Session) {
 		case PART:
 			user := msg.Prefix
 
-			session.sendJSON("part", Join{
-				Server:   irc.Host,
-				User:     user,
-				Channels: msg.Params,
+			session.sendJSON("part", Part{
+				Join: Join{
+					Server:   irc.Host,
+					User:     user,
+					Channels: msg.Params,
+				},
+				Reason: msg.Trailing,
 			})
 
 			channelStore.RemoveUser(user, irc.Host, msg.Params[0])
@@ -94,6 +95,7 @@ func handleMessages(irc *IRC, session *Session) {
 			session.sendJSON("quit", Quit{
 				Server: irc.Host,
 				User:   user,
+				Reason: msg.Trailing,
 			})
 
 			channelStore.RemoveUserAll(user, irc.Host)

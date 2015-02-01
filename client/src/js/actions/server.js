@@ -21,8 +21,4 @@ serverActions.disconnect.preEmit = function(server) {
 	socket.send('quit', { server: server });
 };
 
-socket.on('servers', function(data) {
-	serverActions.load(data);
-});
-
 module.exports = serverActions;

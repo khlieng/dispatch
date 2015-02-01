@@ -104,7 +104,7 @@ func handleWS(ws *websocket.Conn) {
 			}
 
 		case "part":
-			var data Join
+			var data Part
 
 			json.Unmarshal(req.Request, &data)
 

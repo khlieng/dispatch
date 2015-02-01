@@ -30,36 +30,4 @@ channelActions.part.preEmit = function(channels, server) {
 	});
 };
 
-socket.on('join', function(data) {
-	channelActions.addUser(data.user, data.server, data.channels[0]);
-});
-
-socket.on('part', function(data) {
-	channelActions.removeUser(data.user, data.server, data.channels[0]);
-});
-
-socket.on('quit', function(data) {
-	channelActions.removeUserAll(data.user, data.server);
-});
-
-socket.on('nick', function(data) {
-	channelActions.renameUser(data.old, data.new, data.server);
-});
-
-socket.on('users', function(data) {
-	channelActions.setUsers(data.users, data.server, data.channel);
-});
-
-socket.on('topic', function(data) {
-	channelActions.setTopic(data.topic, data.server, data.channel);
-});
-
-socket.on('mode', function(data) {
-	channelActions.setMode(data);
-});
-
-socket.on('channels', function(data) {
-	channelActions.load(data);
-});
-
 module.exports = channelActions;
