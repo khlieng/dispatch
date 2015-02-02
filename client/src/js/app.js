@@ -1,9 +1,14 @@
 var React = require('react');
+var Router = require('react-router');
+var Route = Router.Route;
+var DefaultRoute = Router.DefaultRoute;
 
 require('./irc');
 var socket = require('./socket');
 var util = require('./util');
 var App = require('./components/App.jsx');
+var Chat = require('./components/Chat.jsx');
+var Settings = require('./components/Settings.jsx');
 var tabActions = require('./actions/tab');
 var serverActions = require('./actions/server');
 var channelActions = require('./actions/channel');
@@ -25,4 +30,13 @@ socket.on('error', function(error) {
 	console.log(error.server + ': ' + error.message);
 });
 
-React.render(<App />, document.body);
+var routes = (
+	<Route name="app" path="/" handler={App}>
+		<Route name="settings" handler={Settings} />
+		<DefaultRoute handler={Chat} />
+	</Route>
+);
+
+Router.run(routes, Router.HistoryLocation, function(Handler) {
+	React.render(<Handler />, document.body);
+});

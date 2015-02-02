@@ -94,7 +94,7 @@ func (i *IRC) Connect(address string) error {
 	}
 	i.Server = address
 
-	dialer := &net.Dialer{Timeout: 5 * time.Second}
+	dialer := &net.Dialer{Timeout: 10 * time.Second}
 
 	if i.TLS {
 		if i.TLSConfig == nil {

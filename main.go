@@ -3,8 +3,10 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 
+	"github.com/julienschmidt/httprouter"
 	"golang.org/x/net/websocket"
 
 	"github.com/khlieng/name_pending/storage"
@@ -14,13 +16,27 @@ var (
 	channelStore *storage.ChannelStore
 	sessions     map[string]*Session
 	sessionLock  sync.Mutex
+	fs           http.Handler
 )
+
+func serveFiles(w http.ResponseWriter, r *http.Request) {
+	if strings.HasSuffix(r.URL.Path, "bundle.js") {
+		r.URL.Path = "/bundle.js"
+	} else if strings.HasSuffix(r.URL.Path, "style.css") {
+		r.URL.Path = "/style.css"
+	} else {
+		r.URL.Path = "/"
+	}
+
+	fs.ServeHTTP(w, r)
+}
 
 func main() {
 	defer storage.Cleanup()
 
 	channelStore = storage.NewChannelStore()
 	sessions = make(map[string]*Session)
+	fs = http.FileServer(http.Dir("client/dist"))
 
 	/*for _, user := range storage.LoadUsers() {
 		channels := user.GetChannels()
@@ -49,9 +65,11 @@ func main() {
 		}
 	}*/
 
-	http.Handle("/", http.FileServer(http.Dir("client/dist")))
-	http.Handle("/ws", websocket.Handler(handleWS))
+	router := httprouter.New()
+
+	router.Handler("GET", "/ws", websocket.Handler(handleWS))
+	router.NotFound = serveFiles
 
 	log.Println("Listening on port 1337")
-	http.ListenAndServe(":1337", nil)
+	http.ListenAndServe(":1337", router)
 }

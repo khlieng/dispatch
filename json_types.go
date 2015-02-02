@@ -17,7 +17,7 @@ type WSResponse struct {
 type Connect struct {
 	Server   string `json:"server"`
 	TLS      bool   `json:"tls"`
-	Name     string `json:"name"`
+	Name     string `json:"name,omitempty"`
 	Nick     string `json:"nick"`
 	Username string `json:"username"`
 }
@@ -56,7 +56,7 @@ type Quit struct {
 type Chat struct {
 	Server  string `json:"server"`
 	From    string `json:"from"`
-	To      string `json:"to"`
+	To      string `json:"to,omitempty"`
 	Message string `json:"message"`
 }
 
