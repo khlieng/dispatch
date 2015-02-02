@@ -186,6 +186,13 @@ var channelStore = Reflux.createStore({
 		return channels[server];
 	},
 
+	getUsers: function(server, channel) {
+		if (channels[server] && channels[server][channel]) {
+			return channels[server][channel].users;
+		}
+		return [];
+	},
+
 	getState: function() {
 		return channels;
 	}

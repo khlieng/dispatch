@@ -9,6 +9,8 @@ import (
 
 type Server struct {
 	Address  string `json:"address"`
+	TLS      bool   `json:"tls"`
+	Name     string `json:"name"`
 	Nick     string `json:"nick"`
 	Username string `json:"username"`
 	Realname string `json:"realname"`

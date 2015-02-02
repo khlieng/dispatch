@@ -86,6 +86,8 @@ func handleWS(ws *websocket.Conn) {
 
 					session.user.AddServer(storage.Server{
 						Address:  irc.Host,
+						TLS:      data.TLS,
+						Name:     data.Name,
 						Nick:     data.Nick,
 						Username: data.Username,
 					})

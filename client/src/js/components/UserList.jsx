@@ -22,20 +22,14 @@ var UserList = React.createClass({
 	render: function() {
 		var users = null;
 		var tab = this.state.selectedTab;
-
 		var style = {};
 
 		if (!tab.channel || tab.channel[0] !== '#') {
 			style.display = 'none';
-		}
-
-		if (tab.channel && this.state.channels[tab.server]) {
-			var channel = this.state.channels[tab.server][tab.channel];
-			if (channel) {
-				users = _.map(channel.users, function(user) {
-					return <UserListItem user={user} />;
-				});
-			}
+		} else {
+			users = _.map(channelStore.getUsers(tab.server, tab.channel), function(user) {
+				return <UserListItem key={user.nick} user={user} />;
+			});
 		}
 
 		return (

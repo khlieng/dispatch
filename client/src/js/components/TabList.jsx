@@ -4,6 +4,7 @@ var _ = require('lodash');
 
 var channelStore = require('../stores/channel');
 var privateChatStore = require('../stores/privateChat');
+var serverStore = require('../stores/server');
 var selectedTabStore = require('../stores/selectedTab');
 var tabActions = require('../actions/tab');
 
@@ -11,14 +12,16 @@ var TabList = React.createClass({
 	mixins: [
 		Reflux.connect(channelStore, 'channels'),
 		Reflux.connect(privateChatStore, 'privateChats'),
-		Reflux.connect(selectedTabStore, 'selectedTab')
+		Reflux.connect(selectedTabStore, 'selectedTab'),
+		Reflux.connect(serverStore, 'servers')
 	],
 
 	getInitialState: function() {
 		return {
 			channels: channelStore.getState(),
 			privateChats: privateChatStore.getState(),
-			selectedTab: selectedTabStore.getState()
+			selectedTab: selectedTabStore.getState(),
+			servers: serverStore.getState()
 		};
 	},
 
@@ -36,7 +39,13 @@ var TabList = React.createClass({
 					tabClass = '';
 				}
 
-				return <p className={tabClass} onClick={tabActions.select.bind(null, address, name)}>{name}</p>;
+				return (
+					<p 
+						className={tabClass} 
+						onClick={tabActions.select.bind(null, address, name)}>
+							{name}
+					</p>
+				);
 			});
 
 			_.each(self.state.privateChats[address], function(chat, nick) {
@@ -46,8 +55,14 @@ var TabList = React.createClass({
 				} else {
 					tabClass = '';
 				}
-				
-				channels.push(<p className={tabClass} onClick={tabActions.select.bind(null, address, nick)}>{nick}</p>);	
+
+				channels.push(
+					<p 
+						className={tabClass} 
+						onClick={tabActions.select.bind(null, address, nick)}>
+							{nick}
+					</p>
+				);	
 			});
 
 			if (address === selected.server &&
@@ -57,7 +72,13 @@ var TabList = React.createClass({
 				tabClass = 'tab-server';
 			}
 
-			channels.unshift(<p className={tabClass} onClick={tabActions.select.bind(null, address, null)}>{address}</p>);
+			channels.unshift(
+				<p 
+					className={tabClass} 
+					onClick={tabActions.select.bind(null, address, null)}>
+						{serverStore.getName(address)}
+				</p>
+			);
 
 			return channels;
 		});

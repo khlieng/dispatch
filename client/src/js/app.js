@@ -14,8 +14,8 @@ var nick = 'test' + Math.floor(Math.random() * 99999);
 socket.on('connect', function() {
 	socket.send('uuid', uuid);
 
-	serverActions.connect('irc.freenode.net', nick, 'username', true);
-	serverActions.connect('irc.quakenet.org', nick, 'username');
+	serverActions.connect('irc.freenode.net', nick, 'username', true, 'Freenode');
+	serverActions.connect('irc.quakenet.org', nick, 'username', false, 'QuakeNet');
 
 	channelActions.join(['#stuff'], 'irc.freenode.net');
 	channelActions.join(['#herp'], 'irc.quakenet.org');

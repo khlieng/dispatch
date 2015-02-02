@@ -8,12 +8,13 @@ var serverActions = Reflux.createActions([
 	'load'
 ]);
 
-serverActions.connect.preEmit = function(server, nick, username, tls) {
+serverActions.connect.preEmit = function(server, nick, username, tls, name) {
 	socket.send('connect', {
 		server: server,
 		nick: nick,
 		username: username,
-		tls: tls || false
+		tls: tls || false,
+		name: name || server
 	});
 };
 

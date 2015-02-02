@@ -179,7 +179,7 @@ func (i *IRC) Writef(format string, a ...interface{}) {
 }
 
 func (i *IRC) write(data string) {
-	fmt.Fprint(i.conn, data+"\r\n")
+	i.conn.Write([]byte(data + "\r\n"))
 }
 
 func (i *IRC) writef(format string, a ...interface{}) {
@@ -189,7 +189,7 @@ func (i *IRC) writef(format string, a ...interface{}) {
 func (i *IRC) send() {
 	i.ready.Wait()
 	for message := range i.out {
-		fmt.Fprint(i.conn, message)
+		i.conn.Write([]byte(message))
 	}
 }
 

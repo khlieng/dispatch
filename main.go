@@ -31,7 +31,7 @@ func main() {
 			sessions[user.UUID] = session
 
 			irc := NewIRC(server.Nick, server.Username)
-			irc.TLS = true
+			irc.TLS = server.TLS
 			irc.Connect(server.Address)
 
 			session.setIRC(irc.Host, irc)

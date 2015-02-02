@@ -1,6 +1,7 @@
 var Reflux = require('reflux');
 var _ = require('lodash');
 
+var serverStore = require('./server');
 var actions = require('../actions/tab');
 var channelActions = require('../actions/channel');
 
@@ -20,6 +21,13 @@ var selectedTabStore = Reflux.createStore({
 	select: function(server, channel) {
 		selectedTab.server = server;
 		selectedTab.channel = channel;
+
+		if (channel) {
+			selectedTab.name = channel;
+		} else {
+			selectedTab.name = serverStore.getName(server);
+		}
+
 		this.trigger(selectedTab);
 	},
 
@@ -49,8 +57,8 @@ var selectedTabStore = Reflux.createStore({
 	}
 });
 
-selectedTabStore.listen(function(selected) {
-	localStorage.selectedTab = JSON.stringify(selected);
+selectedTabStore.listen(function(selectedTab) {
+	localStorage.selectedTab = JSON.stringify(selectedTab);
 });
 
 module.exports = selectedTabStore;

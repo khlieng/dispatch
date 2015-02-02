@@ -19,25 +19,21 @@ var ChatTitle = React.createClass({
 
     render: function() {
         var tab = this.state.selectedTab;
-        var title;
         var topic;
         var usercount;
 
         if (tab.channel && this.state.channels[tab.server]) {
             var channel = this.state.channels[tab.server][tab.channel];
-            title = tab.channel
             if (channel) {
                 usercount = channel.users.length;
                 topic = channel.topic || '';
             }
-        } else {
-            title = tab.server;
         }
 
         return (
             <div className="chat-title-bar">
                 <div>
-                    <span className="chat-title">{title}</span>
+                    <span className="chat-title">{tab.name}</span>
                     <span className="chat-topic" title={topic}>{topic}</span>
                 </div>
                 <span className="chat-usercount">{usercount}</span>

@@ -17,6 +17,7 @@ type WSResponse struct {
 type Connect struct {
 	Server   string `json:"server"`
 	TLS      bool   `json:"tls"`
+	Name     string `json:"name"`
 	Nick     string `json:"nick"`
 	Username string `json:"username"`
 }
