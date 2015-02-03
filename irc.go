@@ -94,7 +94,7 @@ func (i *IRC) Connect(address string) error {
 	}
 	i.Server = address
 
-	dialer := &net.Dialer{Timeout: 10 * time.Second}
+	dialer := &net.Dialer{Timeout: 30 * time.Second}
 
 	if i.TLS {
 		if i.TLSConfig == nil {
@@ -227,7 +227,7 @@ func parseMessage(line string) *Message {
 		msg.Prefix = line[1 : cmdStart-1]
 	}
 
-	if i := strings.LastIndex(line, " :"); i > 0 {
+	if i := strings.Index(line, " :"); i > 0 {
 		cmdEnd = i
 		msg.Trailing = line[i+2:]
 	}
@@ -236,6 +236,10 @@ func parseMessage(line string) *Message {
 	msg.Command = cmd[0]
 	if len(cmd) > 1 {
 		msg.Params = cmd[1:]
+	}
+
+	if msg.Trailing != "" {
+		msg.Params = append(msg.Params, msg.Trailing)
 	}
 
 	return &msg

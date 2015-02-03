@@ -20,7 +20,7 @@ var selectedTabStore = Reflux.createStore({
 
 	select: function(server, channel) {
 		selectedTab.server = server;
-		selectedTab.channel = channel;
+		selectedTab.channel = channel || null;
 
 		if (channel) {
 			selectedTab.name = channel;

@@ -24,26 +24,19 @@ func handleMessages(irc *IRC, session *Session) {
 
 		case JOIN:
 			user := msg.Prefix
-			var channel string
-
-			if len(msg.Params) > 0 {
-				channel = msg.Params[0]
-			} else {
-				channel = msg.Trailing
-			}
 
 			session.sendJSON("join", Join{
 				Server:   irc.Host,
 				User:     user,
-				Channels: []string{channel},
+				Channels: msg.Params,
 			})
 
-			channelStore.AddUser(user, irc.Host, channel)
+			channelStore.AddUser(user, irc.Host, msg.Params[0])
 
 			if user == irc.nick {
 				session.user.AddChannel(storage.Channel{
 					Server: irc.Host,
-					Name:   channel,
+					Name:   msg.Params[0],
 				})
 			}
 
@@ -116,7 +109,7 @@ func handleMessages(irc *IRC, session *Session) {
 			session.sendJSON("pm", Chat{
 				Server:  irc.Host,
 				From:    msg.Prefix,
-				Message: strings.Join(append(msg.Params[1:], msg.Trailing), " "),
+				Message: strings.Join(msg.Params[1:], " "),
 			})
 
 		case RPL_TOPIC:
