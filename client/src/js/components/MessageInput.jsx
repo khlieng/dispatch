@@ -22,6 +22,12 @@ function dispatchCommand(cmd, channel, server) {
 				channelActions.part([channel], server);
 			}
 			break;
+
+		case 'me':
+			if (params.length > 1) {
+				messageActions.send('\x01ACTION ' + params.slice(1).join(' ') + '\x01', channel, server);
+			}
+			break;
 	}
 }
 

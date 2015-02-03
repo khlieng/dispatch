@@ -10,6 +10,13 @@ var messages = {};
 function addMessage(message, dest) {
 	message.time = new Date();
 
+	if (message.message.indexOf('\x01ACTION') === 0) {
+		var from = message.from;
+		message.from = null;
+		message.type = 'action';
+		message.message = from + message.message.slice(7);
+	}
+
 	if (!(message.server in messages)) {
 		messages[message.server] = {};
 		messages[message.server][dest] = [message];

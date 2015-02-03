@@ -40,10 +40,8 @@ var MessageBox = React.createClass({
 			messages = _.map(this.state.messages[tab.server][dest], function(message) {
 				var messageClass = 'message';
 
-				switch (message.type) {
-					case 'info':
-						messageClass += ' message-info';
-						break;
+				if (message.type) {
+					messageClass += ' message-' + message.type;
 				}
 
 				return (
