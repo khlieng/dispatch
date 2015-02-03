@@ -24,19 +24,26 @@ func handleMessages(irc *IRC, session *Session) {
 
 		case JOIN:
 			user := msg.Prefix
+			var channel string
+
+			if len(msg.Params) > 0 {
+				channel = msg.Params[0]
+			} else {
+				channel = msg.Trailing
+			}
 
 			session.sendJSON("join", Join{
 				Server:   irc.Host,
 				User:     user,
-				Channels: msg.Params,
+				Channels: []string{channel},
 			})
 
-			channelStore.AddUser(user, irc.Host, msg.Params[0])
+			channelStore.AddUser(user, irc.Host, channel)
 
 			if user == irc.nick {
 				session.user.AddChannel(storage.Channel{
 					Server: irc.Host,
-					Name:   msg.Params[0],
+					Name:   channel,
 				})
 			}
 

@@ -7,6 +7,7 @@ var privateChatStore = require('../stores/privateChat');
 var serverStore = require('../stores/server');
 var selectedTabStore = require('../stores/selectedTab');
 var tabActions = require('../actions/tab');
+var routeActions = require('../actions/route');
 
 var TabList = React.createClass({
 	mixins: [
@@ -23,6 +24,14 @@ var TabList = React.createClass({
 			selectedTab: selectedTabStore.getState(),
 			servers: serverStore.getState()
 		};
+	},
+
+	handleConnectClick: function() {
+		routeActions.navigate('connect');
+	},
+
+	handleSettingsClick: function() {
+		routeActions.navigate('settings');
 	},
 
 	render: function() {
@@ -85,10 +94,10 @@ var TabList = React.createClass({
 
 		return (
 			<div className="tablist">
-				<button className="button-connect">Add Network</button>
+				<button className="button-connect" onClick={this.handleConnectClick}>Connect</button>
 				{tabs}
 				<div className="side-buttons">
-					<button>Settings</button>
+					<button onClick={this.handleSettingsClick}>Settings</button>
 				</div>
 			</div>
 		);

@@ -82,6 +82,7 @@ var channelStore = Reflux.createStore({
 	init: function() {
 		this.listenToMany(actions);
 		this.listenTo(serverActions.connect, 'addServer');
+		this.listenTo(serverActions.load, 'loadServers');
 	},
 
 	part: function(partChannels, server) {
@@ -99,8 +100,10 @@ var channelStore = Reflux.createStore({
 	},
 
 	removeUser: function(user, server, channel) {
-		_.remove(channels[server][channel].users, { nick: user });
-		this.trigger(channels);
+		if (channels[server][channel]) {
+			_.remove(channels[server][channel].users, { nick: user });
+			this.trigger(channels);
+		}
 	},
 
 	removeUserAll: function(user, server) {
@@ -180,6 +183,15 @@ var channelStore = Reflux.createStore({
 			channels[server] = {};
 			this.trigger(channels);
 		}
+	},
+
+	loadServers: function(storedServers) {
+		_.each(storedServers, function(server) {
+			if (!(server.address in channels)) {
+				channels[server.address] = {};
+			}
+		});
+		this.trigger(channels);
 	},
 
 	getChannels: function(server) {

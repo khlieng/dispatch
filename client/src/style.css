@@ -89,6 +89,62 @@ p {
 	width: 100px;
 }
 
+.connect {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	top: 0;
+	left: 200px;
+	right: 0;
+	bottom: 0;
+}
+
+.connect-form h1 {
+	font: 32px Montserrat, sans-serif;
+	margin-bottom: 15px;
+	text-align: center;
+}
+
+.connect-form input {
+	display: block;
+	margin: 5px 0px;
+	padding: 10px;
+	border: none;
+}
+
+.connect-form input[type="submit"],
+.connect-form input[type="text"] {
+	width: 200px;
+}
+
+.connect-form input[type="submit"] {
+	height: 50px;
+	font-family: Montserrat, sans-serif;
+	background: #6BB758;
+	color: #FFF;
+	cursor: pointer;
+}
+
+.connect-form input[type="submit"]:hover {
+	background: #7BBF6A;
+}
+
+.connect-form input[type="submit"]:active {
+	background: #6BB758;
+}
+
+.connect-form input[type="checkbox"] {
+	display: inline-block;
+	margin: 15px 10px;
+	margin-left: 0;
+	vertical-align: center;
+}
+
+.connect-form label {
+	color: #333;
+}
+
 .chat-title-bar {
 	font-family: Montserrat, sans-serif;
 	position: fixed;

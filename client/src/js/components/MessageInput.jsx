@@ -4,6 +4,7 @@ var Reflux = require('reflux');
 var selectedTabStore = require('../stores/selectedTab');
 var messageActions = require('../actions/message');
 var channelActions = require('../actions/channel');
+var tabActions = require('../actions/tab');
 
 function dispatchCommand(cmd, channel, server) {
 	var params = cmd.slice(1).split(' ');
@@ -12,6 +13,7 @@ function dispatchCommand(cmd, channel, server) {
 		case 'join':
 			if (params[1]) {
 				channelActions.join([params[1]], server);
+				tabActions.select(server, params[1]);
 			}
 			break;
 
