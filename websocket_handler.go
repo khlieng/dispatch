@@ -133,6 +133,16 @@ func handleWS(ws *websocket.Conn) {
 			if irc, ok := session.getIRC(data.Server); ok {
 				irc.Privmsg(data.To, data.Message)
 			}
+
+		case "nick":
+			var data Nick
+
+			json.Unmarshal(req.Request, &data)
+
+			if irc, ok := session.getIRC(data.Server); ok {
+				irc.Nick(data.New)
+				session.user.SetNick(data.New, data.Server)
+			}
 		}
 	}
 }

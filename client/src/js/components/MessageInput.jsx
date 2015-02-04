@@ -1,9 +1,11 @@
 var React = require('react');
 var Reflux = require('reflux');
 
+var channelStore = require('../stores/channel');
 var selectedTabStore = require('../stores/selectedTab');
 var messageActions = require('../actions/message');
 var channelActions = require('../actions/channel');
+var serverActions = require('../actions/server');
 var tabActions = require('../actions/tab');
 
 function dispatchCommand(cmd, channel, server) {
@@ -28,6 +30,21 @@ function dispatchCommand(cmd, channel, server) {
 				messageActions.send('\x01ACTION ' + params.slice(1).join(' ') + '\x01', channel, server);
 			}
 			break;
+
+		case 'topic':
+			var topic = channelStore.getTopic(server, channel);
+			if (topic) {
+				messageActions.inform(topic, server, channel);
+			} else {
+				messageActions.inform('No topic set', server, channel);
+			}
+			break;
+
+		case 'nick':
+			if (params[1]) {
+				serverActions.setNick(params[1], server);
+			}
+			break;
 	}
 }
 
@@ -46,7 +63,7 @@ var MessageInput = React.createClass({
 		if (e.which === 13 && e.target.value) {
 			var tab = this.state.selectedTab;
 
-			if (e.target.value.charAt(0) === '/') {
+			if (e.target.value[0] === '/') {
 				dispatchCommand(e.target.value, tab.channel, tab.server);
 			} else {
 				messageActions.send(e.target.value, tab.channel, tab.server);

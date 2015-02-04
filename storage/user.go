@@ -123,6 +123,22 @@ func (u User) AddChannel(channel Channel) {
 	})
 }
 
+func (u User) SetNick(nick, address string) {
+	go db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Servers"))
+		id := []byte(u.UUID + ":" + address)
+		var server Server
+
+		json.Unmarshal(b.Get(id), &server)
+		server.Nick = nick
+
+		data, _ := json.Marshal(server)
+		b.Put(id, data)
+
+		return nil
+	})
+}
+
 func (u User) RemoveServer(address string) {
 	go db.Update(func(tx *bolt.Tx) error {
 		serverID := []byte(u.UUID + ":" + address)

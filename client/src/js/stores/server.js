@@ -28,6 +28,11 @@ var serverStore = Reflux.createStore({
 		tabActions.select(server);
 	},
 
+	setNick: function(nick, server) {
+		servers[server].nick = nick;
+		this.trigger(servers);
+	},
+
 	load: function(storedServers) {
 		_.each(storedServers, function(server) {
 			servers[server.address] = server;

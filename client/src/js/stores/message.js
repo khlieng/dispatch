@@ -73,7 +73,7 @@ var messageStore = Reflux.createStore({
 			to: channel,
 			message: message,
 			type: 'info'
-		}, channel);
+		}, channel || server);
 		this.trigger(messages);
 	},
 
