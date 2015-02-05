@@ -108,7 +108,7 @@ var channelStore = Reflux.createStore({
 
 	removeUserAll: function(user, server) {
 		_.each(channels[server], function(channel) {
-			_.remove(channel.users, { nick: user });
+			_.remove(channel.users, { nick: user });
 		});
 		this.trigger(channels);
 	},

@@ -1,6 +1,7 @@
 var React = require('react');
 var Reflux = require('reflux');
 var _ = require('lodash');
+var Infinite = require('react-infinite');
 
 var UserListItem = require('./UserListItem.jsx');
 var channelStore = require('../stores/channel');
@@ -15,12 +16,20 @@ var UserList = React.createClass({
 	getInitialState: function() {
 		return {
 			channels: channelStore.getState(),
-			selectedTab: selectedTabStore.getState()
+			selectedTab: selectedTabStore.getState(),
+			height: window.innerHeight - 100
 		};
 	},
 
+	componentDidMount: function() {
+		var self = this;
+		window.addEventListener('resize', function() {
+			self.setState({ height: window.innerHeight - 100 });
+		});
+	},
+
 	render: function() {
-		var users = null;
+		var users = [];
 		var tab = this.state.selectedTab;
 		var style = {};
 
@@ -33,7 +42,11 @@ var UserList = React.createClass({
 		}
 
 		return (
-			<div className="userlist" style={style}>{users}</div>
+			<div className="userlist" style={style}>
+				<Infinite containerHeight={this.state.height} elementHeight={24}>
+					{users}
+				</Infinite>
+			</div>
 		);
 	}
 });

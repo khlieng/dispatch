@@ -12,7 +12,6 @@ var Chat = require('./components/Chat.jsx');
 var Settings = require('./components/Settings.jsx');
 
 var uuid = localStorage.uuid || (localStorage.uuid = util.UUID());
-var nick = 'test' + Math.floor(Math.random() * 99999);
 
 socket.on('connect', function() {
 	socket.send('uuid', uuid);

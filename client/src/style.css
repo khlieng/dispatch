@@ -243,10 +243,11 @@ p {
 	bottom: 50px;
 	right: 0;
 	width: 200px;
-	padding: 15px 0px;
-	overflow: auto;
 	border-left: 1px solid #DDD;
-	overflow-x: hidden;
+}
+
+.userlist > div {
+	padding: 15px 0px;
 }
 
 .userlist p {
