@@ -17,7 +17,7 @@ var serverStore = Reflux.createStore({
 			server = server.slice(0, i);
 		}
 
-		servers[server] = {
+		servers[server] = {
 			address: server,
 			nick: nick,
 			username: username,

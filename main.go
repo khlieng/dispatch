@@ -20,12 +20,22 @@ var (
 )
 
 func serveFiles(w http.ResponseWriter, r *http.Request) {
+	var ext string
+
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		ext = ".gz"
+	}
+
 	if strings.HasSuffix(r.URL.Path, "bundle.js") {
-		r.URL.Path = "/bundle.js"
+		w.Header().Set("Content-Type", "text/javascript")
+		r.URL.Path = "/bundle.js" + ext
 	} else if strings.HasSuffix(r.URL.Path, "style.css") {
-		r.URL.Path = "/style.css"
+		w.Header().Set("Content-Type", "text/css")
+		r.URL.Path = "/style.css" + ext
 	} else {
-		r.URL.Path = "/"
+		w.Header().Set("Content-Type", "text/html")
+		r.URL.Path = "/index.html" + ext
 	}
 
 	fs.ServeHTTP(w, r)

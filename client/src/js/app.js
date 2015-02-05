@@ -10,21 +10,12 @@ var App = require('./components/App.jsx');
 var Connect = require('./components/Connect.jsx');
 var Chat = require('./components/Chat.jsx');
 var Settings = require('./components/Settings.jsx');
-var tabActions = require('./actions/tab');
-var serverActions = require('./actions/server');
-var channelActions = require('./actions/channel');
 
 var uuid = localStorage.uuid || (localStorage.uuid = util.UUID());
 var nick = 'test' + Math.floor(Math.random() * 99999);
 
 socket.on('connect', function() {
 	socket.send('uuid', uuid);
-
-	/*serverActions.connect('irc.freenode.net', nick, 'username', true, 'Freenode');
-	serverActions.connect('irc.quakenet.org', nick, 'username', false, 'QuakeNet');
-
-	channelActions.join(['#stuff'], 'irc.freenode.net');
-	channelActions.join(['#herp'], 'irc.quakenet.org');*/
 });
 
 socket.on('error', function(error) {

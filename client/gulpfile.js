@@ -4,6 +4,7 @@ var minifyHTML = require('gulp-minify-html');
 var minifyCSS = require('gulp-minify-css');
 var autoprefixer = require('gulp-autoprefixer');
 var uglify = require('gulp-uglify');
+var gzip = require('gulp-gzip');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
@@ -69,10 +70,23 @@ function js(watch) {
     return rebundle();
 }
 
+gulp.task('gzip', ['html', 'css', 'js'], function() {
+    gulp.src('./dist/*.{html,css,js}')
+        .pipe(gzip())
+        .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('gzip:watch', function() {
+    gulp.src('./dist/*.{html,css,js}')
+        .pipe(gzip())
+        .pipe(gulp.dest('./dist'));
+});
+
 gulp.task('watch', ['default'], function() {
+    gulp.watch('./dist/*.{html,css,js}', ['gzip:watch'])
     gulp.watch('./src/*.html', ['html']);
     gulp.watch('./src/*.css', ['css']);
     return js(true);
 });
 
-gulp.task('default', ['html', 'css', 'js']);
+gulp.task('default', ['html', 'css', 'js', 'gzip']);
