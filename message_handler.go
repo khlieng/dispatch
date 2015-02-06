@@ -33,7 +33,7 @@ func handleMessages(irc *IRC, session *Session) {
 
 			channelStore.AddUser(user, irc.Host, msg.Params[0])
 
-			if user == irc.nick {
+			if user == irc.GetNick() {
 				session.user.AddChannel(storage.Channel{
 					Server: irc.Host,
 					Name:   msg.Params[0],
@@ -54,7 +54,7 @@ func handleMessages(irc *IRC, session *Session) {
 
 			channelStore.RemoveUser(user, irc.Host, msg.Params[0])
 
-			if user == irc.nick {
+			if user == irc.GetNick() {
 				session.user.RemoveChannel(irc.Host, msg.Params[0])
 			}
 
@@ -72,7 +72,7 @@ func handleMessages(irc *IRC, session *Session) {
 			}
 
 		case PRIVMSG, NOTICE:
-			if msg.Params[0] == irc.nick {
+			if msg.Params[0] == irc.GetNick() {
 				session.sendJSON("pm", Chat{
 					Server:  irc.Host,
 					From:    msg.Prefix,
@@ -186,5 +186,5 @@ func isChannel(s string) bool {
 }
 
 func printMessage(msg *Message, irc *IRC) {
-	log.Println(irc.nick+":", msg.Prefix, msg.Command, msg.Params, msg.Trailing)
+	log.Println(irc.GetNick()+":", msg.Prefix, msg.Command, msg.Params, msg.Trailing)
 }

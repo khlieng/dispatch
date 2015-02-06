@@ -26,7 +26,7 @@ var ChatTitle = React.createClass({
                 <div>
                     <span className="chat-title">{tab.name}</span>
                 </div>
-                <span className="chat-usercount">{usercount}</span>
+                <span className="chat-usercount">{usercount || null}</span>
             </div>
         );
     }

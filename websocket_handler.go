@@ -120,7 +120,7 @@ func handleWS(ws *websocket.Conn) {
 			json.Unmarshal(req.Request, &data)
 
 			if irc, ok := session.getIRC(data.Server); ok {
-				channelStore.RemoveUserAll(irc.nick, data.Server)
+				channelStore.RemoveUserAll(irc.GetNick(), data.Server)
 				session.user.RemoveServer(data.Server)
 				irc.Quit()
 			}

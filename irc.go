@@ -55,17 +55,18 @@ type Message struct {
 }
 
 type IRC struct {
-	conn   net.Conn
-	reader *bufio.Reader
-	out    chan string
-	ready  sync.WaitGroup
+	conn     net.Conn
+	reader   *bufio.Reader
+	out      chan string
+	ready    sync.WaitGroup
+	nick     string
+	nickLock sync.Mutex
 
 	Messages  chan *Message
 	Server    string
 	Host      string
 	TLS       bool
 	TLSConfig *tls.Config
-	nick      string
 	Username  string
 	Realname  string
 }
@@ -132,6 +133,10 @@ func (i *IRC) Pass(password string) {
 
 func (i *IRC) Nick(nick string) {
 	i.write("NICK " + nick)
+
+	i.nickLock.Lock()
+	i.nick = nick
+	i.nickLock.Unlock()
 }
 
 func (i *IRC) User(username, realname string) {
@@ -168,6 +173,13 @@ func (i *IRC) Quit() {
 		i.write("QUIT")
 		i.conn.Close()
 	}()
+}
+
+func (i *IRC) GetNick() string {
+	i.nickLock.Lock()
+	defer i.nickLock.Unlock()
+
+	return i.nick
 }
 
 func (i *IRC) Write(data string) {
