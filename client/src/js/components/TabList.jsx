@@ -2,27 +2,24 @@ var React = require('react');
 var Reflux = require('reflux');
 var _ = require('lodash');
 
+var TabListItem = require('./TabListItem.jsx');
 var channelStore = require('../stores/channel');
 var privateChatStore = require('../stores/privateChat');
 var serverStore = require('../stores/server');
-var selectedTabStore = require('../stores/selectedTab');
-var tabActions = require('../actions/tab');
 var routeActions = require('../actions/route');
 
 var TabList = React.createClass({
 	mixins: [
+		Reflux.connect(serverStore, 'servers'),
 		Reflux.connect(channelStore, 'channels'),
-		Reflux.connect(privateChatStore, 'privateChats'),
-		Reflux.connect(selectedTabStore, 'selectedTab'),
-		Reflux.connect(serverStore, 'servers')
+		Reflux.connect(privateChatStore, 'privateChats')
 	],
 
 	getInitialState: function() {
 		return {
+			servers: serverStore.getState(),
 			channels: channelStore.getState(),
-			privateChats: privateChatStore.getState(),
-			selectedTab: selectedTabStore.getState(),
-			servers: serverStore.getState()
+			privateChats: privateChatStore.getState()
 		};
 	},
 
@@ -36,60 +33,37 @@ var TabList = React.createClass({
 
 	render: function() {
 		var self = this;
-		var tabClass;
-		var selected = this.state.selectedTab;
 
 		var tabs = _.map(this.state.channels, function(server, address) {
-			var channels = _.map(server, function(channel, name) {				
-				if (address === selected.server &&
-					name === selected.channel) {
-					tabClass = 'selected';
-				} else {
-					tabClass = '';
-				}
-
+			var serverTabs = _.map(server, function(channel, name) {
 				return (
-					<p 
-						className={tabClass} 
-						onClick={tabActions.select.bind(null, address, name)}>
-							{name}
-					</p>
+					<TabListItem 
+						server={address} 
+						channel={name}
+						name={name}>
+					</TabListItem>
 				);
 			});
 
 			_.each(self.state.privateChats[address], function(chat, nick) {
-				if (address === selected.server &&
-					nick === selected.channel) {
-					tabClass = 'selected';
-				} else {
-					tabClass = '';
-				}
-
-				channels.push(
-					<p 
-						className={tabClass} 
-						onClick={tabActions.select.bind(null, address, nick)}>
-							{nick}
-					</p>
+				serverTabs.push(
+					<TabListItem 
+						server={address} 
+						channel={nick}
+						name={nick}>
+					</TabListItem>
 				);	
 			});
 
-			if (address === selected.server &&
-				selected.channel === null) {
-				tabClass = 'tab-server selected';
-			} else {
-				tabClass = 'tab-server';
-			}
-
-			channels.unshift(
-				<p 
-					className={tabClass} 
-					onClick={tabActions.select.bind(null, address, null)}>
-						{serverStore.getName(address)}
-				</p>
+			serverTabs.unshift(
+				<TabListItem 
+					server={address} 
+					channel={null}
+					name={serverStore.getName(address)}>
+				</TabListItem>
 			);
 
-			return channels;
+			return serverTabs;
 		});
 
 		return (

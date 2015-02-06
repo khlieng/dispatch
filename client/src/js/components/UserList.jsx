@@ -22,10 +22,15 @@ var UserList = React.createClass({
 	},
 
 	componentDidMount: function() {
-		var self = this;
-		window.addEventListener('resize', function() {
-			self.setState({ height: window.innerHeight - 100 });
-		});
+		window.addEventListener('resize', this.handleResize);
+	},
+
+	componentWillUnmount: function() {
+		window.removeEventListener('resize', this.handleResize);
+	},
+
+	handleResize: function() {
+		this.setState({ height: window.innerHeight - 100 });
 	},
 
 	render: function() {

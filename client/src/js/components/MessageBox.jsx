@@ -34,25 +34,22 @@ var MessageBox = React.createClass({
 	render: function() {
 		var tab = this.state.selectedTab;
 		var dest = tab.channel || tab.server;
-		var messages;
 
-		if (this.state.messages[tab.server] && dest) {
-			messages = _.map(this.state.messages[tab.server][dest], function(message) {
-				var messageClass = 'message';
+		var messages = _.map(messageStore.getMessages(tab.server, dest), function(message) {
+			var messageClass = 'message';
 
-				if (message.type) {
-					messageClass += ' message-' + message.type;
-				}
+			if (message.type) {
+				messageClass += ' message-' + message.type;
+			}
 
-				return (
-					<p className={messageClass}>
-						<span className="message-time">{util.timestamp(message.time)}</span>
-						{ message.from ? <span className="message-sender">{message.from}</span> : null }
-						{message.message}
-					</p>
-				);
-			});
-		}
+			return (
+				<p className={messageClass}>
+					<span className="message-time">{util.timestamp(message.time)}</span>
+					{ message.from ? <span className="message-sender">{message.from}</span> : null }
+					{message.message}
+				</p>
+			);
+		});
 		
 		return (
 			<div className="messagebox">{messages}</div>

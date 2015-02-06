@@ -77,6 +77,13 @@ var messageStore = Reflux.createStore({
 		this.trigger(messages);
 	},
 
+	getMessages: function(server, dest) {
+		if (messages[server] && messages[server][dest]) {
+			return messages[server][dest];
+		}
+		return [];
+	},
+
 	getState: function() {
 		return messages;
 	}
