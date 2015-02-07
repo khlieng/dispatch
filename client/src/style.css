@@ -12,7 +12,6 @@ body {
 input {
 	font: 16px Roboto, sans-serif;
 	border: none;
-	border-top: 1px solid #DDD;
 	outline: none;
 }
 
@@ -81,12 +80,17 @@ p {
 	text-align: center;
 }
 
-.side-buttons button {
-	background: #333;
-	color: #FFF;
+.side-buttons i {
+	color: #999;
 	margin: 5px;
-	height: 40px;
-	width: 100px;
+	line-height: 40px;
+	width: 40px;
+	cursor: pointer;
+	font-size: 20px;
+}
+
+.side-buttons i:hover {
+	color: #FFF;
 }
 
 .connect {
@@ -136,12 +140,25 @@ p {
 
 .connect-form input[type="checkbox"] {
 	display: inline-block;
-	margin: 15px 10px;
-	margin-left: 0;
-	vertical-align: center;
+	margin-right: 10px;
+	vertical-align: middle;
+}
+
+.connect-form i {
+	float: right;
+	cursor: pointer;
+	color: #999;
+	padding: 10px 5px;
+	font-size: 24px;
+}
+
+.connect-form i:hover {
+	color: #000;
 }
 
 .connect-form label {
+	display: inline-block;
+	padding: 10px 0;
 	color: #333;
 }
 
@@ -235,6 +252,7 @@ p {
 	width: 100%;
 	height: 100%;
 	padding: 15px;
+	border-top: 1px solid #DDD;
 }
 
 .userlist {

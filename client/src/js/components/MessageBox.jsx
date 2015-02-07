@@ -34,6 +34,7 @@ var MessageBox = React.createClass({
 	render: function() {
 		var tab = this.state.selectedTab;
 		var dest = tab.channel || tab.server;
+		var style = {}
 
 		var messages = _.map(messageStore.getMessages(tab.server, dest), function(message) {
 			var messageClass = 'message';
@@ -50,9 +51,13 @@ var MessageBox = React.createClass({
 				</p>
 			);
 		});
-		
+
+		if (!tab.channel || tab.channel[0] !== '#') {
+			style.right = 0;
+		}
+
 		return (
-			<div className="messagebox">{messages}</div>
+			<div className="messagebox" style={style}>{messages}</div>
 		);
 	}
 });

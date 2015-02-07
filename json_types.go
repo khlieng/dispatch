@@ -15,11 +15,13 @@ type WSResponse struct {
 }
 
 type Connect struct {
+	Name     string `json:"name"`
 	Server   string `json:"server"`
 	TLS      bool   `json:"tls"`
-	Name     string `json:"name,omitempty"`
+	Password string `json:"password"`
 	Nick     string `json:"nick"`
 	Username string `json:"username"`
+	Realname string `json:"realname"`
 }
 
 type Nick struct {

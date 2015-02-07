@@ -67,6 +67,7 @@ type IRC struct {
 	Host      string
 	TLS       bool
 	TLSConfig *tls.Config
+	Password  string
 	Username  string
 	Realname  string
 }
@@ -117,6 +118,9 @@ func (i *IRC) Connect(address string) error {
 
 	i.reader = bufio.NewReader(i.conn)
 
+	if i.Password != "" {
+		i.Pass(i.Password)
+	}
 	i.Nick(i.nick)
 	i.User(i.Username, i.Realname)
 
@@ -143,12 +147,40 @@ func (i *IRC) User(username, realname string) {
 	i.writef("USER %s 0 * :%s", username, realname)
 }
 
+func (i *IRC) Oper(name, password string) {
+	i.Write("OPER " + name + " " + password)
+}
+
+func (i *IRC) Mode(target, modes, params string) {
+	i.Write(strings.TrimRight("MODE "+target+" "+modes+" "+params, " "))
+}
+
+func (i *IRC) Quit() {
+	go func() {
+		i.ready.Wait()
+		i.write("QUIT")
+		i.conn.Close()
+	}()
+}
+
 func (i *IRC) Join(channels ...string) {
 	i.Write("JOIN " + strings.Join(channels, ","))
 }
 
 func (i *IRC) Part(channels ...string) {
 	i.Write("PART " + strings.Join(channels, ","))
+}
+
+func (i *IRC) Topic(channel string) {
+	i.Write("TOPIC " + channel)
+}
+
+func (i *IRC) Invite(nick, channel string) {
+	i.Write("INVITE " + nick + " " + channel)
+}
+
+func (i *IRC) Kick(channel string, users ...string) {
+	i.Write("KICK " + channel + " " + strings.Join(users, ","))
 }
 
 func (i *IRC) Privmsg(target, msg string) {
@@ -159,20 +191,8 @@ func (i *IRC) Notice(target, msg string) {
 	i.Writef("NOTICE %s :%s", target, msg)
 }
 
-func (i *IRC) Topic(channel string) {
-	i.Write("TOPIC " + channel)
-}
-
 func (i *IRC) Whois(nick string) {
 	i.Write("WHOIS " + nick)
-}
-
-func (i *IRC) Quit() {
-	go func() {
-		i.ready.Wait()
-		i.write("QUIT")
-		i.conn.Close()
-	}()
 }
 
 func (i *IRC) GetNick() string {

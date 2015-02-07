@@ -75,6 +75,8 @@ func handleWS(ws *websocket.Conn) {
 
 				irc := NewIRC(data.Nick, data.Username)
 				irc.TLS = data.TLS
+				irc.Password = data.Password
+				irc.Realname = data.Realname
 
 				if err := irc.Connect(data.Server); err != nil {
 					session.sendError(err, irc.Host)
@@ -85,11 +87,13 @@ func handleWS(ws *websocket.Conn) {
 					go handleMessages(irc, session)
 
 					session.user.AddServer(storage.Server{
+						Name:     data.Name,
 						Address:  irc.Host,
 						TLS:      data.TLS,
-						Name:     data.Name,
+						Password: data.Password,
 						Nick:     data.Nick,
 						Username: data.Username,
+						Realname: data.Realname,
 					})
 				}
 			} else {
