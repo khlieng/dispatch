@@ -10,8 +10,13 @@ var App = require('./components/App.jsx');
 var Connect = require('./components/Connect.jsx');
 var Chat = require('./components/Chat.jsx');
 var Settings = require('./components/Settings.jsx');
+var routeActions = require('./actions/route');
 
-var uuid = localStorage.uuid || (localStorage.uuid = util.UUID());
+var uuid = localStorage.uuid;
+if (!uuid) {
+	routeActions.navigate('connect');
+	localStorage.uuid = uuid = util.UUID();
+}
 
 socket.on('connect', function() {
 	socket.send('uuid', uuid);
