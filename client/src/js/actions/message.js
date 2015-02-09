@@ -7,7 +7,8 @@ var messageActions = Reflux.createActions([
 	'send',
 	'add',
 	'broadcast',
-	'inform'
+	'inform',
+	'command'
 ]);
 
 messageActions.send.preEmit = function(message, to, server) {

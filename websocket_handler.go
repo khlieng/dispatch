@@ -43,7 +43,7 @@ func handleWS(ws *websocket.Conn) {
 				sessionLock.Unlock()
 				session = storedSession
 
-				log.Println(addr, "attached to existing IRC connections")
+				log.Println(addr, "attached to", session.numIRC(), "existing IRC connections")
 
 				channels := session.user.GetChannels()
 				for i, channel := range channels {
@@ -124,9 +124,10 @@ func handleWS(ws *websocket.Conn) {
 			json.Unmarshal(req.Request, &data)
 
 			if irc, ok := session.getIRC(data.Server); ok {
+				irc.Quit()
+				session.deleteIRC(data.Server)
 				channelStore.RemoveUserAll(irc.GetNick(), data.Server)
 				session.user.RemoveServer(data.Server)
-				irc.Quit()
 			}
 
 		case "chat":

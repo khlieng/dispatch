@@ -28,6 +28,11 @@ var serverStore = Reflux.createStore({
 		tabActions.select(server);
 	},
 
+	disconnect: function(server) {
+		delete servers[server];
+		this.trigger(servers);
+	},
+
 	setNick: function(nick, server) {
 		servers[server].nick = nick;
 		this.trigger(servers);

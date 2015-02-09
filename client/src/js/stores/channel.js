@@ -82,6 +82,7 @@ var channelStore = Reflux.createStore({
 	init: function() {
 		this.listenToMany(actions);
 		this.listenTo(serverActions.connect, 'addServer');
+		this.listenTo(serverActions.disconnect, 'removeServer');
 		this.listenTo(serverActions.load, 'loadServers');
 	},
 
@@ -183,6 +184,11 @@ var channelStore = Reflux.createStore({
 			channels[server] = {};
 			this.trigger(channels);
 		}
+	},
+
+	removeServer: function(server) {
+		delete channels[server];
+		this.trigger(channels);
 	},
 
 	loadServers: function(storedServers) {

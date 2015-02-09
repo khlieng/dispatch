@@ -30,9 +30,9 @@ func NewSession() *Session {
 
 func (s *Session) getIRC(server string) (*IRC, bool) {
 	s.ircLock.Lock()
-	defer s.ircLock.Unlock()
-
 	irc, ok := s.irc[server]
+	s.ircLock.Unlock()
+
 	return irc, ok
 }
 
@@ -40,6 +40,20 @@ func (s *Session) setIRC(server string, irc *IRC) {
 	s.ircLock.Lock()
 	s.irc[server] = irc
 	s.ircLock.Unlock()
+}
+
+func (s *Session) deleteIRC(server string) {
+	s.ircLock.Lock()
+	delete(s.irc, server)
+	s.ircLock.Unlock()
+}
+
+func (s *Session) numIRC() int {
+	s.ircLock.Lock()
+	n := len(s.irc)
+	s.ircLock.Unlock()
+
+	return n
 }
 
 func (s *Session) setWS(addr string, ws *websocket.Conn) {
