@@ -11,7 +11,7 @@ var serverStore = Reflux.createStore({
 		this.listenToMany(actions);
 	},
 
-	connect: function(server, nick, username, tls, name) {
+	connect: function(server, nick, opts) {
 		var i = server.indexOf(':');
 		if (i > 0) {
 			server = server.slice(0, i);
@@ -20,8 +20,7 @@ var serverStore = Reflux.createStore({
 		servers[server] = {
 			address: server,
 			nick: nick,
-			username: username,
-			name: name || server
+			name: opts.name || server
 		};
 
 		this.trigger(servers);

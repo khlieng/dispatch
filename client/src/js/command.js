@@ -4,10 +4,11 @@ var messageActions = require('./actions/message');
 var serverActions = require('./actions/server');
 var tabActions = require('./actions/tab');
 
-messageActions.command.listen(function(cmd, channel, server) {
-	var params = cmd.slice(1).split(' ');
+messageActions.command.listen(function(line, channel, server) {
+	var params = line.slice(1).split(' ');
+	var command = params[0].toLowerCase();
 
-	switch (params[0].toLowerCase()) {
+	switch (command) {
 		case 'nick':
 			if (params[1]) {
 				serverActions.setNick(params[1], server);

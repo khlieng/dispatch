@@ -63,6 +63,10 @@ socket.on('channels', function(data) {
 	channelActions.load(data);
 });
 
+serverActions.connect.listen(function(server, nick, opts) {
+	messageActions.inform('Connecting...', server);
+});
+
 function withReason(message, reason) {
 	return message + (reason ? ' (' + reason + ')' : '');
 }

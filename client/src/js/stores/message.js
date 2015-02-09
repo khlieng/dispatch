@@ -4,6 +4,8 @@ var _ = require('lodash');
 var serverStore = require('./server');
 var channelStore = require('./channel');
 var actions = require('../actions/message');
+var serverActions = require('../actions/server');
+var channelActions = require('../actions/channel');
 
 var messages = {};
 
@@ -30,6 +32,8 @@ function addMessage(message, dest) {
 var messageStore = Reflux.createStore({
 	init: function() {
 		this.listenToMany(actions);
+		this.listenTo(serverActions.disconnect, 'disconnect');
+		this.listenTo(channelActions.part, 'part');
 	},
 
 	send: function(message, to, server) {
@@ -74,6 +78,18 @@ var messageStore = Reflux.createStore({
 			message: message,
 			type: 'info'
 		}, channel || server);
+		this.trigger(messages);
+	},
+
+	disconnect: function(server) {
+		delete messages[server];
+		this.trigger(messages);
+	},
+
+	part: function(channels, server) {
+		_.each(channels, function(channel) {
+			delete messages[server][channel];
+		});
 		this.trigger(messages);
 	},
 
