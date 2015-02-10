@@ -8,6 +8,7 @@ import (
 )
 
 func handleMessages(irc *IRC, session *Session) {
+	var whois WhoisReply
 	userBuffers := make(map[string][]string)
 	var motd MOTD
 
@@ -111,6 +112,23 @@ func handleMessages(irc *IRC, session *Session) {
 				From:    msg.Prefix,
 				Message: strings.Join(msg.Params[1:], " "),
 			})
+
+		case RPL_WHOISUSER:
+			whois.Nick = msg.Params[1]
+			whois.Username = msg.Params[2]
+			whois.Host = msg.Params[3]
+			whois.Realname = msg.Params[5]
+
+		case RPL_WHOISSERVER:
+			whois.Server = msg.Params[2]
+
+		case RPL_WHOISCHANNELS:
+			whois.Channels = append(whois.Channels, strings.Split(strings.TrimRight(msg.Trailing, " "), " ")...)
+
+		case RPL_ENDOFWHOIS:
+			session.sendJSON("whois", whois)
+
+			whois = WhoisReply{}
 
 		case RPL_TOPIC:
 			session.sendJSON("topic", Topic{

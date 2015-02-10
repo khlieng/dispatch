@@ -6,6 +6,8 @@ var socket = require('../socket');
 var channelActions = Reflux.createActions([
 	'join',
 	'part',
+	'invite',
+	'kick',
 	'addUser',
 	'removeUser',
 	'removeUserAll',
@@ -27,6 +29,22 @@ channelActions.part.preEmit = function(channels, server) {
 	socket.send('part', {
 		server: server,
 		channels: channels
+	});
+};
+
+channelActions.invite.preEmit = function(user, channel, server) {
+	socket.send('invite', {
+		server: server,
+		channel: channel,
+		user: user
+	});
+};
+
+channelActions.kick.preEmit = function(user, channel, server) {
+	socket.send('kick', {
+		server: server,
+		channel: channel,
+		user: user
 	});
 };
 

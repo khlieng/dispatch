@@ -80,6 +80,32 @@ type MOTD struct {
 	Content []string `json:"content"`
 }
 
+type Invite struct {
+	Server  string `json:"server"`
+	Channel string `json:"channel"`
+	User    string `json:"user"`
+}
+
+type Kick struct {
+	Server  string `json:"server"`
+	Channel string `json:"channel"`
+	User    string `json:"user"`
+}
+
+type Whois struct {
+	Server string `json:"server"`
+	User   string `json:"user"`
+}
+
+type WhoisReply struct {
+	Nick     string   `json:"nick"`
+	Username string   `json:"username"`
+	Host     string   `json:"host"`
+	Realname string   `json:"realname"`
+	Server   string   `json:"server"`
+	Channels []string `json:"channels"`
+}
+
 type Error struct {
 	Server  string `json:"server"`
 	Message string `json:"message"`

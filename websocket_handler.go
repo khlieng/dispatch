@@ -148,6 +148,33 @@ func handleWS(ws *websocket.Conn) {
 				irc.Nick(data.New)
 				session.user.SetNick(data.New, data.Server)
 			}
+
+		case "invite":
+			var data Invite
+
+			json.Unmarshal(req.Request, &data)
+
+			if irc, ok := session.getIRC(data.Server); ok {
+				irc.Invite(data.User, data.Channel)
+			}
+
+		case "kick":
+			var data Invite
+
+			json.Unmarshal(req.Request, &data)
+
+			if irc, ok := session.getIRC(data.Server); ok {
+				irc.Kick(data.Channel, data.User)
+			}
+
+		case "whois":
+			var data Whois
+
+			json.Unmarshal(req.Request, &data)
+
+			if irc, ok := session.getIRC(data.Server); ok {
+				irc.Whois(data.User)
+			}
 		}
 	}
 }

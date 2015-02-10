@@ -1,6 +1,7 @@
 var _ = require('lodash');
 
 var socket = require('./socket');
+var selectedTabStore = require('./stores/selectedTab');
 var channelActions = require('./actions/channel');
 var messageActions = require('./actions/message');
 var serverActions = require('./actions/server');
@@ -53,6 +54,19 @@ socket.on('topic', function(data) {
 
 socket.on('mode', function(data) {
 	channelActions.setMode(data);
+});
+
+socket.on('whois', function(data) {
+	var tab = selectedTabStore.getState();
+
+	console.log(data.channels);
+
+	messageActions.inform('Nick: ' + data.nick, tab.server, tab.channel);
+	messageActions.inform('Username: ' + data.username, tab.server, tab.channel);
+	messageActions.inform('Realname: ' + data.realname, tab.server, tab.channel);
+	messageActions.inform('Host: ' + data.host, tab.server, tab.channel);
+	messageActions.inform('Server: ' + data.server, tab.server, tab.channel);
+	messageActions.inform('Channels: ' + data.channels, tab.server, tab.channel);
 });
 
 socket.on('servers', function(data) {
