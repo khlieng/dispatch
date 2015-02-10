@@ -59,8 +59,6 @@ socket.on('mode', function(data) {
 socket.on('whois', function(data) {
 	var tab = selectedTabStore.getState();
 
-	console.log(data.channels);
-
 	messageActions.inform('Nick: ' + data.nick, tab.server, tab.channel);
 	messageActions.inform('Username: ' + data.username, tab.server, tab.channel);
 	messageActions.inform('Realname: ' + data.realname, tab.server, tab.channel);

@@ -7,13 +7,22 @@ var tabActions = require('../actions/tab');
 
 var MessageInput = React.createClass({
 	mixins: [
-		Reflux.connect(selectedTabStore, 'selectedTab')
+		Reflux.connect(selectedTabStore, 'selectedTab'),
+		Reflux.listenTo(tabActions.select, 'tabSelected')
 	],
 
 	getInitialState: function() {
 		return {
 			selectedTab: selectedTabStore.getState()
 		};
+	},
+
+	componentDidMount: function() {
+		this.refs.input.getDOMNode().focus();
+	},
+
+	tabSelected: function() {
+		this.refs.input.getDOMNode().focus();
 	},
 
 	handleKey: function(e) {
@@ -32,7 +41,7 @@ var MessageInput = React.createClass({
 	render: function() {
 		return (
 			<div className="message-input-wrap">
-				<input className="message-input" type="text" onKeyDown={this.handleKey} />
+				<input ref="input" className="message-input" type="text" onKeyDown={this.handleKey} />
 			</div>
 		);
 	}
