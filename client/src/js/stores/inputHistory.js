@@ -7,6 +7,11 @@ var HISTORY_MAX_LENGTH = 128;
 
 var history = [];
 var index = -1;
+var stored = localStorage.inputHistory;
+
+if (stored) {
+	history = JSON.parse(stored);
+}
 
 var inputHistoryStore = Reflux.createStore({
 	init: function() {
@@ -16,10 +21,12 @@ var inputHistoryStore = Reflux.createStore({
 	add: function(line) {
 		if (line.trim() && line !== history[0]) {
 			history.unshift(line);
+
 			if (history.length > HISTORY_MAX_LENGTH) {
 				history.pop();
 			}
-			this.trigger(history[index]);
+
+			localStorage.inputHistory = JSON.stringify(history);
 		}
 	},
 
