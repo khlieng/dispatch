@@ -45,7 +45,10 @@ var serverStore = Reflux.createStore({
 	},
 
 	getNick: function(server) {
-		return servers[server].nick;
+		if (servers[server]) {
+			return servers[server].nick;
+		}
+		return null;
 	},
 
 	getName: function(server) {

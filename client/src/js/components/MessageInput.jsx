@@ -1,19 +1,24 @@
 var React = require('react');
 var Reflux = require('reflux');
 
+var inputHistoryStore = require('../stores/inputHistory');
 var selectedTabStore = require('../stores/selectedTab');
 var messageActions = require('../actions/message');
+var inputHistoryActions = require('../actions/inputHistory');
 var tabActions = require('../actions/tab');
 
 var MessageInput = React.createClass({
 	mixins: [
 		Reflux.connect(selectedTabStore, 'selectedTab'),
+		Reflux.connect(inputHistoryStore, 'history'),
 		Reflux.listenTo(tabActions.select, 'tabSelected')
 	],
 
 	getInitialState: function() {
 		return {
-			selectedTab: selectedTabStore.getState()
+			selectedTab: selectedTabStore.getState(),
+			history: inputHistoryStore.getState(),
+			value: ''
 		};
 	},
 
@@ -34,14 +39,34 @@ var MessageInput = React.createClass({
 			} else {
 				messageActions.send(e.target.value, tab.channel, tab.server);
 			}
-			e.target.value = '';
+
+			inputHistoryActions.add(e.target.value);
+			inputHistoryActions.reset();
+			this.setState({ value: '' });
+		} else if (e.which === 38) {
+			e.preventDefault();
+			inputHistoryActions.increment();
+		} else if (e.which === 40) {
+			inputHistoryActions.decrement();
+		} else if (e.key === 'Unidentified') {
+			inputHistoryActions.reset();
 		}
+	},
+
+	handleChange: function(e) {
+		this.setState({ value: e.target.value });
 	},
 
 	render: function() {
 		return (
 			<div className="message-input-wrap">
-				<input ref="input" className="message-input" type="text" onKeyDown={this.handleKey} />
+				<input 
+					ref="input" 
+					className="message-input" 
+					type="text" 
+					value={this.state.history || this.state.value}
+					onKeyDown={this.handleKey}
+					onChange={this.handleChange} />
 			</div>
 		);
 	}

@@ -1,5 +1,4 @@
 var channelStore = require('./stores/channel');
-var selectedTabStore = require('./stores/selectedTab');
 var channelActions = require('./actions/channel');
 var messageActions = require('./actions/message');
 var serverActions = require('./actions/server');
