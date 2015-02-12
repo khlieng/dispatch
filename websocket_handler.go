@@ -47,12 +47,19 @@ func handleWS(ws *websocket.Conn) {
 
 				channels := session.user.GetChannels()
 				for i, channel := range channels {
-					channels[i].Users = channelStore.GetUsers(channel.Server, channel.Name)
 					channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
 				}
 
 				session.sendJSON("channels", channels)
 				session.sendJSON("servers", session.user.GetServers())
+
+				for _, channel := range channels {
+					session.sendJSON("users", Userlist{
+						Server:  channel.Server,
+						Channel: channel.Name,
+						Users:   channelStore.GetUsers(channel.Server, channel.Name),
+					})
+				}
 			} else {
 				session = NewSession()
 				session.user = storage.NewUser(UUID)
