@@ -20,10 +20,10 @@
     "gulp-gzip": "0.0.8"
   },
   "dependencies": {
-    "lodash": "3.0.0",
-    "reflux": "0.2.4",
-    "react-router": "~0.11.6",
-    "react": "~0.12.2",
-    "react-infinite": "~0.2.2"
+    "lodash": "3.2.0",
+    "reflux": "0.2.5",
+    "react-router": "0.12.0",
+    "react": "0.12.2",
+    "react-infinite": "0.2.3"
   }
 }

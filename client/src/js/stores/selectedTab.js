@@ -18,6 +18,7 @@ var selectedTabStore = Reflux.createStore({
 		this.listenToMany(actions);
 		this.listenTo(channelActions.part, 'part');
 		this.listenTo(serverActions.disconnect, 'disconnect');
+		this.listenTo(channelActions.addUser, 'userAdded');
 		this.listenTo(channelActions.load, 'loadChannels');
 		this.listenTo(serverActions.load, 'loadServers');
 	},
@@ -47,6 +48,17 @@ var selectedTabStore = Reflux.createStore({
 	disconnect: function(server) {
 		if (server === selectedTab.server) {
 			selectedTab = {};
+			this.trigger(selectedTab);
+		}
+	},
+
+	userAdded: function(user, server, channel) {
+		// Update the selected channel incase the casing is different
+		if (server === selectedTab.server &&
+			channel.toLowerCase() === selectedTab.channel.toLowerCase() &&
+			user === serverStore.getNick(server)) {
+			selectedTab.channel = channel;
+			selectedTab.name = channel;
 			this.trigger(selectedTab);
 		}
 	},
