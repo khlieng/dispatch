@@ -2,6 +2,8 @@ var EventEmitter = require('events').EventEmitter;
 
 var _ = require('lodash');
 
+var ws = new WebSocket('ws://' + window.location.host + '/ws');
+
 var socket = {
 	send: function(type, data) {
 		ws.send(JSON.stringify({ type: type, request: data }));
@@ -9,8 +11,6 @@ var socket = {
 };
 
 _.extend(socket, EventEmitter.prototype);
-
-var ws = new WebSocket('ws://' + window.location.host + '/ws');
 
 ws.onopen = function() {
 	socket.emit('connect');

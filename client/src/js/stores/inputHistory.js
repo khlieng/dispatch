@@ -31,8 +31,10 @@ var inputHistoryStore = Reflux.createStore({
 	},
 
 	reset: function() {
-		index = -1;
-		this.trigger(history[index]);
+		if (index !== -1) {
+			index = -1;
+			this.trigger(history[index]);
+		}
 	},
 
 	increment: function() {

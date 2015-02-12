@@ -20,7 +20,7 @@ type Server struct {
 type Channel struct {
 	Server string   `json:"server"`
 	Name   string   `json:"name"`
-	Users  []string `json:"users"`
+	Users  []string `json:"users,omitempty"`
 	Topic  string   `json:"topic,omitempty"`
 }
 

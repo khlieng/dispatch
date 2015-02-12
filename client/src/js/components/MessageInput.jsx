@@ -48,6 +48,8 @@ var MessageInput = React.createClass({
 			inputHistoryActions.increment();
 		} else if (e.which === 40) {
 			inputHistoryActions.decrement();
+		} else if (e.key === 'Backspace' || e.key === 'Delete') {
+			inputHistoryActions.reset();
 		} else if (e.key === 'Unidentified') {
 			inputHistoryActions.reset();
 		}
