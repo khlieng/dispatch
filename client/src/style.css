@@ -5,12 +5,12 @@
 }
 
 body {
-	font-family: Roboto, sans-serif;
+	font-family: Ubuntu Mono, monospace;
 	background: #f0f0f0;
 }
 
 input {
-	font: 16px Roboto, sans-serif;
+	font: 16px Ubuntu Mono, monospace;
 	border: none;
 	outline: none;
 }
@@ -140,7 +140,7 @@ p {
 
 .connect-form input[type="checkbox"] {
 	display: inline-block;
-	margin-right: 10px;
+	margin-right: 5px;
 	vertical-align: middle;
 }
 
@@ -189,7 +189,7 @@ p {
 
 .chat-topic {
 	display: none;
-	font: 16px Roboto, sans-serif;
+	font: 16px Ubuntu Mono, monospace;
 	line-height: 50px;
 	vertical-align: top;
 	color: #222;
@@ -227,7 +227,7 @@ p {
 }
 
 .message-action {
-	color: #6BB758;
+	color: #FF6698;
 }
 
 .message-time {
@@ -235,8 +235,8 @@ p {
 }
 
 .message-sender {
+	font-weight: 700;
 	color: #6BB758;
-	font: 16px Montserrat, sans-serif;
 }
 
 .message-input-wrap {
@@ -265,7 +265,7 @@ p {
 }
 
 .userlist > div {
-	padding: 15px 0px;
+	padding: 10px 0px;
 }
 
 .userlist p {
@@ -275,4 +275,19 @@ p {
 
 .userlist p:hover {
 	background: #DDD;
+}
+
+.list {
+	position: fixed;
+	left: 200px;
+	top: 0;
+	width: 300px;
+}
+
+.list > div {
+	overflow: auto !important;
+}
+
+.list p:nth-child(even) {
+	background: #AAA;
 }
