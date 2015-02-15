@@ -88,13 +88,21 @@ var MessageBox = React.createClass({
 			return <p className="message">{line}</p>;
 		});
 
-		return (
-			<div className="messagebox" style={style}>
-				<Infinite ref="list" containerHeight={this.state.height} elementHeight={24}>
-					{lines}
-				</Infinite>
-			</div>
-		);
+		if (lines.length !== 1) {
+			return (
+				<div className="messagebox" style={style}>
+					<Infinite ref="list" containerHeight={this.state.height} elementHeight={24}>
+						{lines}
+					</Infinite>
+				</div>
+			);
+		} else {
+			return (
+				<div className="messagebox" style={style}>
+					<div ref="list">{lines}</div>
+				</div>
+			);
+		}
 	}
 });
 

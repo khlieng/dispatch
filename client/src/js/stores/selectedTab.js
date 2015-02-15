@@ -54,7 +54,8 @@ var selectedTabStore = Reflux.createStore({
 
 	userAdded: function(user, server, channel) {
 		// Update the selected channel incase the casing is different
-		if (server === selectedTab.server &&
+		if (selectedTab.channel &&
+			server === selectedTab.server &&
 			user === serverStore.getNick(server) &&
 			channel.toLowerCase() === selectedTab.channel.toLowerCase()) {
 			selectedTab.channel = channel;
