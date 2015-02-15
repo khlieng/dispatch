@@ -37,13 +37,12 @@ exports.wrap = function(lines, width, charWidth) {
 				if (wordCount !== 1) {
 					wrapped.push(line);
 
-					line = word;
-					lineWidth = word.length * charWidth;
-					wordCount = 1;
-					
 					if (i !== wlen - 1) {
-						line += ' ';
-						lineWidth += charWidth;
+						line = word + ' ';
+						lineWidth = (word.length + 1) * charWidth;
+						wordCount = 1;
+					} else {
+						wrapped.push(word);
 					}
 				} else {
 					wrapped.push(word);

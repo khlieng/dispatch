@@ -8,7 +8,8 @@ var messageActions = Reflux.createActions([
 	'add',
 	'broadcast',
 	'inform',
-	'command'
+	'command',
+	'setWrapWidth'
 ]);
 
 messageActions.send.preEmit = function(message, to, server) {
