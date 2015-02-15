@@ -85,7 +85,8 @@ func handleWS(ws *websocket.Conn) {
 				irc.Password = data.Password
 				irc.Realname = data.Realname
 
-				if err := irc.Connect(data.Server); err != nil {
+				err := irc.Connect(data.Server)
+				if err != nil {
 					session.sendError(err, irc.Host)
 					log.Println(err)
 				} else {

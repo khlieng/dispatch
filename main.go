@@ -19,6 +19,41 @@ var (
 	fs           http.Handler
 )
 
+func reconnect() {
+	for _, user := range storage.LoadUsers() {
+		channels := user.GetChannels()
+
+		for _, server := range user.GetServers() {
+			session := NewSession()
+			session.user = user
+			sessions[user.UUID] = session
+
+			irc := NewIRC(server.Nick, server.Username)
+			irc.TLS = server.TLS
+			irc.Password = server.Password
+			irc.Realname = server.Realname
+
+			err := irc.Connect(server.Address)
+			if err != nil {
+				log.Println(err)
+			} else {
+				session.setIRC(irc.Host, irc)
+
+				go session.write()
+				go handleMessages(irc, session)
+
+				var joining []string
+				for _, channel := range channels {
+					if channel.Server == server.Address {
+						joining = append(joining, channel.Name)
+					}
+				}
+				irc.Join(joining...)
+			}
+		}
+	}
+}
+
 func serveFiles(w http.ResponseWriter, r *http.Request) {
 	var ext string
 
@@ -48,32 +83,7 @@ func main() {
 	sessions = make(map[string]*Session)
 	fs = http.FileServer(http.Dir("client/dist"))
 
-	/*for _, user := range storage.LoadUsers() {
-		channels := user.GetChannels()
-
-		for _, server := range user.GetServers() {
-			session := NewSession()
-			session.user = user
-			sessions[user.UUID] = session
-
-			irc := NewIRC(server.Nick, server.Username)
-			irc.TLS = server.TLS
-			irc.Connect(server.Address)
-
-			session.setIRC(irc.Host, irc)
-
-			go session.write()
-			go handleMessages(irc, session)
-
-			var joining []string
-			for _, channel := range channels {
-				if channel.Server == server.Address {
-					joining = append(joining, channel.Name)
-				}
-			}
-			irc.Join(joining...)
-		}
-	}*/
+	//reconnect()
 
 	router := httprouter.New()
 
