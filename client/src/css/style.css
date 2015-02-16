@@ -27,7 +27,7 @@ p {
 }
 
 i[class^="icon-"]:before, i[class*=" icon-"]:before {
-  margin: 0;
+	margin: 0;
 }
 
 .tablist {
@@ -211,7 +211,6 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	top: 50px;
 	bottom: 50px;
 	right: 200px;
-	/*padding: 15px;*/
 	z-index: 1;
 }
 
@@ -222,13 +221,6 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .message {
 	white-space: nowrap;
-	/*margin-bottom: 5px;
-	padding-left: 55px;
-	text-indent: -55px;*/
-}
-
-.message span {
-	/*margin-right: 15px;*/
 }
 
 .message-info {
@@ -284,19 +276,4 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .userlist p:hover {
 	background: #DDD;
-}
-
-.list {
-	position: fixed;
-	left: 200px;
-	top: 0;
-	width: 300px;
-}
-
-.list > div {
-	overflow: auto !important;
-}
-
-.list p:nth-child(even) {
-	background: #AAA;
 }
