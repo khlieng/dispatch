@@ -4,7 +4,6 @@ var _ = require('lodash');
 var Infinite = require('react-infinite');
 
 var util = require('../util');
-var messageStore = require('../stores/message');
 var messageLineStore = require('../stores/messageLine');
 var selectedTabStore = require('../stores/selectedTab');
 var messageActions = require('../actions/message');

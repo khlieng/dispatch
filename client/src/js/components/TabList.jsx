@@ -71,7 +71,7 @@ var TabList = React.createClass({
 				<button className="button-connect" onClick={this.handleConnectClick}>Connect</button>
 				{tabs}
 				<div className="side-buttons">
-					<i className="fa fa-cog" onClick={this.handleSettingsClick}></i>
+					<i className="icon-cog" onClick={this.handleSettingsClick}></i>
 				</div>
 			</div>
 		);

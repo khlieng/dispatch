@@ -65,7 +65,7 @@ var Connect = React.createClass({
 					{optionals}
 					<p>
 						<label><input name="ssl" type="checkbox" />SSL</label>
-						<i className="fa fa-ellipsis-h" onClick={this.handleShowClick}></i>
+						<i className="icon-ellipsis" onClick={this.handleShowClick}></i>
 					</p>
 					<input type="submit" value="Connect" />
 				</form>

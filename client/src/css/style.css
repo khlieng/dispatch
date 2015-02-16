@@ -26,6 +26,10 @@ p {
 	line-height: 1.5;
 }
 
+i[class^="icon-"]:before, i[class*=" icon-"]:before {
+  margin: 0;
+}
+
 .tablist {
 	position: fixed;
 	left: 0;
