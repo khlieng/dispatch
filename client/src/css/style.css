@@ -216,7 +216,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .messagebox > div {
 	padding: 10px 15px;
-	overflow: auto !important;
+	overflow-y: auto !important;
 }
 
 .message {
@@ -266,6 +266,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .userlist > div {
+	overflow-y: auto !important;
 	padding: 10px 0px;
 }
 

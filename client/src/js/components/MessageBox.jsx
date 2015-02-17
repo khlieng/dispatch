@@ -2,6 +2,7 @@ var React = require('react');
 var Reflux = require('reflux');
 var _ = require('lodash');
 var Infinite = require('react-infinite');
+var Autolinker = require('autolinker');
 
 var util = require('../util');
 var messageLineStore = require('../stores/messageLine');
@@ -84,7 +85,7 @@ var MessageBox = React.createClass({
 		}
 
 		var lines = _.map(this.state.lines, function(line) {
-			return <p className="message">{line}</p>;
+			return <p className="message" dangerouslySetInnerHTML={{ __html: Autolinker.link(line) }}></p>;
 		});
 
 		if (lines.length !== 1) {

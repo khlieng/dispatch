@@ -88,9 +88,9 @@ gulp.task('gzip:watch', function() {
 });
 
 gulp.task('watch', ['default'], function() {
-    gulp.watch('./dist/*.{html,css,js}', ['gzip:watch'])
+    gulp.watch('./dist/**/*.{html,css,js}', ['gzip:watch'])
     gulp.watch('./src/*.html', ['html']);
-    gulp.watch('./src/*.css', ['css']);
+    gulp.watch('./src/css/*.css', ['css']);
     return js(true);
 });
 
