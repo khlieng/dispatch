@@ -11,13 +11,13 @@ var messageActions = require('../actions/message');
 
 var MessageBox = React.createClass({
 	mixins: [
-		Reflux.connect(messageLineStore, 'lines'),
+		Reflux.connect(messageLineStore, 'messages'),
 		Reflux.connect(selectedTabStore, 'selectedTab')
 	],
 
 	getInitialState: function() {
 		return {
-			lines: messageLineStore.getState(),
+			messages: messageLineStore.getState(),
 			selectedTab: selectedTabStore.getState(),
 			height: window.innerHeight - 100
 		};
@@ -62,31 +62,38 @@ var MessageBox = React.createClass({
 	render: function() {
 		var tab = this.state.selectedTab;
 		var dest = tab.channel || tab.server;
-		var style = {}
+		var lines = [];
+		var style = {};
 
-		/*var messages = _.map(messageStore.getMessages(tab.server, dest), function(message) {
+		if (!tab.channel || tab.channel[0] !== '#') {
+			style.right = 0;
+		}
+
+		for (var j = 0; j < this.state.messages.length; j++) {
+			var message = this.state.messages[j];
+
 			var messageClass = 'message';
 
 			if (message.type) {
 				messageClass += ' message-' + message.type;
 			}
 
-			return (
+			lines.push(
 				<p className={messageClass}>
 					<span className="message-time">{util.timestamp(message.time)}</span>
-					{ message.from ? <span className="message-sender"> {message.from}</span> : null }
-					{' ' + message.message}
+					{message.from ? <span className="message-sender"> {message.from}</span> : null}
+					<span dangerouslySetInnerHTML={{ __html: ' ' + Autolinker.link(message.lines[0]) }}></span>
 				</p>
 			);
-		});*/
 
-		if (!tab.channel || tab.channel[0] !== '#') {
-			style.right = 0;
+			for (var i = 1; i < message.lines.length; i++) {
+				lines.push(
+					<p className={messageClass}>
+						<span dangerouslySetInnerHTML={{ __html: Autolinker.link(message.lines[i]) }}></span>
+					</p>
+				);
+			}
 		}
-
-		var lines = _.map(this.state.lines, function(line) {
-			return <p className="message" dangerouslySetInnerHTML={{ __html: Autolinker.link(line) }}></p>;
-		});
 
 		if (lines.length !== 1) {
 			return (

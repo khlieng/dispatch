@@ -5,12 +5,12 @@
 }
 
 body {
-	font-family: Ubuntu Mono, monospace;
+	font-family: Droid Sans Mono, monospace;
 	background: #f0f0f0;
 }
 
 input {
-	font: 16px Ubuntu Mono, monospace;
+	font: 16px Droid Sans Mono, monospace;
 	border: none;
 	outline: none;
 }
@@ -193,7 +193,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .chat-topic {
 	display: none;
-	font: 16px Ubuntu Mono, monospace;
+	font: 16px Droid Sans Mono, monospace;
 	line-height: 50px;
 	vertical-align: top;
 	color: #222;
@@ -236,7 +236,6 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .message-sender {
-	font-weight: 700;
 	color: #6BB758;
 }
 

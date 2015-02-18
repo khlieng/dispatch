@@ -16,16 +16,20 @@ exports.timestamp = function(date) {
 	return h + ':' + m;
 };
 
-exports.wrap = function(lines, width, charWidth) {
-	var wrapped = [];
-	var lineWidth;
-	var wordCount;
-
-	for (var j = 0, llen = lines.length; j < llen; j++) {
-		var words = lines[j].split(' ');
+exports.wrapMessages = function(messages, width, charWidth) {
+	for (var j = 0, llen = messages.length; j < llen; j++) {
+		var message = messages[j];
+		var words = message.message.split(' ');
 		var line = '';
-		lineWidth = 0;
-		wordCount = 0;
+		var wrapped = [];
+		var lineWidth = (6 + (message.from ? message.from.length + 1 : 0)) * charWidth;
+		var wordCount = 0;
+
+		// Add empty line if first word after timestamp + sender wraps
+		if (words.length > 0 && lineWidth + words[0].length * charWidth >= width) {
+			wrapped.push(line);
+			lineWidth = 0;
+		}
 
 		for (var i = 0, wlen = words.length; i < wlen; i++) {
 			var word = words[i];
@@ -57,9 +61,9 @@ exports.wrap = function(lines, width, charWidth) {
 				wrapped.push(line);
 			}
 		}
-	}
 
-	return wrapped;
+		message.lines = wrapped;
+	}
 };
 
 var canvas = document.createElement('canvas');

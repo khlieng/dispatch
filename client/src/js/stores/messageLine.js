@@ -7,27 +7,17 @@ var selectedTabStore = require('./selectedTab');
 var messageActions = require('../actions/message');
 
 var width = window.innerWidth;
-var charWidth = util.stringWidth(' ', '16px Ubuntu Mono');
+var charWidth = util.stringWidth(' ', '16px Droid Sans Mono');
 
 var tab = selectedTabStore.getState();
 var messages;
-var lines;
-
-wrap();
 
 function wrap() {
 	messages = messageStore.getMessages(tab.server, tab.channel || tab.server);
-
-	lines = util.wrap(_.map(messages, function(message) {
-		var line = util.timestamp(message.time);
-		if (message.from) {
-			line += ' ' + message.from;
-		}
-		line += ' ' + message.message;
-
-		return line;
-	}), width, charWidth);
+	util.wrapMessages(messages, width, charWidth);
 }
+
+wrap();
 
 var messageLineStore = Reflux.createStore({
 	init: function() {
@@ -38,25 +28,25 @@ var messageLineStore = Reflux.createStore({
 
 	setWrapWidth: function(w) {
 		width = w;
-		
+
 		wrap();
-		this.trigger(lines);
+		this.trigger(messages);
 	},
 
 	messagesChanged: function() {
 		wrap();
-		this.trigger(lines);
+		this.trigger(messages);
 	},
 
 	selectedTabChanged: function(selectedTab) {
 		tab = selectedTab;
 		
 		wrap();		
-		this.trigger(lines);
+		this.trigger(messages);
 	},
 
 	getState: function() {
-		return lines;
+		return messages;
 	}
 });
 
