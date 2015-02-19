@@ -29,7 +29,7 @@ var messageLineStore = Reflux.createStore({
 	setWrapWidth: function(w) {
 		width = w;
 
-		wrap();
+		util.wrapMessages(messages, width, charWidth);
 		this.trigger(messages);
 	},
 

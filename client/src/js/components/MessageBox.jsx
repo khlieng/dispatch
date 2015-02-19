@@ -71,15 +71,15 @@ var MessageBox = React.createClass({
 
 		for (var j = 0; j < this.state.messages.length; j++) {
 			var message = this.state.messages[j];
-
 			var messageClass = 'message';
+			var key = message.server + dest + j;
 
 			if (message.type) {
 				messageClass += ' message-' + message.type;
 			}
 
 			lines.push(
-				<p className={messageClass}>
+				<p key={key} className={messageClass}>
 					<span className="message-time">{util.timestamp(message.time)}</span>
 					{message.from ? <span className="message-sender"> {message.from}</span> : null}
 					<span dangerouslySetInnerHTML={{ __html: ' ' + Autolinker.link(message.lines[0]) }}></span>
@@ -88,7 +88,7 @@ var MessageBox = React.createClass({
 
 			for (var i = 1; i < message.lines.length; i++) {
 				lines.push(
-					<p className={messageClass}>
+					<p key={key + '-' + i} className={messageClass}>
 						<span dangerouslySetInnerHTML={{ __html: Autolinker.link(message.lines[i]) }}></span>
 					</p>
 				);
