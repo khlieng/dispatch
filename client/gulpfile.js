@@ -8,7 +8,7 @@ var gzip = require('gulp-gzip');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
-var reactify = require('reactify');
+var babelify = require('babelify');
 var strictify = require('strictify');
 var watchify = require('watchify');
 
@@ -51,7 +51,7 @@ function js(watch) {
     }
 
     bundler
-        .transform(reactify)
+        .transform(babelify)
         .transform(strictify);
 
     rebundle = function() {
