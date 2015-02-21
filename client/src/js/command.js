@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 var channelStore = require('./stores/channel');
 var channelActions = require('./actions/channel');
 var messageActions = require('./actions/message');
@@ -27,7 +29,9 @@ messageActions.command.listen(function(line, channel, server) {
 			break;
 
 		case 'part':
-			if (channel) {
+			if (params[1]) {
+				channelActions.part([params[1]], server);
+			} else if (channel) {
 				channelActions.part([channel], server);
 			}
 			break;
@@ -87,6 +91,20 @@ messageActions.command.listen(function(line, channel, server) {
 
 		case 'away':
 			serverActions.away(params[1], server);
+			break;
+
+		case 'help':
+			messageActions.inform([
+				_.escape('/join <channel> - Join a channel'),
+				'/part [channel] - Leave the current or entered channel',
+				_.escape('/nick <nick> - Change nick'),
+				'/quit - Disconnect from the current server',
+				_.escape('/me <message> - Send action message'),
+				'/topic - Show topic for the current channel',
+				_.escape('/msg <target> <message> - Send message to the entered channel or user'),
+				_.escape('/say <message> - Send message to the current chat'),
+				'/away [message] - Set or clear away message'
+			], server, channel);
 			break;
 	}
 });

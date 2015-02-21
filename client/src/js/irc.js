@@ -59,12 +59,14 @@ socket.on('mode', function(data) {
 socket.on('whois', function(data) {
 	var tab = selectedTabStore.getState();
 
-	messageActions.inform('Nick: ' + data.nick, tab.server, tab.channel);
-	messageActions.inform('Username: ' + data.username, tab.server, tab.channel);
-	messageActions.inform('Realname: ' + data.realname, tab.server, tab.channel);
-	messageActions.inform('Host: ' + data.host, tab.server, tab.channel);
-	messageActions.inform('Server: ' + data.server, tab.server, tab.channel);
-	messageActions.inform('Channels: ' + data.channels, tab.server, tab.channel);
+	messageActions.inform([
+		'Nick: ' + data.nick,
+		'Username: ' + data.username,
+		'Realname: ' + data.realname,
+		'Host: ' + data.host,
+		'Server: ' + data.server,
+		'Channels: ' + data.channels
+	], tab.server, tab.channel);
 });
 
 socket.on('servers', function(data) {

@@ -72,12 +72,24 @@ var messageStore = Reflux.createStore({
 	},
 
 	inform: function(message, server, channel) {
-		addMessage({
-			server: server,
-			to: channel,
-			message: message,
-			type: 'info'
-		}, channel || server);
+		if (_.isArray(message)) {
+			_.each(message, (msg) => {
+				addMessage({
+					server: server,
+					to: channel,
+					message: msg,
+					type: 'info'
+				}, channel || server);
+			});
+		} else {
+			addMessage({
+				server: server,
+				to: channel,
+				message: message,
+				type: 'info'
+			}, channel || server);
+		}
+		
 		this.trigger(messages);
 	},
 
