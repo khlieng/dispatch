@@ -64,6 +64,9 @@ var MessageBox = React.createClass({
 		var dest = tab.channel || tab.server;
 		var lines = [];
 		var style = {};
+		var innerStyle = {
+			paddingLeft: this.props.indent + 'px'
+		};
 
 		if (!tab.channel || tab.channel[0] !== '#') {
 			style.right = 0;
@@ -88,7 +91,7 @@ var MessageBox = React.createClass({
 
 			for (var i = 1; i < message.lines.length; i++) {
 				lines.push(
-					<p key={key + '-' + i} className={messageClass}>
+					<p key={key + '-' + i} className={messageClass} style={innerStyle}>
 						<span dangerouslySetInnerHTML={{ __html: Autolinker.link(message.lines[i]) }}></span>
 					</p>
 				);

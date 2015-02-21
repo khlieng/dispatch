@@ -10,7 +10,7 @@ var Chat = React.createClass({
         return (
             <div>
                 <ChatTitle />
-                <MessageBox />
+                <MessageBox indent={window.messageIndent} />
                 <MessageInput />
                 <UserList />
             </div>

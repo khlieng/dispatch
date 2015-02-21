@@ -16,7 +16,9 @@ exports.timestamp = function(date) {
 	return h + ':' + m;
 };
 
-exports.wrapMessages = function(messages, width, charWidth) {
+exports.wrapMessages = function(messages, width, charWidth, indent) {
+	indent = indent || 0;
+
 	for (var j = 0, llen = messages.length; j < llen; j++) {
 		var message = messages[j];
 		var words = message.message.split(' ');
@@ -24,15 +26,21 @@ exports.wrapMessages = function(messages, width, charWidth) {
 		var wrapped = [];
 		var lineWidth = (6 + (message.from ? message.from.length + 1 : 0)) * charWidth;
 		var wordCount = 0;
+		var hasWrapped = false;
 
 		// Add empty line if first word after timestamp + sender wraps
-		if (words.length > 0 && lineWidth + words[0].length * charWidth >= width) {
+		if (words.length > 0 && message.from && lineWidth + words[0].length * charWidth >= width) {
 			wrapped.push(line);
 			lineWidth = 0;
 		}
 
 		for (var i = 0, wlen = words.length; i < wlen; i++) {
 			var word = words[i];
+
+			if (hasWrapped) {
+				hasWrapped = false;
+				lineWidth += indent;
+			}
 
 			lineWidth += word.length * charWidth;
 			wordCount++;
@@ -53,6 +61,8 @@ exports.wrapMessages = function(messages, width, charWidth) {
 					lineWidth = 0;
 					wordCount = 0;
 				}
+
+				hasWrapped = true;
 			} else if (i !== wlen - 1) {
 				line += word + ' ';
 				lineWidth += charWidth;
