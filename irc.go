@@ -30,6 +30,8 @@ const (
 	RPL_LUSERCHANNELS = "254"
 	RPL_LUSERME       = "255"
 
+	RPL_AWAY = "301"
+
 	RPL_WHOISUSER     = "311"
 	RPL_WHOISSERVER   = "312"
 	RPL_WHOISOPERATOR = "313"
@@ -193,6 +195,10 @@ func (i *IRC) Notice(target, msg string) {
 
 func (i *IRC) Whois(nick string) {
 	i.Write("WHOIS " + nick)
+}
+
+func (i *IRC) Away(message string) {
+	i.Write("AWAY :" + message)
 }
 
 func (i *IRC) GetNick() string {

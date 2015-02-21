@@ -6,6 +6,7 @@ var serverActions = Reflux.createActions([
 	'connect',
 	'disconnect',
 	'whois',
+	'away',
 	'setNick',
 	'load'
 ]);
@@ -28,6 +29,10 @@ serverActions.disconnect.preEmit = (server) => {
 
 serverActions.whois.preEmit = (user, server) => {
 	socket.send('whois', { server, user });
+};
+
+serverActions.away.preEmit = (message, server) => {
+	socket.send('away', { server, message });
 };
 
 serverActions.setNick.preEmit = (nick, server) => {

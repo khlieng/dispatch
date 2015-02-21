@@ -84,5 +84,9 @@ messageActions.command.listen(function(line, channel, server) {
 				serverActions.whois(params[1], server);
 			}
 			break;
+
+		case 'away':
+			serverActions.away(params[1], server);
+			break;
 	}
 });

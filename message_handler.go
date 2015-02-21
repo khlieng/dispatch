@@ -141,11 +141,6 @@ func handleMessages(irc *IRC, session *Session) {
 
 		case RPL_NAMREPLY:
 			users := strings.Split(msg.Trailing, " ")
-
-			/*for i, user := range users {
-				users[i] = strings.TrimLeft(user, "@+")
-			}*/
-
 			userBuffer := userBuffers[msg.Params[2]]
 			userBuffers[msg.Params[2]] = append(userBuffer, users...)
 

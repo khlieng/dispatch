@@ -183,6 +183,15 @@ func handleWS(ws *websocket.Conn) {
 			if irc, ok := session.getIRC(data.Server); ok {
 				irc.Whois(data.User)
 			}
+
+		case "away":
+			var data Away
+
+			json.Unmarshal(req.Request, &data)
+
+			if irc, ok := session.getIRC(data.Server); ok {
+				irc.Away(data.Message)
+			}
 		}
 	}
 }

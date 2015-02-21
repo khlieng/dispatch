@@ -106,6 +106,11 @@ type WhoisReply struct {
 	Channels []string `json:"channels"`
 }
 
+type Away struct {
+	Server  string `json:"server"`
+	Message string `json:"message"`
+}
+
 type Error struct {
 	Server  string `json:"server"`
 	Message string `json:"message"`
