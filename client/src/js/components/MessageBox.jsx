@@ -4,7 +4,7 @@ var _ = require('lodash');
 var Infinite = require('react-infinite');
 var Autolinker = require('autolinker');
 
-var util = require('../util');
+var MessageHeader = require('./MessageHeader.jsx');
 var messageLineStore = require('../stores/messageLine');
 var selectedTabStore = require('../stores/selectedTab');
 var messageActions = require('../actions/message');
@@ -81,13 +81,7 @@ var MessageBox = React.createClass({
 				messageClass += ' message-' + message.type;
 			}
 
-			lines.push(
-				<p key={key} className={messageClass}>
-					<span className="message-time">{util.timestamp(message.time)}</span>
-					{message.from ? <span className="message-sender"> {message.from}</span> : null}
-					<span dangerouslySetInnerHTML={{ __html: ' ' + Autolinker.link(message.lines[0]) }}></span>
-				</p>
-			);
+			lines.push(<MessageHeader key={key} message={message} />);
 
 			for (var i = 1; i < message.lines.length; i++) {
 				lines.push(

@@ -237,6 +237,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .message-sender {
 	color: #6BB758;
+	cursor: pointer;
 }
 
 .message-input-wrap {
