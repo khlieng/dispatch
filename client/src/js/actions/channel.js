@@ -18,34 +18,20 @@ var channelActions = Reflux.createActions([
 	'load'
 ]);
 
-channelActions.join.preEmit = function(channels, server) {
-	socket.send('join', {
-		server: server,
-		channels: channels
-	});
+channelActions.join.preEmit = (channels, server) => {
+	socket.send('join', { server, channels });
 };
 
-channelActions.part.preEmit = function(channels, server) {
-	socket.send('part', {
-		server: server,
-		channels: channels
-	});
+channelActions.part.preEmit = (channels, server) => {
+	socket.send('part', { server, channels });
 };
 
-channelActions.invite.preEmit = function(user, channel, server) {
-	socket.send('invite', {
-		server: server,
-		channel: channel,
-		user: user
-	});
+channelActions.invite.preEmit = (user, channel, server) => {
+	socket.send('invite', { server, channel, user });
 };
 
-channelActions.kick.preEmit = function(user, channel, server) {
-	socket.send('kick', {
-		server: server,
-		channel: channel,
-		user: user
-	});
+channelActions.kick.preEmit = (user, channel, server) => {
+	socket.send('kick', { server, channel, user });
 };
 
 module.exports = channelActions;

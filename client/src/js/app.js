@@ -19,13 +19,8 @@ if (!uuid) {
 	localStorage.uuid = uuid = util.UUID();
 }
 
-socket.on('connect', function() {
-	socket.send('uuid', uuid);
-});
-
-socket.on('error', function(error) {
-	console.log(error.server + ': ' + error.message);
-});
+socket.on('connect', () => socket.send('uuid', uuid));
+socket.on('error', (error) => console.log(error.server + ': ' + error.message));
 
 var routes = (
 	<Route name="app" path="/" handler={App}>

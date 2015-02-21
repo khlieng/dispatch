@@ -6,8 +6,6 @@ var tabActions = Reflux.createActions([
 	'select'
 ]);
 
-tabActions.select.preEmit = function() {
-	routeActions.navigate('app');
-};
+tabActions.select.preEmit = () => routeActions.navigate('app');
 
 module.exports = tabActions;

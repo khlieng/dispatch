@@ -14,7 +14,7 @@ class Socket extends EventEmitter {
 	}
 
 	send(type, data) {
-		this.ws.send(JSON.stringify({ type: type, request: data }));
+		this.ws.send(JSON.stringify({ type, request: data }));
 	}
 }
 

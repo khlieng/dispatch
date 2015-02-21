@@ -10,10 +10,10 @@ var serverActions = Reflux.createActions([
 	'load'
 ]);
 
-serverActions.connect.preEmit = function(server, nick, opts) {
+serverActions.connect.preEmit = (server, nick, opts) => {
 	socket.send('connect', {
-		server: server,
-		nick: nick,
+		server,
+		nick,
 		username: opts.username || nick,
 		password: opts.password,
 		realname: opts.realname || nick,
@@ -22,20 +22,17 @@ serverActions.connect.preEmit = function(server, nick, opts) {
 	});
 };
 
-serverActions.disconnect.preEmit = function(server) {
-	socket.send('quit', { server: server });
+serverActions.disconnect.preEmit = (server) => {
+	socket.send('quit', { server });
 };
 
-serverActions.whois.preEmit = function(user, server) {
-	socket.send('whois', {
-		server: server,
-		user: user
-	});
+serverActions.whois.preEmit = (user, server) => {
+	socket.send('whois', { server, user });
 };
 
-serverActions.setNick.preEmit = function(nick, server) {
+serverActions.setNick.preEmit = (nick, server) => {
 	socket.send('nick', {
-		server: server,
+		server,
 		new: nick
 	});
 };

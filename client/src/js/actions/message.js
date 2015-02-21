@@ -12,12 +12,8 @@ var messageActions = Reflux.createActions([
 	'setWrapWidth'
 ]);
 
-messageActions.send.preEmit = function(message, to, server) {
-	socket.send('chat', {
-		server: server,
-		to: to,
-		message: message
-	});
+messageActions.send.preEmit = (message, to, server) => {
+	socket.send('chat', { server, to, message });
 };
 
 module.exports = messageActions;
