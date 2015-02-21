@@ -1,29 +1,21 @@
 var EventEmitter = require('events').EventEmitter;
 
-var _ = require('lodash');
+class Socket extends EventEmitter {
+	constructor() {
+		this.ws = new WebSocket('ws://' + window.location.host + '/ws');
 
-var ws = new WebSocket('ws://' + window.location.host + '/ws');
+		this.ws.onopen = () => this.emit('connect');
+		this.ws.onclose = () => this.emit('disconnect');
+		this.ws.onmessage = (e) => {
+			var msg = JSON.parse(e.data);
 
-var socket = {
-	send: function(type, data) {
-		ws.send(JSON.stringify({ type: type, request: data }));
+			this.emit(msg.type, msg.response);
+		}
 	}
-};
 
-_.extend(socket, EventEmitter.prototype);
+	send(type, data) {
+		this.ws.send(JSON.stringify({ type: type, request: data }));
+	}
+}
 
-ws.onopen = function() {
-	socket.emit('connect');
-};
-
-ws.onclose = function() {
-	socket.emit('disconnect');
-};
-
-ws.onmessage = function(e) {
-	var msg = JSON.parse(e.data);
-
-	socket.emit(msg.type, msg.response);
-};
-
-module.exports = socket;
+module.exports = new Socket();

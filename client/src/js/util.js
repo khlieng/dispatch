@@ -16,9 +16,7 @@ exports.timestamp = function(date) {
 	return h + ':' + m;
 };
 
-exports.wrapMessages = function(messages, width, charWidth, indent) {
-	indent = indent || 0;
-
+exports.wrapMessages = function(messages, width, charWidth, indent = 0) {
 	for (var j = 0, llen = messages.length; j < llen; j++) {
 		var message = messages[j];
 		var words = message.message.split(' ');
