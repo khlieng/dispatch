@@ -26,7 +26,9 @@ var routes = (
 	<Route name="app" path="/" handler={App}>
 		<Route name="connect" handler={Connect} />
 		<Route name="settings" handler={Settings} />
-		<DefaultRoute handler={Chat} />
+		<Route name="status" path="/:server" handler={Chat} />
+		<Route name="chat" path="/:server/:channel" handler={Chat} />
+		<DefaultRoute handler={Settings} />
 	</Route>
 );
 

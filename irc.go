@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 	"sync"
@@ -236,6 +237,7 @@ func (i *IRC) recv() {
 	for {
 		line, err := i.reader.ReadString('\n')
 		if err != nil {
+			log.Println("IRC connection to", i.Server, "died")
 			return
 		}
 

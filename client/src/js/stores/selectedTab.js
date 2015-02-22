@@ -7,11 +7,6 @@ var channelActions = require('../actions/channel');
 var serverActions = require('../actions/server');
 
 var selectedTab = {};
-var stored = localStorage.selectedTab;
-
-if (stored) {
-	selectedTab = JSON.parse(stored);
-}
 
 var selectedTabStore = Reflux.createStore({
 	init: function() {
@@ -19,7 +14,7 @@ var selectedTabStore = Reflux.createStore({
 		this.listenTo(channelActions.part, 'part');
 		this.listenTo(serverActions.disconnect, 'disconnect');
 		this.listenTo(channelActions.addUser, 'userAdded');
-		this.listenTo(channelActions.load, 'loadChannels');
+		//this.listenTo(channelActions.load, 'loadChannels');
 		this.listenTo(serverActions.load, 'loadServers');
 	},
 
@@ -65,16 +60,17 @@ var selectedTabStore = Reflux.createStore({
 	},
 
 	loadChannels: function(channels) {
-		if (selectedTab.channel && !_.find(channels, { name: selectedTab.channel })) {
-			selectedTab.channel = null;
-			selectedTab.name = null;
-			this.trigger(selectedTab);
-		}
+		
 	},
 
 	loadServers: function(servers) {
-		if (selectedTab.server && !_.find(servers, { address: selectedTab.server })) {
+		var server = _.find(servers, { address: selectedTab.server });
+
+		if (!server) {
 			selectedTab = {};
+			this.trigger(selectedTab);
+		} else if (!selectedTab.channel) {
+			selectedTab.name = server.name;
 			this.trigger(selectedTab);
 		}
 	},

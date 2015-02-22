@@ -45,7 +45,11 @@ messageActions.command.listen(function(line, channel, server) {
 		case 'topic':
 			var topic = channelStore.getTopic(server, channel);
 			if (topic) {
-				messageActions.inform(topic, server, channel);
+				messageActions.add({
+					server: server,
+					to: channel,
+					message: topic
+				});
 			} else {
 				messageActions.inform('No topic set', server, channel);
 			}
