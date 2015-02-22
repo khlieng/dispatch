@@ -46,13 +46,21 @@ var UserList = React.createClass({
 			});
 		}
 
-		return (
-			<div className="userlist" style={style}>
-				<Infinite containerHeight={this.state.height} elementHeight={24}>
-					{users}
-				</Infinite>
-			</div>
-		);
+		if (users.length !== 1) {
+			return (
+				<div className="userlist" style={style}>
+					<Infinite containerHeight={this.state.height} elementHeight={24}>
+						{users}
+					</Infinite>
+				</div>
+			);
+		} else {
+			return (
+				<div className="userlist" style={style}>
+					<div>{users}</div>
+				</div>
+			);
+		}		
 	}
 });
 
