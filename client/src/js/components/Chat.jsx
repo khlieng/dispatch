@@ -12,12 +12,14 @@ var Chat = React.createClass({
     mixins: [Router.State],
 
     componentWillMount: function() {
-        var p = this.getParams();
+        if (!window.loaded) {
+            var p = this.getParams();
 
-        if (p.channel) {
-            tabActions.select(p.server, '#' + p.channel);
-        } else if (p.server) {
-            tabActions.select(p.server);
+            if (p.channel) {
+                tabActions.select(p.server, '#' + p.channel);
+            } else if (p.server) {
+                tabActions.select(p.server);
+            }
         }
     },
 

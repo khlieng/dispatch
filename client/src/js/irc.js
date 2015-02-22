@@ -6,6 +6,7 @@ var channelActions = require('./actions/channel');
 var messageActions = require('./actions/message');
 var serverActions = require('./actions/server');
 var routeActions = require('./actions/route');
+var tabActions = require('./actions/tab');
 
 socket.on('join', function(data) {
 	channelActions.addUser(data.user, data.server, data.channels[0]);
@@ -71,9 +72,12 @@ socket.on('whois', function(data) {
 });
 
 socket.on('servers', function(data) {
+	window.loaded = true;
+
 	if (data === null) {
 		routeActions.navigate('connect');
 	}
+
 	serverActions.load(data);
 });
 

@@ -5,6 +5,7 @@ var serverStore = require('./server');
 var actions = require('../actions/tab');
 var channelActions = require('../actions/channel');
 var serverActions = require('../actions/server');
+var routeActions = require('../actions/route');
 
 var selectedTab = {};
 
@@ -14,8 +15,9 @@ var selectedTabStore = Reflux.createStore({
 		this.listenTo(channelActions.part, 'part');
 		this.listenTo(serverActions.disconnect, 'disconnect');
 		this.listenTo(channelActions.addUser, 'userAdded');
-		//this.listenTo(channelActions.load, 'loadChannels');
+		this.listenTo(channelActions.load, 'loadChannels');
 		this.listenTo(serverActions.load, 'loadServers');
+		this.listenTo(routeActions.navigate, 'navigate');
 	},
 
 	select: function(server, channel = null) {
@@ -60,7 +62,18 @@ var selectedTabStore = Reflux.createStore({
 	},
 
 	loadChannels: function(channels) {
-		
+		// Handle double hashtag channel names, only a single hashtag
+		// gets added to the channel in the URL on page load
+		_.each(channels, (channel) => {
+			if (channel.server === selectedTab.server &&
+				channel.name !== selectedTab.channel &&
+				channel.name.indexOf(selectedTab.channel) !== -1) {
+				selectedTab.channel = channel.name;
+				selectedTab.name = channel.name;
+
+				this.trigger(selectedTab);
+			}
+		});
 	},
 
 	loadServers: function(servers) {
@@ -71,6 +84,14 @@ var selectedTabStore = Reflux.createStore({
 			this.trigger(selectedTab);
 		} else if (!selectedTab.channel) {
 			selectedTab.name = server.name;
+			this.trigger(selectedTab);
+		}
+	},
+
+	navigate: function(route) {
+		if (route.indexOf('.') === -1) {
+			selectedTab.server = null;
+			selectedTab.channel = null;
 			this.trigger(selectedTab);
 		}
 	},

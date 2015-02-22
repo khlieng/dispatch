@@ -8,7 +8,10 @@ var tabActions = Reflux.createActions([
 
 tabActions.select.preEmit = (server, channel) => {
 	if (channel) {
-		routeActions.navigate('/' + server + '/' + channel.slice(1))
+		while (channel[0] === '#') {
+			channel = channel.slice(1);
+		}
+		routeActions.navigate('/' + server + '/' + channel);
 	} else {
 		routeActions.navigate('/' + server);
 	}
