@@ -36,6 +36,7 @@ var selectedTabStore = Reflux.createStore({
 	part: function(channels, server) {
 		if (server === selectedTab.server && 
 			channels.indexOf(selectedTab.channel) !== -1) {
+			selectedTab.server = null;
 			selectedTab.channel = null;
 			selectedTab.name = null;
 			this.trigger(selectedTab);

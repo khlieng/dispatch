@@ -19,10 +19,16 @@ exports.timestamp = function(date) {
 exports.wrapMessages = function(messages, width, charWidth, indent = 0) {
 	for (var j = 0, llen = messages.length; j < llen; j++) {
 		var message = messages[j];
+		var lineWidth = (6 + (message.from ? message.from.length + 1 : 0)) * charWidth;
+
+		if (lineWidth + message.message.length * charWidth < width) {
+			message.lines = [message.message];
+			continue;
+		}
+
 		var words = message.message.split(' ');
 		var line = '';
 		var wrapped = [];
-		var lineWidth = (6 + (message.from ? message.from.length + 1 : 0)) * charWidth;
 		var wordCount = 0;
 		var hasWrapped = false;
 
