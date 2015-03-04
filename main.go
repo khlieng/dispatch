@@ -6,9 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/julienschmidt/httprouter"
-	"golang.org/x/net/websocket"
-
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"
 	"github.com/khlieng/name_pending/storage"
 )
 

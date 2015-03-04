@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"golang.org/x/net/websocket"
-
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"
 	"github.com/khlieng/name_pending/storage"
 )
 

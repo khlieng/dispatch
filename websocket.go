@@ -1,7 +1,7 @@
 package main
 
 import (
-	"golang.org/x/net/websocket"
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"
 )
 
 type WebSocket struct {

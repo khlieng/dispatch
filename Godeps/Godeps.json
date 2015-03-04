@@ -1,0 +1,19 @@
+{
+	"ImportPath": "github.com/khlieng/name_pending",
+	"GoVersion": "go1.4",
+	"Deps": [
+		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.0-43-gcf33c9e",
+			"Rev": "cf33c9e0ca0a23509b8bb8edfc63e4776bb1a330"
+		},
+		{
+			"ImportPath": "github.com/julienschmidt/httprouter",
+			"Rev": "b428fda53bb0a764fea9c76c9413512eda291dec"
+		},
+		{
+			"ImportPath": "golang.org/x/net/websocket",
+			"Rev": "3d87fd621ca9a824c5cff17216ce44769456cb3f"
+		}
+	]
+}
