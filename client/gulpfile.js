@@ -23,14 +23,14 @@ if (argv.production) {
 gulp.task('html', function() {
     gulp.src('./src/*.html')
         .pipe(minifyHTML())
-        .pipe(gulp.dest('./dist'));
+        .pipe(gulp.dest('../bin/assets'));
 });
 
 gulp.task('css', function() {
     gulp.src('./src/css/*.css')
         .pipe(autoprefixer())
         .pipe(minifyCSS())
-        .pipe(gulp.dest('./dist/css'));
+        .pipe(gulp.dest('../bin/assets/css'));
 });
 
 gulp.task('js', function() {
@@ -60,7 +60,7 @@ function js(watch) {
         return stream
             .pipe(source('bundle.js'))
             .pipe(gulpif(argv.production, streamify(uglify())))
-            .pipe(gulp.dest('./dist'));
+            .pipe(gulp.dest('../bin/assets'));
     };
 
     bundler.on('time', function(time) {
@@ -72,23 +72,23 @@ function js(watch) {
 
 gulp.task('fonts', function() {
     gulp.src('./src/font/*')
-        .pipe(gulp.dest('./dist/font'));
+        .pipe(gulp.dest('../bin/assets/font'));
 });
 
 gulp.task('gzip', ['html', 'css', 'js', 'fonts'], function() {
-    gulp.src('./dist/**/!(*.gz)')
+    gulp.src('../bin/assets/**/!(*.gz)')
         .pipe(gzip())
-        .pipe(gulp.dest('./dist'));
+        .pipe(gulp.dest('../bin/assets'));
 });
 
 gulp.task('gzip:watch', function() {
-    gulp.src('./dist/**/*.{html,css,js}')
+    gulp.src('../bin/assets/**/*.{html,css,js}')
         .pipe(gzip())
-        .pipe(gulp.dest('./dist'));
+        .pipe(gulp.dest('../bin/assets'));
 });
 
 gulp.task('watch', ['default'], function() {
-    gulp.watch('./dist/**/*.{html,css,js}', ['gzip:watch'])
+    gulp.watch('../bin/assets/**/*.{html,css,js}', ['gzip:watch'])
     gulp.watch('./src/*.html', ['html']);
     gulp.watch('./src/css/*.css', ['css']);
     return js(true);
