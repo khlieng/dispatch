@@ -4,7 +4,7 @@ Web-based IRC client in Go.
 ## Building
 
 #### Requirements
-* [Go](http://golang.org/doc/code.html)
+* [Go](http://golang.org/doc/install)
 * [Node.js + npm](http://nodejs.org/download/)
 
 #### Get the source
