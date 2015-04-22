@@ -21,16 +21,16 @@ if (argv.production) {
 }
 
 gulp.task('html', function() {
-    gulp.src('./src/*.html')
+    gulp.src('src/*.html')
         .pipe(minifyHTML())
-        .pipe(gulp.dest('../bin/assets'));
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('css', function() {
-    gulp.src('./src/css/*.css')
+    gulp.src('src/css/*.css')
         .pipe(autoprefixer())
         .pipe(minifyCSS())
-        .pipe(gulp.dest('../bin/assets/css'));
+        .pipe(gulp.dest('dist/css'));
 });
 
 gulp.task('js', function() {
@@ -60,7 +60,7 @@ function js(watch) {
         return stream
             .pipe(source('bundle.js'))
             .pipe(gulpif(argv.production, streamify(uglify())))
-            .pipe(gulp.dest('../bin/assets'));
+            .pipe(gulp.dest('dist'));
     };
 
     bundler.on('time', function(time) {
@@ -71,26 +71,26 @@ function js(watch) {
 }
 
 gulp.task('fonts', function() {
-    gulp.src('./src/font/*')
-        .pipe(gulp.dest('../bin/assets/font'));
+    gulp.src('src/font/*')
+        .pipe(gulp.dest('dist/font'));
 });
 
 gulp.task('gzip', ['html', 'css', 'js', 'fonts'], function() {
-    gulp.src('../bin/assets/**/!(*.gz)')
+    gulp.src('dist/**/!(*.gz)')
         .pipe(gzip())
-        .pipe(gulp.dest('../bin/assets'));
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('gzip:watch', function() {
-    gulp.src('../bin/assets/**/*.{html,css,js}')
+    gulp.src('dist/**/*.{html,css,js}')
         .pipe(gzip())
-        .pipe(gulp.dest('../bin/assets'));
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('watch', ['default'], function() {
-    gulp.watch('../bin/assets/**/*.{html,css,js}', ['gzip:watch'])
-    gulp.watch('./src/*.html', ['html']);
-    gulp.watch('./src/css/*.css', ['css']);
+    gulp.watch('dist/**/*.{html,css,js}', ['gzip:watch'])
+    gulp.watch('src/*.html', ['html']);
+    gulp.watch('src/css/*.css', ['css']);
     return js(true);
 });
 
