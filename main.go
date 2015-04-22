@@ -94,7 +94,7 @@ func main() {
 
 	channelStore = storage.NewChannelStore()
 	sessions = make(map[string]*Session)
-	fs = http.FileServer(http.Dir("assets"))
+	fs = http.FileServer(assetFS())
 
 	files = []File{
 		File{"/bundle.js", "text/javascript"},
