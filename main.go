@@ -94,7 +94,7 @@ func main() {
 
 	channelStore = storage.NewChannelStore()
 	sessions = make(map[string]*Session)
-	fs = http.FileServer(assetFS())
+	fs = http.FileServer(BindataFileSystem{})
 
 	files = []File{
 		File{"/bundle.js", "text/javascript"},

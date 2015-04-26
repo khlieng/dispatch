@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/boltdb/bolt"
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 type Server struct {

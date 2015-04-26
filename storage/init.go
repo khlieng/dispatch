@@ -6,7 +6,7 @@ import (
 	"os/user"
 	"path"
 
-	"github.com/boltdb/bolt"
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 var db *bolt.DB

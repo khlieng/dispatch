@@ -18,6 +18,7 @@ name_pending
 
 ```bash
 cd $GOPATH/src/github.com/khlieng/name_pending
+
 go install
 ```
 
@@ -29,13 +30,11 @@ go install
 ```bash
 npm install -g gulp
 go get github.com/jteeuwen/go-bindata/...
-go get github.com/elazarl/go-bindata-assetfs/...
-
 cd $GOPATH/src/github.com/khlieng/name_pending/client
 npm install
+
 gulp -p
-go-bindata-assetfs -nomemcopy dist/...
-mv bindata_assetfs.go ../bindata.go
+go-bindata -nomemcopy -o ../bindata.go dist/...
 
 # Rebuild the server :)
 ```
