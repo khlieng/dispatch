@@ -16,7 +16,7 @@ type Session struct {
 	wsLock sync.Mutex
 	out    chan []byte
 
-	user storage.User
+	user *storage.User
 }
 
 func NewSession() *Session {

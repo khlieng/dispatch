@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"
 	"github.com/khlieng/name_pending/storage"
@@ -84,25 +85,32 @@ func handleWS(ws *websocket.Conn) {
 				irc.Password = data.Password
 				irc.Realname = data.Realname
 
-				err := irc.Connect(data.Server)
-				if err != nil {
-					session.sendError(err, irc.Host)
-					log.Println(err)
+				if idx := strings.Index(data.Server, ":"); idx < 0 {
+					session.setIRC(data.Server, irc)
 				} else {
-					session.setIRC(irc.Host, irc)
-
-					go handleMessages(irc, session)
-
-					session.user.AddServer(storage.Server{
-						Name:     data.Name,
-						Address:  irc.Host,
-						TLS:      data.TLS,
-						Password: data.Password,
-						Nick:     data.Nick,
-						Username: data.Username,
-						Realname: data.Realname,
-					})
+					session.setIRC(data.Server[:idx], irc)
 				}
+
+				go func() {
+					err := irc.Connect(data.Server)
+					if err != nil {
+						session.deleteIRC(irc.Host)
+						session.sendError(err, irc.Host)
+						log.Println(err)
+					} else {
+						go handleMessages(irc, session)
+
+						session.user.AddServer(storage.Server{
+							Name:     data.Name,
+							Address:  irc.Host,
+							TLS:      data.TLS,
+							Password: data.Password,
+							Nick:     data.Nick,
+							Username: data.Username,
+							Realname: data.Realname,
+						})
+					}
+				}()
 			} else {
 				log.Println(addr, "already connected to", data.Server)
 			}

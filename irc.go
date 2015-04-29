@@ -227,8 +227,8 @@ func (i *IRC) writef(format string, a ...interface{}) {
 
 func (i *IRC) send() {
 	i.ready.Wait()
-	for message := range i.out {
-		i.conn.Write([]byte(message))
+	for {
+		i.conn.Write([]byte(<-i.out))
 	}
 }
 

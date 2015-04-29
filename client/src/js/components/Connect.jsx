@@ -19,7 +19,7 @@ var Connect = React.createClass({
 		var channels = _.filter(_.map(e.target.channels.value.split(','), _.trim));
 		var opts = {
 			name: e.target.name.value.trim(),
-			ssl: e.target.ssl.checked
+			tls: e.target.ssl.checked
 		};
 
 		if (this.state.showOptionals) {

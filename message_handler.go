@@ -88,6 +88,10 @@ func handleMessages(irc *IRC, session *Session) {
 				})
 			}
 
+			if msg.Params[0] != "*" {
+				session.user.LogMessage(irc.Host, msg.Prefix, msg.Params[0], msg.Trailing)
+			}
+
 		case QUIT:
 			user := msg.Prefix
 

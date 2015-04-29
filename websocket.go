@@ -18,7 +18,7 @@ func NewWebSocket(ws *websocket.Conn) *WebSocket {
 }
 
 func (w *WebSocket) write() {
-	for data := range w.Out {
-		w.conn.Write(data)
+	for {
+		w.conn.Write(<-w.Out)
 	}
 }

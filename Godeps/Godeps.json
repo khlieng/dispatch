@@ -1,19 +1,72 @@
 {
 	"ImportPath": "github.com/khlieng/name_pending",
 	"GoVersion": "go1.4",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/blevesearch/bleve",
+			"Rev": "16f538d7b76dd85c935a3104c390307cae5cbf79"
+		},
+		{
+			"ImportPath": "github.com/blevesearch/go-porterstemmer",
+			"Comment": "v1.0.1-9-g23a2c8e",
+			"Rev": "23a2c8e5cf1f380f27722c6d2ae8896431dc7d0e"
+		},
+		{
+			"ImportPath": "github.com/blevesearch/segment",
+			"Rev": "9588637ce3caba8516208ccc17193ddedd741418"
+		},
 		{
 			"ImportPath": "github.com/boltdb/bolt",
 			"Comment": "v1.0-43-gcf33c9e",
 			"Rev": "cf33c9e0ca0a23509b8bb8edfc63e4776bb1a330"
 		},
 		{
+			"ImportPath": "github.com/cznic/b",
+			"Rev": "c4adf3a58579a2d57cd3097f455dcdf75edcdfd8"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "655cdfa588ea190e901bc5590e65d5621688847c"
+		},
+		{
 			"ImportPath": "github.com/julienschmidt/httprouter",
 			"Rev": "b428fda53bb0a764fea9c76c9413512eda291dec"
 		},
 		{
+			"ImportPath": "github.com/ryszard/goskiplist/skiplist",
+			"Rev": "2dfbae5fcf46374f166f8969cb07e167f1be6273"
+		},
+		{
+			"ImportPath": "github.com/steveyen/gtreap",
+			"Rev": "72cd76f34c91f8d64a031af97b499e4a0b1a6e0c"
+		},
+		{
+			"ImportPath": "github.com/syndtr/goleveldb/leveldb",
+			"Rev": "4875955338b0a434238a31165cb87255ab6e9e4a"
+		},
+		{
+			"ImportPath": "github.com/syndtr/gosnappy/snappy",
+			"Rev": "156a073208e131d7d2e212cb749feae7c339e846"
+		},
+		{
+			"ImportPath": "github.com/willf/bitset",
+			"Comment": "v1.0.0-17-g4b22041",
+			"Rev": "4b220417a489359f934045d0509d941a7a2a1038"
+		},
+		{
 			"ImportPath": "golang.org/x/net/websocket",
 			"Rev": "3d87fd621ca9a824c5cff17216ce44769456cb3f"
+		},
+		{
+			"ImportPath": "golang.org/x/text/transform",
+			"Rev": "c92eb3cd6e70951a111680995e651ea4b2c35539"
+		},
+		{
+			"ImportPath": "golang.org/x/text/unicode/norm",
+			"Rev": "c92eb3cd6e70951a111680995e651ea4b2c35539"
 		}
 	]
 }

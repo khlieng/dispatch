@@ -8,6 +8,8 @@ import (
 
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"
+
+	"github.com/khlieng/name_pending/args"
 	"github.com/khlieng/name_pending/storage"
 )
 
@@ -26,35 +28,37 @@ type File struct {
 
 func reconnect() {
 	for _, user := range storage.LoadUsers() {
+		session := NewSession()
+		session.user = user
+		sessions[user.UUID] = session
+		go session.write()
+
 		channels := user.GetChannels()
 
 		for _, server := range user.GetServers() {
-			session := NewSession()
-			session.user = user
-			sessions[user.UUID] = session
-
 			irc := NewIRC(server.Nick, server.Username)
 			irc.TLS = server.TLS
 			irc.Password = server.Password
 			irc.Realname = server.Realname
 
-			err := irc.Connect(server.Address)
-			if err != nil {
-				log.Println(err)
-			} else {
-				session.setIRC(irc.Host, irc)
+			go func() {
+				err := irc.Connect(server.Address)
+				if err != nil {
+					log.Println(err)
+				} else {
+					session.setIRC(irc.Host, irc)
 
-				go session.write()
-				go handleMessages(irc, session)
+					go handleMessages(irc, session)
 
-				var joining []string
-				for _, channel := range channels {
-					if channel.Server == server.Address {
-						joining = append(joining, channel.Name)
+					var joining []string
+					for _, channel := range channels {
+						if channel.Server == server.Address {
+							joining = append(joining, channel.Name)
+						}
 					}
+					irc.Join(joining...)
 				}
-				irc.Join(joining...)
-			}
+			}()
 		}
 	}
 }
@@ -106,7 +110,9 @@ func main() {
 		File{"/font/fontello.woff", "application/font-woff"},
 	}
 
-	//reconnect()
+	if !args.Development {
+		reconnect()
+	}
 
 	router := httprouter.New()
 
