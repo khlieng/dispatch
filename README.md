@@ -34,7 +34,6 @@ cd $GOPATH/src/github.com/khlieng/name_pending/client
 npm install
 
 gulp -p
-go-bindata -nomemcopy -o ../bindata.go dist/...
 
 # Rebuild the server :)
 ```
