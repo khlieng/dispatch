@@ -31,8 +31,8 @@ type File struct {
 	ContentType string
 }
 
-func Run(port int, development bool) {
-	defer storage.Cleanup()
+func Run(port int) {
+	defer storage.Close()
 
 	channelStore = storage.NewChannelStore()
 	sessions = make(map[string]*Session)
@@ -48,9 +48,7 @@ func Run(port int, development bool) {
 		File{"/font/fontello.woff", "application/font-woff"},
 	}
 
-	if !development {
-		reconnect()
-	}
+	reconnect()
 
 	router := httprouter.New()
 

@@ -20,14 +20,17 @@ var (
 	bucketMessages = []byte("Messages")
 )
 
-func Initialize(clean bool) {
-	var err error
-	currentUser, _ := user.Current()
-	appDir = path.Join(currentUser.HomeDir, ".name_pending")
-
-	if clean {
-		os.RemoveAll(appDir)
+func init() {
+	currentUser, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	appDir = path.Join(currentUser.HomeDir, ".name_pending")
+}
+
+func Initialize() {
+	var err error
 
 	os.Mkdir(appDir, 0777)
 	os.Mkdir(path.Join(appDir, "logs"), 0777)
@@ -46,6 +49,10 @@ func Initialize(clean bool) {
 	})
 }
 
-func Cleanup() {
+func Close() {
 	db.Close()
+}
+
+func Clear() {
+	os.RemoveAll(appDir)
 }

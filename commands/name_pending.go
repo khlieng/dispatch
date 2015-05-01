@@ -9,20 +9,20 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
-		Use:  "name_pending",
-		Long: "Web-based IRC client in Go.",
+		Use:   "name_pending",
+		Short: "Web-based IRC client in Go.",
 		Run: func(cmd *cobra.Command, args []string) {
-			storage.Initialize(development)
-			server.Run(port, development)
+			storage.Initialize()
+			server.Run(port)
 		},
 	}
 
-	development bool
-	port        int
+	port int
 )
 
 func init() {
-	rootCmd.Flags().BoolVarP(&development, "dev", "d", false, "development mode")
+	rootCmd.AddCommand(clearCmd)
+
 	rootCmd.Flags().IntVarP(&port, "port", "p", 1337, "port to listen on")
 }
 
