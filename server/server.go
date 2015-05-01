@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"
 
 	"github.com/khlieng/name_pending/storage"
 )
@@ -19,6 +19,11 @@ var (
 	sessionLock  sync.Mutex
 	fs           http.Handler
 	files        []File
+
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
 )
 
 type File struct {
@@ -49,11 +54,51 @@ func Run(port int, development bool) {
 
 	router := httprouter.New()
 
-	router.Handler("GET", "/ws", websocket.Handler(handleWS))
+	router.HandlerFunc("GET", "/ws", upgradeWS)
 	router.NotFound = serveFiles
 
 	log.Println("Listening on port", port)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), router))
+}
+
+func upgradeWS(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	handleWS(conn)
+}
+
+func serveFiles(w http.ResponseWriter, r *http.Request) {
+	var ext string
+
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		ext = ".gz"
+	}
+
+	if r.URL.Path == "/" {
+		w.Header().Set("Content-Type", "text/html")
+		r.URL.Path = "/index.html" + ext
+		fs.ServeHTTP(w, r)
+		return
+	}
+
+	for _, file := range files {
+		if strings.HasSuffix(r.URL.Path, file.Path) {
+			w.Header().Set("Content-Type", file.ContentType)
+			r.URL.Path = file.Path + ext
+			fs.ServeHTTP(w, r)
+			return
+		}
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	r.URL.Path = "/index.html" + ext
+
+	fs.ServeHTTP(w, r)
 }
 
 func reconnect() {
@@ -91,34 +136,4 @@ func reconnect() {
 			}()
 		}
 	}
-}
-
-func serveFiles(w http.ResponseWriter, r *http.Request) {
-	var ext string
-
-	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-		w.Header().Set("Content-Encoding", "gzip")
-		ext = ".gz"
-	}
-
-	if r.URL.Path == "/" {
-		w.Header().Set("Content-Type", "text/html")
-		r.URL.Path = "/index.html" + ext
-		fs.ServeHTTP(w, r)
-		return
-	}
-
-	for _, file := range files {
-		if strings.HasSuffix(r.URL.Path, file.Path) {
-			w.Header().Set("Content-Type", file.ContentType)
-			r.URL.Path = file.Path + ext
-			fs.ServeHTTP(w, r)
-			return
-		}
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	r.URL.Path = "/index.html" + ext
-
-	fs.ServeHTTP(w, r)
 }

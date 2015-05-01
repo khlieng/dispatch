@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
+
 	"github.com/khlieng/name_pending/storage"
 )
 

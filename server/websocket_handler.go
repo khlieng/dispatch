@@ -5,7 +5,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
+
 	"github.com/khlieng/name_pending/storage"
 )
 
@@ -16,12 +17,12 @@ func handleWS(ws *websocket.Conn) {
 	var UUID string
 	var req WSRequest
 
-	addr := ws.Request().RemoteAddr
+	addr := ws.RemoteAddr().String()
 
 	log.Println(addr, "connected")
 
 	for {
-		err := websocket.JSON.Receive(ws, &req)
+		err := ws.ReadJSON(&req)
 		if err != nil {
 			if session != nil {
 				session.deleteWS(addr)

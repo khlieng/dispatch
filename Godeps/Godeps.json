@@ -32,6 +32,10 @@
 			"Rev": "655cdfa588ea190e901bc5590e65d5621688847c"
 		},
 		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "ecff5aabe41f13b4cdf897e3c0c9bbccbe552a29"
+		},
+		{
 			"ImportPath": "github.com/inconshreveable/mousetrap",
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
 		},
@@ -67,10 +71,6 @@
 			"ImportPath": "github.com/willf/bitset",
 			"Comment": "v1.0.0-17-g4b22041",
 			"Rev": "4b220417a489359f934045d0509d941a7a2a1038"
-		},
-		{
-			"ImportPath": "golang.org/x/net/websocket",
-			"Rev": "3d87fd621ca9a824c5cff17216ce44769456cb3f"
 		},
 		{
 			"ImportPath": "golang.org/x/text/transform",

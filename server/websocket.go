@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
 )
 
 type WebSocket struct {
@@ -19,6 +19,6 @@ func NewWebSocket(ws *websocket.Conn) *WebSocket {
 
 func (w *WebSocket) write() {
 	for {
-		w.conn.Write(<-w.Out)
+		w.conn.WriteMessage(websocket.TextMessage, <-w.Out)
 	}
 }
