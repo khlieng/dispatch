@@ -7,8 +7,6 @@ import (
 	"path"
 
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
-
-	"github.com/khlieng/name_pending/args"
 )
 
 var (
@@ -22,12 +20,12 @@ var (
 	bucketMessages = []byte("Messages")
 )
 
-func init() {
+func Initialize(clean bool) {
 	var err error
 	currentUser, _ := user.Current()
 	appDir = path.Join(currentUser.HomeDir, ".name_pending")
 
-	if args.Development {
+	if clean {
 		os.RemoveAll(appDir)
 	}
 

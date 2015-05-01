@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/net/websocket"

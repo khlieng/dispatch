@@ -32,12 +32,24 @@
 			"Rev": "655cdfa588ea190e901bc5590e65d5621688847c"
 		},
 		{
+			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
 			"ImportPath": "github.com/julienschmidt/httprouter",
 			"Rev": "b428fda53bb0a764fea9c76c9413512eda291dec"
 		},
 		{
 			"ImportPath": "github.com/ryszard/goskiplist/skiplist",
 			"Rev": "2dfbae5fcf46374f166f8969cb07e167f1be6273"
+		},
+		{
+			"ImportPath": "github.com/spf13/cobra",
+			"Rev": "3ee9552eebbb5db27cb81abcae66c6f1430cad29"
+		},
+		{
+			"ImportPath": "github.com/spf13/pflag",
+			"Rev": "32bfad653e29e893e4ed3812fdc0294a05126c08"
 		},
 		{
 			"ImportPath": "github.com/steveyen/gtreap",
