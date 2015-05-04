@@ -75,7 +75,7 @@ socket.on('servers', function(data) {
 	window.loaded = true;
 
 	if (data === null) {
-		routeActions.navigate('connect');
+		routeActions.navigate('connect', true);
 	}
 
 	serverActions.load(data);

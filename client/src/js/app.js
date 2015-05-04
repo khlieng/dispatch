@@ -15,7 +15,7 @@ var routeActions = require('./actions/route');
 
 var uuid = localStorage.uuid;
 if (!uuid) {
-	routeActions.navigate('connect');
+	routeActions.navigate('connect', true);
 	localStorage.uuid = uuid = util.UUID();
 }
 

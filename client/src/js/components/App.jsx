@@ -13,8 +13,12 @@ var App = React.createClass({
 		Reflux.listenTo(routeActions.navigate, 'navigate')
 	],
 
-	navigate: function(path) {
-		this.transitionTo(path);
+	navigate: function(path, replace) {
+		if (!replace) {
+			this.transitionTo(path);
+		} else {
+			this.replaceWith(path);
+		}
 	},
 
 	render: function() {
