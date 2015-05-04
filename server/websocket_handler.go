@@ -68,6 +68,8 @@ func handleWS(ws *websocket.Conn) {
 				sessions[UUID] = session
 				sessionLock.Unlock()
 
+				session.sendJSON("servers", nil)
+
 				go session.write()
 			}
 
