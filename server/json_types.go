@@ -2,6 +2,8 @@ package server
 
 import (
 	"encoding/json"
+
+	"github.com/khlieng/name_pending/storage"
 )
 
 type WSRequest struct {
@@ -109,6 +111,18 @@ type WhoisReply struct {
 type Away struct {
 	Server  string `json:"server"`
 	Message string `json:"message"`
+}
+
+type SearchRequest struct {
+	Server  string `json:"server"`
+	Channel string `json:"channel"`
+	Phrase  string `json:"phrase"`
+}
+
+type SearchResult struct {
+	Server  string            `json:"server"`
+	Channel string            `json:"channel"`
+	Results []storage.Message `json:"results"`
 }
 
 type Error struct {

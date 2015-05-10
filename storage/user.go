@@ -235,11 +235,11 @@ func (u *User) GetMessages(server, channel string, count int, fromID uint64) ([]
 
 func (u *User) SearchMessages(server, channel, phrase string) ([]Message, error) {
 	serverQuery := bleve.NewMatchQuery(server)
-	serverQuery.SetField("Server")
+	serverQuery.SetField("server")
 	channelQuery := bleve.NewMatchQuery(channel)
-	channelQuery.SetField("To")
+	channelQuery.SetField("to")
 	contentQuery := bleve.NewMatchQuery(phrase)
-	contentQuery.SetField("Content")
+	contentQuery.SetField("content")
 
 	query := bleve.NewBooleanQuery([]bleve.Query{serverQuery, channelQuery, contentQuery}, nil, nil)
 
@@ -249,7 +249,9 @@ func (u *User) SearchMessages(server, channel, phrase string) ([]Message, error)
 		return nil, err
 	}
 
-	var messages []Message
+	log.Printf("%.3fms\n", searchResults.Took.Seconds()*1000)
+
+	messages := []Message{}
 	u.messageLog.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketMessages)
 

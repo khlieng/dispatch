@@ -7,6 +7,7 @@ var messageActions = require('./actions/message');
 var serverActions = require('./actions/server');
 var routeActions = require('./actions/route');
 var tabActions = require('./actions/tab');
+var searchActions = require('./actions/search');
 
 socket.on('join', function(data) {
 	channelActions.addUser(data.user, data.server, data.channels[0]);
@@ -83,6 +84,10 @@ socket.on('servers', function(data) {
 
 socket.on('channels', function(data) {
 	channelActions.load(data);
+});
+
+socket.on('search', function(data) {
+	searchActions.searchDone(data.results);
 });
 
 serverActions.connect.listen(function(server, nick, opts) {

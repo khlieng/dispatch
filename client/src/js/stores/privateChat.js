@@ -34,7 +34,7 @@ var privateChatStore = Reflux.createStore({
 	},
 
 	close: function(server, nick) {
-		delete privateChat[server][nick];
+		delete privateChats[server][nick];
 		this.trigger(privateChats);
 	},
 

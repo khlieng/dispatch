@@ -86,9 +86,8 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .side-buttons i {
 	color: #999;
-	margin: 5px;
+	margin: 25px;
 	line-height: 40px;
-	width: 40px;
 	cursor: pointer;
 	font-size: 20px;
 }
@@ -171,38 +170,75 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	position: fixed;
 	left: 200px;
 	top: 0;
-	right: 0;
+	right: 200px;
 	height: 50px;
-	padding: 0 15px;
+	padding-left: 15px;
 	line-height: 50px;
 	border-bottom: 1px solid #DDD;
+	display: flex;
+	font-size: 20px;
 }
 
-.chat-title-bar div {
-	position: absolute;
-	left: 0;
-	right: 100px;
-	white-space: nowrap;
-	overflow: hidden;
+.chat-title-bar i {
+	padding: 0 15px;
+	cursor: pointer;
+}
+
+.button-leave {
+	border-left: 1px solid #DDD;
+}
+
+.button-leave:hover {
+	background: #DDD;
 }
 
 .chat-title {
-	margin-left: 15px;
 	font-size: 28px;
+	flex: 1;
 }
 
-.chat-topic {
-	display: none;
-	font: 16px Droid Sans Mono, monospace;
+.userlist-bar {
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 200px;
+	height: 50px;
+	border-left: 1px solid #DDD;
+	border-bottom: 1px solid #DDD;
 	line-height: 50px;
-	vertical-align: top;
-	color: #222;
-	margin-left: 15px;
+	text-align: center;
+	padding: 0 15px;
+	font-family: Montserrat, sans-serif;
 }
 
-.chat-usercount {
-	font-size: 20px;
-	float: right;
+.userlist-bar i {
+	margin-right: 3px;
+}
+
+.search {
+	display: none;
+	position: fixed;
+	left: 200px;
+	top: 50px;
+	bottom: 50px;
+	right: 200px;
+	z-index: 2;
+	background: #f0f0f0;
+}
+
+.search-input {
+	width: 100%;
+	padding: 15px;
+	border-bottom: 1px solid #DDD;
+}
+
+.search-results {
+	position: absolute;
+	top: 50px;
+	bottom: 0;
+	width: 100%;
+	overflow: auto;
+	padding: 10px 15px;
 }
 
 .messagebox {

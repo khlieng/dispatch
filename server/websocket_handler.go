@@ -202,6 +202,25 @@ func handleWS(ws *websocket.Conn) {
 			if irc, ok := session.getIRC(data.Server); ok {
 				irc.Away(data.Message)
 			}
+
+		case "search":
+			go func() {
+				var data SearchRequest
+
+				json.Unmarshal(req.Request, &data)
+
+				results, err := session.user.SearchMessages(data.Server, data.Channel, data.Phrase)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+
+				session.sendJSON("search", SearchResult{
+					Server:  data.Server,
+					Channel: data.Channel,
+					Results: results,
+				})
+			}()
 		}
 	}
 }

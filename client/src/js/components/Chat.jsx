@@ -3,6 +3,7 @@ var Reflux = require('reflux');
 var Router = require('react-router');
 
 var ChatTitle = require('./ChatTitle.jsx');
+var Search = require('./Search.jsx');
 var MessageBox = require('./MessageBox.jsx');
 var MessageInput = require('./MessageInput.jsx');
 var UserList = require('./UserList.jsx');
@@ -27,6 +28,7 @@ var Chat = React.createClass({
         return (
             <div>
                 <ChatTitle />
+                <Search />
                 <MessageBox indent={window.messageIndent} />
                 <MessageInput />
                 <UserList />

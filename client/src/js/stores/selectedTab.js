@@ -6,6 +6,7 @@ var actions = require('../actions/tab');
 var channelActions = require('../actions/channel');
 var serverActions = require('../actions/server');
 var routeActions = require('../actions/route');
+var privateChatActions = require('../actions/privateChat');
 
 var selectedTab = {};
 
@@ -13,6 +14,7 @@ var selectedTabStore = Reflux.createStore({
 	init: function() {
 		this.listenToMany(actions);
 		this.listenTo(channelActions.part, 'part');
+		this.listenTo(privateChatActions.close, 'close');
 		this.listenTo(serverActions.disconnect, 'disconnect');
 		this.listenTo(channelActions.addUser, 'userAdded');
 		this.listenTo(channelActions.load, 'loadChannels');
@@ -36,6 +38,16 @@ var selectedTabStore = Reflux.createStore({
 	part: function(channels, server) {
 		if (server === selectedTab.server && 
 			channels.indexOf(selectedTab.channel) !== -1) {
+			selectedTab.server = null;
+			selectedTab.channel = null;
+			selectedTab.name = null;
+			this.trigger(selectedTab);
+		}
+	},
+
+	close: function(server, nick) {
+		if (server === selectedTab.server &&
+			nick === selectedTab.channel) {
 			selectedTab.server = null;
 			selectedTab.channel = null;
 			selectedTab.name = null;
