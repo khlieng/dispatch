@@ -32,6 +32,8 @@ func init() {
 func Initialize() {
 	var err error
 
+	log.Println("Storing data at", appDir)
+
 	os.Mkdir(appDir, 0777)
 	os.Mkdir(path.Join(appDir, "logs"), 0777)
 
