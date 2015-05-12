@@ -25,6 +25,6 @@
     "react-router": "0.12.0",
     "react": "0.12.2",
     "react-infinite": "0.2.3",
-    "autolinker": "~0.15.2"
+    "autolinker": "khlieng/Autolinker.js"
   }
 }

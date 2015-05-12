@@ -84,9 +84,11 @@ var MessageBox = React.createClass({
 			lines.push(<MessageHeader key={key} message={message} />);
 
 			for (var i = 1; i < message.lines.length; i++) {
+				var line = Autolinker.link(message.lines[i], { keepOriginalText: true });
+
 				lines.push(
 					<p key={key + '-' + i} className={messageClass} style={innerStyle}>
-						<span dangerouslySetInnerHTML={{ __html: Autolinker.link(message.lines[i]) }}></span>
+						<span dangerouslySetInnerHTML={{ __html: line }}></span>
 					</p>
 				);
 			}

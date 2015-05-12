@@ -18,6 +18,7 @@ var MessageHeader = React.createClass({
 		var message = this.props.message;
 		var sender = null;
 		var messageClass = 'message';
+		var line = Autolinker.link(message.lines[0], { keepOriginalText: true });
 
 		if (message.from) {
 			sender = (
@@ -38,7 +39,7 @@ var MessageHeader = React.createClass({
 			<p className={messageClass}>
 				<span className="message-time">{util.timestamp(message.time)}</span>
 				{sender}
-				<span dangerouslySetInnerHTML={{ __html: ' ' + Autolinker.link(message.lines[0]) }}></span>
+				<span dangerouslySetInnerHTML={{ __html: ' ' + line }}></span>
 			</p>
 		);
 	}
