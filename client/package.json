@@ -17,7 +17,8 @@
     "browserify": "~8.0.3",
     "gulp-autoprefixer": "~2.0.0",
     "gulp-gzip": "0.0.8",
-    "babelify": "~5.0.3"
+    "babelify": "~5.0.3",
+    "gulp-concat": "~2.5.2"
   },
   "dependencies": {
     "lodash": "3.2.0",

@@ -7,6 +7,7 @@ var minifyCSS = require('gulp-minify-css');
 var autoprefixer = require('gulp-autoprefixer');
 var uglify = require('gulp-uglify');
 var gzip = require('gulp-gzip');
+var concat = require('gulp-concat');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
@@ -29,10 +30,11 @@ gulp.task('html', function() {
 });
 
 gulp.task('css', function() {
-    gulp.src('src/css/*.css')
+    gulp.src(['src/css/fontello.css', 'src/css/style.css'])
+        .pipe(concat('bundle.css'))
         .pipe(autoprefixer())
         .pipe(minifyCSS())
-        .pipe(gulp.dest('dist/css'));
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('js', function() {

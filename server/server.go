@@ -43,8 +43,7 @@ func Run(port int) {
 
 	files = []File{
 		File{"/bundle.js", "text/javascript"},
-		File{"/css/style.css", "text/css"},
-		File{"/css/fontello.css", "text/css"},
+		File{"/bundle.css", "text/css"},
 		File{"/font/fontello.eot", "application/vnd.ms-fontobject"},
 		File{"/font/fontello.svg", "image/svg+xml"},
 		File{"/font/fontello.ttf", "application/x-font-ttf"},
