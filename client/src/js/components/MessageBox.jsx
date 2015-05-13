@@ -63,14 +63,9 @@ var MessageBox = React.createClass({
 		var tab = this.state.selectedTab;
 		var dest = tab.channel || tab.server;
 		var lines = [];
-		var style = {};
 		var innerStyle = {
 			paddingLeft: this.props.indent + 'px'
 		};
-
-		if (!tab.channel || tab.channel[0] !== '#') {
-			style.right = 0;
-		}
 
 		for (var j = 0; j < this.state.messages.length; j++) {
 			var message = this.state.messages[j];
@@ -96,7 +91,7 @@ var MessageBox = React.createClass({
 
 		if (lines.length !== 1) {
 			return (
-				<div className="messagebox" style={style}>
+				<div className="messagebox">
 					<Infinite ref="list" containerHeight={this.state.height} elementHeight={24}>
 						{lines}
 					</Infinite>
@@ -104,7 +99,7 @@ var MessageBox = React.createClass({
 			);
 		} else {
 			return (
-				<div className="messagebox" style={style}>
+				<div className="messagebox">
 					<div ref="list">{lines}</div>
 				</div>
 			);

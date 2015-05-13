@@ -170,7 +170,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	position: fixed;
 	left: 200px;
 	top: 0;
-	right: 200px;
+	right: 0;
 	height: 50px;
 	padding-left: 15px;
 	line-height: 50px;
@@ -179,9 +179,21 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	font-size: 20px;
 }
 
+.chat-channel .chat-title-bar {
+	right: 200px;
+}
+
 .chat-title-bar i {
 	padding: 0 15px;
 	cursor: pointer;
+}
+
+.chat-server .icon-search {
+	display: none;
+}
+
+.chat-server .userlist-bar, .chat-private .userlist-bar {
+	display: none;
 }
 
 .button-leave {
@@ -226,6 +238,10 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	background: #f0f0f0;
 }
 
+.chat-private .search {
+	right: 0;
+}
+
 .search-input {
 	width: 100%;
 	padding: 15px;
@@ -246,8 +262,12 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	left: 200px;
 	top: 50px;
 	bottom: 50px;
-	right: 200px;
+	right: 0;
 	z-index: 1;
+}
+
+.chat-channel .messagebox {
+	right: 200px;
 }
 
 .messagebox > div {

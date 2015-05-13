@@ -3,6 +3,7 @@ var Reflux = require('reflux');
 
 var channelStore = require('../stores/channel');
 var selectedTabStore = require('../stores/selectedTab');
+var serverActions = require('../actions/server');
 var channelActions = require('../actions/channel');
 var searchActions = require('../actions/search');
 var privateChatActions = require('../actions/privateChat');
@@ -23,9 +24,11 @@ var ChatTitle = React.createClass({
     handleLeaveClick: function() {
         var tab = this.state.selectedTab;
 
-        if (tab.channel[0] === '#') {
+        if (!tab.channel) {
+            serverActions.disconnect(tab.server);
+        } else if (tab.channel[0] === '#') {
             channelActions.part([tab.channel], tab.server);
-        } else if (tab.channel) {
+        } else {
             privateChatActions.close(tab.server, tab.channel);
         }
     },
@@ -33,26 +36,29 @@ var ChatTitle = React.createClass({
     render: function() {
         var tab = this.state.selectedTab;
         var usercount = channelStore.getUsers(tab.server, tab.channel).length;
-        var iconStyle = {};
-        var userListStyle = {};
+        var leaveTitle;
 
         if (!tab.channel) {
-            iconStyle.display = 'none';
-            userListStyle.display = 'none';
+            leaveTitle = 'Disconnect';
         } else if (tab.channel[0] !== '#') {
-            userListStyle.display = 'none';
+            leaveTitle = 'Close';
+        } else {
+            leaveTitle = 'Leave';
         }
 
         return (
             <div>
                 <div className="chat-title-bar">
                     <span className="chat-title">{tab.name}</span>
-                    <i className="icon-search" title="Search" style={iconStyle} onClick={searchActions.toggle}></i>
-                    <i className="icon-logout button-leave" title="Leave" style={iconStyle} onClick={this.handleLeaveClick}></i>
+                    <i className="icon-search" title="Search" onClick={searchActions.toggle}></i>
+                    <i 
+                        className="icon-logout button-leave" 
+                        title={leaveTitle} 
+                        onClick={this.handleLeaveClick}></i>
                 </div>
                 <div className="userlist-bar">
-                    <i className="icon-user" style={userListStyle}></i>
-                    <span className="chat-usercount" style={userListStyle}>{usercount || null}</span>
+                    <i className="icon-user"></i>
+                    <span className="chat-usercount">{usercount || null}</span>
                 </div>
             </div>
         );

@@ -9,6 +9,25 @@ var routeActions = require('../actions/route');
 var privateChatActions = require('../actions/privateChat');
 
 var selectedTab = {};
+var history = [];
+
+function selectPrevTab() {
+	history.pop();
+
+	if (history.length > 0) {
+		selectedTab = _.extend({}, history[history.length - 1]);
+		return true;
+	}
+
+	return false;
+}
+
+function updateChannelName(name) {
+	selectedTab.channel = name;
+	selectedTab.name = name;
+	history[history.length - 1].channel = name;
+	history[history.length - 1].name = name; 
+}
 
 var selectedTabStore = Reflux.createStore({
 	init: function() {
@@ -32,15 +51,19 @@ var selectedTabStore = Reflux.createStore({
 			selectedTab.name = serverStore.getName(server);
 		}
 
+		history.push(_.extend({}, selectedTab));
+
 		this.trigger(selectedTab);
 	},
 
 	part: function(channels, server) {
 		if (server === selectedTab.server && 
 			channels.indexOf(selectedTab.channel) !== -1) {
-			selectedTab.server = null;
-			selectedTab.channel = null;
-			selectedTab.name = null;
+			if (!selectPrevTab()) {
+				selectedTab.channel = null;
+				selectedTab.name = serverStore.getName(server);
+			}
+			
 			this.trigger(selectedTab);
 		}
 	},
@@ -48,43 +71,49 @@ var selectedTabStore = Reflux.createStore({
 	close: function(server, nick) {
 		if (server === selectedTab.server &&
 			nick === selectedTab.channel) {
-			selectedTab.server = null;
-			selectedTab.channel = null;
-			selectedTab.name = null;
+			if (!selectPrevTab()) {
+				selectedTab.channel = null;
+				selectedTab.name = serverStore.getName(server);
+			}
+			
 			this.trigger(selectedTab);
 		}
 	},
 
 	disconnect: function(server) {
 		if (server === selectedTab.server) {
-			selectedTab = {};
+			_.remove(history, { server: server });
+
+			if (!selectPrevTab()) {
+				selectedTab = {};
+			}
+
 			this.trigger(selectedTab);
 		}
 	},
 
 	userAdded: function(user, server, channel) {
-		// Update the selected channel incase the casing is different
 		if (selectedTab.channel &&
 			server === selectedTab.server &&
 			user === serverStore.getNick(server) &&
 			channel.toLowerCase().indexOf(selectedTab.channel.toLowerCase()) !== -1) {
-			selectedTab.channel = channel;
-			selectedTab.name = channel;
+			// Update the selected channel incase the casing is different
+			updateChannelName(channel);
 			this.trigger(selectedTab);
 		}
 	},
 
 	loadChannels: function(channels) {
-		// Handle double hashtag channel names, only a single hashtag
-		// gets added to the channel in the URL on page load
 		_.each(channels, (channel) => {
 			if (channel.server === selectedTab.server &&
 				channel.name !== selectedTab.channel &&
 				channel.name.indexOf(selectedTab.channel) !== -1) {
-				selectedTab.channel = channel.name;
-				selectedTab.name = channel.name;
-
+				// Handle double hashtag channel names, only a single hashtag
+				// gets added to the channel in the URL on page load
+				updateChannelName(channel.name);
 				this.trigger(selectedTab);
+
+				return false;
 			}
 		});
 	},
@@ -92,17 +121,16 @@ var selectedTabStore = Reflux.createStore({
 	loadServers: function(servers) {
 		var server = _.find(servers, { address: selectedTab.server });
 
-		if (!server) {
-			selectedTab = {};
-			this.trigger(selectedTab);
-		} else if (!selectedTab.channel) {
+		if (server && !selectedTab.channel) {
 			selectedTab.name = server.name;
+			history[history.length - 1].name = server.name;
+
 			this.trigger(selectedTab);
 		}
 	},
 
 	navigate: function(route) {
-		if (route.indexOf('.') === -1) {
+		if (route.indexOf('.') === -1 && selectedTab.server) {
 			selectedTab.server = null;
 			selectedTab.channel = null;
 			this.trigger(selectedTab);
@@ -123,6 +151,21 @@ var selectedTabStore = Reflux.createStore({
 });
 
 selectedTabStore.listen(function(selectedTab) {
+	var channel = selectedTab.channel;
+
+	if (selectedTab.server) {
+		if (channel) {
+			while (channel[0] === '#') {
+				channel = channel.slice(1);
+			}
+			routeActions.navigate('/' + selectedTab.server + '/' + channel);
+		} else {
+			routeActions.navigate('/' + selectedTab.server);
+		}
+	} else if (_.size(serverStore.getState()) === 0) {
+		routeActions.navigate('connect');
+	}
+	
 	localStorage.selectedTab = JSON.stringify(selectedTab);
 });
 

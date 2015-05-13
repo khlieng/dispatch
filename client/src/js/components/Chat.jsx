@@ -7,10 +7,20 @@ var Search = require('./Search.jsx');
 var MessageBox = require('./MessageBox.jsx');
 var MessageInput = require('./MessageInput.jsx');
 var UserList = require('./UserList.jsx');
+var selectedTabStore = require('../stores/selectedTab');
 var tabActions = require('../actions/tab');
 
 var Chat = React.createClass({
-    mixins: [Router.State],
+    mixins: [
+        Router.State,
+        Reflux.connect(selectedTabStore, 'selectedTab')
+    ],
+
+    getInitialState: function() {
+        return {
+            selectedTab: selectedTabStore.getState()
+        };
+    },
 
     componentWillMount: function() {
         if (!window.loaded) {
@@ -25,8 +35,19 @@ var Chat = React.createClass({
     },
 
     render: function() {
+        var chatClass;
+        var tab = this.state.selectedTab;
+
+        if (!tab.channel) {
+            chatClass = 'chat-server';
+        } else if (tab.channel[0] !== '#') {
+            chatClass = 'chat-private';
+        } else {
+            chatClass = 'chat-channel';
+        }
+
         return (
-            <div>
+            <div className={chatClass}>
                 <ChatTitle />
                 <Search />
                 <MessageBox indent={window.messageIndent} />
