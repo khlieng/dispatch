@@ -22,11 +22,11 @@ var MessageHeader = React.createClass({
 
 		if (message.from) {
 			sender = (
-				<span 
-					className="message-sender" 
-					style={{ marginLeft: window.charWidth + 'px' }}
-					onClick={this.handleSenderClick}>
+				<span>
+					{' '}
+					<span className="message-sender" onClick={this.handleSenderClick}>
 						{message.from}
+					</span>
 				</span>
 			);
 		}
