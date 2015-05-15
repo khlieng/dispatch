@@ -2,6 +2,8 @@ var EventEmitter = require('events').EventEmitter;
 
 class Socket extends EventEmitter {
 	constructor() {
+		super();
+		
 		this.ws = new WebSocket('ws://' + window.location.host + '/ws');
 
 		this.ws.onopen = () => this.emit('connect');

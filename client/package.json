@@ -9,23 +9,25 @@
     "vinyl-source-stream": "~1.0.0",
     "gulp-if": "~1.2.5",
     "gulp": "~3.8.10",
-    "gulp-uglify": "~1.0.2",
-    "gulp-minify-css": "~0.3.11",
+    "gulp-uglify": "1.2.0",
+    "gulp-minify-css": "1.1.1",
     "gulp-streamify": "0.0.5",
-    "gulp-minify-html": "~0.1.8",
-    "watchify": "~2.2.1",
-    "browserify": "~8.0.3",
-    "gulp-autoprefixer": "~2.0.0",
+    "gulp-minify-html": "1.0.2",
+    "watchify": "3.2.1",
+    "browserify": "10.2.0",
+    "gulp-autoprefixer": "2.2.0",
     "gulp-gzip": "0.0.8",
-    "babelify": "~5.0.3",
-    "gulp-concat": "~2.5.2"
+    "babelify": "6.1.0",
+    "gulp-concat": "~2.5.2",
+    "reactify": "^1.1.1",
+    "del": "^1.1.1"
   },
   "dependencies": {
-    "lodash": "3.2.0",
-    "reflux": "0.2.5",
-    "react-router": "0.12.0",
-    "react": "0.12.2",
-    "react-infinite": "0.2.3",
+    "lodash": "3.8.0",
+    "reflux": "0.2.7",
+    "react-router": "0.13.3",
+    "react": "0.13.3",
+    "react-infinite": "0.3.4",
     "autolinker": "khlieng/Autolinker.js"
   }
 }

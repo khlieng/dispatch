@@ -24,13 +24,13 @@ if (argv.production) {
 }
 
 gulp.task('html', function() {
-    gulp.src('src/*.html')
+    return gulp.src('src/*.html')
         .pipe(minifyHTML())
         .pipe(gulp.dest('dist'));
 });
 
 gulp.task('css', function() {
-    gulp.src(['src/css/fontello.css', 'src/css/style.css'])
+    return gulp.src(['src/css/fontello.css', 'src/css/style.css'])
         .pipe(concat('bundle.css'))
         .pipe(autoprefixer())
         .pipe(minifyCSS())
@@ -75,34 +75,30 @@ function js(watch) {
 }
 
 gulp.task('fonts', function() {
-    gulp.src('src/font/*')
+    return gulp.src('src/font/*')
         .pipe(gulp.dest('dist/font'));
 });
 
 gulp.task('gzip', ['html', 'css', 'js', 'fonts'], function() {
-    gulp.src('dist/**/!(*.gz)')
+    return gulp.src('dist/**/!(*.gz)')
         .pipe(gzip())
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('dist/gz'));
 });
 
 function bindata(cb) {
     if (argv.production) {
-        exec('go-bindata -nomemcopy -pkg server -o ../server/bindata.go dist/...', function(err) {
-            cb(err);
-        });
+        exec('go-bindata -nomemcopy -nocompress -pkg server -o ../server/bindata.go dist/gz/...', cb);
     } else {
-        exec('go-bindata -debug -pkg server -o ../server/bindata.go dist/...', function(err) {
-            cb(err);
-        });
+        exec('go-bindata -debug -pkg server -o ../server/bindata.go dist/...', cb);
     }
 }
 
-gulp.task('bindata', ['html', 'css', 'js', 'fonts', 'gzip'], function(cb) {
+gulp.task('bindata', ['gzip'], function(cb) {
     bindata(cb);
 });
 
 gulp.task('gzip:watch', function() {
-    gulp.src('dist/**/*.{html,css,js}')
+    return gulp.src('dist/**/*.{html,css,js}')
         .pipe(gzip())
         .pipe(gulp.dest('dist'));
 });

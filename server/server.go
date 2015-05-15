@@ -1,6 +1,9 @@
 package server
 
 import (
+	"bytes"
+	"compress/gzip"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -17,8 +20,15 @@ var (
 	channelStore *storage.ChannelStore
 	sessions     map[string]*Session
 	sessionLock  sync.Mutex
-	fs           http.Handler
-	files        []File
+
+	files = []File{
+		File{"/bundle.js", "text/javascript"},
+		File{"/bundle.css", "text/css"},
+		File{"/font/fontello.eot", "application/vnd.ms-fontobject"},
+		File{"/font/fontello.svg", "image/svg+xml"},
+		File{"/font/fontello.ttf", "application/x-font-ttf"},
+		File{"/font/fontello.woff", "application/font-woff"},
+	}
 
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -39,16 +49,6 @@ func Run(port int) {
 
 	channelStore = storage.NewChannelStore()
 	sessions = make(map[string]*Session)
-	fs = http.FileServer(BindataFileSystem{})
-
-	files = []File{
-		File{"/bundle.js", "text/javascript"},
-		File{"/bundle.css", "text/css"},
-		File{"/font/fontello.eot", "application/vnd.ms-fontobject"},
-		File{"/font/fontello.svg", "image/svg+xml"},
-		File{"/font/fontello.ttf", "application/x-font-ttf"},
-		File{"/font/fontello.woff", "application/font-woff"},
-	}
 
 	reconnect()
 
@@ -72,33 +72,36 @@ func upgradeWS(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveFiles(w http.ResponseWriter, r *http.Request) {
-	var ext string
-
-	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-		w.Header().Set("Content-Encoding", "gzip")
-		ext = ".gz"
-	}
-
 	if r.URL.Path == "/" {
-		w.Header().Set("Content-Type", "text/html")
-		r.URL.Path = "/index.html" + ext
-		fs.ServeHTTP(w, r)
+		serveFile("dist/gz/index.html.gz", "text/html", w, r)
 		return
 	}
 
 	for _, file := range files {
 		if strings.HasSuffix(r.URL.Path, file.Path) {
-			w.Header().Set("Content-Type", file.ContentType)
-			r.URL.Path = file.Path + ext
-			fs.ServeHTTP(w, r)
+			serveFile("dist/gz"+file.Path+".gz", file.ContentType, w, r)
 			return
 		}
 	}
 
-	w.Header().Set("Content-Type", "text/html")
-	r.URL.Path = "/index.html" + ext
+	serveFile("dist/gz/index.html.gz", "text/html", w, r)
+}
 
-	fs.ServeHTTP(w, r)
+func serveFile(path, contentType string, w http.ResponseWriter, r *http.Request) {
+	data, _ := Asset(path)
+
+	w.Header().Set("Content-Type", contentType)
+
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+		w.Write(data)
+	} else {
+		gzr, _ := gzip.NewReader(bytes.NewReader(data))
+		buf, _ := ioutil.ReadAll(gzr)
+		w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+		w.Write(buf)
+	}
 }
 
 func reconnect() {
