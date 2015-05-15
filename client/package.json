@@ -19,8 +19,7 @@
     "gulp-gzip": "0.0.8",
     "babelify": "6.1.0",
     "gulp-concat": "~2.5.2",
-    "reactify": "^1.1.1",
-    "del": "^1.1.1"
+    "reactify": "^1.1.1"
   },
   "dependencies": {
     "lodash": "3.8.0",
