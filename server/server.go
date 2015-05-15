@@ -1,13 +1,9 @@
 package server
 
 import (
-	"bytes"
-	"compress/gzip"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
@@ -21,15 +17,6 @@ var (
 	sessions     map[string]*Session
 	sessionLock  sync.Mutex
 
-	files = []File{
-		File{"bundle.js", "text/javascript"},
-		File{"bundle.css", "text/css"},
-		File{"font/fontello.eot", "application/vnd.ms-fontobject"},
-		File{"font/fontello.svg", "image/svg+xml"},
-		File{"font/fontello.ttf", "application/x-font-ttf"},
-		File{"font/fontello.woff", "application/font-woff"},
-	}
-
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -38,11 +25,6 @@ var (
 		},
 	}
 )
-
-type File struct {
-	Path        string
-	ContentType string
-}
 
 func Run(port int) {
 	defer storage.Close()
@@ -69,39 +51,6 @@ func upgradeWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	handleWS(conn)
-}
-
-func serveFiles(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" {
-		serveFile("index.html.gz", "text/html", w, r)
-		return
-	}
-
-	for _, file := range files {
-		if strings.HasSuffix(r.URL.Path, file.Path) {
-			serveFile(file.Path+".gz", file.ContentType, w, r)
-			return
-		}
-	}
-
-	serveFile("index.html.gz", "text/html", w, r)
-}
-
-func serveFile(path, contentType string, w http.ResponseWriter, r *http.Request) {
-	data, _ := Asset(path)
-
-	w.Header().Set("Content-Type", contentType)
-
-	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-		w.Header().Set("Content-Encoding", "gzip")
-		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-		w.Write(data)
-	} else {
-		gzr, _ := gzip.NewReader(bytes.NewReader(data))
-		buf, _ := ioutil.ReadAll(gzr)
-		w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
-		w.Write(buf)
-	}
 }
 
 func reconnect() {
