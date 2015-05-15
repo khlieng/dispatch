@@ -87,9 +87,9 @@ gulp.task('gzip', ['html', 'css', 'js', 'fonts'], function() {
 
 function bindata(cb) {
     if (argv.production) {
-        exec('go-bindata -nomemcopy -nocompress -pkg server -o ../server/bindata.go dist/gz/...', cb);
+        exec('go-bindata -nomemcopy -nocompress -pkg server -o ../server/bindata.go -prefix "dist/gz" dist/gz/...', cb);
     } else {
-        exec('go-bindata -debug -pkg server -o ../server/bindata.go dist/...', cb);
+        exec('go-bindata -debug -pkg server -o ../server/bindata.go -prefix "dist/gz" dist/...', cb);
     }
 }
 
