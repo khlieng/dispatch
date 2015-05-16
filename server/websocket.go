@@ -19,6 +19,13 @@ func NewWebSocket(ws *websocket.Conn) *WebSocket {
 
 func (w *WebSocket) write() {
 	for {
-		w.conn.WriteMessage(websocket.TextMessage, <-w.Out)
+		err := w.conn.WriteMessage(websocket.TextMessage, <-w.Out)
+		if err != nil {
+			return
+		}
 	}
+}
+
+func (w *WebSocket) close() {
+	close(w.Out)
 }

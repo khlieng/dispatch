@@ -228,12 +228,15 @@ func (i *IRC) writef(format string, a ...interface{}) {
 func (i *IRC) send() {
 	i.ready.Wait()
 	for {
-		i.conn.Write([]byte(<-i.out))
+		_, err := i.conn.Write([]byte(<-i.out))
+		if err != nil {
+			return
+		}
 	}
 }
 
 func (i *IRC) recv() {
-	defer i.conn.Close()
+	defer i.close()
 	for {
 		line, err := i.reader.ReadString('\n')
 		if err != nil {
@@ -254,6 +257,12 @@ func (i *IRC) recv() {
 
 		i.Messages <- msg
 	}
+}
+
+func (i *IRC) close() {
+	i.conn.Close()
+	i.ready.Done()
+	close(i.out)
 }
 
 func parseMessage(line string) *Message {

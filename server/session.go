@@ -67,6 +67,7 @@ func (s *Session) setWS(addr string, ws *websocket.Conn) {
 
 func (s *Session) deleteWS(addr string) {
 	s.wsLock.Lock()
+	s.ws[addr].close()
 	delete(s.ws, addr)
 	s.wsLock.Unlock()
 }
