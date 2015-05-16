@@ -12,7 +12,12 @@ func handleMessages(irc *IRC, session *Session) {
 	userBuffers := make(map[string][]string)
 	var motd MOTD
 
-	for msg := range irc.Messages {
+	for {
+		msg, ok := <-irc.Messages
+		if !ok {
+			return
+		}
+
 		switch msg.Command {
 		case NICK:
 			session.sendJSON("nick", Nick{

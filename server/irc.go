@@ -62,6 +62,7 @@ type IRC struct {
 	reader   *bufio.Reader
 	out      chan string
 	ready    sync.WaitGroup
+	once     sync.Once
 	nick     string
 	nickLock sync.Mutex
 
@@ -247,22 +248,23 @@ func (i *IRC) recv() {
 		msg := parseMessage(line)
 		msg.Prefix = parseUser(msg.Prefix)
 
+		i.Messages <- msg
+
 		switch msg.Command {
 		case PING:
-			i.write("PONG :" + msg.Trailing)
+			go i.write("PONG :" + msg.Trailing)
 
 		case RPL_WELCOME:
-			i.ready.Done()
+			i.once.Do(i.ready.Done)
 		}
-
-		i.Messages <- msg
 	}
 }
 
 func (i *IRC) close() {
 	i.conn.Close()
-	i.ready.Done()
+	i.once.Do(i.ready.Done)
 	close(i.out)
+	close(i.Messages)
 }
 
 func parseMessage(line string) *Message {
