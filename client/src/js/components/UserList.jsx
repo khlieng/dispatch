@@ -9,14 +9,16 @@ var selectedTabStore = require('../stores/selectedTab');
 
 var UserList = React.createClass({
 	mixins: [
-		Reflux.connect(channelStore, 'channels'),
+		Reflux.listenTo(channelStore, 'channelsChanged'),
 		Reflux.connect(selectedTabStore, 'selectedTab')
 	],
 
 	getInitialState: function() {
+		var tab = selectedTabStore.getState();
+
 		return {
-			channels: channelStore.getState(),
-			selectedTab: selectedTabStore.getState(),
+			users: channelStore.getUsers(tab.server, tab.channel),
+			selectedTab: tab,
 			height: window.innerHeight - 100
 		};
 	},
@@ -29,19 +31,25 @@ var UserList = React.createClass({
 		window.removeEventListener('resize', this.handleResize);
 	},
 
+	channelsChanged: function() {
+		var tab = this.state.selectedTab;
+
+		this.setState({ users: channelStore.getUsers(tab.server, tab.channel) });
+	},
+
 	handleResize: function() {
 		this.setState({ height: window.innerHeight - 100 });
 	},
 
 	render: function() {
-		var users = [];
 		var tab = this.state.selectedTab;
+		var users = [];
 		var style = {};
 
 		if (!tab.channel || tab.channel[0] !== '#') {
 			style.display = 'none';
 		} else {
-			users = _.map(channelStore.getUsers(tab.server, tab.channel), (user) => {
+			users = _.map(this.state.users, (user) => {
 				return <UserListItem key={user.nick} user={user} />;
 			});
 		}

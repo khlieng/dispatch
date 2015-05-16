@@ -10,15 +10,23 @@ var privateChatActions = require('../actions/privateChat');
 
 var ChatTitle = React.createClass({
     mixins: [
-        Reflux.connect(channelStore, 'channels'),
+        Reflux.listenTo(channelStore, 'channelsChanged'),
         Reflux.connect(selectedTabStore, 'selectedTab')
     ],
 
     getInitialState: function() {
+        var tab = selectedTabStore.getState();
+
         return {
-            channels: channelStore.getState(),
-            selectedTab: selectedTabStore.getState()
+            usercount: channelStore.getUsers(tab.server, tab.channel).length,
+            selectedTab: tab
         };
+    },
+
+    channelsChanged: function() {
+        var tab = this.state.selectedTab;
+        
+        this.setState({ usercount: channelStore.getUsers(tab.server, tab.channel).length });
     },
 
     handleLeaveClick: function() {
@@ -35,7 +43,6 @@ var ChatTitle = React.createClass({
 
     render: function() {
         var tab = this.state.selectedTab;
-        var usercount = channelStore.getUsers(tab.server, tab.channel).length;
         var leaveTitle;
 
         if (!tab.channel) {
@@ -58,7 +65,7 @@ var ChatTitle = React.createClass({
                 </div>
                 <div className="userlist-bar">
                     <i className="icon-user"></i>
-                    <span className="chat-usercount">{usercount || null}</span>
+                    <span className="chat-usercount">{this.state.usercount || null}</span>
                 </div>
             </div>
         );

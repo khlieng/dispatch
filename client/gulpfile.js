@@ -100,7 +100,7 @@ gulp.task('bindata', ['gzip'], function(cb) {
 gulp.task('gzip:watch', function() {
     return gulp.src('dist/**/*.{html,css,js}')
         .pipe(gzip())
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('dist/gz'));
 });
 
 gulp.task('bindata:watch', ['gzip:watch'], function(cb) {
