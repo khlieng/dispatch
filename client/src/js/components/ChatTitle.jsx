@@ -11,7 +11,7 @@ var privateChatActions = require('../actions/privateChat');
 var ChatTitle = React.createClass({
     mixins: [
         Reflux.listenTo(channelStore, 'channelsChanged'),
-        Reflux.connect(selectedTabStore, 'selectedTab')
+        Reflux.listenTo(selectedTabStore, 'selectedTabChanged')
     ],
 
     getInitialState: function() {
@@ -27,6 +27,13 @@ var ChatTitle = React.createClass({
         var tab = this.state.selectedTab;
         
         this.setState({ usercount: channelStore.getUsers(tab.server, tab.channel).length });
+    },
+
+    selectedTabChanged: function(tab) {
+        this.setState({
+            selectedTab: tab,
+            usercount: channelStore.getUsers(tab.server, tab.channel).length
+        });
     },
 
     handleLeaveClick: function() {

@@ -10,7 +10,7 @@ var selectedTabStore = require('../stores/selectedTab');
 var UserList = React.createClass({
 	mixins: [
 		Reflux.listenTo(channelStore, 'channelsChanged'),
-		Reflux.connect(selectedTabStore, 'selectedTab')
+		Reflux.listenTo(selectedTabStore, 'selectedTabChanged')
 	],
 
 	getInitialState: function() {
@@ -35,6 +35,13 @@ var UserList = React.createClass({
 		var tab = this.state.selectedTab;
 
 		this.setState({ users: channelStore.getUsers(tab.server, tab.channel) });
+	},
+
+	selectedTabChanged: function(tab) {
+		this.setState({
+			selectedTab: tab,
+			users: channelStore.getUsers(tab.server, tab.channel)
+		});
 	},
 
 	handleResize: function() {
