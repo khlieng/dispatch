@@ -6,27 +6,29 @@ var util = require('../util');
 var searchStore = require('../stores/search');
 var selectedTabStore = require('../stores/selectedTab');
 var searchActions = require('../actions/search');
+var PureMixin = require('../mixins/pure');
 
 var Search = React.createClass({
 	mixins: [
-		Reflux.connect(searchStore),
+		PureMixin,
+		Reflux.connect(searchStore, 'search'),
 		Reflux.connect(selectedTabStore, 'selectedTab')
 	],
 
-	getInitialState: function() {
-		var state = _.extend({}, searchStore.getState());
-		state.selectedTab = selectedTabStore.getState();
-
-		return state;
+	getInitialState() {
+		return {
+			search: searchStore.getState(),
+			selectedTab: selectedTabStore.getState()
+		};
 	},
 
-	componentDidUpdate: function(prevProps, prevState) {
-		if (!prevState.show && this.state.show) {
+	componentDidUpdate(prevProps, prevState) {
+		if (!prevState.search.get('show') && this.state.search.get('show')) {
 			this.refs.input.getDOMNode().focus();
 		}
 	},
 
-	handleChange: function(e) {
+	handleChange(e) {
 		var tab = this.state.selectedTab;
 
 		if (tab.channel) {
@@ -34,12 +36,12 @@ var Search = React.createClass({
 		}
 	},
 
-	render: function() {
+	render() {
 		var style = {
-			display: this.state.show ? 'block' : 'none'
+			display: this.state.search.get('show') ? 'block' : 'none'
 		};
 
-		var results = _.map(this.state.results, (result) => {
+		var results = this.state.search.get('results').map(result => {
 			return (
 				<p key={result.id}>{util.timestamp(new Date(result.time * 1000))} {result.from} {result.content}</p>
 			);

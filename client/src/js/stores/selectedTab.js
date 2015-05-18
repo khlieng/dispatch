@@ -1,4 +1,5 @@
 var Reflux = require('reflux');
+var Immutable = require('immutable');
 var _ = require('lodash');
 
 var serverStore = require('./server');
@@ -8,14 +9,20 @@ var serverActions = require('../actions/server');
 var routeActions = require('../actions/route');
 var privateChatActions = require('../actions/privateChat');
 
-var selectedTab = {};
+var Tab = Immutable.Record({
+	server: null,
+	channel: null,
+	name: null
+});
+
+var selectedTab = new Tab();
 var history = [];
 
 function selectPrevTab() {
 	history.pop();
 
 	if (history.length > 0) {
-		selectedTab = _.extend({}, history[history.length - 1]);
+		selectedTab = history[history.length - 1];
 		return true;
 	}
 
@@ -23,14 +30,12 @@ function selectPrevTab() {
 }
 
 function updateChannelName(name) {
-	selectedTab.channel = name;
-	selectedTab.name = name;
-	history[history.length - 1].channel = name;
-	history[history.length - 1].name = name; 
+	selectedTab = selectedTab.set('channel', name).set('name', name);
+	history[history.length - 1] = selectedTab;
 }
 
 var selectedTabStore = Reflux.createStore({
-	init: function() {
+	init() {
 		this.listenToMany(actions);
 		this.listenTo(channelActions.part, 'part');
 		this.listenTo(privateChatActions.close, 'close');
@@ -41,58 +46,57 @@ var selectedTabStore = Reflux.createStore({
 		this.listenTo(routeActions.navigate, 'navigate');
 	},
 
-	select: function(server, channel = null) {
-		selectedTab.server = server;
-		selectedTab.channel = channel;
+	select(server, channel = null) {
+		selectedTab = new Tab({ 
+			server, 
+			channel, 
+			name: channel || serverStore.getName(server) 
+		});
 
-		if (channel) {
-			selectedTab.name = channel;
-		} else {
-			selectedTab.name = serverStore.getName(server);
-		}
-
-		history.push(_.extend({}, selectedTab));
+		history.push(selectedTab);
 
 		this.trigger(selectedTab);
 	},
 
-	part: function(channels, server) {
+	part(channels, server) {
 		if (server === selectedTab.server && 
 			channels.indexOf(selectedTab.channel) !== -1) {
 			if (!selectPrevTab()) {
-				selectedTab.channel = null;
-				selectedTab.name = serverStore.getName(server);
+				selectedTab = selectedTab
+					.set('channel', null)
+					.set('name', serverStore.getName(server));
 			}
 			
 			this.trigger(selectedTab);
 		}
 	},
 
-	close: function(server, nick) {
+	close(server, nick) {
 		if (server === selectedTab.server &&
 			nick === selectedTab.channel) {
 			if (!selectPrevTab()) {
-				selectedTab.channel = null;
-				selectedTab.name = serverStore.getName(server);
+				selectedTab = selectedTab
+					.set('channel', null)
+					.set('name', serverStore.getName(server));
 			}
 			
 			this.trigger(selectedTab);
 		}
 	},
 
-	disconnect: function(server) {
+	disconnect(server) {
 		if (server === selectedTab.server) {
 			_.remove(history, { server: server });
 
 			if (!selectPrevTab()) {
-				selectedTab = {};
+				selectedTab = new Tab();
 			}
 
 			this.trigger(selectedTab);
 		}
 	},
 
-	userAdded: function(user, server, channel) {
+	userAdded(user, server, channel) {
 		if (selectedTab.channel &&
 			server === selectedTab.server &&
 			user === serverStore.getNick(server) &&
@@ -103,7 +107,7 @@ var selectedTabStore = Reflux.createStore({
 		}
 	},
 
-	loadChannels: function(channels) {
+	loadChannels(channels) {
 		_.each(channels, (channel) => {
 			if (channel.server === selectedTab.server &&
 				channel.name !== selectedTab.channel &&
@@ -118,39 +122,38 @@ var selectedTabStore = Reflux.createStore({
 		});
 	},
 
-	loadServers: function(servers) {
+	loadServers(servers) {
 		var server = _.find(servers, { address: selectedTab.server });
 
 		if (server && !selectedTab.channel) {
-			selectedTab.name = server.name;
-			history[history.length - 1].name = server.name;
+			selectedTab = selectedTab.set('name', server.name);
+			history[history.length - 1] = selectedTab;
 
 			this.trigger(selectedTab);
 		}
 	},
 
-	navigate: function(route) {
+	navigate(route) {
 		if (route.indexOf('.') === -1 && selectedTab.server) {
-			selectedTab.server = null;
-			selectedTab.channel = null;
+			selectedTab = new Tab();
 			this.trigger(selectedTab);
 		}
 	},
 
-	getServer: function() {
+	getServer() {
 		return selectedTab.server;
 	},
 
-	getChannel: function() {
+	getChannel() {
 		return selectedTab.channel;
 	},
 
-	getState: function() {
+	getState() {
 		return selectedTab;
 	}
 });
 
-selectedTabStore.listen(function(selectedTab) {
+selectedTabStore.listen(selectedTab => {
 	var channel = selectedTab.channel;
 
 	if (selectedTab.server) {

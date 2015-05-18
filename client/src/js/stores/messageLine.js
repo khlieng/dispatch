@@ -10,43 +10,53 @@ var width = window.innerWidth;
 window.charWidth = util.stringWidth(' ', '16px Droid Sans Mono');
 window.messageIndent = 6 * charWidth;
 
+// Temporary hack incase this runs before the font has loaded
+setTimeout(() => window.charWidth = util.stringWidth(' ', '16px Droid Sans Mono'), 1000);
+
 var tab = selectedTabStore.getState();
 var messages;
+var prev;
 
 function wrap() {
-	messages = messageStore.getMessages(tab.server, tab.channel || tab.server);
-	util.wrapMessages(messages, width, charWidth, messageIndent);
+	var next = messageStore.getMessages(tab.server, tab.channel || tab.server);
+	if (next !== prev) {
+		prev = next;
+		messages = util.wrapMessages(next, width, charWidth, messageIndent);
+		return true;
+	}
+	return false;
 }
 
 wrap();
 
 var messageLineStore = Reflux.createStore({
-	init: function() {
+	init() {
 		this.listenTo(messageActions.setWrapWidth, 'setWrapWidth');
 		this.listenTo(messageStore, 'messagesChanged');
 		this.listenTo(selectedTabStore, 'selectedTabChanged');
 	},
 
-	setWrapWidth: function(w) {
+	setWrapWidth(w) {
 		width = w;
-
-		util.wrapMessages(messages, width, charWidth, messageIndent);
+		messages = util.wrapMessages(messages, width, charWidth, messageIndent);
 		this.trigger(messages);
 	},
 
-	messagesChanged: function() {
-		wrap();
-		this.trigger(messages);
+	messagesChanged() {
+		if (wrap()) {
+			this.trigger(messages);
+		}
 	},
 
-	selectedTabChanged: function(selectedTab) {
+	selectedTabChanged(selectedTab) {
 		tab = selectedTab;
 		
-		wrap();		
-		this.trigger(messages);
+		if (wrap()) {
+			this.trigger(messages);
+		}
 	},
 
-	getState: function() {
+	getState() {
 		return messages;
 	}
 });

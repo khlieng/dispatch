@@ -13,7 +13,7 @@ var UserList = React.createClass({
 		Reflux.listenTo(selectedTabStore, 'selectedTabChanged')
 	],
 
-	getInitialState: function() {
+	getInitialState() {
 		var tab = selectedTabStore.getState();
 
 		return {
@@ -23,32 +23,32 @@ var UserList = React.createClass({
 		};
 	},
 
-	componentDidMount: function() {
+	componentDidMount() {
 		window.addEventListener('resize', this.handleResize);
 	},
 
-	componentWillUnmount: function() {
+	componentWillUnmount() {
 		window.removeEventListener('resize', this.handleResize);
 	},
 
-	channelsChanged: function() {
+	channelsChanged() {
 		var tab = this.state.selectedTab;
 
 		this.setState({ users: channelStore.getUsers(tab.server, tab.channel) });
 	},
 
-	selectedTabChanged: function(tab) {
+	selectedTabChanged(tab) {
 		this.setState({
 			selectedTab: tab,
 			users: channelStore.getUsers(tab.server, tab.channel)
 		});
 	},
 
-	handleResize: function() {
+	handleResize() {
 		this.setState({ height: window.innerHeight - 100 });
 	},
 
-	render: function() {
+	render() {
 		var tab = this.state.selectedTab;
 		var users = [];
 		var style = {};

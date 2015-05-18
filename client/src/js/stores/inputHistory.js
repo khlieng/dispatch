@@ -14,11 +14,11 @@ if (stored) {
 }
 
 var inputHistoryStore = Reflux.createStore({
-	init: function() {
+	init() {
 		this.listenToMany(actions);
 	},
 
-	add: function(line) {
+	add(line) {
 		if (line.trim() && line !== history[0]) {
 			history.unshift(line);
 
@@ -30,28 +30,28 @@ var inputHistoryStore = Reflux.createStore({
 		}
 	},
 
-	reset: function() {
+	reset() {
 		if (index !== -1) {
 			index = -1;
 			this.trigger(history[index]);
 		}
 	},
 
-	increment: function() {
+	increment() {
 		if (index !== history.length - 1) {
 			index++;
 			this.trigger(history[index]);
 		}
 	},
 
-	decrement: function() {
+	decrement() {
 		if (index !== -1) {
 			index--;
 			this.trigger(history[index]);
 		}
 	},
 
-	getState: function() {
+	getState() {
 		if (index !== -1) {
 			return history[index];
 		}

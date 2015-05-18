@@ -13,7 +13,7 @@ var App = React.createClass({
 		Reflux.listenTo(routeActions.navigate, 'navigate')
 	],
 
-	navigate: function(path, replace) {
+	navigate(path, replace) {
 		if (!replace) {
 			this.transitionTo(path);
 		} else {
@@ -21,7 +21,7 @@ var App = React.createClass({
 		}
 	},
 
-	render: function() {
+	render() {
 		return (
 			<div>
 				<TabList />

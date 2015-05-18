@@ -21,35 +21,35 @@ function initChat(server, nick) {
 }
 
 var privateChatStore = Reflux.createStore({
-	init: function() {
+	init() {
 		this.listenToMany(actions);
 		this.listenTo(messageActions.add, 'messageAdded');
 		this.listenTo(serverActions.disconnect, 'disconnect');
 	},
 
-	open: function(server, nick) {
+	open(server, nick) {
 		if (initChat(server, nick)) {
 			this.trigger(privateChats);
 		}
 	},
 
-	close: function(server, nick) {
+	close(server, nick) {
 		delete privateChats[server][nick];
 		this.trigger(privateChats);
 	},
 
-	messageAdded: function(message) {
+	messageAdded(message) {
 		if (!message.to && message.from.indexOf('.') === -1) {
 			this.open(message.server, message.from);
 		}
 	},
 
-	disconnect: function(server) {
+	disconnect(server) {
 		delete privateChats[server];
 		this.trigger(privateChats);
 	},
 
-	getState: function() {
+	getState() {
 		return privateChats;
 	}
 });

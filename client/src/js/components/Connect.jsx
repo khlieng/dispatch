@@ -5,13 +5,13 @@ var serverActions = require('../actions/server');
 var channelActions = require('../actions/channel');
 
 var Connect = React.createClass({
-	getInitialState: function() {
+	getInitialState() {
 		return {
 			showOptionals: false
 		};
 	},
 
-	handleSubmit: function(e) {
+	handleSubmit(e) {
 		e.preventDefault();
 
 		var address = e.target.address.value.trim();

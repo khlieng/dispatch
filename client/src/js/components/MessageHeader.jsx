@@ -7,14 +7,18 @@ var privateChatActions = require('../actions/privateChat');
 var tabActions = require('../actions/tab');
 
 var MessageHeader = React.createClass({
-	handleSenderClick: function() {
+	shouldComponentUpdate(nextProps) {
+		return nextProps.message.lines[0] !== this.props.message.lines[0];
+	},
+
+	handleSenderClick() {
 		var message = this.props.message;
 
 		privateChatActions.open(message.server, message.from);
 		tabActions.select(message.server, message.from);
 	},
 
-	render: function() {
+	render() {
 		var message = this.props.message;
 		var sender = null;
 		var messageClass = 'message';

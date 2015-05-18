@@ -5,17 +5,20 @@ var Infinite = require('react-infinite');
 var Autolinker = require('autolinker');
 
 var MessageHeader = require('./MessageHeader.jsx');
+var MessageLine = require('./MessageLine.jsx');
 var messageLineStore = require('../stores/messageLine');
 var selectedTabStore = require('../stores/selectedTab');
 var messageActions = require('../actions/message');
+var PureMixin = require('../mixins/pure');
 
 var MessageBox = React.createClass({
 	mixins: [
+		PureMixin,
 		Reflux.connect(messageLineStore, 'messages'),
 		Reflux.connect(selectedTabStore, 'selectedTab')
 	],
 
-	getInitialState: function() {
+	getInitialState() {
 		return {
 			messages: messageLineStore.getState(),
 			selectedTab: selectedTabStore.getState(),
@@ -23,20 +26,20 @@ var MessageBox = React.createClass({
 		};
 	},
 
-	componentDidMount: function() {
+	componentDidMount() {
 		window.addEventListener('resize', this.handleResize);
 	},
 
-	componentWillUnmount: function() {
+	componentWillUnmount() {
 		window.removeEventListener('resize', this.handleResize);
 	},
 
-	componentWillUpdate: function() {
+	componentWillUpdate() {
 		var el = this.refs.list.getDOMNode();
 		this.autoScroll = el.scrollTop + el.offsetHeight === el.scrollHeight;
 	},
 
-	componentDidUpdate: function() {
+	componentDidUpdate() {
 		this.updateWidth();
 
 		if (this.autoScroll) {
@@ -45,12 +48,12 @@ var MessageBox = React.createClass({
 		}
 	},
 
-	handleResize: function() {
+	handleResize() {
 		this.updateWidth();
 		this.setState({ height: window.innerHeight - 100 });
 	},
 
-	updateWidth: function() {
+	updateWidth() {
 		var width = this.refs.list.getDOMNode().firstChild.offsetWidth;
 
 		if (this.width !== width) {
@@ -59,7 +62,7 @@ var MessageBox = React.createClass({
 		}
 	},
 
-	render: function() {
+	render() {
 		var tab = this.state.selectedTab;
 		var dest = tab.channel || tab.server;
 		var lines = [];
@@ -67,27 +70,17 @@ var MessageBox = React.createClass({
 			paddingLeft: this.props.indent + 'px'
 		};
 
-		for (var j = 0; j < this.state.messages.length; j++) {
-			var message = this.state.messages[j];
-			var messageClass = 'message';
-			var key = message.server + dest + j;
-
-			if (message.type) {
-				messageClass += ' message-' + message.type;
-			}
+		this.state.messages.forEach((message, j) => {
+			var key = message.server + dest + j;			
 
 			lines.push(<MessageHeader key={key} message={message} />);
 
 			for (var i = 1; i < message.lines.length; i++) {
-				var line = Autolinker.link(message.lines[i], { keepOriginalText: true });
-
 				lines.push(
-					<p key={key + '-' + i} className={messageClass} style={innerStyle}>
-						<span dangerouslySetInnerHTML={{ __html: line }}></span>
-					</p>
+					<MessageLine key={key + '-' + i} type={message.type} line={message.lines[i]} />
 				);
 			}
-		}
+		});
 
 		if (lines.length !== 1) {
 			return (

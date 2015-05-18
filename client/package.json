@@ -27,6 +27,8 @@
     "react-router": "0.13.3",
     "react": "0.13.3",
     "react-infinite": "0.3.4",
-    "autolinker": "khlieng/Autolinker.js"
+    "autolinker": "khlieng/Autolinker.js",
+    "immutable": "~3.7.2",
+    "react-pure-render": "~1.0.1"
   }
 }

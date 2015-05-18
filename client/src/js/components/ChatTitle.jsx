@@ -14,7 +14,7 @@ var ChatTitle = React.createClass({
         Reflux.listenTo(selectedTabStore, 'selectedTabChanged')
     ],
 
-    getInitialState: function() {
+    getInitialState() {
         var tab = selectedTabStore.getState();
 
         return {
@@ -23,20 +23,20 @@ var ChatTitle = React.createClass({
         };
     },
 
-    channelsChanged: function() {
+    channelsChanged() {
         var tab = this.state.selectedTab;
         
         this.setState({ usercount: channelStore.getUsers(tab.server, tab.channel).length });
     },
 
-    selectedTabChanged: function(tab) {
+    selectedTabChanged(tab) {
         this.setState({
             selectedTab: tab,
             usercount: channelStore.getUsers(tab.server, tab.channel).length
         });
     },
 
-    handleLeaveClick: function() {
+    handleLeaveClick() {
         var tab = this.state.selectedTab;
 
         if (!tab.channel) {
@@ -48,7 +48,7 @@ var ChatTitle = React.createClass({
         }
     },
 
-    render: function() {
+    render() {
         var tab = this.state.selectedTab;
         var leaveTitle;
 

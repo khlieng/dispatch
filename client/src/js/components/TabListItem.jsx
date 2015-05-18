@@ -3,27 +3,33 @@ var Reflux = require('reflux');
 
 var selectedTabStore = require('../stores/selectedTab');
 var tabActions = require('../actions/tab');
+var PureMixin = require('../mixins/pure');
 
 var TabListItem = React.createClass({
-	mixins: [Reflux.connect(selectedTabStore)],
+	mixins: [
+		PureMixin,
+		Reflux.connect(selectedTabStore, 'tab')
+	],
 
-	getInitialState: function() {
-		return selectedTabStore.getState();
+	getInitialState() {
+		return {
+			tab: selectedTabStore.getState()
+		};
 	},
 
-	handleClick: function() {
+	handleClick() {
 		tabActions.select(this.props.server, this.props.channel);
 	},
 
-	render: function() {
+	render() {
 		var classes = [];
 
 		if (!this.props.channel) {
 			classes.push('tab-server');
 		}
 
-		if (this.props.server === this.state.server &&
-			this.props.channel === this.state.channel) {
+		if (this.props.server === this.state.tab.server &&
+			this.props.channel === this.state.tab.channel) {
 			classes.push('selected');
 		}
 

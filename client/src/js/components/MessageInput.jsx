@@ -6,33 +6,33 @@ var selectedTabStore = require('../stores/selectedTab');
 var messageActions = require('../actions/message');
 var inputHistoryActions = require('../actions/inputHistory');
 var tabActions = require('../actions/tab');
+var PureMixin = require('../mixins/pure');
 
 var MessageInput = React.createClass({
 	mixins: [
-		Reflux.connect(selectedTabStore, 'selectedTab'),
+		PureMixin,
 		Reflux.connect(inputHistoryStore, 'history'),
 		Reflux.listenTo(tabActions.select, 'tabSelected')
 	],
 
-	getInitialState: function() {
+	getInitialState() {
 		return {
-			selectedTab: selectedTabStore.getState(),
 			history: inputHistoryStore.getState(),
 			value: ''
 		};
 	},
 
-	componentDidMount: function() {
+	componentDidMount() {
 		this.refs.input.getDOMNode().focus();
 	},
 
-	tabSelected: function() {
+	tabSelected() {
 		this.refs.input.getDOMNode().focus();
 	},
 
-	handleKey: function(e) {
+	handleKey(e) {
 		if (e.which === 13 && e.target.value) {
-			var tab = this.state.selectedTab;
+			var tab = selectedTabStore.getState();
 
 			if (e.target.value[0] === '/') {
 				messageActions.command(e.target.value, tab.channel, tab.server);
@@ -55,11 +55,11 @@ var MessageInput = React.createClass({
 		}
 	},
 
-	handleChange: function(e) {
+	handleChange(e) {
 		this.setState({ value: e.target.value });
 	},
 
-	render: function() {
+	render() {
 		return (
 			<div className="message-input-wrap">
 				<input 

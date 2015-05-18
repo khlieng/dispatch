@@ -17,67 +17,69 @@ exports.timestamp = function(date) {
 };
 
 exports.wrapMessages = function(messages, width, charWidth, indent = 0) {
-	for (var j = 0, llen = messages.length; j < llen; j++) {
-		var message = messages[j];
-		var lineWidth = (6 + (message.from ? message.from.length + 1 : 0)) * charWidth;
+	return messages.withMutations(m => {
+		for (var j = 0, llen = messages.size; j < llen; j++) {
+			var message = messages.get(j);
+			var lineWidth = (6 + (message.from ? message.from.length + 1 : 0)) * charWidth;
 
-		if (lineWidth + message.message.length * charWidth < width) {
-			message.lines = [message.message];
-			continue;
-		}
-
-		var words = message.message.split(' ');
-		var line = '';
-		var wrapped = [];
-		var wordCount = 0;
-		var hasWrapped = false;
-
-		// Add empty line if first word after timestamp + sender wraps
-		if (words.length > 0 && message.from && lineWidth + words[0].length * charWidth >= width) {
-			wrapped.push(line);
-			lineWidth = 0;
-		}
-
-		for (var i = 0, wlen = words.length; i < wlen; i++) {
-			var word = words[i];
-
-			if (hasWrapped) {
-				hasWrapped = false;
-				lineWidth += indent;
+			if (lineWidth + message.message.length * charWidth < width) {
+				m.setIn([j, 'lines'], [message.message]);
+				continue;
 			}
 
-			lineWidth += word.length * charWidth;
-			wordCount++;
+			var words = message.message.split(' ');
+			var line = '';
+			var wrapped = [];
+			var wordCount = 0;
+			var hasWrapped = false;
 
-			if (lineWidth >= width) {
-				if (wordCount !== 1) {
-					wrapped.push(line);
+			// Add empty line if first word after timestamp + sender wraps
+			if (words.length > 0 && message.from && lineWidth + words[0].length * charWidth >= width) {
+				wrapped.push(line);
+				lineWidth = 0;
+			}
 
-					if (i !== wlen - 1) {
-						line = word + ' ';
-						lineWidth = (word.length + 1) * charWidth;
-						wordCount = 1;
-					} else {
-						wrapped.push(word);
-					}
-				} else {
-					wrapped.push(word);
-					lineWidth = 0;
-					wordCount = 0;
+			for (var i = 0, wlen = words.length; i < wlen; i++) {
+				var word = words[i];
+
+				if (hasWrapped) {
+					hasWrapped = false;
+					lineWidth += indent;
 				}
 
-				hasWrapped = true;
-			} else if (i !== wlen - 1) {
-				line += word + ' ';
-				lineWidth += charWidth;
-			} else {
-				line += word;
-				wrapped.push(line);
-			}
-		}
+				lineWidth += word.length * charWidth;
+				wordCount++;
 
-		message.lines = wrapped;
-	}
+				if (lineWidth >= width) {
+					if (wordCount !== 1) {
+						wrapped.push(line);
+
+						if (i !== wlen - 1) {
+							line = word + ' ';
+							lineWidth = (word.length + 1) * charWidth;
+							wordCount = 1;
+						} else {
+							wrapped.push(word);
+						}
+					} else {
+						wrapped.push(word);
+						lineWidth = 0;
+						wordCount = 0;
+					}
+
+					hasWrapped = true;
+				} else if (i !== wlen - 1) {
+					line += word + ' ';
+					lineWidth += charWidth;
+				} else {
+					line += word;
+					wrapped.push(line);
+				}
+			}
+
+			m.setIn([j, 'lines'], wrapped);
+		}
+	});
 };
 
 var canvas = document.createElement('canvas');

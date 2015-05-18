@@ -1,7 +1,7 @@
 var React = require('react');
 
 var Settings = React.createClass({
-	render: function() {
+	render() {
 		return (
 			<div>
 				<h1>Settings</h1>

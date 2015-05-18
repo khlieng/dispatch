@@ -1,4 +1,5 @@
 var Reflux = require('reflux');
+var Immutable = require('immutable');
 var _ = require('lodash');
 
 var serverStore = require('./server');
@@ -7,7 +8,18 @@ var actions = require('../actions/message');
 var serverActions = require('../actions/server');
 var channelActions = require('../actions/channel');
 
-var messages = {};
+var messages = Immutable.Map();
+var empty = Immutable.List();
+
+var Message = Immutable.Record({
+	server: null,
+	from: null,
+	to: null,
+	message: '',
+	time: null,
+	type: null,
+	lines: []
+});
 
 function addMessage(message, dest) {
 	message.time = new Date();
@@ -19,24 +31,17 @@ function addMessage(message, dest) {
 		message.message = from + message.message.slice(7);
 	}
 
-	if (!(message.server in messages)) {
-		messages[message.server] = {};
-		messages[message.server][dest] = [message];
-	} else if (!(dest in messages[message.server])) {
-		messages[message.server][dest] = [message];
-	} else {
-		messages[message.server][dest].push(message);
-	}
+	messages = messages.updateIn([message.server, dest], empty, list => list.push(new Message(message)));
 }
 
 var messageStore = Reflux.createStore({
-	init: function() {
+	init() {
 		this.listenToMany(actions);
 		this.listenTo(serverActions.disconnect, 'disconnect');
 		this.listenTo(channelActions.part, 'part');
 	},
 
-	send: function(message, to, server) {
+	send(message, to, server) {
 		addMessage({
 			server: server,
 			from: serverStore.getNick(server),
@@ -47,7 +52,7 @@ var messageStore = Reflux.createStore({
 		this.trigger(messages);
 	},
 
-	add: function(message) {
+	add(message) {
 		var dest = message.to || message.from;
 		if (message.from && message.from.indexOf('.') !== -1) {
 			dest = message.server;
@@ -57,7 +62,7 @@ var messageStore = Reflux.createStore({
 		this.trigger(messages);
 	},
 
-	broadcast: function(message, server, user) {
+	broadcast(message, server, user) {
 		_.each(channelStore.getChannels(server), function(channel, channelName) {
 			if (!user || (user && _.find(channel.users, { nick: user }))) {
 				addMessage({
@@ -71,7 +76,7 @@ var messageStore = Reflux.createStore({
 		this.trigger(messages);
 	},
 
-	inform: function(message, server, channel) {
+	inform(message, server, channel) {
 		if (_.isArray(message)) {
 			_.each(message, (msg) => {
 				addMessage({
@@ -93,26 +98,23 @@ var messageStore = Reflux.createStore({
 		this.trigger(messages);
 	},
 
-	disconnect: function(server) {
-		delete messages[server];
+	disconnect(server) {
+		messages = messages.delete(server);
 		this.trigger(messages);
 	},
 
-	part: function(channels, server) {
+	part(channels, server) {
 		_.each(channels, function(channel) {
-			delete messages[server][channel];
+			messages = messages.deleteIn([server, channel]);
 		});
 		this.trigger(messages);
 	},
 
-	getMessages: function(server, dest) {
-		if (messages[server] && messages[server][dest]) {
-			return messages[server][dest];
-		}
-		return [];
+	getMessages(server, dest) {
+		return messages.getIn([server, dest]) || empty;
 	},
 
-	getState: function() {
+	getState() {
 		return messages;
 	}
 });

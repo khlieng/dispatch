@@ -9,20 +9,22 @@ var MessageInput = require('./MessageInput.jsx');
 var UserList = require('./UserList.jsx');
 var selectedTabStore = require('../stores/selectedTab');
 var tabActions = require('../actions/tab');
+var PureMixin = require('../mixins/pure');
 
 var Chat = React.createClass({
     mixins: [
+        PureMixin,
         Router.State,
         Reflux.connect(selectedTabStore, 'selectedTab')
     ],
 
-    getInitialState: function() {
+    getInitialState() {
         return {
             selectedTab: selectedTabStore.getState()
         };
     },
 
-    componentWillMount: function() {
+    componentWillMount() {
         if (!window.loaded) {
             var p = this.getParams();
 
@@ -34,7 +36,7 @@ var Chat = React.createClass({
         }
     },
 
-    render: function() {
+    render() {
         var chatClass;
         var tab = this.state.selectedTab;
 

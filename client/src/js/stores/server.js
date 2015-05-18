@@ -7,11 +7,11 @@ var tabActions = require('../actions/tab');
 var servers = {};
 
 var serverStore = Reflux.createStore({
-	init: function() {
+	init() {
 		this.listenToMany(actions);
 	},
 
-	connect: function(server, nick, opts) {
+	connect(server, nick, opts) {
 		var i = server.indexOf(':');
 		if (i > 0) {
 			server = server.slice(0, i);
@@ -27,38 +27,38 @@ var serverStore = Reflux.createStore({
 		tabActions.select(server);
 	},
 
-	disconnect: function(server) {
+	disconnect(server) {
 		delete servers[server];
 		this.trigger(servers);
 	},
 
-	setNick: function(nick, server) {
+	setNick(nick, server) {
 		servers[server].nick = nick;
 		this.trigger(servers);
 	},
 
-	load: function(storedServers) {
+	load(storedServers) {
 		_.each(storedServers, function(server) {
 			servers[server.address] = server;
 		});
 		this.trigger(servers);
 	},
 
-	getNick: function(server) {
+	getNick(server) {
 		if (servers[server]) {
 			return servers[server].nick;
 		}
 		return null;
 	},
 
-	getName: function(server) {
+	getName(server) {
 		if (servers[server]) {
 			return servers[server].name;
 		}
 		return null;
 	},
 
-	getState: function() {
+	getState() {
 		return servers;
 	}
 });

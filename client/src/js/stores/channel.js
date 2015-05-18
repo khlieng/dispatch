@@ -79,42 +79,42 @@ function sortUsers(server, channel) {
 }
 
 var channelStore = Reflux.createStore({
-	init: function() {
+	init() {
 		this.listenToMany(actions);
 		this.listenTo(serverActions.connect, 'addServer');
 		this.listenTo(serverActions.disconnect, 'removeServer');
 		this.listenTo(serverActions.load, 'loadServers');
 	},
 
-	part: function(partChannels, server) {
+	part(partChannels, server) {
 		_.each(partChannels, function(channel) {
 			delete channels[server][channel];
 		});
 		this.trigger(channels);
 	},
 
-	addUser: function(user, server, channel) {
+	addUser(user, server, channel) {
 		initChannel(server, channel);
 		channels[server][channel].users.push(createUser(user));
 		sortUsers(server, channel);
 		this.trigger(channels);
 	},
 
-	removeUser: function(user, server, channel) {
+	removeUser(user, server, channel) {
 		if (channels[server][channel]) {
 			_.remove(channels[server][channel].users, { nick: user });
 			this.trigger(channels);
 		}
 	},
 
-	removeUserAll: function(user, server) {
+	removeUserAll(user, server) {
 		_.each(channels[server], function(channel) {
 			_.remove(channel.users, { nick: user });
 		});
 		this.trigger(channels);
 	},
 
-	renameUser: function(oldNick, newNick, server) {
+	renameUser(oldNick, newNick, server) {
 		_.each(channels[server], function(channel, channelName) {
 			var user = _.find(channel.users, { nick: oldNick });
 			if (user) {
@@ -126,7 +126,7 @@ var channelStore = Reflux.createStore({
 		this.trigger(channels);
 	},
 
-	setUsers: function(users, server, channel) {
+	setUsers(users, server, channel) {
 		initChannel(server, channel);
 		var chan = channels[server][channel];
 
@@ -140,12 +140,12 @@ var channelStore = Reflux.createStore({
 		this.trigger(channels);
 	},
 
-	setTopic: function(topic, server, channel) {
+	setTopic(topic, server, channel) {
 		channels[server][channel].topic = topic;
 		this.trigger(channels);
 	},
 
-	setMode: function(mode) {
+	setMode(mode) {
 		var user = _.find(channels[mode.server][mode.channel].users, { nick: mode.user });
 		if (user) {
 			_.each(mode.remove, function(mode) {
@@ -161,7 +161,7 @@ var channelStore = Reflux.createStore({
 		}
 	},
 
-	load: function(storedChannels) {
+	load(storedChannels) {
 		_.each(storedChannels, function(channel) {
 			initChannel(channel.server, channel.name);
 			var chan = channels[channel.server][channel.name];
@@ -179,19 +179,19 @@ var channelStore = Reflux.createStore({
 		this.trigger(channels);
 	},
 
-	addServer: function(server) {
+	addServer(server) {
 		if (!(server in channels)) {
 			channels[server] = {};
 			this.trigger(channels);
 		}
 	},
 
-	removeServer: function(server) {
+	removeServer(server) {
 		delete channels[server];
 		this.trigger(channels);
 	},
 
-	loadServers: function(storedServers) {
+	loadServers(storedServers) {
 		_.each(storedServers, function(server) {
 			if (!(server.address in channels)) {
 				channels[server.address] = {};
@@ -200,25 +200,25 @@ var channelStore = Reflux.createStore({
 		this.trigger(channels);
 	},
 
-	getChannels: function(server) {
+	getChannels(server) {
 		return channels[server];
 	},
 
-	getUsers: function(server, channel) {
+	getUsers(server, channel) {
 		if (channels[server] && channels[server][channel]) {
 			return channels[server][channel].users;
 		}
 		return [];
 	},
 
-	getTopic: function(server, channel) {
+	getTopic(server, channel) {
 		if (channels[server] && channels[server][channel]) {
 			return channels[server][channel].topic || null;
 		}
 		return null;
 	},
 
-	getState: function() {
+	getState() {
 		return channels;
 	}
 });

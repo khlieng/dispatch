@@ -1,28 +1,29 @@
 var Reflux = require('reflux');
+var Immutable = require('immutable');
 
 var actions = require('../actions/search');
 
-var state = {
+var state = Immutable.Map({
 	show: false,
-	results: []
-};
+	results: Immutable.List()
+});
 
 var searchStore = Reflux.createStore({
-	init: function() {
+	init() {
 		this.listenToMany(actions);
 	},
 
-	searchDone: function(results) {
-		state.results = results;
+	searchDone(results) {
+		state = state.set('results', Immutable.List(results));
 		this.trigger(state);
 	},
 
-	toggle: function() {
-		state.show = !state.show;
+	toggle() {
+		state = state.update('show', show => !show);
 		this.trigger(state);
 	},
 
-	getState: function() {
+	getState() {
 		return state;
 	}
 });

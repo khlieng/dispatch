@@ -15,7 +15,7 @@ var TabList = React.createClass({
 		Reflux.connect(privateChatStore, 'privateChats')
 	],
 
-	getInitialState: function() {
+	getInitialState() {
 		return {
 			servers: serverStore.getState(),
 			channels: channelStore.getState(),
@@ -23,15 +23,15 @@ var TabList = React.createClass({
 		};
 	},
 
-	handleConnectClick: function() {
+	handleConnectClick() {
 		routeActions.navigate('connect');
 	},
 
-	handleSettingsClick: function() {
+	handleSettingsClick() {
 		routeActions.navigate('settings');
 	},
 
-	render: function() {
+	render() {
 		var tabs = _.map(this.state.channels, (server, address) => {
 			var serverTabs = _.map(server, (channel, name) => {
 				return (
