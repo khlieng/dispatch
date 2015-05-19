@@ -12,6 +12,6 @@ module.exports = {
 		}
 
 		return !shallowEqual(this.props, nextProps) ||
-			   !shallowEqual(this.state, nextState);
+		       !shallowEqual(this.state, nextState);
 	}
 };
