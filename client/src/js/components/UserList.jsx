@@ -56,9 +56,9 @@ var UserList = React.createClass({
 		if (!tab.channel || tab.channel[0] !== '#') {
 			style.display = 'none';
 		} else {
-			users = _.map(this.state.users, (user) => {
+			users = this.state.users.map(user => {
 				return <UserListItem key={user.nick} user={user} />;
-			});
+			}).toArray(); // React Infinite uses .length
 		}
 
 		if (users.length !== 1) {

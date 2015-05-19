@@ -63,8 +63,8 @@ var messageStore = Reflux.createStore({
 	},
 
 	broadcast(message, server, user) {
-		_.each(channelStore.getChannels(server), function(channel, channelName) {
-			if (!user || (user && _.find(channel.users, { nick: user }))) {
+		channelStore.getChannels(server).forEach((channel, channelName) => {
+			if (!user || (user && channel.get('users').find(u => u.nick === user))) {
 				addMessage({
 					server: server,
 					to: channelName,

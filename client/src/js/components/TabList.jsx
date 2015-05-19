@@ -32,8 +32,8 @@ var TabList = React.createClass({
 	},
 
 	render() {
-		var tabs = _.map(this.state.channels, (server, address) => {
-			var serverTabs = _.map(server, (channel, name) => {
+		var tabs = this.state.channels.map((server, address) => {
+			var serverTabs = server.map((channel, name) => {
 				return (
 					<TabListItem 
 						server={address} 
@@ -41,7 +41,7 @@ var TabList = React.createClass({
 						name={name}>
 					</TabListItem>
 				);
-			});
+			}).toArray();
 
 			_.each(this.state.privateChats[address], (chat, nick) => {
 				serverTabs.push(

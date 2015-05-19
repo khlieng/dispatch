@@ -18,7 +18,7 @@ var ChatTitle = React.createClass({
         var tab = selectedTabStore.getState();
 
         return {
-            usercount: channelStore.getUsers(tab.server, tab.channel).length,
+            usercount: channelStore.getUsers(tab.server, tab.channel).size,
             selectedTab: tab
         };
     },
@@ -26,13 +26,13 @@ var ChatTitle = React.createClass({
     channelsChanged() {
         var tab = this.state.selectedTab;
         
-        this.setState({ usercount: channelStore.getUsers(tab.server, tab.channel).length });
+        this.setState({ usercount: channelStore.getUsers(tab.server, tab.channel).size });
     },
 
     selectedTabChanged(tab) {
         this.setState({
             selectedTab: tab,
-            usercount: channelStore.getUsers(tab.server, tab.channel).length
+            usercount: channelStore.getUsers(tab.server, tab.channel).size
         });
     },
 

@@ -6,16 +6,15 @@ var messageStore = require('./message');
 var selectedTabStore = require('./selectedTab');
 var messageActions = require('../actions/message');
 
-var width = window.innerWidth;
-window.charWidth = util.stringWidth(' ', '16px Droid Sans Mono');
-window.messageIndent = 6 * charWidth;
-
-// Temporary hack incase this runs before the font has loaded
-setTimeout(() => window.charWidth = util.stringWidth(' ', '16px Droid Sans Mono'), 1000);
-
 var tab = selectedTabStore.getState();
+var width = window.innerWidth;
 var messages;
 var prev;
+
+function updateCharWidth() {
+	window.charWidth = util.stringWidth(' ', '16px Droid Sans Mono');
+	window.messageIndent = 6 * charWidth;
+}
 
 function wrap() {
 	var next = messageStore.getMessages(tab.server, tab.channel || tab.server);
@@ -27,10 +26,14 @@ function wrap() {
 	return false;
 }
 
-wrap();
-
 var messageLineStore = Reflux.createStore({
 	init() {
+		updateCharWidth();
+		wrap();
+
+		// Temporary hack incase this runs before the font has loaded
+		setTimeout(updateCharWidth, 1000);
+
 		this.listenTo(messageActions.setWrapWidth, 'setWrapWidth');
 		this.listenTo(messageStore, 'messagesChanged');
 		this.listenTo(selectedTabStore, 'selectedTabChanged');

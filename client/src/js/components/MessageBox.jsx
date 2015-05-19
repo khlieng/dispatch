@@ -66,9 +66,6 @@ var MessageBox = React.createClass({
 		var tab = this.state.selectedTab;
 		var dest = tab.channel || tab.server;
 		var lines = [];
-		var innerStyle = {
-			paddingLeft: this.props.indent + 'px'
-		};
 
 		this.state.messages.forEach((message, j) => {
 			var key = message.server + dest + j;			
