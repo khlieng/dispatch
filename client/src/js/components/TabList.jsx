@@ -7,9 +7,11 @@ var channelStore = require('../stores/channel');
 var privateChatStore = require('../stores/privateChat');
 var serverStore = require('../stores/server');
 var routeActions = require('../actions/route');
+var PureMixin = require('../mixins/pure');
 
 var TabList = React.createClass({
 	mixins: [
+		PureMixin,
 		Reflux.connect(serverStore, 'servers'),
 		Reflux.connect(channelStore, 'channels'),
 		Reflux.connect(privateChatStore, 'privateChats')
@@ -32,36 +34,41 @@ var TabList = React.createClass({
 	},
 
 	render() {
-		var tabs = this.state.channels.map((server, address) => {
-			var serverTabs = server.map((channel, name) => {
-				return (
-					<TabListItem 
+		var tabs = [];
+
+		this.state.channels.forEach((server, address) => {
+			tabs.push(
+				<TabListItem 
+					key={address}
+					server={address} 
+					channel={null}
+					name={this.state.servers.getIn([address, 'name'])}>
+				</TabListItem>
+			);
+
+			server.forEach((channel, name) => {
+				tabs.push(
+					<TabListItem
+						key={address + name} 
 						server={address} 
 						channel={name}
 						name={name}>
 					</TabListItem>
 				);
-			}).toArray();
-
-			_.each(this.state.privateChats[address], (chat, nick) => {
-				serverTabs.push(
-					<TabListItem 
-						server={address} 
-						channel={nick}
-						name={nick}>
-					</TabListItem>
-				);	
 			});
 
-			serverTabs.unshift(
-				<TabListItem 
-					server={address} 
-					channel={null}
-					name={serverStore.getName(address)}>
-				</TabListItem>
-			);
-
-			return serverTabs;
+			if (this.state.privateChats.has(address)) {
+				this.state.privateChats.get(address).forEach(nick => {
+					tabs.push(
+						<TabListItem 
+							key={address + nick}
+							server={address} 
+							channel={nick}
+							name={nick}>
+						</TabListItem>
+					);
+				});
+			}
 		});
 
 		return (

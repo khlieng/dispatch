@@ -6,9 +6,11 @@ var Infinite = require('react-infinite');
 var UserListItem = require('./UserListItem.jsx');
 var channelStore = require('../stores/channel');
 var selectedTabStore = require('../stores/selectedTab');
+var PureMixin = require('../mixins/pure');
 
 var UserList = React.createClass({
 	mixins: [
+		PureMixin,
 		Reflux.listenTo(channelStore, 'channelsChanged'),
 		Reflux.listenTo(selectedTabStore, 'selectedTabChanged')
 	],
@@ -61,7 +63,7 @@ var UserList = React.createClass({
 			}).toArray(); // React Infinite uses .length
 		}
 
-		if (users.length !== 1) {
+		if (users.length > 1) {
 			return (
 				<div className="userlist" style={style}>
 					<Infinite containerHeight={this.state.height} elementHeight={24}>

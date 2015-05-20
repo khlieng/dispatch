@@ -1,10 +1,15 @@
 var Reflux = require('reflux');
+var Immutable = require('immutable');
 var _ = require('lodash');
 
 var actions = require('../actions/server');
 var tabActions = require('../actions/tab');
 
-var servers = {};
+var servers = Immutable.Map();
+var Server = Immutable.Record({
+	nick: null,
+	name: null
+});
 
 var serverStore = Reflux.createStore({
 	init() {
@@ -17,45 +22,38 @@ var serverStore = Reflux.createStore({
 			server = server.slice(0, i);
 		}
 
-		servers[server] = {
-			address: server,
+		servers = servers.set(server, new Server({
 			nick: nick,
 			name: opts.name || server
-		};
+		}));
 
 		this.trigger(servers);
 		tabActions.select(server);
 	},
 
 	disconnect(server) {
-		delete servers[server];
+		servers = servers.delete(server);
 		this.trigger(servers);
 	},
 
 	setNick(nick, server) {
-		servers[server].nick = nick;
+		servers = servers.update(server, s => s.set('nick', nick));
 		this.trigger(servers);
 	},
 
 	load(storedServers) {
 		_.each(storedServers, function(server) {
-			servers[server.address] = server;
+			servers = servers.set(server.address, new Server(server));
 		});
 		this.trigger(servers);
 	},
 
 	getNick(server) {
-		if (servers[server]) {
-			return servers[server].nick;
-		}
-		return null;
+		return servers.getIn([server, 'nick']);
 	},
 
 	getName(server) {
-		if (servers[server]) {
-			return servers[server].name;
-		}
-		return null;
+		return servers.getIn([server, 'name']);
 	},
 
 	getState() {

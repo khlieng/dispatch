@@ -7,9 +7,11 @@ var serverActions = require('../actions/server');
 var channelActions = require('../actions/channel');
 var searchActions = require('../actions/search');
 var privateChatActions = require('../actions/privateChat');
+var PureMixin = require('../mixins/pure');
 
 var ChatTitle = React.createClass({
     mixins: [
+        PureMixin,
         Reflux.listenTo(channelStore, 'channelsChanged'),
         Reflux.listenTo(selectedTabStore, 'selectedTabChanged')
     ],

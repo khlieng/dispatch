@@ -39,13 +39,15 @@ function loadUser(nick) {
 }
 
 function updateRenderName(user) {
+	var name = user.nick;
+
 	if (user.mode.indexOf('o') !== -1) {
-		return user.set('renderName', '@' + user.nick);
+		name = '@' + name;
 	} else if (user.mode.indexOf('v') !== -1) {
-		return user.set('renderName', '+' + user.nick);
-	} else {
-		return user.set('renderName', user.nick);
+		name = '+' + name;
 	}
+
+	return user.set('renderName', name);
 }
 
 function sortUsers(a, b) {
@@ -188,7 +190,7 @@ var channelStore = Reflux.createStore({
 	},
 
 	getTopic(server, channel) {
-		return channels.getIn([server, channel, 'topic']) || null;
+		return channels.getIn([server, channel, 'topic']);
 	},
 
 	getState() {

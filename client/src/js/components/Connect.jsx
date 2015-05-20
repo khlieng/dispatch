@@ -3,8 +3,11 @@ var _ = require('lodash');
 
 var serverActions = require('../actions/server');
 var channelActions = require('../actions/channel');
+var PureMixin = require('../mixins/pure');
 
 var Connect = React.createClass({
+	mixins: [PureMixin],
+
 	getInitialState() {
 		return {
 			showOptionals: false

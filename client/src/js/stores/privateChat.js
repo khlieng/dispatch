@@ -1,24 +1,12 @@
 var Reflux = require('reflux');
+var Immutable = require('immutable');
 
 var actions = require('../actions/privateChat');
 var messageActions = require('../actions/message');
 var serverActions = require('../actions/server');
 
-var privateChats = {};
-
-function initChat(server, nick) {
-	if (!(server in privateChats)) {
-		privateChats[server] = {};
-		privateChats[server][nick] = {};
-
-		return true;
-	} else if (!(nick in privateChats[server])) {
-		privateChats[server][nick] = {};
-
-		return true;
-	}
-	return false;
-}
+var privateChats = Immutable.Map();
+var empty = Immutable.List();
 
 var privateChatStore = Reflux.createStore({
 	init() {
@@ -28,13 +16,12 @@ var privateChatStore = Reflux.createStore({
 	},
 
 	open(server, nick) {
-		if (initChat(server, nick)) {
-			this.trigger(privateChats);
-		}
+		privateChats = privateChats.update(server, empty, chats => chats.push(nick));
+		this.trigger(privateChats);
 	},
 
 	close(server, nick) {
-		delete privateChats[server][nick];
+		privateChats = privateChats.update(server, chats => chats.delete(chats.indexOf(nick)));
 		this.trigger(privateChats);
 	},
 
@@ -45,7 +32,7 @@ var privateChatStore = Reflux.createStore({
 	},
 
 	disconnect(server) {
-		delete privateChats[server];
+		privateChats = privateChats.delete(server);
 		this.trigger(privateChats);
 	},
 

@@ -3,8 +3,11 @@ var React = require('react');
 var selectedTabStore = require('../stores/selectedTab');
 var privateChatActions = require('../actions/privateChat');
 var tabActions = require('../actions/tab');
+var PureMixin = require('../mixins/pure');
 
 var UserListItem = React.createClass({
+    mixins: [PureMixin],
+    
 	handleClick() {
 		var server = selectedTabStore.getServer();
 
