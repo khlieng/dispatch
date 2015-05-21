@@ -12,6 +12,7 @@ var messages = Immutable.Map();
 var empty = Immutable.List();
 
 var Message = Immutable.Record({
+	id: null,
 	server: null,
 	from: null,
 	to: null,
