@@ -10,6 +10,10 @@ var Search = Immutable.Record({
 
 var search = new Search();
 
+function getState() {
+	return search;
+}
+
 var searchStore = Reflux.createStore({
 	init() {
 		this.listenToMany(actions);
@@ -25,9 +29,8 @@ var searchStore = Reflux.createStore({
 		this.trigger(search);
 	},
 
-	getState() {
-		return search;
-	}
+	getInitialState: getState,
+	getState
 });
 
 module.exports = searchStore;

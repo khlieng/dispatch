@@ -8,6 +8,10 @@ var serverActions = require('../actions/server');
 var privateChats = Immutable.Map();
 var empty = Immutable.List();
 
+function getState() {
+	return privateChats;
+}
+
 var privateChatStore = Reflux.createStore({
 	init() {
 		this.listenToMany(actions);
@@ -36,9 +40,8 @@ var privateChatStore = Reflux.createStore({
 		this.trigger(privateChats);
 	},
 
-	getState() {
-		return privateChats;
-	}
+	getInitialState: getState,
+	getState
 });
 
 module.exports = privateChatStore;

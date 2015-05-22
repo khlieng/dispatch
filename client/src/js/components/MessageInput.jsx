@@ -17,7 +17,6 @@ var MessageInput = React.createClass({
 
 	getInitialState() {
 		return {
-			history: inputHistoryStore.getState(),
 			value: ''
 		};
 	},

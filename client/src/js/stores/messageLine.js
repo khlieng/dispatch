@@ -26,6 +26,10 @@ function wrap() {
 	return false;
 }
 
+function getState() {
+	return messages;
+}
+
 var messageLineStore = Reflux.createStore({
 	init() {
 		updateCharWidth();
@@ -59,9 +63,8 @@ var messageLineStore = Reflux.createStore({
 		}
 	},
 
-	getState() {
-		return messages;
-	}
+	getInitialState: getState,
+	getState
 });
 
 module.exports = messageLineStore;

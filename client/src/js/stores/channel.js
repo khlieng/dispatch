@@ -50,7 +50,7 @@ function updateRenderName(user) {
 	return user.set('renderName', name);
 }
 
-function sortUsers(a, b) {
+function compareUsers(a, b) {
 	a = a.renderName.toLowerCase();
 	b = b.renderName.toLowerCase();
 
@@ -75,6 +75,10 @@ function sortUsers(a, b) {
 	return 0;
 }
 
+function getState() {
+	return channels;
+}
+
 var channelStore = Reflux.createStore({
 	init() {
 		this.listenToMany(actions);
@@ -92,7 +96,7 @@ var channelStore = Reflux.createStore({
 
 	addUser(user, server, channel) {
 		channels = channels.updateIn([server, channel, 'users'], empty, users => {
-			return users.push(createUser(user)).sort(sortUsers);
+			return users.push(createUser(user)).sort(compareUsers);
 		});
 		this.trigger(channels);
 	},
@@ -117,14 +121,14 @@ var channelStore = Reflux.createStore({
 				var i = users.findIndex(user => user.nick === oldNick);
 				return users.update(i, user => {
 					return updateRenderName(user.set('nick', newNick));
-				}).sort(sortUsers);
+				}).sort(compareUsers);
 			});
 		});
 		this.trigger(channels);
 	},
 
 	setUsers(users, server, channel) {
-		users = _.map(users, user => loadUser(user)).sort(sortUsers);
+		users = _.map(users, user => loadUser(user)).sort(compareUsers);
 		channels = channels.setIn([server, channel, 'users'], Immutable.List(users));
 		this.trigger(channels);
 	},
@@ -146,7 +150,7 @@ var channelStore = Reflux.createStore({
 
 			return updateRenderName(user);
 		});
-		channels = channels.updateIn([mode.server, mode.channel, 'users'], users => users.sort(sortUsers));
+		channels = channels.updateIn([mode.server, mode.channel, 'users'], users => users.sort(compareUsers));
 		this.trigger(channels);
 	},
 
@@ -193,9 +197,8 @@ var channelStore = Reflux.createStore({
 		return channels.getIn([server, channel, 'topic']);
 	},
 
-	getState() {
-		return channels;
-	}
+	getInitialState: getState,
+	getState
 });
 
 module.exports = channelStore;

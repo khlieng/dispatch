@@ -13,6 +13,13 @@ if (stored) {
 	history = JSON.parse(stored);
 }
 
+function getState() {
+	if (index !== -1) {
+		return history[index];
+	}
+	return null;
+}
+
 var inputHistoryStore = Reflux.createStore({
 	init() {
 		this.listenToMany(actions);
@@ -51,12 +58,8 @@ var inputHistoryStore = Reflux.createStore({
 		}
 	},
 
-	getState() {
-		if (index !== -1) {
-			return history[index];
-		}
-		return null;
-	}
+	getInitialState: getState,
+	getState
 });
 
 module.exports = inputHistoryStore;

@@ -18,12 +18,6 @@ var Chat = React.createClass({
         Reflux.connect(selectedTabStore, 'selectedTab')
     ],
 
-    getInitialState() {
-        return {
-            selectedTab: selectedTabStore.getState()
-        };
-    },
-
     componentWillMount() {
         if (!window.loaded) {
             var p = this.getParams();

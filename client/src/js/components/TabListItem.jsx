@@ -11,12 +11,6 @@ var TabListItem = React.createClass({
 		Reflux.connect(selectedTabStore, 'tab')
 	],
 
-	getInitialState() {
-		return {
-			tab: selectedTabStore.getState()
-		};
-	},
-
 	handleClick() {
 		tabActions.select(this.props.server, this.props.channel);
 	},

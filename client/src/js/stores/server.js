@@ -11,6 +11,10 @@ var Server = Immutable.Record({
 	name: null
 });
 
+function getState() {
+	return servers;
+}
+
 var serverStore = Reflux.createStore({
 	init() {
 		this.listenToMany(actions);
@@ -56,9 +60,8 @@ var serverStore = Reflux.createStore({
 		return servers.getIn([server, 'name']);
 	},
 
-	getState() {
-		return servers;
-	}
+	getInitialState: getState,
+	getState
 });
 
 module.exports = serverStore;

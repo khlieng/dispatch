@@ -34,6 +34,10 @@ function updateChannelName(name) {
 	history[history.length - 1] = selectedTab;
 }
 
+function getState() {
+	return selectedTab;
+}
+
 var selectedTabStore = Reflux.createStore({
 	init() {
 		this.listenToMany(actions);
@@ -148,9 +152,8 @@ var selectedTabStore = Reflux.createStore({
 		return selectedTab.channel;
 	},
 
-	getState() {
-		return selectedTab;
-	}
+	getInitialState: getState,
+	getState
 });
 
 selectedTabStore.listen(selectedTab => {
@@ -165,7 +168,7 @@ selectedTabStore.listen(selectedTab => {
 		} else {
 			routeActions.navigate('/' + selectedTab.server);
 		}
-	} else if (_.size(serverStore.getState()) === 0) {
+	} else if (serverStore.getState().size === 0) {
 		routeActions.navigate('connect');
 	}
 	

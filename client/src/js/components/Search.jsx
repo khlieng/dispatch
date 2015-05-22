@@ -15,15 +15,8 @@ var Search = React.createClass({
 		Reflux.connect(selectedTabStore, 'selectedTab')
 	],
 
-	getInitialState() {
-		return {
-			search: searchStore.getState(),
-			selectedTab: selectedTabStore.getState()
-		};
-	},
-
 	componentDidUpdate(prevProps, prevState) {
-		if (!prevState.search.get('show') && this.state.search.get('show')) {
+		if (!prevState.search.show && this.state.search.show) {
 			this.refs.input.getDOMNode().focus();
 		}
 	},
@@ -38,10 +31,10 @@ var Search = React.createClass({
 
 	render() {
 		var style = {
-			display: this.state.search.get('show') ? 'block' : 'none'
+			display: this.state.search.show ? 'block' : 'none'
 		};
 
-		var results = this.state.search.get('results').map(result => {
+		var results = this.state.search.results.map(result => {
 			return (
 				<p key={result.id}>{util.timestamp(new Date(result.time * 1000))} {result.from} {result.content}</p>
 			);

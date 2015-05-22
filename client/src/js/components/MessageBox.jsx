@@ -20,8 +20,6 @@ var MessageBox = React.createClass({
 
 	getInitialState() {
 		return {
-			messages: messageLineStore.getState(),
-			selectedTab: selectedTabStore.getState(),
 			height: window.innerHeight - 100
 		};
 	},
