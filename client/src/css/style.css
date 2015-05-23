@@ -36,15 +36,26 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	top: 0;
 	bottom: 0;
 	width: 200px;
-	overflow: auto;
 	background: #222;
 	color: #FFF;
 	font-family: Montserrat, sans-serif;
 }
 
+.tab-container {
+	position: absolute;
+	top: 50px;
+	bottom: 50px;
+	width: 100%;
+	overflow: auto;
+}
+
 .tablist p {
 	padding: 3px 15px;
 	cursor: pointer;
+}
+
+.tablist p:last-child {
+	margin-bottom: 10px;
 }
 
 .tablist p:hover {
@@ -57,8 +68,8 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .tab-server {
-	color: #AAA;
-	margin-top: 15px !important;
+	color: #999;
+	margin-top: 10px !important;
 }
 
 .button-connect {
@@ -85,15 +96,22 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .side-buttons i {
+	display: inline-block;
 	color: #999;
-	margin: 25px;
-	line-height: 40px;
+	width: 50%;
+	line-height: 50px;
 	cursor: pointer;
 	font-size: 20px;
+	border-top: 1px solid #1D1D1D;
+}
+
+.side-buttons i:not(:first-child) {
+	border-left: 1px solid #1D1D1D;
 }
 
 .side-buttons i:hover {
-	color: #FFF;
+	color: #CCC;
+	background: #1D1D1D;
 }
 
 .connect {
@@ -205,8 +223,34 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .chat-title {
-	font-size: 28px;
+	font-size: 24px;
+	white-space: nowrap;
+}
+
+.chat-topic-wrap {
 	flex: 1;
+	position: relative;
+	margin: 0 15px;
+}
+
+.chat-topic {
+	position: absolute;
+	width: 100%;
+	bottom: -4px;
+	font-size: 16px;
+	color: #999;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.chat-topic a {
+	color: #999;
+	text-decoration: none;
+}
+
+.chat-topic a:hover {
+	text-decoration: underline;
 }
 
 .userlist-bar {

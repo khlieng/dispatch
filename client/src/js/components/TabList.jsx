@@ -66,7 +66,7 @@ var TabList = React.createClass({
 		return (
 			<div className="tablist">
 				<button className="button-connect" onClick={this.handleConnectClick}>Connect</button>
-				{tabs}
+				<div className="tab-container">{tabs}</div>
 				<div className="side-buttons">
 					<i className="icon-user"></i>
 					<i className="icon-cog" onClick={this.handleSettingsClick}></i>

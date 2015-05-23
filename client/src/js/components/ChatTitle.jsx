@@ -1,5 +1,6 @@
 var React = require('react');
 var Reflux = require('reflux');
+var Autolinker = require('autolinker');
 
 var channelStore = require('../stores/channel');
 var selectedTabStore = require('../stores/selectedTab');
@@ -9,6 +10,14 @@ var searchActions = require('../actions/search');
 var privateChatActions = require('../actions/privateChat');
 var PureMixin = require('../mixins/pure');
 
+function buildState(tab) {
+    return {
+        selectedTab: tab,
+        usercount: channelStore.getUsers(tab.server, tab.channel).size,
+        topic: channelStore.getTopic(tab.server, tab.channel)
+    };
+}
+
 var ChatTitle = React.createClass({
     mixins: [
         PureMixin,
@@ -17,25 +26,15 @@ var ChatTitle = React.createClass({
     ],
 
     getInitialState() {
-        var tab = selectedTabStore.getState();
-
-        return {
-            usercount: channelStore.getUsers(tab.server, tab.channel).size,
-            selectedTab: tab
-        };
+        return buildState(selectedTabStore.getState());
     },
 
     channelsChanged() {
-        var tab = this.state.selectedTab;
-        
-        this.setState({ usercount: channelStore.getUsers(tab.server, tab.channel).size });
+        this.setState(buildState(this.state.selectedTab));
     },
 
     selectedTabChanged(tab) {
-        this.setState({
-            selectedTab: tab,
-            usercount: channelStore.getUsers(tab.server, tab.channel).size
-        });
+        this.setState(buildState(tab));
     },
 
     handleLeaveClick() {
@@ -52,6 +51,7 @@ var ChatTitle = React.createClass({
 
     render() {
         var tab = this.state.selectedTab;
+        var topic = Autolinker.link(this.state.topic || '', { keepOriginalText: true });
         var leaveTitle;
 
         if (!tab.channel) {
@@ -66,6 +66,9 @@ var ChatTitle = React.createClass({
             <div>
                 <div className="chat-title-bar">
                     <span className="chat-title">{tab.name}</span>
+                    <div className="chat-topic-wrap">
+                        <span className="chat-topic" dangerouslySetInnerHTML={{ __html: topic }}></span>
+                    </div>
                     <i className="icon-search" title="Search" onClick={searchActions.toggle}></i>
                     <i 
                         className="icon-logout button-leave" 
