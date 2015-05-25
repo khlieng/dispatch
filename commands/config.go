@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"syscall"
 
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/cobra"
 
@@ -18,10 +17,13 @@ var (
 	configCmd = &cobra.Command{
 		Use:   "config",
 		Short: "Edit config file",
-		Run: func(cmd *cobra.Command, _ []string) {
+		Run: func(cmd *cobra.Command, args []string) {
 			if editor := findEditor(); editor != "" {
-				args := []string{editor, path.Join(storage.AppDir, "config.toml")}
-				syscall.Exec(editor, args, os.Environ())
+				process := exec.Command(editor, path.Join(storage.AppDir, "config.toml"))
+				process.Stdin = os.Stdin
+				process.Stdout = os.Stdout
+				process.Stderr = os.Stderr
+				process.Run()
 			} else {
 				log.Println("Unable to locate editor")
 			}
