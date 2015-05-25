@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	appDir string
+	AppDir string
 
 	db *bolt.DB
 
@@ -26,18 +26,18 @@ func init() {
 		log.Fatal(err)
 	}
 
-	appDir = path.Join(currentUser.HomeDir, ".name_pending")
+	AppDir = path.Join(currentUser.HomeDir, ".name_pending")
+
+	os.Mkdir(AppDir, 0777)
+	os.Mkdir(path.Join(AppDir, "logs"), 0777)
 }
 
 func Initialize() {
 	var err error
 
-	log.Println("Storing data at", appDir)
+	log.Println("Storing data at", AppDir)
 
-	os.Mkdir(appDir, 0777)
-	os.Mkdir(path.Join(appDir, "logs"), 0777)
-
-	db, err = bolt.Open(path.Join(appDir, "data.db"), 0600, nil)
+	db, err = bolt.Open(path.Join(AppDir, "data.db"), 0600, nil)
 	if err != nil {
 		log.Fatal("Could not open database file")
 	}
@@ -56,5 +56,6 @@ func Close() {
 }
 
 func Clear() {
-	os.RemoveAll(appDir)
+	os.RemoveAll(path.Join(AppDir, "logs"))
+	os.Remove(path.Join(AppDir, "data.db"))
 }

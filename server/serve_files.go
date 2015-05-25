@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/khlieng/name_pending/assets"
 )
 
 var files = []File{
@@ -41,7 +43,7 @@ func serveFiles(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveFile(w http.ResponseWriter, r *http.Request, path, contentType string) {
-	info, err := AssetInfo(path)
+	info, err := assets.AssetInfo(path)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
@@ -51,7 +53,7 @@ func serveFile(w http.ResponseWriter, r *http.Request, path, contentType string)
 		return
 	}
 
-	data, err := Asset(path)
+	data, err := assets.Asset(path)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return

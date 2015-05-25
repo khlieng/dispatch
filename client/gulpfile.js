@@ -79,21 +79,26 @@ gulp.task('fonts', function() {
         .pipe(gulp.dest('dist/font'));
 });
 
+gulp.task('config', function() {
+    return gulp.src('../config.default.toml')
+        .pipe(gulp.dest('dist/gz'));
+});
+
 gulp.task('gzip', ['html', 'css', 'js', 'fonts'], function() {
-    return gulp.src('dist/**/!(*.gz)')
+    return gulp.src(['dist/**/!(*.gz)', '!dist/{gz,gz/**}'])
         .pipe(gzip())
         .pipe(gulp.dest('dist/gz'));
 });
 
 function bindata(cb) {
     if (argv.production) {
-        exec('go-bindata -nomemcopy -nocompress -pkg server -o ../server/bindata.go -prefix "dist/gz" dist/gz/...', cb);
+        exec('go-bindata -nomemcopy -nocompress -pkg assets -o ../assets/bindata.go -prefix "dist/gz" dist/gz/...', cb);
     } else {
-        exec('go-bindata -debug -pkg server -o ../server/bindata.go -prefix "dist/gz" dist/...', cb);
+        exec('go-bindata -debug -pkg assets -o ../assets/bindata.go -prefix "dist/gz" dist/gz/...', cb);
     }
 }
 
-gulp.task('bindata', ['gzip'], function(cb) {
+gulp.task('bindata', ['gzip', 'config'], function(cb) {
     bindata(cb);
 });
 
@@ -114,4 +119,4 @@ gulp.task('watch', ['default'], function() {
     return js(true);
 });
 
-gulp.task('default', ['html', 'css', 'js', 'fonts', 'gzip', 'bindata']);
+gulp.task('default', ['html', 'css', 'js', 'fonts', 'config', 'gzip', 'bindata']);
