@@ -1,9 +1,16 @@
 package commands
 
 import (
+	"io/ioutil"
+	"log"
+	"os"
+	"os/user"
+	"path"
+
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/viper"
 
+	"github.com/khlieng/name_pending/assets"
 	"github.com/khlieng/name_pending/server"
 	"github.com/khlieng/name_pending/storage"
 )
@@ -13,10 +20,25 @@ var (
 		Use:   "name_pending",
 		Short: "Web-based IRC client in Go.",
 		Run: func(cmd *cobra.Command, args []string) {
-			storage.Initialize()
+			storage.Initialize(appDir)
 			server.Run(viper.GetInt("port"))
 		},
+
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			appDir = viper.GetString("dir")
+
+			os.Mkdir(appDir, 0777)
+			os.Mkdir(path.Join(appDir, "logs"), 0777)
+
+			initConfig()
+
+			viper.SetConfigName("config")
+			viper.AddConfigPath(appDir)
+			viper.ReadInConfig()
+		},
 	}
+
+	appDir string
 )
 
 func init() {
@@ -24,14 +46,38 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 
 	rootCmd.Flags().IntP("port", "p", 1337, "port to listen on")
-
-	viper.SetConfigName("config")
-	viper.AddConfigPath(storage.AppDir)
-	viper.ReadInConfig()
+	rootCmd.PersistentFlags().String("dir", defaultDir(), "directory to store config and data in")
 
 	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
+	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
 }
 
 func Execute() {
 	rootCmd.Execute()
+}
+
+func initConfig() {
+	configPath := path.Join(appDir, "config.toml")
+
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		config, err := assets.Asset("config.default.toml")
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		err = ioutil.WriteFile(configPath, config, 0600)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+func defaultDir() string {
+	currentUser, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return path.Join(currentUser.HomeDir, ".name_pending")
 }

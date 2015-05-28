@@ -304,7 +304,7 @@ func (u *User) SearchMessages(server, channel, phrase string) ([]Message, error)
 func (u *User) openMessageLog() {
 	var err error
 
-	u.messageLog, err = bolt.Open(path.Join(AppDir, "logs", u.UUID+"_log"), 0600, nil)
+	u.messageLog, err = bolt.Open(path.Join(appDir, "logs", u.UUID+"_log"), 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -315,7 +315,7 @@ func (u *User) openMessageLog() {
 		return nil
 	})
 
-	indexPath := path.Join(AppDir, "logs", u.UUID+"_index")
+	indexPath := path.Join(appDir, "logs", u.UUID+"_index")
 	u.messageIndex, err = bleve.Open(indexPath)
 	if err == bleve.ErrorIndexPathDoesNotExist {
 		mapping := bleve.NewIndexMapping()

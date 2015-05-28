@@ -3,16 +3,14 @@ package storage
 import (
 	"log"
 	"os"
-	"os/user"
 	"path"
 
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 var (
-	AppDir string
-
-	db *bolt.DB
+	appDir string
+	db     *bolt.DB
 
 	bucketUsers    = []byte("Users")
 	bucketServers  = []byte("Servers")
@@ -20,24 +18,13 @@ var (
 	bucketMessages = []byte("Messages")
 )
 
-func init() {
-	currentUser, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	AppDir = path.Join(currentUser.HomeDir, ".name_pending")
-
-	os.Mkdir(AppDir, 0777)
-	os.Mkdir(path.Join(AppDir, "logs"), 0777)
-}
-
-func Initialize() {
+func Initialize(dir string) {
 	var err error
+	appDir = dir
 
-	log.Println("Storing data at", AppDir)
+	log.Println("Storing data at", dir)
 
-	db, err = bolt.Open(path.Join(AppDir, "data.db"), 0600, nil)
+	db, err = bolt.Open(path.Join(dir, "data.db"), 0600, nil)
 	if err != nil {
 		log.Fatal("Could not open database file")
 	}
@@ -55,7 +42,7 @@ func Close() {
 	db.Close()
 }
 
-func Clear() {
-	os.RemoveAll(path.Join(AppDir, "logs"))
-	os.Remove(path.Join(AppDir, "data.db"))
+func Clear(dir string) {
+	os.RemoveAll(path.Join(dir, "logs"))
+	os.Remove(path.Join(dir, "data.db"))
 }
