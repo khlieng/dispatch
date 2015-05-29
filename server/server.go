@@ -68,7 +68,7 @@ func reconnect() {
 			irc.Password = server.Password
 			irc.Realname = server.Realname
 
-			go func() {
+			go func(server storage.Server) {
 				err := irc.Connect(server.Address)
 				if err != nil {
 					log.Println(err)
@@ -85,7 +85,7 @@ func reconnect() {
 					}
 					irc.Join(joining...)
 				}
-			}()
+			}(server)
 		}
 	}
 }
