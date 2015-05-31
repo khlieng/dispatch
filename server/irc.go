@@ -52,6 +52,7 @@ const (
 
 type Message struct {
 	Prefix   string
+	Nick     string
 	Command  string
 	Params   []string
 	Trailing string
@@ -246,8 +247,6 @@ func (i *IRC) recv() {
 		}
 
 		msg := parseMessage(line)
-		msg.Prefix = parseUser(msg.Prefix)
-
 		i.Messages <- msg
 
 		switch msg.Command {
@@ -276,6 +275,7 @@ func parseMessage(line string) *Message {
 	if strings.HasPrefix(line, ":") {
 		cmdStart = strings.Index(line, " ") + 1
 		msg.Prefix = line[1 : cmdStart-1]
+		msg.Nick = parseNick(msg.Prefix)
 	}
 
 	if i := strings.Index(line, " :"); i > 0 {
@@ -296,9 +296,9 @@ func parseMessage(line string) *Message {
 	return &msg
 }
 
-func parseUser(user string) string {
-	if i := strings.Index(user, "!"); i > 0 {
-		return user[:i]
+func parseNick(prefix string) string {
+	if i := strings.Index(prefix, "!"); i > 0 {
+		return prefix[:i]
 	}
-	return user
+	return prefix
 }

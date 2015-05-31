@@ -23,24 +23,22 @@ func handleMessages(irc *IRC, session *Session) {
 		case NICK:
 			session.sendJSON("nick", Nick{
 				Server: irc.Host,
-				Old:    msg.Prefix,
+				Old:    msg.Nick,
 				New:    msg.Trailing,
 			})
 
-			channelStore.RenameUser(msg.Prefix, msg.Trailing, irc.Host)
+			channelStore.RenameUser(msg.Nick, msg.Trailing, irc.Host)
 
 		case JOIN:
-			user := msg.Prefix
-
 			session.sendJSON("join", Join{
 				Server:   irc.Host,
-				User:     user,
+				User:     msg.Nick,
 				Channels: msg.Params,
 			})
 
-			channelStore.AddUser(user, irc.Host, msg.Params[0])
+			channelStore.AddUser(msg.Nick, irc.Host, msg.Params[0])
 
-			if user == irc.GetNick() {
+			if msg.Nick == irc.GetNick() {
 				session.user.AddChannel(storage.Channel{
 					Server: irc.Host,
 					Name:   msg.Params[0],
@@ -48,20 +46,18 @@ func handleMessages(irc *IRC, session *Session) {
 			}
 
 		case PART:
-			user := msg.Prefix
-
 			session.sendJSON("part", Part{
 				Join: Join{
 					Server:   irc.Host,
-					User:     user,
+					User:     msg.Nick,
 					Channels: msg.Params,
 				},
 				Reason: msg.Trailing,
 			})
 
-			channelStore.RemoveUser(user, irc.Host, msg.Params[0])
+			channelStore.RemoveUser(msg.Nick, irc.Host, msg.Params[0])
 
-			if user == irc.GetNick() {
+			if msg.Nick == irc.GetNick() {
 				session.user.RemoveChannel(irc.Host, msg.Params[0])
 			}
 
@@ -82,32 +78,30 @@ func handleMessages(irc *IRC, session *Session) {
 			if msg.Params[0] == irc.GetNick() {
 				session.sendJSON("pm", Chat{
 					Server:  irc.Host,
-					From:    msg.Prefix,
+					From:    msg.Nick,
 					Message: msg.Trailing,
 				})
 			} else {
 				session.sendJSON("message", Chat{
 					Server:  irc.Host,
-					From:    msg.Prefix,
+					From:    msg.Nick,
 					To:      msg.Params[0],
 					Message: msg.Trailing,
 				})
 			}
 
 			if msg.Params[0] != "*" {
-				session.user.LogMessage(irc.Host, msg.Prefix, msg.Params[0], msg.Trailing)
+				session.user.LogMessage(irc.Host, msg.Nick, msg.Params[0], msg.Trailing)
 			}
 
 		case QUIT:
-			user := msg.Prefix
-
 			session.sendJSON("quit", Quit{
 				Server: irc.Host,
-				User:   user,
+				User:   msg.Nick,
 				Reason: msg.Trailing,
 			})
 
-			channelStore.RemoveUserAll(user, irc.Host)
+			channelStore.RemoveUserAll(msg.Nick, irc.Host)
 
 		case RPL_WELCOME,
 			RPL_YOURHOST,
@@ -119,7 +113,7 @@ func handleMessages(irc *IRC, session *Session) {
 			RPL_LUSERME:
 			session.sendJSON("pm", Chat{
 				Server:  irc.Host,
-				From:    msg.Prefix,
+				From:    msg.Nick,
 				Message: strings.Join(msg.Params[1:], " "),
 			})
 
