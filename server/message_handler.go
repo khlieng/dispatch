@@ -15,6 +15,7 @@ func handleMessages(irc *IRC, session *Session) {
 	for {
 		msg, ok := <-irc.Messages
 		if !ok {
+			session.deleteIRC(irc.Host)
 			return
 		}
 
