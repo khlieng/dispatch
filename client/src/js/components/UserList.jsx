@@ -1,6 +1,5 @@
 var React = require('react');
 var Reflux = require('reflux');
-var _ = require('lodash');
 var Infinite = require('react-infinite');
 
 var UserListItem = require('./UserListItem.jsx');
@@ -77,7 +76,7 @@ var UserList = React.createClass({
 					<div>{users}</div>
 				</div>
 			);
-		}		
+		}
 	}
 });
 

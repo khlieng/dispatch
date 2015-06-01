@@ -2,15 +2,15 @@ var _ = require('lodash');
 
 exports.UUID = function() {
 	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-	    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-	    return v.toString(16);
+		var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
 	});
 };
 
 exports.timestamp = function(date) {
 	date = date || new Date();
-	
-	var h = _.padLeft(date.getHours(), 2, '0')
+
+	var h = _.padLeft(date.getHours(), 2, '0');
 	var m = _.padLeft(date.getMinutes(), 2, '0');
 
 	return h + ':' + m;
@@ -85,7 +85,7 @@ exports.wrapMessages = function(messages, width, charWidth, indent = 0) {
 var canvas = document.createElement('canvas');
 var ctx = canvas.getContext('2d');
 
-exports.stringWidth = function(str, font) {	
+exports.stringWidth = function(str, font) {
 	ctx.font = font;
 	return ctx.measureText(str).width;
 };
@@ -102,7 +102,7 @@ exports.scrollbarWidth = function() {
 
     var inner = document.createElement('div');
     inner.style.width = '100%';
-    outer.appendChild(inner);        
+    outer.appendChild(inner);
 
     var widthWithScroll = inner.offsetWidth;
 

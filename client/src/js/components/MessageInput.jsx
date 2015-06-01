@@ -61,10 +61,10 @@ var MessageInput = React.createClass({
 	render() {
 		return (
 			<div className="message-input-wrap">
-				<input 
-					ref="input" 
-					className="message-input" 
-					type="text" 
+				<input
+					ref="input"
+					className="message-input"
+					type="text"
 					value={this.state.history || this.state.value}
 					onKeyDown={this.handleKey}
 					onChange={this.handleChange} />

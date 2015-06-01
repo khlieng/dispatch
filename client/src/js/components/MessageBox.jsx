@@ -1,8 +1,6 @@
 var React = require('react');
 var Reflux = require('reflux');
-var _ = require('lodash');
 var Infinite = require('react-infinite');
-var Autolinker = require('autolinker');
 
 var MessageHeader = require('./MessageHeader.jsx');
 var MessageLine = require('./MessageLine.jsx');
@@ -66,7 +64,7 @@ var MessageBox = React.createClass({
 		var lines = [];
 
 		this.state.messages.forEach((message, j) => {
-			var key = message.server + dest + j;			
+			var key = message.server + dest + j;
 
 			lines.push(<MessageHeader key={key} message={message} />);
 

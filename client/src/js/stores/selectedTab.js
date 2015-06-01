@@ -51,10 +51,10 @@ var selectedTabStore = Reflux.createStore({
 	},
 
 	select(server, channel = null) {
-		selectedTab = new Tab({ 
-			server, 
-			channel, 
-			name: channel || serverStore.getName(server) 
+		selectedTab = new Tab({
+			server,
+			channel,
+			name: channel || serverStore.getName(server)
 		});
 
 		history.push(selectedTab);
@@ -63,14 +63,14 @@ var selectedTabStore = Reflux.createStore({
 	},
 
 	part(channels, server) {
-		if (server === selectedTab.server && 
+		if (server === selectedTab.server &&
 			channels.indexOf(selectedTab.channel) !== -1) {
 			if (!selectPrevTab()) {
 				selectedTab = selectedTab
 					.set('channel', null)
 					.set('name', serverStore.getName(server));
 			}
-			
+
 			this.trigger(selectedTab);
 		}
 	},
@@ -83,7 +83,7 @@ var selectedTabStore = Reflux.createStore({
 					.set('channel', null)
 					.set('name', serverStore.getName(server));
 			}
-			
+
 			this.trigger(selectedTab);
 		}
 	},
@@ -112,7 +112,7 @@ var selectedTabStore = Reflux.createStore({
 	},
 
 	loadChannels(channels) {
-		_.each(channels, (channel) => {
+		_.each(channels, (channel) => {
 			if (channel.server === selectedTab.server &&
 				channel.name !== selectedTab.channel &&
 				channel.name.indexOf(selectedTab.channel) !== -1) {
@@ -156,23 +156,23 @@ var selectedTabStore = Reflux.createStore({
 	getState
 });
 
-selectedTabStore.listen(selectedTab => {
-	var channel = selectedTab.channel;
+selectedTabStore.listen(tab => {
+	var channel = tab.channel;
 
-	if (selectedTab.server) {
+	if (tab.server) {
 		if (channel) {
 			while (channel[0] === '#') {
 				channel = channel.slice(1);
 			}
-			routeActions.navigate('/' + selectedTab.server + '/' + channel);
+			routeActions.navigate('/' + tab.server + '/' + channel);
 		} else {
-			routeActions.navigate('/' + selectedTab.server);
+			routeActions.navigate('/' + tab.server);
 		}
 	} else if (serverStore.getState().size === 0) {
 		routeActions.navigate('connect');
 	}
-	
-	localStorage.selectedTab = JSON.stringify(selectedTab);
+
+	localStorage.selectedTab = JSON.stringify(tab);
 });
 
 module.exports = selectedTabStore;

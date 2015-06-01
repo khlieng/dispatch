@@ -7,8 +7,8 @@ var PureMixin = require('../mixins/pure');
 
 var UserListItem = React.createClass({
     mixins: [PureMixin],
-    
-	handleClick() {
+
+    handleClick() {
 		var server = selectedTabStore.getServer();
 
 		privateChatActions.open(server, this.props.user.nick);

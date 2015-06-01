@@ -8,6 +8,7 @@ var autoprefixer = require('gulp-autoprefixer');
 var uglify = require('gulp-uglify');
 var gzip = require('gulp-gzip');
 var concat = require('gulp-concat');
+var eslint = require('gulp-eslint');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
@@ -74,6 +75,13 @@ function js(watch) {
     return rebundle();
 }
 
+gulp.task('lint', function() {
+    return gulp.src('src/js/**/*.{js,jsx}')
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failOnError());
+});
+
 gulp.task('fonts', function() {
     return gulp.src('src/font/*')
         .pipe(gulp.dest('dist/font'));
@@ -116,7 +124,8 @@ gulp.task('watch', ['default'], function() {
     gulp.watch('dist/**/*.{html,css,js}', ['gzip:watch', 'bindata:watch'])
     gulp.watch('src/*.html', ['html']);
     gulp.watch('src/css/*.css', ['css']);
+    gulp.watch('src/js/**/*.{js,jsx}', ['lint']);
     return js(true);
 });
 
-gulp.task('default', ['html', 'css', 'js', 'fonts', 'config', 'gzip', 'bindata']);
+gulp.task('default', ['html', 'css', 'js', 'lint', 'fonts', 'config', 'gzip', 'bindata']);

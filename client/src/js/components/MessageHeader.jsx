@@ -1,5 +1,4 @@
 var React = require('react');
-var Reflux = require('reflux');
 var Autolinker = require('autolinker');
 
 var util = require('../util');

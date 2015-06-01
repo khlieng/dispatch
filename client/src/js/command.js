@@ -43,7 +43,7 @@ messageActions.command.listen(function(line, channel, server) {
 			break;
 
 		case 'topic':
-			var topic = channelStore.getTopic(server, channel);
+			let topic = channelStore.getTopic(server, channel);
 			if (topic) {
 				messageActions.add({
 					server: server,
@@ -72,8 +72,8 @@ messageActions.command.listen(function(line, channel, server) {
 
 		case 'msg':
 			if (params.length > 2) {
-				var dest = params[1];
-				var message = params.slice(2).join(' ');
+				let dest = params[1];
+				let message = params.slice(2).join(' ');
 
 				messageActions.send(message, dest, server);
 			}
@@ -81,7 +81,7 @@ messageActions.command.listen(function(line, channel, server) {
 
 		case 'say':
 			if (params.length > 1) {
-				var message = params.slice(1).join(' ');
+				let message = params.slice(1).join(' ');
 
 				messageActions.send(message, channel, server);
 			}

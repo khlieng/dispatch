@@ -35,7 +35,7 @@ var Connect = React.createClass({
 			serverActions.connect(address, nick, opts);
 
 			if (channels.length > 0) {
-				channelActions.join(channels, address);				
+				channelActions.join(channels, address);
 			}
 		}
 	},

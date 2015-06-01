@@ -3,7 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 class Socket extends EventEmitter {
 	constructor() {
 		super();
-		
+
 		this.ws = new WebSocket('ws://' + window.location.host + '/ws');
 
 		this.ws.onopen = () => this.emit('connect');
@@ -12,7 +12,7 @@ class Socket extends EventEmitter {
 			var msg = JSON.parse(e.data);
 
 			this.emit(msg.type, msg.response);
-		}
+		};
 	}
 
 	send(type, data) {

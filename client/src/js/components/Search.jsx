@@ -1,6 +1,5 @@
 var React = require('react');
 var Reflux = require('reflux');
-var _ = require('lodash');
 
 var util = require('../util');
 var searchStore = require('../stores/search');
@@ -42,9 +41,9 @@ var Search = React.createClass({
 
 		return (
 			<div className="search" style={style}>
-				<input 
+				<input
 					ref="input"
-					className="search-input" 
+					className="search-input"
 					type="text"
 					onChange={this.handleChange} />
 				<div className="search-results">{results}</div>

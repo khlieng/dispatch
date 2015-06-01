@@ -1,6 +1,5 @@
 var React = require('react');
 var Reflux = require('reflux');
-var _ = require('lodash');
 
 var TabListItem = require('./TabListItem.jsx');
 var channelStore = require('../stores/channel');
@@ -30,9 +29,9 @@ var TabList = React.createClass({
 
 		this.state.channels.forEach((server, address) => {
 			tabs.push(
-				<TabListItem 
+				<TabListItem
 					key={address}
-					server={address} 
+					server={address}
 					channel={null}
 					name={this.state.servers.getIn([address, 'name'])}>
 				</TabListItem>
@@ -41,8 +40,8 @@ var TabList = React.createClass({
 			server.forEach((channel, name) => {
 				tabs.push(
 					<TabListItem
-						key={address + name} 
-						server={address} 
+						key={address + name}
+						server={address}
 						channel={name}
 						name={name}>
 					</TabListItem>
@@ -52,9 +51,9 @@ var TabList = React.createClass({
 			if (this.state.privateChats.has(address)) {
 				this.state.privateChats.get(address).forEach(nick => {
 					tabs.push(
-						<TabListItem 
+						<TabListItem
 							key={address + nick}
-							server={address} 
+							server={address}
 							channel={nick}
 							name={nick}>
 						</TabListItem>

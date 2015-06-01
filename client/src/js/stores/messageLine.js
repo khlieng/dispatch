@@ -1,5 +1,4 @@
 var Reflux = require('reflux');
-var _ = require('lodash');
 
 var util = require('../util');
 var messageStore = require('./message');
@@ -13,14 +12,14 @@ var prev;
 
 function updateCharWidth() {
 	window.charWidth = util.stringWidth(' ', '16px Droid Sans Mono');
-	window.messageIndent = 6 * charWidth;
+	window.messageIndent = 6 * window.charWidth;
 }
 
 function wrap() {
 	var next = messageStore.getMessages(tab.server, tab.channel || tab.server);
 	if (next !== prev) {
 		prev = next;
-		messages = util.wrapMessages(next, width, charWidth, messageIndent);
+		messages = util.wrapMessages(next, width, window.charWidth, window.messageIndent);
 		return true;
 	}
 	return false;
@@ -45,7 +44,7 @@ var messageLineStore = Reflux.createStore({
 
 	setWrapWidth(w) {
 		width = w;
-		messages = util.wrapMessages(messages, width, charWidth, messageIndent);
+		messages = util.wrapMessages(messages, width, window.charWidth, window.messageIndent);
 		this.trigger(messages);
 	},
 
@@ -57,7 +56,7 @@ var messageLineStore = Reflux.createStore({
 
 	selectedTabChanged(selectedTab) {
 		tab = selectedTab;
-		
+
 		if (wrap()) {
 			this.trigger(messages);
 		}

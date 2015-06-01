@@ -6,8 +6,11 @@ var channelActions = require('./actions/channel');
 var messageActions = require('./actions/message');
 var serverActions = require('./actions/server');
 var routeActions = require('./actions/route');
-var tabActions = require('./actions/tab');
 var searchActions = require('./actions/search');
+
+function withReason(message, reason) {
+	return message + (reason ? ' (' + reason + ')' : '');
+}
 
 socket.on('join', function(data) {
 	channelActions.addUser(data.user, data.server, data.channels[0]);
@@ -90,10 +93,6 @@ socket.on('search', function(data) {
 	searchActions.searchDone(data.results);
 });
 
-serverActions.connect.listen(function(server, nick, opts) {
+serverActions.connect.listen(function(server) {
 	messageActions.inform('Connecting...', server);
 });
-
-function withReason(message, reason) {
-	return message + (reason ? ' (' + reason + ')' : '');
-}

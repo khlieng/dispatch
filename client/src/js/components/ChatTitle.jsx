@@ -70,9 +70,9 @@ var ChatTitle = React.createClass({
                         <span className="chat-topic" dangerouslySetInnerHTML={{ __html: topic }}></span>
                     </div>
                     <i className="icon-search" title="Search" onClick={searchActions.toggle}></i>
-                    <i 
-                        className="icon-logout button-leave" 
-                        title={leaveTitle} 
+                    <i
+                        className="icon-logout button-leave"
+                        title={leaveTitle}
                         onClick={this.handleLeaveClick}></i>
                 </div>
                 <div className="userlist-bar">

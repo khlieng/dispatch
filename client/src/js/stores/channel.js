@@ -14,6 +14,18 @@ var User = Immutable.Record({
 	mode: ''
 });
 
+function updateRenderName(user) {
+	var name = user.nick;
+
+	if (user.mode.indexOf('o') !== -1) {
+		name = '@' + name;
+	} else if (user.mode.indexOf('v') !== -1) {
+		name = '+' + name;
+	}
+
+	return user.set('renderName', name);
+}
+
 function createUser(nick, mode) {
 	return updateRenderName(new User({
 		nick: nick,
@@ -36,18 +48,6 @@ function loadUser(nick) {
 	}
 
 	return createUser(nick, mode);
-}
-
-function updateRenderName(user) {
-	var name = user.nick;
-
-	if (user.mode.indexOf('o') !== -1) {
-		name = '@' + name;
-	} else if (user.mode.indexOf('v') !== -1) {
-		name = '+' + name;
-	}
-
-	return user.set('renderName', name);
 }
 
 function compareUsers(a, b) {
@@ -142,10 +142,10 @@ var channelStore = Reflux.createStore({
 		var i = channels.getIn([mode.server, mode.channel, 'users']).findIndex(u => u.nick === mode.user);
 
 		channels = channels.updateIn([mode.server, mode.channel, 'users', i], user => {
-			_.each(mode.remove, function(mode) {
-				user = user.set('mode', user.mode.replace(mode, ''));
+			_.each(mode.remove, remove => {
+				user = user.set('mode', user.mode.replace(remove, ''));
 			});
-			
+
 			user = user.set('mode', user.mode + mode.add);
 
 			return updateRenderName(user);
