@@ -69,22 +69,18 @@ func reconnect() {
 			irc.Realname = server.Realname
 
 			go func(server storage.Server) {
-				err := irc.Connect(server.Address)
-				if err != nil {
-					log.Println(err)
-				} else {
-					session.setIRC(irc.Host, irc)
+				irc.Connect(server.Address)
+				session.setIRC(irc.Host, irc)
 
-					go handleMessages(irc, session)
+				go handleMessages(irc, session)
 
-					var joining []string
-					for _, channel := range channels {
-						if channel.Server == server.Address {
-							joining = append(joining, channel.Name)
-						}
+				var joining []string
+				for _, channel := range channels {
+					if channel.Server == server.Address {
+						joining = append(joining, channel.Name)
 					}
-					irc.Join(joining...)
 				}
+				irc.Join(joining...)
 			}(server)
 		}
 	}

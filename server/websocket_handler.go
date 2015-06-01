@@ -95,24 +95,18 @@ func handleWS(ws *websocket.Conn) {
 				}
 
 				go func() {
-					err := irc.Connect(data.Server)
-					if err != nil {
-						session.deleteIRC(irc.Host)
-						session.sendError(err, irc.Host)
-						log.Println(err)
-					} else {
-						go handleMessages(irc, session)
+					irc.Connect(data.Server)
+					go handleMessages(irc, session)
 
-						session.user.AddServer(storage.Server{
-							Name:     data.Name,
-							Address:  irc.Host,
-							TLS:      data.TLS,
-							Password: data.Password,
-							Nick:     data.Nick,
-							Username: data.Username,
-							Realname: data.Realname,
-						})
-					}
+					session.user.AddServer(storage.Server{
+						Name:     data.Name,
+						Address:  irc.Host,
+						TLS:      data.TLS,
+						Password: data.Password,
+						Nick:     data.Nick,
+						Username: data.Username,
+						Realname: data.Realname,
+					})
 				}()
 			} else {
 				log.Println(addr, "already connected to", data.Server)

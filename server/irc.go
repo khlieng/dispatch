@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 	"sync"
@@ -59,13 +58,19 @@ type Message struct {
 }
 
 type IRC struct {
-	conn     net.Conn
-	reader   *bufio.Reader
-	out      chan string
-	ready    sync.WaitGroup
-	once     sync.Once
-	nick     string
-	nickLock sync.Mutex
+	conn      net.Conn
+	connected bool
+	dialer    *net.Dialer
+	reader    *bufio.Reader
+	out       chan string
+
+	quit      chan struct{}
+	reconnect chan struct{}
+	ready     sync.WaitGroup
+	once      sync.Once
+	lock      sync.Mutex
+
+	nick string
 
 	Messages  chan *Message
 	Server    string
@@ -79,15 +84,17 @@ type IRC struct {
 
 func NewIRC(nick, username string) *IRC {
 	return &IRC{
-		nick:     nick,
-		Username: username,
-		Realname: nick,
-		Messages: make(chan *Message, 32),
-		out:      make(chan string, 32),
+		nick:      nick,
+		Username:  username,
+		Realname:  nick,
+		Messages:  make(chan *Message, 32),
+		out:       make(chan string, 32),
+		quit:      make(chan struct{}),
+		reconnect: make(chan struct{}),
 	}
 }
 
-func (i *IRC) Connect(address string) error {
+func (i *IRC) Connect(address string) {
 	if idx := strings.Index(address, ":"); idx < 0 {
 		i.Host = address
 
@@ -100,40 +107,16 @@ func (i *IRC) Connect(address string) error {
 		i.Host = address[:idx]
 	}
 	i.Server = address
+	i.dialer = &net.Dialer{Timeout: 10 * time.Second}
 
-	dialer := &net.Dialer{Timeout: 30 * time.Second}
+	go i.run()
+}
 
-	if i.TLS {
-		if i.TLSConfig == nil {
-			i.TLSConfig = &tls.Config{InsecureSkipVerify: true}
-		}
+func (i *IRC) Connected() bool {
+	i.lock.Lock()
+	defer i.lock.Unlock()
 
-		if conn, err := tls.DialWithDialer(dialer, "tcp", address, i.TLSConfig); err != nil {
-			return err
-		} else {
-			i.conn = conn
-		}
-	} else {
-		if conn, err := dialer.Dial("tcp", address); err != nil {
-			return err
-		} else {
-			i.conn = conn
-		}
-	}
-
-	i.reader = bufio.NewReader(i.conn)
-
-	if i.Password != "" {
-		i.Pass(i.Password)
-	}
-	i.Nick(i.nick)
-	i.User(i.Username, i.Realname)
-
-	i.ready.Add(1)
-	go i.send()
-	go i.recv()
-
-	return nil
+	return i.connected
 }
 
 func (i *IRC) Pass(password string) {
@@ -141,11 +124,11 @@ func (i *IRC) Pass(password string) {
 }
 
 func (i *IRC) Nick(nick string) {
-	i.write("NICK " + nick)
+	i.Write("NICK " + nick)
 
-	i.nickLock.Lock()
+	i.lock.Lock()
 	i.nick = nick
-	i.nickLock.Unlock()
+	i.lock.Unlock()
 }
 
 func (i *IRC) User(username, realname string) {
@@ -162,9 +145,10 @@ func (i *IRC) Mode(target, modes, params string) {
 
 func (i *IRC) Quit() {
 	go func() {
-		i.ready.Wait()
-		i.write("QUIT")
-		i.conn.Close()
+		if i.Connected() {
+			i.write("QUIT")
+		}
+		close(i.quit)
 	}()
 }
 
@@ -205,8 +189,8 @@ func (i *IRC) Away(message string) {
 }
 
 func (i *IRC) GetNick() string {
-	i.nickLock.Lock()
-	defer i.nickLock.Unlock()
+	i.lock.Lock()
+	defer i.lock.Unlock()
 
 	return i.nick
 }
@@ -227,23 +211,115 @@ func (i *IRC) writef(format string, a ...interface{}) {
 	fmt.Fprintf(i.conn, format+"\r\n", a...)
 }
 
-func (i *IRC) send() {
-	i.ready.Wait()
+func (i *IRC) run() {
+	i.tryConnect()
 	for {
-		_, err := i.conn.Write([]byte(<-i.out))
-		if err != nil {
+		select {
+		case <-i.quit:
+			i.close()
+			i.lock.Lock()
+			i.connected = false
+			i.lock.Unlock()
+			return
+
+		case <-i.reconnect:
+			i.reconnect = make(chan struct{})
+			i.once = sync.Once{}
+			i.tryConnect()
+		}
+	}
+}
+
+func (i *IRC) tryConnect() {
+	// TODO: backoff
+	for {
+		select {
+		case <-i.quit:
+			return
+		default:
+		}
+
+		err := i.connect()
+		if err == nil {
 			return
 		}
 	}
 }
 
+func (i *IRC) connect() error {
+	if i.TLS {
+		if i.TLSConfig == nil {
+			i.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+		}
+
+		if conn, err := tls.DialWithDialer(i.dialer, "tcp", i.Server, i.TLSConfig); err != nil {
+			return err
+		} else {
+			i.conn = conn
+		}
+	} else {
+		if conn, err := i.dialer.Dial("tcp", i.Server); err != nil {
+			return err
+		} else {
+			i.conn = conn
+		}
+	}
+
+	i.lock.Lock()
+	i.connected = true
+	i.lock.Unlock()
+
+	i.reader = bufio.NewReader(i.conn)
+
+	if i.Password != "" {
+		i.Pass(i.Password)
+	}
+	i.write("NICK " + i.nick)
+	i.User(i.Username, i.Realname)
+
+	i.ready.Add(1)
+	go i.send()
+	go i.recv()
+
+	return nil
+}
+
+func (i *IRC) send() {
+	i.ready.Wait()
+	for {
+		select {
+		case <-i.quit:
+			return
+
+		case <-i.reconnect:
+			return
+
+		case msg := <-i.out:
+			_, err := i.conn.Write([]byte(msg))
+			if err != nil {
+				return
+			}
+		}
+	}
+}
+
 func (i *IRC) recv() {
-	defer i.close()
+	defer i.conn.Close()
 	for {
 		line, err := i.reader.ReadString('\n')
 		if err != nil {
-			log.Println("IRC connection to", i.Server, "died")
+			i.lock.Lock()
+			i.connected = false
+			i.lock.Unlock()
+			i.once.Do(i.ready.Done)
+			close(i.reconnect)
 			return
+		}
+
+		select {
+		case <-i.quit:
+			return
+		default:
 		}
 
 		msg := parseMessage(line)
@@ -260,8 +336,9 @@ func (i *IRC) recv() {
 }
 
 func (i *IRC) close() {
-	i.conn.Close()
-	i.once.Do(i.ready.Done)
+	if i.Connected() {
+		i.once.Do(i.ready.Done)
+	}
 	close(i.out)
 	close(i.Messages)
 }
@@ -275,7 +352,12 @@ func parseMessage(line string) *Message {
 	if strings.HasPrefix(line, ":") {
 		cmdStart = strings.Index(line, " ") + 1
 		msg.Prefix = line[1 : cmdStart-1]
-		msg.Nick = parseNick(msg.Prefix)
+
+		if i := strings.Index(msg.Prefix, "!"); i > 0 {
+			msg.Nick = msg.Prefix[:i]
+		} else {
+			msg.Nick = msg.Prefix
+		}
 	}
 
 	if i := strings.Index(line, " :"); i > 0 {
@@ -294,11 +376,4 @@ func parseMessage(line string) *Message {
 	}
 
 	return &msg
-}
-
-func parseNick(prefix string) string {
-	if i := strings.Index(prefix, "!"); i > 0 {
-		return prefix[:i]
-	}
-	return prefix
 }
