@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
-
 	"github.com/khlieng/name_pending/storage"
 )
 
@@ -56,18 +54,14 @@ func (s *Session) numIRC() int {
 	return n
 }
 
-func (s *Session) setWS(addr string, ws *websocket.Conn) {
-	socket := NewWebSocket(ws)
-	go socket.write()
-
+func (s *Session) setWS(addr string, w *WebSocket) {
 	s.wsLock.Lock()
-	s.ws[addr] = socket
+	s.ws[addr] = w
 	s.wsLock.Unlock()
 }
 
 func (s *Session) deleteWS(addr string) {
 	s.wsLock.Lock()
-	s.ws[addr].close()
 	delete(s.ws, addr)
 	s.wsLock.Unlock()
 }

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"time"
+
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
 )
 
@@ -18,8 +20,22 @@ func NewWebSocket(ws *websocket.Conn) *WebSocket {
 }
 
 func (w *WebSocket) write() {
+	var err error
+	ping := time.Tick(20 * time.Second)
+
 	for {
-		err := w.conn.WriteMessage(websocket.TextMessage, <-w.Out)
+		select {
+		case msg, ok := <-w.Out:
+			if !ok {
+				return
+			}
+
+			err = w.conn.WriteMessage(websocket.TextMessage, msg)
+
+		case <-ping:
+			err = w.conn.WriteJSON(WSResponse{Type: "ping"})
+		}
+
 		if err != nil {
 			return
 		}

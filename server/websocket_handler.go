@@ -18,6 +18,8 @@ func handleWS(ws *websocket.Conn) {
 	var req WSRequest
 
 	addr := ws.RemoteAddr().String()
+	w := NewWebSocket(ws)
+	go w.write()
 
 	log.Println(addr, "connected")
 
@@ -27,6 +29,8 @@ func handleWS(ws *websocket.Conn) {
 			if session != nil {
 				session.deleteWS(addr)
 			}
+
+			w.close()
 
 			log.Println(addr, "disconnected")
 			return
@@ -73,7 +77,7 @@ func handleWS(ws *websocket.Conn) {
 				go session.write()
 			}
 
-			session.setWS(addr, ws)
+			session.setWS(addr, w)
 
 		case "connect":
 			var data Connect
