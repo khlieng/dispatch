@@ -1,18 +1,19 @@
 # name_pending
-Web-based IRC client in Go.
 
-## Features
+####[Try it!](http://np.khlieng.com/)
+
+### Features
 * Searchable history
 * Persistent connections
 * Multiple users
 
 ## Usage
-There is a few different ways of getting it.
+There is a few different ways of getting it:
 
-### 1. Binary
+#### 1. Binary
 There will be binary releases.
 
-### 2. Go
+#### 2. Go
 This requires a [Go environment](http://golang.org/doc/install).
 
 ```bash
@@ -26,7 +27,7 @@ To get some help run:
 name_pending help
 ```
 
-### 3. Docker
+#### 3. Docker
 ```bash
 docker run -p 8080:8080 khlieng/name_pending
 ```
