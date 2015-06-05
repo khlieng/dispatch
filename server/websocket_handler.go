@@ -7,30 +7,31 @@ import (
 
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
 
+	"github.com/khlieng/name_pending/irc"
 	"github.com/khlieng/name_pending/storage"
 )
 
-func handleWS(ws *websocket.Conn) {
-	defer ws.Close()
+func handleWS(conn *websocket.Conn) {
+	defer conn.Close()
 
 	var session *Session
 	var UUID string
-	var req WSRequest
 
-	addr := ws.RemoteAddr().String()
-	w := NewWebSocket(ws)
-	go w.write()
+	addr := conn.RemoteAddr().String()
+
+	ws := newConn(conn)
+	defer ws.close()
+	go ws.send()
+	go ws.recv()
 
 	log.Println(addr, "connected")
 
 	for {
-		err := ws.ReadJSON(&req)
-		if err != nil {
+		req, ok := <-ws.in
+		if !ok {
 			if session != nil {
 				session.deleteWS(addr)
 			}
-
-			w.close()
 
 			log.Println(addr, "disconnected")
 			return
@@ -77,7 +78,7 @@ func handleWS(ws *websocket.Conn) {
 				go session.write()
 			}
 
-			session.setWS(addr, w)
+			session.setWS(addr, ws)
 
 		case "connect":
 			var data Connect
@@ -87,24 +88,24 @@ func handleWS(ws *websocket.Conn) {
 			if _, ok := session.getIRC(data.Server); !ok {
 				log.Println(addr, "connecting to", data.Server)
 
-				irc := NewIRC(data.Nick, data.Username)
-				irc.TLS = data.TLS
-				irc.Password = data.Password
-				irc.Realname = data.Realname
+				i := irc.NewClient(data.Nick, data.Username)
+				i.TLS = data.TLS
+				i.Password = data.Password
+				i.Realname = data.Realname
 
 				if idx := strings.Index(data.Server, ":"); idx < 0 {
-					session.setIRC(data.Server, irc)
+					session.setIRC(data.Server, i)
 				} else {
-					session.setIRC(data.Server[:idx], irc)
+					session.setIRC(data.Server[:idx], i)
 				}
 
 				go func() {
-					irc.Connect(data.Server)
-					go handleMessages(irc, session)
+					i.Connect(data.Server)
+					go handleIRC(i, session)
 
 					session.user.AddServer(storage.Server{
 						Name:     data.Name,
-						Address:  irc.Host,
+						Address:  i.Host,
 						TLS:      data.TLS,
 						Password: data.Password,
 						Nick:     data.Nick,
@@ -121,8 +122,8 @@ func handleWS(ws *websocket.Conn) {
 
 			json.Unmarshal(req.Request, &data)
 
-			if irc, ok := session.getIRC(data.Server); ok {
-				irc.Join(data.Channels...)
+			if i, ok := session.getIRC(data.Server); ok {
+				i.Join(data.Channels...)
 			}
 
 		case "part":
@@ -130,8 +131,8 @@ func handleWS(ws *websocket.Conn) {
 
 			json.Unmarshal(req.Request, &data)
 
-			if irc, ok := session.getIRC(data.Server); ok {
-				irc.Part(data.Channels...)
+			if i, ok := session.getIRC(data.Server); ok {
+				i.Part(data.Channels...)
 			}
 
 		case "quit":
@@ -139,10 +140,10 @@ func handleWS(ws *websocket.Conn) {
 
 			json.Unmarshal(req.Request, &data)
 
-			if irc, ok := session.getIRC(data.Server); ok {
-				irc.Quit()
+			if i, ok := session.getIRC(data.Server); ok {
+				i.Quit()
 				session.deleteIRC(data.Server)
-				channelStore.RemoveUserAll(irc.GetNick(), data.Server)
+				channelStore.RemoveUserAll(i.GetNick(), data.Server)
 				session.user.RemoveServer(data.Server)
 			}
 
@@ -151,8 +152,8 @@ func handleWS(ws *websocket.Conn) {
 
 			json.Unmarshal(req.Request, &data)
 
-			if irc, ok := session.getIRC(data.Server); ok {
-				irc.Privmsg(data.To, data.Message)
+			if i, ok := session.getIRC(data.Server); ok {
+				i.Privmsg(data.To, data.Message)
 			}
 
 		case "nick":
@@ -160,8 +161,8 @@ func handleWS(ws *websocket.Conn) {
 
 			json.Unmarshal(req.Request, &data)
 
-			if irc, ok := session.getIRC(data.Server); ok {
-				irc.Nick(data.New)
+			if i, ok := session.getIRC(data.Server); ok {
+				i.Nick(data.New)
 				session.user.SetNick(data.New, data.Server)
 			}
 
@@ -170,8 +171,8 @@ func handleWS(ws *websocket.Conn) {
 
 			json.Unmarshal(req.Request, &data)
 
-			if irc, ok := session.getIRC(data.Server); ok {
-				irc.Invite(data.User, data.Channel)
+			if i, ok := session.getIRC(data.Server); ok {
+				i.Invite(data.User, data.Channel)
 			}
 
 		case "kick":
@@ -179,8 +180,8 @@ func handleWS(ws *websocket.Conn) {
 
 			json.Unmarshal(req.Request, &data)
 
-			if irc, ok := session.getIRC(data.Server); ok {
-				irc.Kick(data.Channel, data.User)
+			if i, ok := session.getIRC(data.Server); ok {
+				i.Kick(data.Channel, data.User)
 			}
 
 		case "whois":
@@ -188,8 +189,8 @@ func handleWS(ws *websocket.Conn) {
 
 			json.Unmarshal(req.Request, &data)
 
-			if irc, ok := session.getIRC(data.Server); ok {
-				irc.Whois(data.User)
+			if i, ok := session.getIRC(data.Server); ok {
+				i.Whois(data.User)
 			}
 
 		case "away":
@@ -197,8 +198,8 @@ func handleWS(ws *websocket.Conn) {
 
 			json.Unmarshal(req.Request, &data)
 
-			if irc, ok := session.getIRC(data.Server); ok {
-				irc.Away(data.Message)
+			if i, ok := session.getIRC(data.Server); ok {
+				i.Away(data.Message)
 			}
 
 		case "search":

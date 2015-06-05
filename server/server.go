@@ -9,6 +9,7 @@ import (
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
 
+	"github.com/khlieng/name_pending/irc"
 	"github.com/khlieng/name_pending/storage"
 )
 
@@ -63,16 +64,16 @@ func reconnect() {
 		channels := user.GetChannels()
 
 		for _, server := range user.GetServers() {
-			irc := NewIRC(server.Nick, server.Username)
-			irc.TLS = server.TLS
-			irc.Password = server.Password
-			irc.Realname = server.Realname
+			i := irc.NewClient(server.Nick, server.Username)
+			i.TLS = server.TLS
+			i.Password = server.Password
+			i.Realname = server.Realname
 
 			go func(server storage.Server) {
-				irc.Connect(server.Address)
-				session.setIRC(irc.Host, irc)
+				i.Connect(server.Address)
+				session.setIRC(i.Host, i)
 
-				go handleMessages(irc, session)
+				go handleIRC(i, session)
 
 				var joining []string
 				for _, channel := range channels {
@@ -80,7 +81,7 @@ func reconnect() {
 						joining = append(joining, channel.Name)
 					}
 				}
-				irc.Join(joining...)
+				i.Join(joining...)
 			}(server)
 		}
 	}

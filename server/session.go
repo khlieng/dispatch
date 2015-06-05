@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/khlieng/name_pending/irc"
 	"github.com/khlieng/name_pending/storage"
 )
 
 type Session struct {
-	irc     map[string]*IRC
+	irc     map[string]*irc.Client
 	ircLock sync.Mutex
 
-	ws     map[string]*WebSocket
+	ws     map[string]*conn
 	wsLock sync.Mutex
 	out    chan []byte
 
@@ -20,23 +21,23 @@ type Session struct {
 
 func NewSession() *Session {
 	return &Session{
-		irc: make(map[string]*IRC),
-		ws:  make(map[string]*WebSocket),
+		irc: make(map[string]*irc.Client),
+		ws:  make(map[string]*conn),
 		out: make(chan []byte, 32),
 	}
 }
 
-func (s *Session) getIRC(server string) (*IRC, bool) {
+func (s *Session) getIRC(server string) (*irc.Client, bool) {
 	s.ircLock.Lock()
-	irc, ok := s.irc[server]
+	i, ok := s.irc[server]
 	s.ircLock.Unlock()
 
-	return irc, ok
+	return i, ok
 }
 
-func (s *Session) setIRC(server string, irc *IRC) {
+func (s *Session) setIRC(server string, i *irc.Client) {
 	s.ircLock.Lock()
-	s.irc[server] = irc
+	s.irc[server] = i
 	s.ircLock.Unlock()
 }
 
@@ -54,7 +55,7 @@ func (s *Session) numIRC() int {
 	return n
 }
 
-func (s *Session) setWS(addr string, w *WebSocket) {
+func (s *Session) setWS(addr string, w *conn) {
 	s.wsLock.Lock()
 	s.ws[addr] = w
 	s.wsLock.Unlock()
@@ -85,7 +86,7 @@ func (s *Session) write() {
 	for res := range s.out {
 		s.wsLock.Lock()
 		for _, ws := range s.ws {
-			ws.Out <- res
+			ws.out <- res
 		}
 		s.wsLock.Unlock()
 	}
