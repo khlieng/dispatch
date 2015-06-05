@@ -99,20 +99,18 @@ func handleWS(conn *websocket.Conn) {
 					session.setIRC(data.Server[:idx], i)
 				}
 
-				go func() {
-					i.Connect(data.Server)
-					go handleIRC(i, session)
+				i.Connect(data.Server)
+				go handleIRC(i, session)
 
-					session.user.AddServer(storage.Server{
-						Name:     data.Name,
-						Address:  i.Host,
-						TLS:      data.TLS,
-						Password: data.Password,
-						Nick:     data.Nick,
-						Username: data.Username,
-						Realname: data.Realname,
-					})
-				}()
+				session.user.AddServer(storage.Server{
+					Name:     data.Name,
+					Address:  i.Host,
+					TLS:      data.TLS,
+					Password: data.Password,
+					Nick:     data.Nick,
+					Username: data.Username,
+					Realname: data.Realname,
+				})
 			} else {
 				log.Println(addr, "already connected to", data.Server)
 			}
