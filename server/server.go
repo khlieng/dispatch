@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
 
 	"github.com/khlieng/name_pending/irc"
 	"github.com/khlieng/name_pending/storage"
@@ -35,13 +34,22 @@ func Run(port int) {
 
 	reconnect()
 
-	router := httprouter.New()
-
-	router.HandlerFunc("GET", "/ws", upgradeWS)
-	router.NotFound = serveFiles
-
 	log.Println("Listening on port", port)
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), router))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), handler{}))
+}
+
+type handler struct{}
+
+func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		return
+	}
+
+	if r.URL.Path == "/ws" {
+		upgradeWS(w, r)
+	} else {
+		serveFiles(w, r)
+	}
 }
 
 func upgradeWS(w http.ResponseWriter, r *http.Request) {

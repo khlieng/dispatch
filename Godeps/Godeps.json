@@ -54,10 +54,6 @@
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
 		},
 		{
-			"ImportPath": "github.com/julienschmidt/httprouter",
-			"Rev": "b428fda53bb0a764fea9c76c9413512eda291dec"
-		},
-		{
 			"ImportPath": "github.com/kr/pretty",
 			"Comment": "go.weekly.2011-12-22-27-ge6ac2fc",
 			"Rev": "e6ac2fc51e89a3249e82157fa0bb7a18ef9dd5bb"
