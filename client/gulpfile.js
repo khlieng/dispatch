@@ -1,6 +1,7 @@
 var exec = require('child_process').exec;
 
 var gulp = require('gulp');
+var gutil = require('gulp-util');
 var gulpif = require('gulp-if');
 var minifyHTML = require('gulp-minify-html');
 var minifyCSS = require('gulp-minify-css');
@@ -15,6 +16,7 @@ var streamify = require('gulp-streamify');
 var babelify = require('babelify');
 var strictify = require('strictify');
 var watchify = require('watchify');
+var merge = require('merge-stream');
 
 var argv = require('yargs')
     .alias('p', 'production')
@@ -23,6 +25,8 @@ var argv = require('yargs')
 if (argv.production) {
     process.env['NODE_ENV'] = 'production';
 }
+
+var deps = Object.keys(require('./package.json').dependencies);
 
 gulp.task('html', function() {
     return gulp.src('src/*.html')
@@ -43,36 +47,42 @@ gulp.task('js', function() {
 });
 
 function js(watch) {
-    var bundler, rebundle;
-    bundler = browserify('./src/js/app.js', {
+    var bundler = browserify('./src/js/app.js', {
         debug: !argv.production,
+        transform: [babelify, strictify],
         cache: {},
         packageCache: {},
         fullPaths: watch
     });
 
-    if (watch) {
-        bundler = watchify(bundler);
-    }
+    bundler.external(deps);
 
-    bundler
-        .transform(babelify)
-        .transform(strictify);
-
-    rebundle = function() {
-        var stream = bundler.bundle();
-        stream.on('error', console.log);
-        return stream
+    var rebundle = function() {
+        return bundler.bundle()
+            .on('error', gutil.log)
             .pipe(source('bundle.js'))
             .pipe(gulpif(argv.production, streamify(uglify())))
             .pipe(gulp.dest('dist'));
     };
 
-    bundler.on('time', function(time) {
-        console.log('JS bundle: ' + time + ' ms');
+    if (watch) {
+        bundler = watchify(bundler);
+        bundler.on('update', rebundle);
+        bundler.on('log', gutil.log);
+    }
+
+    var vendorBundler = browserify({
+        debug: !argv.production,
+        require: deps
     });
-    bundler.on('update', rebundle);
-    return rebundle();
+
+    var vendor = vendorBundler.bundle()
+        .on('error', gutil.log)
+        .pipe(source('vendor.js'))
+        .pipe(gulpif(argv.production, streamify(uglify())))
+        .pipe(gulp.dest('dist'));
+    
+    return merge(rebundle(), vendor);
 }
 
 gulp.task('lint', function() {
@@ -110,7 +120,7 @@ gulp.task('bindata', ['gzip', 'config'], function(cb) {
     bindata(cb);
 });
 
-gulp.task('gzip:watch', function() {
+gulp.task('gzip:watch', ['lint'], function() {
     return gulp.src('dist/**/*.{html,css,js}')
         .pipe(gzip())
         .pipe(gulp.dest('dist/gz'));

@@ -13,6 +13,7 @@ import (
 )
 
 var files = []File{
+	File{"vendor.js", "text/javascript"},
 	File{"bundle.js", "text/javascript"},
 	File{"bundle.css", "text/css"},
 	File{"font/fontello.woff", "application/font-woff"},
