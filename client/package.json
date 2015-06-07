@@ -11,6 +11,7 @@
     "eslint-plugin-react": "^2.4.0",
     "gulp": "~3.8.10",
     "gulp-autoprefixer": "2.2.0",
+    "gulp-cached": "^1.1.0",
     "gulp-concat": "~2.5.2",
     "gulp-eslint": "0.13.2",
     "gulp-gzip": "0.0.8",

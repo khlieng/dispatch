@@ -17,6 +17,7 @@ var babelify = require('babelify');
 var strictify = require('strictify');
 var watchify = require('watchify');
 var merge = require('merge-stream');
+var cache = require('gulp-cached');
 
 var argv = require('yargs')
     .alias('p', 'production')
@@ -87,6 +88,7 @@ function js(watch) {
 
 gulp.task('lint', function() {
     return gulp.src('src/js/**/*.{js,jsx}')
+        .pipe(cache('lint'))
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failOnError());
@@ -108,8 +110,9 @@ gulp.task('gzip', ['html', 'css', 'js', 'fonts'], function() {
         .pipe(gulp.dest('dist/gz'));
 });
 
-gulp.task('gzip:watch', ['lint'], function() {
+gulp.task('gzip:watch', function() {
     return gulp.src('dist/**/*.{html,css,js}')
+        .pipe(cache('gzip'))
         .pipe(gzip())
         .pipe(gulp.dest('dist/gz'));
 });
