@@ -51,7 +51,7 @@ func NewUser(uuid string) *User {
 		UUID: uuid,
 	}
 
-	go db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Users"))
 		data, _ := json.Marshal(user)
 
@@ -60,7 +60,7 @@ func NewUser(uuid string) *User {
 		return nil
 	})
 
-	go user.openMessageLog()
+	user.openMessageLog()
 
 	return user
 }
@@ -73,7 +73,7 @@ func LoadUsers() []*User {
 
 		b.ForEach(func(k, v []byte) error {
 			user := User{UUID: string(k)}
-			go user.openMessageLog()
+			user.openMessageLog()
 
 			users = append(users, &user)
 
@@ -126,7 +126,7 @@ func (u *User) GetChannels() []Channel {
 }
 
 func (u *User) AddServer(server Server) {
-	go db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Servers"))
 		data, _ := json.Marshal(server)
 
@@ -137,7 +137,7 @@ func (u *User) AddServer(server Server) {
 }
 
 func (u *User) AddChannel(channel Channel) {
-	go db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Channels"))
 		data, _ := json.Marshal(channel)
 
@@ -148,7 +148,7 @@ func (u *User) AddChannel(channel Channel) {
 }
 
 func (u *User) SetNick(nick, address string) {
-	go db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Servers"))
 		id := []byte(u.UUID + ":" + address)
 		var server Server
@@ -164,7 +164,7 @@ func (u *User) SetNick(nick, address string) {
 }
 
 func (u *User) RemoveServer(address string) {
-	go db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		serverID := []byte(u.UUID + ":" + address)
 
 		tx.Bucket([]byte("Servers")).Delete(serverID)
@@ -181,7 +181,7 @@ func (u *User) RemoveServer(address string) {
 }
 
 func (u *User) RemoveChannel(server, channel string) {
-	go db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		tx.Bucket([]byte("Channels")).Delete([]byte(u.UUID + ":" + server + ":" + channel))
 
 		return nil
@@ -189,13 +189,17 @@ func (u *User) RemoveChannel(server, channel string) {
 }
 
 func (u *User) LogMessage(server, from, to, content string) {
-	go u.messageLog.Update(func(tx *bolt.Tx) error {
-		bucketKey := server + ":" + to
-		b, _ := tx.Bucket(bucketMessages).CreateBucketIfNotExists([]byte(bucketKey))
-		id, _ := b.NextSequence()
-		idStr := strconv.FormatUint(id, 10)
+	bucketKey := server + ":" + to
+	var id uint64
+	var idStr string
+	var message Message
 
-		message := Message{
+	u.messageLog.Update(func(tx *bolt.Tx) error {
+		b, _ := tx.Bucket(bucketMessages).CreateBucketIfNotExists([]byte(bucketKey))
+		id, _ = b.NextSequence()
+		idStr = strconv.FormatUint(id, 10)
+
+		message = Message{
 			ID:      id,
 			Content: content,
 			Server:  server,
@@ -207,10 +211,10 @@ func (u *User) LogMessage(server, from, to, content string) {
 		data, _ := json.Marshal(message)
 		b.Put([]byte(idStr), data)
 
-		go u.messageIndex.Index(bucketKey+":"+idStr, message)
-
 		return nil
 	})
+
+	u.messageIndex.Index(bucketKey+":"+idStr, message)
 }
 
 func (u *User) GetLastMessages(server, channel string, count int) ([]Message, error) {
@@ -299,6 +303,11 @@ func (u *User) SearchMessages(server, channel, phrase string) ([]Message, error)
 	})
 
 	return messages, nil
+}
+
+func (u *User) Close() {
+	u.messageLog.Close()
+	u.messageIndex.Close()
 }
 
 func (u *User) openMessageLog() {

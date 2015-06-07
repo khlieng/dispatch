@@ -92,7 +92,7 @@ func handleIRC(client *irc.Client, session *Session) {
 			}
 
 			if msg.Params[0] != "*" {
-				session.user.LogMessage(client.Host, msg.Nick, msg.Params[0], msg.Trailing)
+				go session.user.LogMessage(client.Host, msg.Nick, msg.Params[0], msg.Trailing)
 			}
 
 		case irc.Quit:

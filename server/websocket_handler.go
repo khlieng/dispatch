@@ -48,6 +48,7 @@ func handleWS(conn *websocket.Conn) {
 			if storedSession, exists := sessions[UUID]; exists {
 				sessionLock.Unlock()
 				session = storedSession
+				session.setWS(addr, ws)
 
 				log.Println(addr, "attached to", session.numIRC(), "existing IRC connections")
 
@@ -73,12 +74,11 @@ func handleWS(conn *websocket.Conn) {
 				sessions[UUID] = session
 				sessionLock.Unlock()
 
+				session.setWS(addr, ws)
 				session.sendJSON("servers", nil)
 
 				go session.write()
 			}
-
-			session.setWS(addr, ws)
 
 		case "connect":
 			var data Connect
