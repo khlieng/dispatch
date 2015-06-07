@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"sync"
 
 	"github.com/khlieng/name_pending/irc"
@@ -14,7 +13,7 @@ type Session struct {
 
 	ws     map[string]*conn
 	wsLock sync.Mutex
-	out    chan []byte
+	out    chan WSResponse
 
 	user *storage.User
 }
@@ -23,7 +22,7 @@ func NewSession() *Session {
 	return &Session{
 		irc: make(map[string]*irc.Client),
 		ws:  make(map[string]*conn),
-		out: make(chan []byte, 32),
+		out: make(chan WSResponse, 32),
 	}
 }
 
@@ -68,11 +67,7 @@ func (s *Session) deleteWS(addr string) {
 }
 
 func (s *Session) sendJSON(t string, v interface{}) {
-	data, _ := json.Marshal(v)
-	raw := json.RawMessage(data)
-	res, _ := json.Marshal(WSResponse{Type: t, Response: &raw})
-
-	s.out <- res
+	s.out <- WSResponse{t, v}
 }
 
 func (s *Session) sendError(err error, server string) {

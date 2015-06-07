@@ -9,14 +9,14 @@ import (
 type conn struct {
 	conn *websocket.Conn
 	in   chan WSRequest
-	out  chan []byte
+	out  chan WSResponse
 }
 
 func newConn(ws *websocket.Conn) *conn {
 	return &conn{
 		conn: ws,
 		in:   make(chan WSRequest, 32),
-		out:  make(chan []byte, 32),
+		out:  make(chan WSResponse, 32),
 	}
 }
 
@@ -26,12 +26,12 @@ func (c *conn) send() {
 
 	for {
 		select {
-		case msg, ok := <-c.out:
+		case res, ok := <-c.out:
 			if !ok {
 				return
 			}
 
-			err = c.conn.WriteMessage(websocket.TextMessage, msg)
+			err = c.conn.WriteJSON(res)
 
 		case <-ping:
 			err = c.conn.WriteJSON(WSResponse{Type: "ping"})

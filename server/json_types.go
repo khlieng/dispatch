@@ -12,8 +12,8 @@ type WSRequest struct {
 }
 
 type WSResponse struct {
-	Type     string           `json:"type"`
-	Response *json.RawMessage `json:"response"`
+	Type     string      `json:"type"`
+	Response interface{} `json:"response"`
 }
 
 type Connect struct {
