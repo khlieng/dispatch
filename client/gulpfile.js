@@ -108,6 +108,12 @@ gulp.task('gzip', ['html', 'css', 'js', 'fonts'], function() {
         .pipe(gulp.dest('dist/gz'));
 });
 
+gulp.task('gzip:watch', ['lint'], function() {
+    return gulp.src('dist/**/*.{html,css,js}')
+        .pipe(gzip())
+        .pipe(gulp.dest('dist/gz'));
+});
+
 function bindata(cb) {
     if (argv.production) {
         exec('go-bindata -nomemcopy -nocompress -pkg assets -o ../assets/bindata.go -prefix "dist/gz" dist/gz/...', cb);
@@ -116,19 +122,8 @@ function bindata(cb) {
     }
 }
 
-gulp.task('bindata', ['gzip', 'config'], function(cb) {
-    bindata(cb);
-});
-
-gulp.task('gzip:watch', ['lint'], function() {
-    return gulp.src('dist/**/*.{html,css,js}')
-        .pipe(gzip())
-        .pipe(gulp.dest('dist/gz'));
-});
-
-gulp.task('bindata:watch', ['gzip:watch'], function(cb) {
-    bindata(cb);
-});
+gulp.task('bindata', ['gzip', 'config'], bindata);
+gulp.task('bindata:watch', ['gzip:watch'], bindata);
 
 gulp.task('watch', ['default'], function() {
     gulp.watch('dist/**/*.{html,css,js}', ['gzip:watch', 'bindata:watch'])
