@@ -1,4 +1,4 @@
-# name_pending
+# name_pending [![Build Status](https://travis-ci.org/khlieng/name_pending.svg?branch=master)](https://travis-ci.org/khlieng/name_pending)
 
 ####[Try it!](http://np.khlieng.com/)
 
