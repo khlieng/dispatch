@@ -41,13 +41,13 @@ socket.on('pm', function(data) {
 });
 
 socket.on('motd', function(data) {
-	_.each(data.content, function(line) {
-		messageActions.add({
+	messageActions.addAll(_.map(data.content, line => {
+		return {
 			server: data.server,
 			to: data.server,
 			message: line
-		});
-	});
+		};
+	}));
 });
 
 socket.on('users', function(data) {

@@ -5,6 +5,7 @@ var socket = require('../socket');
 var messageActions = Reflux.createActions([
 	'send',
 	'add',
+	'addAll',
 	'broadcast',
 	'inform',
 	'command',

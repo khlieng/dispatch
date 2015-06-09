@@ -22,7 +22,7 @@ var Message = Immutable.Record({
 	lines: []
 });
 
-function addMessage(message, dest) {
+function addMessage(message, dest, mutable) {
 	message.time = new Date();
 
 	if (message.message.indexOf('\x01ACTION') === 0) {
@@ -32,7 +32,19 @@ function addMessage(message, dest) {
 		message.message = from + message.message.slice(7);
 	}
 
-	messages = messages.updateIn([message.server, dest], empty, list => list.push(new Message(message)));
+	if (mutable) {
+		mutable.updateIn([message.server, dest], empty, list => list.push(new Message(message)));
+	} else {
+		messages = messages.updateIn([message.server, dest], empty, list => list.push(new Message(message)));
+	}
+}
+
+function getDest(message) {
+	var dest = message.to || message.from;
+	if (message.from && message.from.indexOf('.') !== -1) {
+		dest = message.server;
+	}
+	return dest;
 }
 
 var messageStore = Reflux.createStore({
@@ -54,13 +66,16 @@ var messageStore = Reflux.createStore({
 	},
 
 	add(message) {
-		var dest = message.to || message.from;
-		if (message.from && message.from.indexOf('.') !== -1) {
-			dest = message.server;
-		}
-
-		addMessage(message, dest);
+		addMessage(message, getDest(message));
 		this.trigger(messages);
+	},
+
+	addAll(newMessages) {
+		messages = messages.withMutations(mutable => {
+			_.each(newMessages, message => {
+				addMessage(message, getDest(message), mutable);
+			});
+		});
 	},
 
 	broadcast(message, server, user) {
