@@ -6,6 +6,7 @@ var channelStore = require('../stores/channel');
 var privateChatStore = require('../stores/privateChat');
 var serverStore = require('../stores/server');
 var routeActions = require('../actions/route');
+var tabActions = require('../actions/tab');
 var PureMixin = require('../mixins/pure');
 
 var TabList = React.createClass({
@@ -18,10 +19,12 @@ var TabList = React.createClass({
 
 	handleConnectClick() {
 		routeActions.navigate('connect');
+		tabActions.hideMenu();
 	},
 
 	handleSettingsClick() {
 		routeActions.navigate('settings');
+		tabActions.hideMenu();
 	},
 
 	render() {
