@@ -297,12 +297,16 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 .search {
 	display: none;
 	position: absolute;
-	left: 200px;
+	left: 0;
 	top: 50px;
 	bottom: 50px;
 	right: 200px;
 	z-index: 2;
 	background: #f0f0f0;
+}
+
+.chat-server .search {
+	display: none;
 }
 
 .chat-private .search {
