@@ -1,0 +1,19 @@
+language: go
+
+go:
+    - 1.4
+    - tip
+
+env:
+    - GOMAXPROCS=2
+
+install:
+    - cd client
+    - npm install -g gulp
+    - npm install
+    - go get github.com/jteeuwen/go-bindata/...
+
+script:
+    - gulp -p
+    - cd ..
+    - go test -v -race ./...
