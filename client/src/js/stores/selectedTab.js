@@ -159,6 +159,8 @@ var selectedTabStore = Reflux.createStore({
 selectedTabStore.listen(tab => {
 	var channel = tab.channel;
 
+	actions.hideMenu();
+
 	if (tab.server) {
 		if (channel) {
 			while (channel[0] === '#') {

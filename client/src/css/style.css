@@ -39,6 +39,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	background: #222;
 	color: #FFF;
 	font-family: Montserrat, sans-serif;
+	transition: transform .2s;
 }
 
 .tab-container {
@@ -114,15 +115,29 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	background: #1D1D1D;
 }
 
+.main-container {
+	position: fixed;
+	left: 200px;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	transition: left .2s, transform .2s;
+}
+
 .connect {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	position: fixed;
+	position: absolute;
 	top: 0;
-	left: 200px;
-	right: 0;
+	width: 100%;
 	bottom: 0;
+}
+
+.connect .navicon {
+	position: absolute;
+	top: 0;
+	left: 0;
 }
 
 .connect-form h1 {
@@ -185,12 +200,11 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .chat-title-bar {
 	font-family: Montserrat, sans-serif;
-	position: fixed;
-	left: 200px;
+	position: absolute;
+	left: 0;
 	top: 0;
 	right: 0;
 	height: 50px;
-	padding-left: 15px;
 	line-height: 50px;
 	border-bottom: 1px solid #DDD;
 	display: flex;
@@ -199,6 +213,14 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .chat-channel .chat-title-bar {
 	right: 200px;
+}
+
+.navicon {
+	display: none;
+	padding: 0 15px;
+	line-height: 50px;
+	font-size: 20px;
+	cursor: pointer;
 }
 
 .chat-title-bar i {
@@ -223,6 +245,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .chat-title {
+	margin-left: 15px;
 	font-size: 24px;
 	white-space: nowrap;
 }
@@ -254,7 +277,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .userlist-bar {
-	position: fixed;
+	position: absolute;
 	top: 0;
 	right: 0;
 	width: 200px;
@@ -273,7 +296,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .search {
 	display: none;
-	position: fixed;
+	position: absolute;
 	left: 200px;
 	top: 50px;
 	bottom: 50px;
@@ -302,8 +325,8 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .messagebox {
-	position: fixed;
-	left: 200px;
+	position: absolute;
+	left: 0;
 	top: 50px;
 	bottom: 50px;
 	right: 0;
@@ -341,9 +364,9 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .message-input-wrap {
-	position: fixed;
-	left: 200px;
-	bottom: 0px;
+	position: absolute;
+	left: 0;
+	bottom: 0;
 	right: 0;
 	height: 50px;
 	z-index: 1;
@@ -357,7 +380,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .userlist {
-	position: fixed;
+	position: absolute;
 	top: 50px;
 	bottom: 50px;
 	right: 0;
@@ -377,4 +400,32 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .userlist p:hover {
 	background: #DDD;
+}
+
+@media (max-width: 600px) {
+	.tablist {
+		width: 200px;
+		transform: translateX(-200px);
+	}
+
+	.main-container {
+		transform: translateX(0);
+		left: 0;
+	}
+
+	.navicon {
+		display: inline-block;
+	}
+
+	.main-container.off-canvas {
+		transform: translateX(200px);
+	}
+
+	.tablist.off-canvas {
+		transform: translateX(0);
+	}
+
+	.chat-title {
+		margin-left: 0;
+	}
 }

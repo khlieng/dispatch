@@ -25,6 +25,7 @@ var TabList = React.createClass({
 	},
 
 	render() {
+		var className = this.props.menuToggled ? 'tablist off-canvas' : 'tablist';
 		var tabs = [];
 
 		this.state.channels.forEach((server, address) => {
@@ -63,7 +64,7 @@ var TabList = React.createClass({
 		});
 
 		return (
-			<div className="tablist">
+			<div className={className}>
 				<button className="button-connect" onClick={this.handleConnectClick}>Connect</button>
 				<div className="tab-container">{tabs}</div>
 				<div className="side-buttons">

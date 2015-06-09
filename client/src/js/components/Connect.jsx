@@ -1,6 +1,7 @@
 var React = require('react');
 var _ = require('lodash');
 
+var Navicon = require('./Navicon.jsx');
 var serverActions = require('../actions/server');
 var channelActions = require('../actions/channel');
 var PureMixin = require('../mixins/pure');
@@ -59,6 +60,7 @@ var Connect = React.createClass({
 
 		return (
 			<div className="connect">
+				<Navicon />
 				<form ref="form" className="connect-form" onSubmit={this.handleSubmit}>
 					<h1>Connect</h1>
 					<input name="name" type="text" placeholder="Name" defaultValue="Freenode" />

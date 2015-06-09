@@ -2,6 +2,7 @@ var React = require('react');
 var Reflux = require('reflux');
 var Autolinker = require('autolinker');
 
+var Navicon = require('./Navicon.jsx');
 var channelStore = require('../stores/channel');
 var selectedTabStore = require('../stores/selectedTab');
 var serverActions = require('../actions/server');
@@ -65,6 +66,7 @@ var ChatTitle = React.createClass({
         return (
             <div>
                 <div className="chat-title-bar">
+                    <Navicon />
                     <span className="chat-title">{tab.name}</span>
                     <div className="chat-topic-wrap">
                         <span className="chat-topic" dangerouslySetInnerHTML={{ __html: topic }}></span>

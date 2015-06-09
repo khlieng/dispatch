@@ -5,28 +5,18 @@ var inputHistoryStore = require('../stores/inputHistory');
 var selectedTabStore = require('../stores/selectedTab');
 var messageActions = require('../actions/message');
 var inputHistoryActions = require('../actions/inputHistory');
-var tabActions = require('../actions/tab');
 var PureMixin = require('../mixins/pure');
 
 var MessageInput = React.createClass({
 	mixins: [
 		PureMixin,
-		Reflux.connect(inputHistoryStore, 'history'),
-		Reflux.listenTo(tabActions.select, 'tabSelected')
+		Reflux.connect(inputHistoryStore, 'history')
 	],
 
 	getInitialState() {
 		return {
 			value: ''
 		};
-	},
-
-	componentDidMount() {
-		this.refs.input.getDOMNode().focus();
-	},
-
-	tabSelected() {
-		this.refs.input.getDOMNode().focus();
 	},
 
 	handleKey(e) {

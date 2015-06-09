@@ -1,10 +1,12 @@
 var React = require('react');
 
+var Navicon = require('./Navicon.jsx');
+
 var Settings = React.createClass({
 	render() {
 		return (
 			<div>
-				<h1>Settings</h1>
+				<Navicon />
 			</div>
 		);
 	}
