@@ -24,6 +24,8 @@ func parseMessage(line string) *Message {
 
 		if i := strings.Index(msg.Prefix, "!"); i > 0 {
 			msg.Nick = msg.Prefix[:i]
+		} else if i := strings.Index(msg.Prefix, "@"); i > 0 {
+			msg.Nick = msg.Prefix[:i]
 		} else {
 			msg.Nick = msg.Prefix
 		}

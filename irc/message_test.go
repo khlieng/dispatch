@@ -34,6 +34,38 @@ func TestParseMessage(t *testing.T) {
 				Command: "CMD",
 				Params:  []string{"a", "b"},
 			},
+		}, {
+			"CMD a b\r\n",
+			&Message{
+				Command: "CMD",
+				Params:  []string{"a", "b"},
+			},
+		}, {
+			"CMD\r\n",
+			&Message{
+				Command: "CMD",
+			},
+		}, {
+			"CMD :tests and stuff\r\n",
+			&Message{
+				Command:  "CMD",
+				Params:   []string{"tests and stuff"},
+				Trailing: "tests and stuff",
+			},
+		}, {
+			":nick@host.com CMD\r\n",
+			&Message{
+				Prefix:  "nick@host.com",
+				Nick:    "nick",
+				Command: "CMD",
+			},
+		}, {
+			":ni@ck!user!name@host!.com CMD\r\n",
+			&Message{
+				Prefix:  "ni@ck!user!name@host!.com",
+				Nick:    "ni@ck",
+				Command: "CMD",
+			},
 		},
 	}
 
