@@ -8,12 +8,14 @@ env:
     - GOMAXPROCS=2
 
 install:
+    - go get golang.org/x/tools/cmd/vet
+    - go get github.com/jteeuwen/go-bindata/...
     - cd client
     - npm install -g gulp
     - npm install
-    - go get github.com/jteeuwen/go-bindata/...
 
 script:
     - gulp -p
     - cd ..
+    - go vet ./...
     - go test -v -race ./...
