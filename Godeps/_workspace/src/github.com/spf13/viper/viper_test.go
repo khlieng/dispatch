@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/pflag"
-	"github.com/stretchr/testify/assert"
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 )
 
 var yamlExample = []byte(`Hacker: true

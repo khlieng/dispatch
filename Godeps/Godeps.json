@@ -100,6 +100,11 @@
 			"Rev": "72cd76f34c91f8d64a031af97b499e4a0b1a6e0c"
 		},
 		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.0-12-g7e4a149",
+			"Rev": "7e4a149930b09fe4c2b134c50ce637457ba6e966"
+		},
+		{
 			"ImportPath": "github.com/syndtr/goleveldb/leveldb",
 			"Rev": "4875955338b0a434238a31165cb87255ab6e9e4a"
 		},
