@@ -45,6 +45,9 @@ func (c *Client) writef(format string, a ...interface{}) {
 }
 
 func (c *Client) connect() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	if c.TLS {
 		if c.TLSConfig == nil {
 			c.TLSConfig = &tls.Config{InsecureSkipVerify: true}
@@ -63,17 +66,10 @@ func (c *Client) connect() error {
 		}
 	}
 
-	c.lock.Lock()
 	c.connected = true
-	c.lock.Unlock()
-
 	c.reader = bufio.NewReader(c.conn)
 
-	if c.Password != "" {
-		c.Pass(c.Password)
-	}
-	c.write("NICK " + c.nick)
-	c.User(c.Username, c.Realname)
+	c.register()
 
 	c.ready.Add(1)
 	go c.send()

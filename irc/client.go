@@ -59,20 +59,12 @@ func (c *Client) Connected() bool {
 	return c.connected
 }
 
-func (c *Client) Pass(password string) {
-	c.write("PASS " + password)
-}
-
 func (c *Client) Nick(nick string) {
 	c.Write("NICK " + nick)
 
 	c.lock.Lock()
 	c.nick = nick
 	c.lock.Unlock()
-}
-
-func (c *Client) User(username, realname string) {
-	c.writef("USER %s 0 * :%s", username, realname)
 }
 
 func (c *Client) Oper(name, password string) {
@@ -89,7 +81,9 @@ func (c *Client) Quit() {
 			c.write("QUIT")
 		}
 		close(c.quit)
+		c.lock.Lock()
 		c.conn.Close()
+		c.lock.Unlock()
 	}()
 }
 
@@ -127,4 +121,24 @@ func (c *Client) Whois(nick string) {
 
 func (c *Client) Away(message string) {
 	c.Write("AWAY :" + message)
+}
+
+func (c *Client) writePass(password string) {
+	c.write("PASS " + password)
+}
+
+func (c *Client) writeNick(nick string) {
+	c.write("NICK " + nick)
+}
+
+func (c *Client) writeUser(username, realname string) {
+	c.writef("USER %s 0 * :%s", username, realname)
+}
+
+func (c *Client) register() {
+	if c.Password != "" {
+		c.writePass(c.Password)
+	}
+	c.writeNick(c.nick)
+	c.writeUser(c.Username, c.Realname)
 }

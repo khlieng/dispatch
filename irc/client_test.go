@@ -16,7 +16,7 @@ func init() {
 
 func initTestClient() {
 	c = NewClient("test", "testing")
-	conn = &mockConn{hook: make(chan string, 1)}
+	conn = &mockConn{hook: make(chan string, 3)}
 	c.conn = conn
 	go c.send()
 }
@@ -36,7 +36,7 @@ func (c *mockConn) Close() error {
 }
 
 func TestPass(t *testing.T) {
-	c.Pass("pass")
+	c.writePass("pass")
 	assert.Equal(t, "PASS pass\r\n", <-conn.hook)
 }
 
@@ -44,10 +44,13 @@ func TestNick(t *testing.T) {
 	c.Nick("test2")
 	assert.Equal(t, "test2", c.GetNick())
 	assert.Equal(t, "NICK test2\r\n", <-conn.hook)
+
+	c.writeNick("nick")
+	assert.Equal(t, "NICK nick\r\n", <-conn.hook)
 }
 
 func TestUser(t *testing.T) {
-	c.User("user", "rn")
+	c.writeUser("user", "rn")
 	assert.Equal(t, "USER user 0 * :rn\r\n", <-conn.hook)
 }
 
@@ -120,4 +123,19 @@ func TestWhois(t *testing.T) {
 func TestAway(t *testing.T) {
 	c.Away("not here")
 	assert.Equal(t, "AWAY :not here\r\n", <-conn.hook)
+}
+
+func TestRegister(t *testing.T) {
+	c.nick = "nick"
+	c.Username = "user"
+	c.Realname = "rn"
+	c.register()
+	assert.Equal(t, "NICK nick\r\n", <-conn.hook)
+	assert.Equal(t, "USER user 0 * :rn\r\n", <-conn.hook)
+
+	c.Password = "pass"
+	c.register()
+	assert.Equal(t, "PASS pass\r\n", <-conn.hook)
+	assert.Equal(t, "NICK nick\r\n", <-conn.hook)
+	assert.Equal(t, "USER user 0 * :rn\r\n", <-conn.hook)
 }
