@@ -145,14 +145,13 @@ func (c *Client) recv() {
 			c.connected = false
 			c.lock.Unlock()
 			c.once.Do(c.ready.Done)
-			close(c.reconnect)
-			return
-		}
-
-		select {
-		case <-c.quit:
-			return
-		default:
+			select {
+			case <-c.quit:
+				return
+			default:
+				close(c.reconnect)
+				return
+			}
 		}
 
 		msg := parseMessage(line)

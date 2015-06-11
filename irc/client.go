@@ -89,6 +89,7 @@ func (c *Client) Quit() {
 			c.write("QUIT")
 		}
 		close(c.quit)
+		c.conn.Close()
 	}()
 }
 

@@ -10,6 +10,17 @@ import (
 var c *Client
 var conn *mockConn
 
+func init() {
+	initTestClient()
+}
+
+func initTestClient() {
+	c = NewClient("test", "testing")
+	conn = &mockConn{hook: make(chan string, 1)}
+	c.conn = conn
+	go c.send()
+}
+
 type mockConn struct {
 	hook chan string
 	net.Conn
@@ -20,15 +31,8 @@ func (c *mockConn) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
-func init() {
-	initTestClient()
-}
-
-func initTestClient() {
-	c = NewClient("test", "testing")
-	conn = &mockConn{hook: make(chan string, 1)}
-	c.conn = conn
-	go c.send()
+func (c *mockConn) Close() error {
+	return nil
 }
 
 func TestPass(t *testing.T) {
