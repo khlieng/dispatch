@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/user"
 	"path"
 
+	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/mitchellh/go-homedir"
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/viper"
 
@@ -74,10 +74,10 @@ func initConfig() {
 }
 
 func defaultDir() string {
-	currentUser, err := user.Current()
+	dir, err := homedir.Dir()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return path.Join(currentUser.HomeDir, ".name_pending")
+	return path.Join(dir, ".name_pending")
 }

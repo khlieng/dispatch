@@ -68,6 +68,10 @@
 			"Rev": "d5929c67198951106f49f7ea425198d0f1a08f7f"
 		},
 		{
+			"ImportPath": "github.com/mitchellh/go-homedir",
+			"Rev": "1f6da4a72e57d4e7edd4a7295a585e0a3999a2d4"
+		},
+		{
 			"ImportPath": "github.com/mitchellh/mapstructure",
 			"Rev": "f7d28d5aeab42b9b95d2e6d6b956f73a290077fc"
 		},
