@@ -76,6 +76,7 @@ var messageStore = Reflux.createStore({
 				addMessage(message, getDest(message), mutable);
 			});
 		});
+		this.trigger(messages);
 	},
 
 	broadcast(message, server, user) {
