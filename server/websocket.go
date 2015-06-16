@@ -6,21 +6,21 @@ import (
 	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
 )
 
-type conn struct {
+type wsConn struct {
 	conn *websocket.Conn
 	in   chan WSRequest
 	out  chan WSResponse
 }
 
-func newConn(ws *websocket.Conn) *conn {
-	return &conn{
-		conn: ws,
+func newWSConn(conn *websocket.Conn) *wsConn {
+	return &wsConn{
+		conn: conn,
 		in:   make(chan WSRequest, 32),
 		out:  make(chan WSResponse, 32),
 	}
 }
 
-func (c *conn) send() {
+func (c *wsConn) send() {
 	var err error
 	ping := time.Tick(20 * time.Second)
 
@@ -43,7 +43,7 @@ func (c *conn) send() {
 	}
 }
 
-func (c *conn) recv() {
+func (c *wsConn) recv() {
 	var req WSRequest
 
 	for {
@@ -57,6 +57,7 @@ func (c *conn) recv() {
 	}
 }
 
-func (c *conn) close() {
+func (c *wsConn) close() {
 	close(c.out)
+	c.conn.Close()
 }

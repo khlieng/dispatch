@@ -59,7 +59,7 @@ class Socket extends EventEmitter {
 				this.send('pong');
 			}
 
-			this.emit(msg.type, msg.response);
+			this.emit(msg.type, msg.data);
 		};
 	}
 
@@ -68,7 +68,7 @@ class Socket extends EventEmitter {
 	}
 
 	send(type, data) {
-		this.ws.send(JSON.stringify({ type, request: data }));
+		this.ws.send(JSON.stringify({ type, data }));
 	}
 
 	setTimeoutPing() {

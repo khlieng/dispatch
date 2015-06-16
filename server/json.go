@@ -7,13 +7,13 @@ import (
 )
 
 type WSRequest struct {
-	Type    string          `json:"type"`
-	Request json.RawMessage `json:"request"`
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data"`
 }
 
 type WSResponse struct {
-	Type     string      `json:"type"`
-	Response interface{} `json:"response"`
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
 }
 
 type Connect struct {

@@ -59,7 +59,7 @@ func upgradeWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handleWS(conn)
+	newWSHandler(conn).run()
 }
 
 func reconnect() {

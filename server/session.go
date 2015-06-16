@@ -11,7 +11,7 @@ type Session struct {
 	irc     map[string]*irc.Client
 	ircLock sync.Mutex
 
-	ws     map[string]*conn
+	ws     map[string]*wsConn
 	wsLock sync.Mutex
 	out    chan WSResponse
 
@@ -21,7 +21,7 @@ type Session struct {
 func NewSession() *Session {
 	return &Session{
 		irc: make(map[string]*irc.Client),
-		ws:  make(map[string]*conn),
+		ws:  make(map[string]*wsConn),
 		out: make(chan WSResponse, 32),
 	}
 }
@@ -54,7 +54,7 @@ func (s *Session) numIRC() int {
 	return n
 }
 
-func (s *Session) setWS(addr string, w *conn) {
+func (s *Session) setWS(addr string, w *wsConn) {
 	s.wsLock.Lock()
 	s.ws[addr] = w
 	s.wsLock.Unlock()

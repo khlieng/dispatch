@@ -11,213 +11,243 @@ import (
 	"github.com/khlieng/name_pending/storage"
 )
 
-func handleWS(conn *websocket.Conn) {
-	defer conn.Close()
+type wsHandler struct {
+	ws      *wsConn
+	session *Session
 
-	var session *Session
-	var UUID string
+	uuid string
+	addr string
 
-	addr := conn.RemoteAddr().String()
+	handlers map[string]func([]byte)
+}
 
-	ws := newConn(conn)
-	defer ws.close()
-	go ws.send()
-	go ws.recv()
+func newWSHandler(conn *websocket.Conn) *wsHandler {
+	h := &wsHandler{
+		ws:   newWSConn(conn),
+		addr: conn.RemoteAddr().String(),
+	}
+	h.initHandlers()
+	return h
+}
 
-	log.Println(addr, "connected")
+func (h *wsHandler) run() {
+	defer h.ws.close()
+	go h.ws.send()
+	go h.ws.recv()
 
 	for {
-		req, ok := <-ws.in
+		req, ok := <-h.ws.in
 		if !ok {
-			if session != nil {
-				session.deleteWS(addr)
+			if h.session != nil {
+				h.session.deleteWS(h.addr)
 			}
-
-			log.Println(addr, "disconnected")
 			return
 		}
 
-		switch req.Type {
-		case "uuid":
-			json.Unmarshal(req.Request, &UUID)
+		h.dispatchRequest(req)
+	}
+}
 
-			log.Println(addr, "set UUID", UUID)
+func (h *wsHandler) dispatchRequest(req WSRequest) {
+	if handler, ok := h.handlers[req.Type]; ok {
+		handler(req.Data)
+	}
+}
 
-			sessionLock.Lock()
+func (h *wsHandler) init(b []byte) {
+	json.Unmarshal(b, &h.uuid)
 
-			if storedSession, exists := sessions[UUID]; exists {
-				sessionLock.Unlock()
-				session = storedSession
-				session.setWS(addr, ws)
+	log.Println(h.addr, "set UUID", h.uuid)
 
-				log.Println(addr, "attached to", session.numIRC(), "existing IRC connections")
+	sessionLock.Lock()
+	if storedSession, exists := sessions[h.uuid]; exists {
+		sessionLock.Unlock()
+		h.session = storedSession
+		h.session.setWS(h.addr, h.ws)
 
-				channels := session.user.GetChannels()
-				for i, channel := range channels {
-					channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
-				}
+		log.Println(h.addr, "attached to", h.session.numIRC(), "existing IRC connections")
 
-				session.sendJSON("channels", channels)
-				session.sendJSON("servers", session.user.GetServers())
-
-				for _, channel := range channels {
-					session.sendJSON("users", Userlist{
-						Server:  channel.Server,
-						Channel: channel.Name,
-						Users:   channelStore.GetUsers(channel.Server, channel.Name),
-					})
-				}
-			} else {
-				session = NewSession()
-				session.user = storage.NewUser(UUID)
-
-				sessions[UUID] = session
-				sessionLock.Unlock()
-
-				session.setWS(addr, ws)
-				session.sendJSON("servers", nil)
-
-				go session.write()
-			}
-
-		case "connect":
-			var data Connect
-
-			json.Unmarshal(req.Request, &data)
-
-			if _, ok := session.getIRC(data.Server); !ok {
-				log.Println(addr, "connecting to", data.Server)
-
-				i := irc.NewClient(data.Nick, data.Username)
-				i.TLS = data.TLS
-				i.Password = data.Password
-				i.Realname = data.Realname
-
-				if idx := strings.Index(data.Server, ":"); idx < 0 {
-					session.setIRC(data.Server, i)
-				} else {
-					session.setIRC(data.Server[:idx], i)
-				}
-
-				i.Connect(data.Server)
-				go newIRCHandler(i, session).run()
-
-				session.user.AddServer(storage.Server{
-					Name:     data.Name,
-					Address:  i.Host,
-					TLS:      data.TLS,
-					Password: data.Password,
-					Nick:     data.Nick,
-					Username: data.Username,
-					Realname: data.Realname,
-				})
-			} else {
-				log.Println(addr, "already connected to", data.Server)
-			}
-
-		case "join":
-			var data Join
-
-			json.Unmarshal(req.Request, &data)
-
-			if i, ok := session.getIRC(data.Server); ok {
-				i.Join(data.Channels...)
-			}
-
-		case "part":
-			var data Part
-
-			json.Unmarshal(req.Request, &data)
-
-			if i, ok := session.getIRC(data.Server); ok {
-				i.Part(data.Channels...)
-			}
-
-		case "quit":
-			var data Quit
-
-			json.Unmarshal(req.Request, &data)
-
-			if i, ok := session.getIRC(data.Server); ok {
-				i.Quit()
-				session.deleteIRC(data.Server)
-				channelStore.RemoveUserAll(i.GetNick(), data.Server)
-				session.user.RemoveServer(data.Server)
-			}
-
-		case "chat":
-			var data Chat
-
-			json.Unmarshal(req.Request, &data)
-
-			if i, ok := session.getIRC(data.Server); ok {
-				i.Privmsg(data.To, data.Message)
-			}
-
-		case "nick":
-			var data Nick
-
-			json.Unmarshal(req.Request, &data)
-
-			if i, ok := session.getIRC(data.Server); ok {
-				i.Nick(data.New)
-				session.user.SetNick(data.New, data.Server)
-			}
-
-		case "invite":
-			var data Invite
-
-			json.Unmarshal(req.Request, &data)
-
-			if i, ok := session.getIRC(data.Server); ok {
-				i.Invite(data.User, data.Channel)
-			}
-
-		case "kick":
-			var data Invite
-
-			json.Unmarshal(req.Request, &data)
-
-			if i, ok := session.getIRC(data.Server); ok {
-				i.Kick(data.Channel, data.User)
-			}
-
-		case "whois":
-			var data Whois
-
-			json.Unmarshal(req.Request, &data)
-
-			if i, ok := session.getIRC(data.Server); ok {
-				i.Whois(data.User)
-			}
-
-		case "away":
-			var data Away
-
-			json.Unmarshal(req.Request, &data)
-
-			if i, ok := session.getIRC(data.Server); ok {
-				i.Away(data.Message)
-			}
-
-		case "search":
-			go func() {
-				var data SearchRequest
-
-				json.Unmarshal(req.Request, &data)
-
-				results, err := session.user.SearchMessages(data.Server, data.Channel, data.Phrase)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-
-				session.sendJSON("search", SearchResult{
-					Server:  data.Server,
-					Channel: data.Channel,
-					Results: results,
-				})
-			}()
+		channels := h.session.user.GetChannels()
+		for i, channel := range channels {
+			channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
 		}
+
+		h.session.sendJSON("channels", channels)
+		h.session.sendJSON("servers", h.session.user.GetServers())
+
+		for _, channel := range channels {
+			h.session.sendJSON("users", Userlist{
+				Server:  channel.Server,
+				Channel: channel.Name,
+				Users:   channelStore.GetUsers(channel.Server, channel.Name),
+			})
+		}
+	} else {
+		h.session = NewSession()
+		h.session.user = storage.NewUser(h.uuid)
+
+		sessions[h.uuid] = h.session
+		sessionLock.Unlock()
+
+		h.session.setWS(h.addr, h.ws)
+		h.session.sendJSON("servers", nil)
+
+		go h.session.write()
+	}
+}
+
+func (h *wsHandler) connect(b []byte) {
+	var data Connect
+	json.Unmarshal(b, &data)
+
+	if _, ok := h.session.getIRC(data.Server); !ok {
+		log.Println(h.addr, "connecting to", data.Server)
+
+		i := irc.NewClient(data.Nick, data.Username)
+		i.TLS = data.TLS
+		i.Password = data.Password
+		i.Realname = data.Realname
+
+		if idx := strings.Index(data.Server, ":"); idx < 0 {
+			h.session.setIRC(data.Server, i)
+		} else {
+			h.session.setIRC(data.Server[:idx], i)
+		}
+
+		i.Connect(data.Server)
+		go newIRCHandler(i, h.session).run()
+
+		h.session.user.AddServer(storage.Server{
+			Name:     data.Name,
+			Address:  i.Host,
+			TLS:      data.TLS,
+			Password: data.Password,
+			Nick:     data.Nick,
+			Username: data.Username,
+			Realname: data.Realname,
+		})
+	} else {
+		log.Println(h.addr, "already connected to", data.Server)
+	}
+}
+
+func (h *wsHandler) join(b []byte) {
+	var data Join
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Join(data.Channels...)
+	}
+}
+
+func (h *wsHandler) part(b []byte) {
+	var data Part
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Part(data.Channels...)
+	}
+}
+
+func (h *wsHandler) quit(b []byte) {
+	var data Quit
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Quit()
+		h.session.deleteIRC(data.Server)
+		channelStore.RemoveUserAll(i.GetNick(), data.Server)
+		h.session.user.RemoveServer(data.Server)
+	}
+}
+
+func (h *wsHandler) chat(b []byte) {
+	var data Chat
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Privmsg(data.To, data.Message)
+	}
+}
+
+func (h *wsHandler) nick(b []byte) {
+	var data Nick
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Nick(data.New)
+		h.session.user.SetNick(data.New, data.Server)
+	}
+}
+
+func (h *wsHandler) invite(b []byte) {
+	var data Invite
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Invite(data.User, data.Channel)
+	}
+}
+
+func (h *wsHandler) kick(b []byte) {
+	var data Invite
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Kick(data.Channel, data.User)
+	}
+}
+
+func (h *wsHandler) whois(b []byte) {
+	var data Whois
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Whois(data.User)
+	}
+}
+
+func (h *wsHandler) away(b []byte) {
+	var data Away
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Away(data.Message)
+	}
+}
+
+func (h *wsHandler) search(b []byte) {
+	go func() {
+		var data SearchRequest
+		json.Unmarshal(b, &data)
+
+		results, err := h.session.user.SearchMessages(data.Server, data.Channel, data.Phrase)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		h.session.sendJSON("search", SearchResult{
+			Server:  data.Server,
+			Channel: data.Channel,
+			Results: results,
+		})
+	}()
+}
+
+func (h *wsHandler) initHandlers() {
+	h.handlers = map[string]func([]byte){
+		"uuid":    h.init,
+		"connect": h.connect,
+		"join":    h.join,
+		"part":    h.part,
+		"quit":    h.quit,
+		"chat":    h.chat,
+		"nick":    h.nick,
+		"invite":  h.invite,
+		"kick":    h.kick,
+		"whois":   h.whois,
+		"away":    h.away,
+		"search":  h.search,
 	}
 }

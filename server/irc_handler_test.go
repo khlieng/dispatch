@@ -43,9 +43,9 @@ func dispatchMessage(msg *irc.Message) WSResponse {
 	return <-s.out
 }
 
-func checkResponse(t *testing.T, expectedType string, expectedResponse interface{}, res WSResponse) {
+func checkResponse(t *testing.T, expectedType string, expectedData interface{}, res WSResponse) {
 	assert.Equal(t, expectedType, res.Type)
-	assert.Equal(t, expectedResponse, res.Response)
+	assert.Equal(t, expectedData, res.Data)
 }
 
 func TestHandleIRCNick(t *testing.T) {
