@@ -100,7 +100,7 @@ func handleWS(conn *websocket.Conn) {
 				}
 
 				i.Connect(data.Server)
-				go handleIRC(i, session)
+				go newIRCHandler(i, session).run()
 
 				session.user.AddServer(storage.Server{
 					Name:     data.Name,

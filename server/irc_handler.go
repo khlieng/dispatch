@@ -8,175 +8,231 @@ import (
 	"github.com/khlieng/name_pending/storage"
 )
 
-func handleIRC(client *irc.Client, session *Session) {
-	var whois WhoisReply
-	userBuffers := make(map[string][]string)
-	var motd MOTD
+type ircHandler struct {
+	client  *irc.Client
+	session *Session
 
+	whois       WhoisReply
+	userBuffers map[string][]string
+	motdBuffer  MOTD
+
+	handlers map[string]func(*irc.Message)
+}
+
+func newIRCHandler(client *irc.Client, session *Session) *ircHandler {
+	i := &ircHandler{
+		client:      client,
+		session:     session,
+		userBuffers: make(map[string][]string),
+	}
+	i.initHandlers()
+	return i
+}
+
+func (i *ircHandler) run() {
 	for {
-		msg, ok := <-client.Messages
+		msg, ok := <-i.client.Messages
 		if !ok {
-			session.deleteIRC(client.Host)
+			i.session.deleteIRC(i.client.Host)
 			return
 		}
 
-		switch msg.Command {
-		case irc.Nick:
-			session.sendJSON("nick", Nick{
-				Server: client.Host,
-				Old:    msg.Nick,
-				New:    msg.Trailing,
-			})
+		i.dispatchMessage(msg)
+	}
+}
 
-			channelStore.RenameUser(msg.Nick, msg.Trailing, client.Host)
+func (i *ircHandler) dispatchMessage(msg *irc.Message) {
+	if handler, ok := i.handlers[msg.Command]; ok {
+		handler(msg)
+	}
+}
 
-		case irc.Join:
-			session.sendJSON("join", Join{
-				Server:   client.Host,
-				User:     msg.Nick,
-				Channels: msg.Params,
-			})
+func (i *ircHandler) nick(msg *irc.Message) {
+	i.session.sendJSON("nick", Nick{
+		Server: i.client.Host,
+		Old:    msg.Nick,
+		New:    msg.Trailing,
+	})
 
-			channelStore.AddUser(msg.Nick, client.Host, msg.Params[0])
+	channelStore.RenameUser(msg.Nick, msg.Trailing, i.client.Host)
+}
 
-			if msg.Nick == client.GetNick() {
-				session.user.AddChannel(storage.Channel{
-					Server: client.Host,
-					Name:   msg.Params[0],
-				})
-			}
+func (i *ircHandler) join(msg *irc.Message) {
+	i.session.sendJSON("join", Join{
+		Server:   i.client.Host,
+		User:     msg.Nick,
+		Channels: msg.Params,
+	})
 
-		case irc.Part:
-			session.sendJSON("part", Part{
-				Join: Join{
-					Server:   client.Host,
-					User:     msg.Nick,
-					Channels: msg.Params,
-				},
-				Reason: msg.Trailing,
-			})
+	channelStore.AddUser(msg.Nick, i.client.Host, msg.Params[0])
 
-			channelStore.RemoveUser(msg.Nick, client.Host, msg.Params[0])
+	if msg.Nick == i.client.GetNick() {
+		i.session.user.AddChannel(storage.Channel{
+			Server: i.client.Host,
+			Name:   msg.Params[0],
+		})
+	}
+}
 
-			if msg.Nick == client.GetNick() {
-				session.user.RemoveChannel(client.Host, msg.Params[0])
-			}
+func (i *ircHandler) part(msg *irc.Message) {
+	i.session.sendJSON("part", Part{
+		Join: Join{
+			Server:   i.client.Host,
+			User:     msg.Nick,
+			Channels: msg.Params,
+		},
+		Reason: msg.Trailing,
+	})
 
-		case irc.Mode:
-			target := msg.Params[0]
-			if len(msg.Params) > 2 && isChannel(target) {
-				mode := parseMode(msg.Params[1])
-				mode.Server = client.Host
-				mode.Channel = target
-				mode.User = msg.Params[2]
+	channelStore.RemoveUser(msg.Nick, i.client.Host, msg.Params[0])
 
-				session.sendJSON("mode", mode)
+	if msg.Nick == i.client.GetNick() {
+		i.session.user.RemoveChannel(i.client.Host, msg.Params[0])
+	}
+}
 
-				channelStore.SetMode(client.Host, target, msg.Params[2], mode.Add, mode.Remove)
-			}
+func (i *ircHandler) mode(msg *irc.Message) {
+	target := msg.Params[0]
+	if len(msg.Params) > 2 && isChannel(target) {
+		mode := parseMode(msg.Params[1])
+		mode.Server = i.client.Host
+		mode.Channel = target
+		mode.User = msg.Params[2]
 
-		case irc.Privmsg, irc.Notice:
-			if msg.Params[0] == client.GetNick() {
-				session.sendJSON("pm", Chat{
-					Server:  client.Host,
-					From:    msg.Nick,
-					Message: msg.Trailing,
-				})
-			} else {
-				session.sendJSON("message", Chat{
-					Server:  client.Host,
-					From:    msg.Nick,
-					To:      msg.Params[0],
-					Message: msg.Trailing,
-				})
-			}
+		i.session.sendJSON("mode", mode)
 
-			if msg.Params[0] != "*" {
-				go session.user.LogMessage(client.Host, msg.Nick, msg.Params[0], msg.Trailing)
-			}
+		channelStore.SetMode(i.client.Host, target, msg.Params[2], mode.Add, mode.Remove)
+	}
+}
 
-		case irc.Quit:
-			session.sendJSON("quit", Quit{
-				Server: client.Host,
-				User:   msg.Nick,
-				Reason: msg.Trailing,
-			})
+func (i *ircHandler) message(msg *irc.Message) {
+	message := Chat{
+		Server:  i.client.Host,
+		From:    msg.Nick,
+		Message: msg.Trailing,
+	}
 
-			channelStore.RemoveUserAll(msg.Nick, client.Host)
+	if msg.Params[0] == i.client.GetNick() {
+		i.session.sendJSON("pm", message)
+	} else {
+		message.To = msg.Params[0]
+		i.session.sendJSON("message", message)
+	}
 
-		case irc.ReplyWelcome,
-			irc.ReplyYourHost,
-			irc.ReplyCreated,
-			irc.ReplyLUserClient,
-			irc.ReplyLUserOp,
-			irc.ReplyLUserUnknown,
-			irc.ReplyLUserChannels,
-			irc.ReplyLUserMe:
-			session.sendJSON("pm", Chat{
-				Server:  client.Host,
-				From:    msg.Nick,
-				Message: strings.Join(msg.Params[1:], " "),
-			})
+	if msg.Params[0] != "*" {
+		go i.session.user.LogMessage(i.client.Host, msg.Nick, msg.Params[0], msg.Trailing)
+	}
+}
 
-		case irc.ReplyWhoisUser:
-			whois.Nick = msg.Params[1]
-			whois.Username = msg.Params[2]
-			whois.Host = msg.Params[3]
-			whois.Realname = msg.Params[5]
+func (i *ircHandler) quit(msg *irc.Message) {
+	i.session.sendJSON("quit", Quit{
+		Server: i.client.Host,
+		User:   msg.Nick,
+		Reason: msg.Trailing,
+	})
 
-		case irc.ReplyWhoisServer:
-			whois.Server = msg.Params[2]
+	channelStore.RemoveUserAll(msg.Nick, i.client.Host)
+}
 
-		case irc.ReplyWhoisChannels:
-			whois.Channels = append(whois.Channels, strings.Split(strings.TrimRight(msg.Trailing, " "), " ")...)
+func (i *ircHandler) info(msg *irc.Message) {
+	i.session.sendJSON("pm", Chat{
+		Server:  i.client.Host,
+		From:    msg.Nick,
+		Message: strings.Join(msg.Params[1:], " "),
+	})
+}
 
-		case irc.ReplyEndOfWhois:
-			session.sendJSON("whois", whois)
+func (i *ircHandler) whoisUser(msg *irc.Message) {
+	i.whois.Nick = msg.Params[1]
+	i.whois.Username = msg.Params[2]
+	i.whois.Host = msg.Params[3]
+	i.whois.Realname = msg.Params[5]
+}
 
-			whois = WhoisReply{}
+func (i *ircHandler) whoisServer(msg *irc.Message) {
+	i.whois.Server = msg.Params[2]
+}
 
-		case irc.ReplyTopic:
-			session.sendJSON("topic", Topic{
-				Server:  client.Host,
-				Channel: msg.Params[1],
-				Topic:   msg.Trailing,
-			})
+func (i *ircHandler) whoisChannels(msg *irc.Message) {
+	i.whois.Channels = append(i.whois.Channels, strings.Split(strings.TrimRight(msg.Trailing, " "), " ")...)
+}
 
-			channelStore.SetTopic(msg.Trailing, client.Host, msg.Params[1])
+func (i *ircHandler) whoisEnd(msg *irc.Message) {
+	i.session.sendJSON("whois", i.whois)
+	i.whois = WhoisReply{}
+}
 
-		case irc.ReplyNamReply:
-			users := strings.Split(msg.Trailing, " ")
-			userBuffer := userBuffers[msg.Params[2]]
-			userBuffers[msg.Params[2]] = append(userBuffer, users...)
+func (i *ircHandler) topic(msg *irc.Message) {
+	i.session.sendJSON("topic", Topic{
+		Server:  i.client.Host,
+		Channel: msg.Params[1],
+		Topic:   msg.Trailing,
+	})
 
-		case irc.ReplyEndOfNames:
-			channel := msg.Params[1]
-			users := userBuffers[channel]
+	channelStore.SetTopic(msg.Trailing, i.client.Host, msg.Params[1])
+}
 
-			session.sendJSON("users", Userlist{
-				Server:  client.Host,
-				Channel: channel,
-				Users:   users,
-			})
+func (i *ircHandler) names(msg *irc.Message) {
+	users := strings.Split(msg.Trailing, " ")
+	userBuffer := i.userBuffers[msg.Params[2]]
+	i.userBuffers[msg.Params[2]] = append(userBuffer, users...)
+}
 
-			channelStore.SetUsers(users, client.Host, channel)
-			delete(userBuffers, channel)
+func (i *ircHandler) namesEnd(msg *irc.Message) {
+	channel := msg.Params[1]
+	users := i.userBuffers[channel]
 
-		case irc.ReplyMotdStart:
-			motd.Server = client.Host
-			motd.Title = msg.Trailing
+	i.session.sendJSON("users", Userlist{
+		Server:  i.client.Host,
+		Channel: channel,
+		Users:   users,
+	})
 
-		case irc.ReplyMotd:
-			motd.Content = append(motd.Content, msg.Trailing)
+	channelStore.SetUsers(users, i.client.Host, channel)
+	delete(i.userBuffers, channel)
+}
 
-		case irc.ReplyEndOfMotd:
-			session.sendJSON("motd", motd)
+func (i *ircHandler) motdStart(msg *irc.Message) {
+	i.motdBuffer.Server = i.client.Host
+	i.motdBuffer.Title = msg.Trailing
+}
 
-			motd = MOTD{}
+func (i *ircHandler) motd(msg *irc.Message) {
+	i.motdBuffer.Content = append(i.motdBuffer.Content, msg.Trailing)
+}
 
-		default:
-			printMessage(msg, client)
-		}
+func (i *ircHandler) motdEnd(msg *irc.Message) {
+	i.session.sendJSON("motd", i.motdBuffer)
+	i.motdBuffer = MOTD{}
+}
+
+func (i *ircHandler) initHandlers() {
+	i.handlers = map[string]func(*irc.Message){
+		irc.Nick:               i.nick,
+		irc.Join:               i.join,
+		irc.Part:               i.part,
+		irc.Mode:               i.mode,
+		irc.Privmsg:            i.message,
+		irc.Notice:             i.message,
+		irc.Quit:               i.quit,
+		irc.ReplyWelcome:       i.info,
+		irc.ReplyYourHost:      i.info,
+		irc.ReplyCreated:       i.info,
+		irc.ReplyLUserClient:   i.info,
+		irc.ReplyLUserOp:       i.info,
+		irc.ReplyLUserUnknown:  i.info,
+		irc.ReplyLUserChannels: i.info,
+		irc.ReplyLUserMe:       i.info,
+		irc.ReplyWhoisUser:     i.whoisUser,
+		irc.ReplyWhoisServer:   i.whoisServer,
+		irc.ReplyWhoisChannels: i.whoisChannels,
+		irc.ReplyEndOfWhois:    i.whoisEnd,
+		irc.ReplyTopic:         i.topic,
+		irc.ReplyNamReply:      i.names,
+		irc.ReplyEndOfNames:    i.namesEnd,
+		irc.ReplyMotdStart:     i.motdStart,
+		irc.ReplyMotd:          i.motd,
+		irc.ReplyEndOfMotd:     i.motdEnd,
 	}
 }
 

@@ -79,7 +79,7 @@ func reconnect() {
 
 			i.Connect(server.Address)
 			session.setIRC(i.Host, i)
-			go handleIRC(i, session)
+			go newIRCHandler(i, session).run()
 
 			var joining []string
 			for _, channel := range channels {
