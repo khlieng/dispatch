@@ -1,6 +1,6 @@
 # dispatch [![Build Status](https://travis-ci.org/khlieng/dispatch.svg?branch=master)](https://travis-ci.org/khlieng/dispatch)
 
-####[Try it!](http://np.khlieng.com/)
+####[Try it!](http://dispatch.khlieng.com/)
 
 ### Features
 * Searchable history
