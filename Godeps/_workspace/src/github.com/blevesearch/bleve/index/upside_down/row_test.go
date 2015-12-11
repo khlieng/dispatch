@@ -13,7 +13,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/golang/protobuf/proto"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/golang/protobuf/proto"
 )
 
 func TestRows(t *testing.T) {

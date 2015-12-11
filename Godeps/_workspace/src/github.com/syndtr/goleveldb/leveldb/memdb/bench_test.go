@@ -11,7 +11,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/comparer"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/comparer"
 )
 
 func BenchmarkPut(b *testing.B) {

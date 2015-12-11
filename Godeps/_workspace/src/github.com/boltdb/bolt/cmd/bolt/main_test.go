@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
-	. "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt/cmd/bolt"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
+	. "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt/cmd/bolt"
 )
 
 // open creates and opens a Bolt database in the temp directory.

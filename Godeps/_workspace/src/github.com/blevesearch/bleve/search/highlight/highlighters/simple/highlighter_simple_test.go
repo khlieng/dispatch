@@ -13,10 +13,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/search"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/search/highlight/fragment_formatters/ansi"
-	sfrag "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/search/highlight/fragmenters/simple"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/search"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/search/highlight/fragment_formatters/ansi"
+	sfrag "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/search/highlight/fragmenters/simple"
 )
 
 const (

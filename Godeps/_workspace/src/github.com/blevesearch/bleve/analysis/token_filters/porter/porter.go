@@ -10,9 +10,9 @@
 package porter
 
 import (
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/go-porterstemmer"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/go-porterstemmer"
 )
 
 const Name = "stemmer_porter"

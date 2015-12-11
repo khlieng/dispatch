@@ -12,9 +12,9 @@ package inmem
 import (
 	"sync"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/ryszard/goskiplist/skiplist"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/ryszard/goskiplist/skiplist"
 )
 
 const Name = "mem"

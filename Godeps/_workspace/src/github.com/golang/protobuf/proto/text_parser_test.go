@@ -36,9 +36,9 @@ import (
 	"reflect"
 	"testing"
 
-	. "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/golang/protobuf/proto"
-	proto3pb "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/golang/protobuf/proto/proto3_proto"
-	. "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
+	. "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/golang/protobuf/proto"
+	proto3pb "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/golang/protobuf/proto/proto3_proto"
+	. "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
 )
 
 type UnmarshalTextTest struct {

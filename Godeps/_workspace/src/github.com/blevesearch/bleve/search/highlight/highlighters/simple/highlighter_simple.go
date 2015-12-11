@@ -13,10 +13,10 @@ import (
 	"container/heap"
 	"fmt"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/search"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/search/highlight"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/search"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/search/highlight"
 )
 
 const Name = "simple"

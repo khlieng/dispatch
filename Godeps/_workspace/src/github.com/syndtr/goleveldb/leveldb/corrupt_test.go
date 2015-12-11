@@ -9,9 +9,9 @@ package leveldb
 import (
 	"bytes"
 	"fmt"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/filter"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/opt"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/storage"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/filter"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/opt"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/storage"
 	"io"
 	"math/rand"
 	"testing"

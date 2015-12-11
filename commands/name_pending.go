@@ -6,18 +6,18 @@ import (
 	"os"
 	"path"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/mitchellh/go-homedir"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/cobra"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/viper"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/mitchellh/go-homedir"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
 
-	"github.com/khlieng/name_pending/assets"
-	"github.com/khlieng/name_pending/server"
-	"github.com/khlieng/name_pending/storage"
+	"github.com/khlieng/dispatch/assets"
+	"github.com/khlieng/dispatch/server"
+	"github.com/khlieng/dispatch/storage"
 )
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "name_pending",
+		Use:   "dispatch",
 		Short: "Web-based IRC client in Go.",
 		Run: func(cmd *cobra.Command, args []string) {
 			storage.Initialize(appDir)
@@ -79,5 +79,5 @@ func defaultDir() string {
 		log.Fatal(err)
 	}
 
-	return path.Join(dir, ".name_pending")
+	return path.Join(dir, ".dispatch")
 }

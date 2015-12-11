@@ -10,8 +10,8 @@
 package goleveldb
 
 import (
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb"
 )
 
 type Writer struct {

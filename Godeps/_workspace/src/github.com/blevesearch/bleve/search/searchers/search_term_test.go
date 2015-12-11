@@ -13,9 +13,9 @@ import (
 	"math"
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store/inmem"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/upside_down"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store/inmem"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/upside_down"
 )
 
 func TestTermSearcher(t *testing.T) {

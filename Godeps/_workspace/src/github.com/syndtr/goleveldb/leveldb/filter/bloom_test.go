@@ -8,7 +8,7 @@ package filter
 
 import (
 	"encoding/binary"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/util"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/syndtr/goleveldb/leveldb/util"
 	"testing"
 )
 

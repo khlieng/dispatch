@@ -18,9 +18,9 @@ import (
 	"net/textproto"
 	"strconv"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/crypto/openpgp/armor"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/crypto/openpgp/errors"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/crypto/openpgp/packet"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/golang.org/x/crypto/openpgp/armor"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/golang.org/x/crypto/openpgp/errors"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/golang.org/x/crypto/openpgp/packet"
 )
 
 // A Block represents a clearsigned message. A signature on a Block can

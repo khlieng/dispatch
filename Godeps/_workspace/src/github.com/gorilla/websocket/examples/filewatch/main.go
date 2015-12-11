@@ -14,7 +14,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
 )
 
 const (

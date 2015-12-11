@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/khlieng/name_pending/assets"
+	"github.com/khlieng/dispatch/assets"
 )
 
 var files = []File{

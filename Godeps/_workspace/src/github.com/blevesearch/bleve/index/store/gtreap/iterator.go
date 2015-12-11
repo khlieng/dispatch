@@ -17,7 +17,7 @@ package gtreap
 import (
 	"sync"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/steveyen/gtreap"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/steveyen/gtreap"
 )
 
 type Iterator struct {

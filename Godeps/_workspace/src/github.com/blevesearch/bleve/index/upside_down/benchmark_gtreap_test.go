@@ -12,8 +12,8 @@ package upside_down
 import (
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store/gtreap"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store/gtreap"
 )
 
 func CreateGTreap() (store.KVStore, error) {

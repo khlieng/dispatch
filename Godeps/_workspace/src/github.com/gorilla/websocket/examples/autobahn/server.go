@@ -8,7 +8,7 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"io"
 	"log"
 	"net/http"

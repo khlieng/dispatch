@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend"
 
-	goetcd "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/coreos/go-etcd/etcd"
+	goetcd "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/coreos/go-etcd/etcd"
 )
 
 type Client struct {

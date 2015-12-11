@@ -30,12 +30,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/kr/pretty"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/mitchellh/mapstructure"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/cast"
-	jww "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/jwalterweatherman"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/pflag"
-	crypt "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/xordataexchange/crypt/config"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/kr/pretty"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/mitchellh/mapstructure"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cast"
+	jww "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/jwalterweatherman"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/pflag"
+	crypt "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xordataexchange/crypt/config"
 )
 
 var v *Viper

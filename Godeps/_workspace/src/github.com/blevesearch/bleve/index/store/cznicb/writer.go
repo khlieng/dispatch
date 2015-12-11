@@ -12,7 +12,7 @@
 package cznicb
 
 import (
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
 )
 
 type Writer struct {

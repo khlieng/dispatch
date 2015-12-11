@@ -12,7 +12,7 @@ package searchers
 import (
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/search"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/search"
 )
 
 func TestPhraseSearch(t *testing.T) {

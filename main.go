@@ -3,7 +3,7 @@ package main
 import (
 	"runtime"
 
-	"github.com/khlieng/name_pending/commands"
+	"github.com/khlieng/dispatch/commands"
 )
 
 func main() {

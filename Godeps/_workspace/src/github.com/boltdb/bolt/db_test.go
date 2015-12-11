@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 var statsFlag = flag.Bool("stats", false, "show performance stats")

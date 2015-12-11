@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
-	_ "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis/tokenizers/unicode"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
+	_ "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis/tokenizers/unicode"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
 )
 
 func TestExceptionsTokenizer(t *testing.T) {

@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/crypto/openpgp/errors"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/golang.org/x/crypto/openpgp/errors"
 )
 
 // PublicKeyV3 represents older, version 3 public keys. These keys are less secure and

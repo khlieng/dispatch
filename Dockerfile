@@ -1,9 +1,9 @@
 FROM scratch
 
-ADD build/name_pending /
+ADD build/dispatch /
 ADD ca-certificates.crt /etc/ssl/certs/
 
 VOLUME ["/data"]
 
-ENTRYPOINT ["/name_pending"]
+ENTRYPOINT ["/dispatch"]
 CMD ["-p=8080", "--dir=/data"]

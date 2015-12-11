@@ -15,7 +15,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve"
 )
 
 // SearchHandler can handle search requests sent over HTTP

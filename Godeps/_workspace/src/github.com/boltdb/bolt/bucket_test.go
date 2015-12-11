@@ -12,7 +12,7 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 // Ensure that a bucket that gets a non-existent key returns nil.

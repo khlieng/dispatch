@@ -11,7 +11,7 @@ package bleve
 
 import (
 	"encoding/json"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
 	"reflect"
 	"testing"
 )

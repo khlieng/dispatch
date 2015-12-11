@@ -10,7 +10,7 @@
 package inmem
 
 import (
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/ryszard/goskiplist/skiplist"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/ryszard/goskiplist/skiplist"
 )
 
 type Iterator struct {

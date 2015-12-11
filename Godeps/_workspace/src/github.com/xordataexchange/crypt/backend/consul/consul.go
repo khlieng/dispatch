@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/armon/consul-api"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/armon/consul-api"
 )
 
 type Client struct {

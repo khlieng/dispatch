@@ -13,11 +13,11 @@ import (
 	"strconv"
 	"testing"
 
-	_ "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis/analyzers/standard_analyzer"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
+	_ "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis/analyzers/standard_analyzer"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/document"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
 )
 
 var benchmarkDocBodies = []string{

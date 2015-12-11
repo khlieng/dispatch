@@ -5,10 +5,10 @@ import (
 	"log"
 	"strings"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
 
-	"github.com/khlieng/name_pending/irc"
-	"github.com/khlieng/name_pending/storage"
+	"github.com/khlieng/dispatch/irc"
+	"github.com/khlieng/dispatch/storage"
 )
 
 type wsHandler struct {

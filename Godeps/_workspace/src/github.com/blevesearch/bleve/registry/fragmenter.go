@@ -12,7 +12,7 @@ package registry
 import (
 	"fmt"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/search/highlight"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/search/highlight"
 )
 
 func RegisterFragmenter(name string, constructor FragmenterConstructor) {

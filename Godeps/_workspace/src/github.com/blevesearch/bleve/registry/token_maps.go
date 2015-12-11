@@ -12,7 +12,7 @@ package registry
 import (
 	"fmt"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
 )
 
 func RegisterTokenMap(name string, constructor TokenMapConstructor) {

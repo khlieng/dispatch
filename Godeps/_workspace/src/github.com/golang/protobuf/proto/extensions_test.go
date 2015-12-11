@@ -34,8 +34,8 @@ package proto_test
 import (
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/golang/protobuf/proto"
-	pb "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/golang/protobuf/proto"
+	pb "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
 )
 
 func TestGetExtensionsWithMissingExtensions(t *testing.T) {

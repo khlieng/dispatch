@@ -15,7 +15,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
 )
 
 // A DocumentMapping describes how a type of document

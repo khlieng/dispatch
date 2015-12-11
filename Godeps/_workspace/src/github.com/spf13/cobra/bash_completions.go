@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/pflag"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/pflag"
 )
 
 const (

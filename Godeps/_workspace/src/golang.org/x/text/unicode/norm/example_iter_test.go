@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"unicode/utf8"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/golang.org/x/text/unicode/norm"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/golang.org/x/text/unicode/norm"
 )
 
 // EqualSimple uses a norm.Iter to compare two non-normalized

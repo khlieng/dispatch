@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 
-	"github.com/khlieng/name_pending/storage"
+	"github.com/khlieng/dispatch/storage"
 )
 
 type WSRequest struct {

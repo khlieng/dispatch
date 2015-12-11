@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 // Get retrieves the value for a given bucket/key.

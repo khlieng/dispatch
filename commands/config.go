@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cobra"
 )
 
 var (

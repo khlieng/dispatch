@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend"
 )
 
 var mockedStore map[string][]byte

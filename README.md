@@ -1,4 +1,4 @@
-# name_pending [![Build Status](https://travis-ci.org/khlieng/name_pending.svg?branch=master)](https://travis-ci.org/khlieng/name_pending)
+# dispatch [![Build Status](https://travis-ci.org/khlieng/dispatch.svg?branch=master)](https://travis-ci.org/khlieng/dispatch)
 
 ####[Try it!](http://np.khlieng.com/)
 
@@ -17,26 +17,26 @@ There will be binary releases.
 This requires a [Go environment](http://golang.org/doc/install).
 
 ```bash
-go get github.com/khlieng/name_pending
+go get github.com/khlieng/dispatch
 
-name_pending
+dispatch
 ```
 
 To get some help run:
 ```bash
-name_pending help
+dispatch help
 ```
 
 #### 3. Docker
 ```bash
-docker run -p 8080:8080 khlieng/name_pending
+docker run -p 8080:8080 khlieng/dispatch
 ```
 
 ## Build
 
 ### Server
 ```bash
-cd $GOPATH/src/github.com/khlieng/name_pending
+cd $GOPATH/src/github.com/khlieng/dispatch
 
 go install
 ```
@@ -48,7 +48,7 @@ Fetch the dependencies:
 ```bash
 npm install -g gulp
 go get github.com/jteeuwen/go-bindata/...
-cd $GOPATH/src/github.com/khlieng/name_pending/client
+cd $GOPATH/src/github.com/khlieng/dispatch/client
 npm install
 ```
 

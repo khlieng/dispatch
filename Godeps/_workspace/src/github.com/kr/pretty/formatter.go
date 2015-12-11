@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/kr/text"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/kr/text"
 )
 
 const (

@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cobra"
 
-	"github.com/khlieng/name_pending/storage"
+	"github.com/khlieng/dispatch/storage"
 )
 
 var clearCmd = &cobra.Command{

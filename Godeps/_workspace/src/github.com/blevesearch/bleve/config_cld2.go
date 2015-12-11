@@ -13,8 +13,8 @@ package bleve
 
 import (
 	// cld2 token filter
-	_ "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis/analyzers/detect_lang_analyzer"
+	_ "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis/analyzers/detect_lang_analyzer"
 
 	// detect language analyzer
-	_ "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis/token_filters/cld2"
+	_ "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis/token_filters/cld2"
 )

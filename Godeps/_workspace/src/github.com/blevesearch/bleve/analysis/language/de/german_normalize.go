@@ -12,16 +12,16 @@ package de
 import (
 	"bytes"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/registry"
 )
 
 const NormalizeName = "normalize_de"
 
 const (
 	N = /* ordinary state */ 0
-	V = 1                      /* stops 'u' from entering umlaut state */
-	U = 2                      /* umlaut state, allows e-deletion */
+	V = 1 /* stops 'u' from entering umlaut state */
+	U = 2 /* umlaut state, allows e-deletion */
 )
 
 type GermanNormalizeFilter struct {

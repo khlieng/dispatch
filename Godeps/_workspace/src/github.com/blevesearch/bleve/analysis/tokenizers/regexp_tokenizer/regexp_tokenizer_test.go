@@ -14,7 +14,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/analysis"
 )
 
 func TestBoundary(t *testing.T) {

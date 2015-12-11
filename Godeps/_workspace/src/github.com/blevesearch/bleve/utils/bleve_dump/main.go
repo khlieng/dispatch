@@ -15,8 +15,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/upside_down"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/upside_down"
 )
 
 var indexPath = flag.String("index", "", "index path")

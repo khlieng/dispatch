@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 // Keys retrieves a list of keys for a given bucket.

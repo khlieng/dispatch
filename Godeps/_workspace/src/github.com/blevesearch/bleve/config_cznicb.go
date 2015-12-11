@@ -12,5 +12,5 @@
 package bleve
 
 import (
-	_ "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store/cznicb"
+	_ "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve/index/store/cznicb"
 )

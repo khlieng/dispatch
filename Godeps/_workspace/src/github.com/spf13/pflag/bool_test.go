@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/pflag"
+	. "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/pflag"
 )
 
 // This value can be a boolean ("true", "false") or "maybe"

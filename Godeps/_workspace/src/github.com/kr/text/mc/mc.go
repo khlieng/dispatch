@@ -10,7 +10,7 @@
 package main
 
 import (
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/kr/text/colwriter"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/kr/text/colwriter"
 	"github.com/kr/pty"
 	"io"
 	"log"

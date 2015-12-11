@@ -39,9 +39,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/golang/protobuf/proto"
-	proto3pb "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/golang/protobuf/proto/proto3_proto"
-	pb "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/golang/protobuf/proto"
+	proto3pb "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/golang/protobuf/proto/proto3_proto"
+	pb "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
 )
 
 // textMessage implements the methods that allow it to marshal and unmarshal

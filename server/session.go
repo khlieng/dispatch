@@ -3,8 +3,8 @@ package server
 import (
 	"sync"
 
-	"github.com/khlieng/name_pending/irc"
-	"github.com/khlieng/name_pending/storage"
+	"github.com/khlieng/dispatch/irc"
+	"github.com/khlieng/dispatch/storage"
 )
 
 type Session struct {

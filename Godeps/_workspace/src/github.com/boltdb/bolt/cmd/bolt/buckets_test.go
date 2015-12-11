@@ -3,8 +3,8 @@ package main_test
 import (
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
-	. "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt/cmd/bolt"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
+	. "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt/cmd/bolt"
 )
 
 // Ensure that a list of buckets can be retrieved.

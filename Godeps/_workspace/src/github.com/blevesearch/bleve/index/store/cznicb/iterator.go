@@ -16,7 +16,7 @@ package cznicb
 import (
 	"errors"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/cznic/b"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/cznic/b"
 )
 
 var iteratorDoneErr = errors.New("iteratorDoneErr") // A sentinel value.

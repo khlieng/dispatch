@@ -7,7 +7,7 @@ package jwalterweatherman
 
 import (
 	"bytes"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/stretchr/testify/assert"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 	"testing"
 )
 

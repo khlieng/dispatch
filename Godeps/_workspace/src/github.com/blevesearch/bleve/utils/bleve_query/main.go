@@ -17,7 +17,7 @@ import (
 	"runtime/pprof"
 	"strings"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/blevesearch/bleve"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve"
 )
 
 var indexPath = flag.String("index", "", "index path")

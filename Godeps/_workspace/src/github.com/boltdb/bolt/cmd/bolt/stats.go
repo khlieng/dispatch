@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
 
 // Collect stats for all top level buckets matching the prefix.

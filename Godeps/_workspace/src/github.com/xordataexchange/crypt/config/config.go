@@ -5,10 +5,10 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend/consul"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend/etcd"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/xordataexchange/crypt/encoding/secconf"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend/consul"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend/etcd"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xordataexchange/crypt/encoding/secconf"
 )
 
 type KVPair struct {

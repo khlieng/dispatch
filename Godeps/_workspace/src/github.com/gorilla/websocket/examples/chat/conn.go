@@ -5,7 +5,7 @@
 package main
 
 import (
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"time"

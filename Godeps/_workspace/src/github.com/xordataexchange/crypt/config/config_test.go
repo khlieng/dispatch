@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend/mock"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xordataexchange/crypt/backend/mock"
 )
 
 var pubring = `-----BEGIN PGP PUBLIC KEY BLOCK-----

@@ -21,11 +21,11 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/BurntSushi/toml"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/magiconair/properties"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/cast"
-	jww "github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/spf13/jwalterweatherman"
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/gopkg.in/yaml.v2"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/BurntSushi/toml"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/magiconair/properties"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cast"
+	jww "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/jwalterweatherman"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/gopkg.in/yaml.v2"
 )
 
 func insensitiviseMap(m map[string]interface{}) {

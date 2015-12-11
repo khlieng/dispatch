@@ -3,7 +3,7 @@ package irc
 import (
 	"testing"
 
-	"github.com/khlieng/name_pending/Godeps/_workspace/src/github.com/stretchr/testify/assert"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 )
 
 func TestParseMessage(t *testing.T) {
