@@ -50,7 +50,12 @@ gulp.task('js', function() {
 function js(watch) {
     var bundler = browserify('./src/js/app.js', {
         debug: !argv.production,
-        transform: [babelify, strictify],
+        transform: [
+            babelify.configure({
+                presets: ['es2015', 'react']
+            }),
+            strictify
+        ],
         cache: {},
         packageCache: {},
         fullPaths: watch
@@ -82,7 +87,7 @@ function js(watch) {
         .pipe(source('vendor.js'))
         .pipe(gulpif(argv.production, streamify(uglify())))
         .pipe(gulp.dest('dist'));
-    
+
     return merge(rebundle(), vendor);
 }
 

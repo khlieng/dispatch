@@ -1,15 +1,14 @@
-var React = require('react');
-var Reflux = require('reflux');
-var Infinite = require('react-infinite');
+import React from 'react';
+import Reflux from 'reflux';
+import Infinite from 'react-infinite';
+import MessageHeader from './MessageHeader.jsx';
+import MessageLine from './MessageLine.jsx';
+import messageLineStore from '../stores/messageLine';
+import selectedTabStore from '../stores/selectedTab';
+import messageActions from '../actions/message';
+import PureMixin from '../mixins/pure';
 
-var MessageHeader = require('./MessageHeader.jsx');
-var MessageLine = require('./MessageLine.jsx');
-var messageLineStore = require('../stores/messageLine');
-var selectedTabStore = require('../stores/selectedTab');
-var messageActions = require('../actions/message');
-var PureMixin = require('../mixins/pure');
-
-var MessageBox = React.createClass({
+export default React.createClass({
 	mixins: [
 		PureMixin,
 		Reflux.connect(messageLineStore, 'messages'),
@@ -23,6 +22,7 @@ var MessageBox = React.createClass({
 	},
 
 	componentDidMount() {
+		this.updateWidth();
 		window.addEventListener('resize', this.handleResize);
 	},
 
@@ -31,15 +31,15 @@ var MessageBox = React.createClass({
 	},
 
 	componentWillUpdate() {
-		var el = this.refs.list.getDOMNode();
+		var el = this.refs.list.refs.scrollable;
 		this.autoScroll = el.scrollTop + el.offsetHeight === el.scrollHeight;
 	},
 
 	componentDidUpdate() {
-		this.updateWidth();
+		setTimeout(this.updateWidth, 0);
 
 		if (this.autoScroll) {
-			var el = this.refs.list.getDOMNode();
+			var el = this.refs.list.refs.scrollable;
 			el.scrollTop = el.scrollHeight;
 		}
 	},
@@ -50,47 +50,44 @@ var MessageBox = React.createClass({
 	},
 
 	updateWidth() {
-		var width = this.refs.list.getDOMNode().firstChild.offsetWidth;
-
-		if (this.width !== width) {
-			this.width = width;
-			messageActions.setWrapWidth(width);
+		const { list } = this.refs;
+		if (list) {
+			const width = list.refs.scrollable.offsetWidth - 30;
+			if (this.width !== width) {
+				this.width = width;
+				messageActions.setWrapWidth(width);
+			}
 		}
 	},
 
 	render() {
-		var tab = this.state.selectedTab;
-		var dest = tab.channel || tab.server;
-		var lines = [];
+		const tab = this.state.selectedTab;
+		const dest = tab.channel || tab.server;
+		const lines = [];
 
 		this.state.messages.forEach((message, j) => {
-			var key = message.server + dest + j;
+			const key = message.server + dest + j;
 
 			lines.push(<MessageHeader key={key} message={message} />);
 
-			for (var i = 1; i < message.lines.length; i++) {
+			for (let i = 1; i < message.lines.length; i++) {
 				lines.push(
 					<MessageLine key={key + '-' + i} type={message.type} line={message.lines[i]} />
 				);
 			}
 		});
 
-		if (lines.length !== 1) {
-			return (
-				<div className="messagebox">
-					<Infinite ref="list" containerHeight={this.state.height} elementHeight={24}>
-						{lines}
-					</Infinite>
-				</div>
-			);
-		} else {
-			return (
-				<div className="messagebox">
-					<div ref="list">{lines}</div>
-				</div>
-			);
-		}
+		return (
+			<div className="messagebox">
+				<Infinite
+					ref="list"
+					className="messagebox-scrollable"
+					containerHeight={this.state.height}
+					elementHeight={24}
+					displayBottomUpwards={false}>
+					{lines}
+				</Infinite>
+			</div>
+		);
 	}
 });
-
-module.exports = MessageBox;

@@ -1,17 +1,16 @@
-var React = require('react');
-var Reflux = require('reflux');
-var Router = require('react-router');
+import React from 'react';
+import Reflux from 'reflux';
+import Router from 'react-router';
+import ChatTitle from './ChatTitle.jsx';
+import Search from './Search.jsx';
+import MessageBox from './MessageBox.jsx';
+import MessageInput from './MessageInput.jsx';
+import UserList from './UserList.jsx';
+import selectedTabStore from '../stores/selectedTab';
+import tabActions from '../actions/tab';
+import PureMixin from '../mixins/pure';
 
-var ChatTitle = require('./ChatTitle.jsx');
-var Search = require('./Search.jsx');
-var MessageBox = require('./MessageBox.jsx');
-var MessageInput = require('./MessageInput.jsx');
-var UserList = require('./UserList.jsx');
-var selectedTabStore = require('../stores/selectedTab');
-var tabActions = require('../actions/tab');
-var PureMixin = require('../mixins/pure');
-
-var Chat = React.createClass({
+export default React.createClass({
     mixins: [
         PureMixin,
         Router.State,
@@ -20,19 +19,18 @@ var Chat = React.createClass({
 
     componentWillMount() {
         if (!window.loaded) {
-            var p = this.getParams();
-
-            if (p.channel) {
-                tabActions.select(p.server, '#' + p.channel);
-            } else if (p.server) {
-                tabActions.select(p.server);
+            const { params } = this.props;
+            if (params.channel) {
+                tabActions.select(params.server, '#' + params.channel);
+            } else if (params.server) {
+                tabActions.select(params.server);
             }
         }
     },
 
     render() {
-        var chatClass;
-        var tab = this.state.selectedTab;
+        let chatClass;
+        const tab = this.state.selectedTab;
 
         if (!tab.channel) {
             chatClass = 'chat-server';
@@ -53,5 +51,3 @@ var Chat = React.createClass({
         );
     }
 });
-
-module.exports = Chat;

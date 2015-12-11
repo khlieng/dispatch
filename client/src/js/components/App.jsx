@@ -1,18 +1,14 @@
-var React = require('react');
-var Reflux = require('reflux');
-var Router = require('react-router');
-var RouteHandler = Router.RouteHandler;
-var Navigation = Router.Navigation;
+import React from 'react';
+import Reflux from 'reflux';
+import { Router } from 'react-router';
+import TabList from './TabList.jsx';
+import routeActions from '../actions/route';
+import tabActions from '../actions/tab';
+import PureMixin from '../mixins/pure';
 
-var TabList = require('./TabList.jsx');
-var routeActions = require('../actions/route');
-var tabActions = require('../actions/tab');
-var PureMixin = require('../mixins/pure');
-
-var App = React.createClass({
+export default React.createClass({
 	mixins: [
 		PureMixin,
-		Navigation,
 		Reflux.listenTo(routeActions.navigate, 'navigate'),
 		Reflux.listenTo(tabActions.hideMenu, 'hideMenu'),
 		Reflux.listenTo(tabActions.toggleMenu, 'toggleMenu')
@@ -25,10 +21,11 @@ var App = React.createClass({
 	},
 
 	navigate(path, replace) {
+		const { history } = this.props;
 		if (!replace) {
-			this.transitionTo(path);
+			history.pushState(null, path);
 		} else {
-			this.replaceWith(path);
+			history.replaceState(null, path);
 		}
 	},
 
@@ -41,17 +38,15 @@ var App = React.createClass({
 	},
 
 	render() {
-		var mainClass = this.state.menuToggled ? 'main-container off-canvas' : 'main-container';
+		const mainClass = this.state.menuToggled ? 'main-container off-canvas' : 'main-container';
 
 		return (
 			<div>
 				<TabList menuToggled={this.state.menuToggled} />
 				<div className={mainClass}>
-					<RouteHandler />
+					{this.props.children}
 				</div>
 			</div>
 		);
 	}
 });
-
-module.exports = App;

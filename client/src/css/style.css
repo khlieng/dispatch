@@ -341,7 +341,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 	right: 200px;
 }
 
-.messagebox > div {
+.messagebox-scrollable {
 	padding: 10px 15px;
 	overflow-y: auto !important;
 }
