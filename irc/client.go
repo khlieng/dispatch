@@ -6,6 +6,8 @@ import (
 	"net"
 	"strings"
 	"sync"
+
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/matryer/resync"
 )
 
 type Client struct {
@@ -29,7 +31,7 @@ type Client struct {
 	quit      chan struct{}
 	reconnect chan struct{}
 	ready     sync.WaitGroup
-	once      sync.Once
+	once      resync.Once
 	lock      sync.Mutex
 }
 

@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/khlieng/dispatch",
-	"GoVersion": "go1.4.2",
+	"GoVersion": "go1.5.2",
 	"Packages": [
 		"./..."
 	],
@@ -66,6 +66,10 @@
 			"ImportPath": "github.com/magiconair/properties",
 			"Comment": "v1.5.2",
 			"Rev": "d5929c67198951106f49f7ea425198d0f1a08f7f"
+		},
+		{
+			"ImportPath": "github.com/matryer/resync",
+			"Rev": "3d7f7ed881e1fcb5d89be33f3eb4717ed379e7b1"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/go-homedir",

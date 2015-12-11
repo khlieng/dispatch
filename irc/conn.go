@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -107,7 +106,7 @@ func (c *Client) run() {
 
 		case <-c.reconnect:
 			c.reconnect = make(chan struct{})
-			c.once = sync.Once{}
+			c.once.Reset()
 			c.tryConnect()
 		}
 	}
