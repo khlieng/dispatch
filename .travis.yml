@@ -5,13 +5,12 @@ go:
     - 1.5
     - tip
 
-env:
-    - GOMAXPROCS=2
-
 install:
     - go get golang.org/x/tools/cmd/vet
     - go get github.com/jteeuwen/go-bindata/...
     - cd client
+    - nvm install 5.0
+    - nvm use 5.0
     - npm install -g gulp
     - npm install
 
