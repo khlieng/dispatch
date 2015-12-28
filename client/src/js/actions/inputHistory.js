@@ -1,10 +1,26 @@
-var Reflux = require('reflux');
+import * as actions from '../actions';
 
-var inputHistoryActions = Reflux.createActions([
-	'add',
-	'reset',
-	'increment',
-	'decrement'
-]);
+export function addInputHistory(line) {
+  return {
+    type: actions.INPUT_HISTORY_ADD,
+    line
+  };
+}
 
-module.exports = inputHistoryActions;
+export function resetInputHistory() {
+  return {
+    type: actions.INPUT_HISTORY_RESET
+  };
+}
+
+export function incrementInputHistory() {
+  return {
+    type: actions.INPUT_HISTORY_INCREMENT
+  };
+}
+
+export function decrementInputHistory() {
+  return {
+    type: actions.INPUT_HISTORY_DECREMENT
+  };
+}

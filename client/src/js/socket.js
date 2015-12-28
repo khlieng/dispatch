@@ -1,85 +1,81 @@
-var EventEmitter = require('events').EventEmitter;
+import { replacePath } from 'redux-simple-router';
+import { broadcast, inform, addMessage, addMessages } from './actions/message';
+import { select } from './actions/tab';
+import { normalizeChannel } from './util';
 
-var Backoff = require('backo');
-
-class Socket extends EventEmitter {
-	constructor() {
-		super();
-
-		this.connectTimeout = 20000;
-		this.pingTimeout = 30000;
-		this.backoff = new Backoff({
-			min: 1000,
-			max: 5000,
-			jitter: 0.25
-		});
-
-		this.connect();
-	}
-
-	connect() {
-		this.ws = new WebSocket('ws://' + window.location.host + '/ws');
-
-		this.timeoutConnect = setTimeout(() => {
-			this.ws.close();
-			this.retry();
-		}, this.connectTimeout);
-
-		this.ws.onopen = () => {
-			clearTimeout(this.timeoutConnect);
-			this.backoff.reset();
-			this.emit('connect');
-			this.setTimeoutPing();
-		};
-
-		this.ws.onclose = () => {
-			clearTimeout(this.timeoutConnect);
-			clearTimeout(this.timeoutPing);
-			if (!this.closing) {
-				this.emit('disconnect');
-				this.retry();
-			}
-			this.closing = false;
-		};
-
-		this.ws.onerror = () => {
-			clearTimeout(this.timeoutConnect);
-			clearTimeout(this.timeoutPing);
-			this.closing = true;
-			this.ws.close();
-			this.retry();
-		};
-
-		this.ws.onmessage = (e) => {
-			this.setTimeoutPing();
-
-			var msg = JSON.parse(e.data);
-
-			if (msg.type === 'ping') {
-				this.send('pong');
-			}
-
-			this.emit(msg.type, msg.data);
-		};
-	}
-
-	retry() {
-		setTimeout(() => this.connect(), this.backoff.duration());
-	}
-
-	send(type, data) {
-		this.ws.send(JSON.stringify({ type, data }));
-	}
-
-	setTimeoutPing() {
-		clearTimeout(this.timeoutPing);
-		this.timeoutPing = setTimeout(() => {
-			this.emit('disconnect');
-			this.closing = true;
-			this.ws.close();
-			this.connect();
-		}, this.pingTimeout);
-	}
+function withReason(message, reason) {
+  return message + (reason ? ` (${reason})` : '');
 }
 
-module.exports = new Socket();
+export default function handleSocket(socket, { dispatch, getState }) {
+  socket.onAny(data => {
+    const type = `SOCKET_${socket.event.toUpperCase()}`;
+    if (Array.isArray(data)) {
+      dispatch({ type, data });
+    } else {
+      dispatch({ type, ...data });
+    }
+  });
+
+  socket.on('message', message => dispatch(addMessage(message)));
+  socket.on('pm', message => dispatch(addMessage(message)));
+
+  socket.on('join', data => {
+    const state = getState();
+    const { server, channel } = state.tab.selected;
+    const { nick } = state.servers.get(server);
+    const [joinedChannel] = data.channels;
+    if (channel &&
+      server === data.server &&
+      nick === data.user &&
+      channel !== joinedChannel &&
+      normalizeChannel(channel) === normalizeChannel(joinedChannel)) {
+      dispatch(select(server, joinedChannel));
+    }
+  });
+
+  socket.on('servers', data => {
+    if (!data) {
+      dispatch(replacePath('/connect'));
+    }
+  });
+
+  socket.on('join', ({ user, server, channels }) =>
+    dispatch(inform(`${user} joined the channel`, server, channels[0]))
+  );
+
+  socket.on('part', ({ user, server, channels, reason }) =>
+    dispatch(inform(withReason(`${user} left the channel`, reason), server, channels[0]))
+  );
+
+  socket.on('quit', ({ user, server, reason, channels }) =>
+    dispatch(broadcast(withReason(`${user} quit`, reason), server, channels))
+  );
+
+  socket.on('nick', data =>
+    dispatch(broadcast(`${data.old} changed nick to ${data.new}`, data.server, data.channels))
+  );
+
+  socket.on('motd', ({ content, server }) =>
+    dispatch(addMessages(content.map(line => {
+      return {
+        server,
+        to: server,
+        message: line
+      };
+    })))
+  );
+
+  socket.on('whois', data => {
+    const tab = getState().tab.selected;
+
+    dispatch(inform([
+      `Nick: ${data.nick}`,
+      `Username: ${data.username}`,
+      `Realname: ${data.realname}`,
+      `Host: ${data.host}`,
+      `Server: ${data.server}`,
+      `Channels: ${data.channels}`
+    ], tab.server, tab.channel));
+  });
+}

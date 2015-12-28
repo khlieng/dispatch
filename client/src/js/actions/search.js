@@ -1,15 +1,20 @@
-var Reflux = require('reflux');
+import * as actions from '../actions';
 
-var socket = require('../socket');
+export function searchMessages(server, channel, phrase) {
+  return {
+    type: actions.SEARCH_MESSAGES,
+    server,
+    channel,
+    phrase,
+    socket: {
+      type: 'search',
+      data: { server, channel, phrase }
+    }
+  };
+}
 
-var searchActions = Reflux.createActions([
-	'search',
-	'searchDone',
-	'toggle'
-]);
-
-searchActions.search.preEmit = (server, channel, phrase) => {
-	socket.send('search', { server, channel, phrase });
-};
-
-module.exports = searchActions;
+export function toggleSearch() {
+  return {
+    type: actions.TOGGLE_SEARCH
+  };
+}

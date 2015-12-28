@@ -57,3 +57,12 @@ func TestTopic(t *testing.T) {
 	channelStore.SetTopic("the topic", "srv", "#chan")
 	assert.Equal(t, "the topic", channelStore.GetTopic("srv", "#chan"))
 }
+
+func TestFindUserChannels(t *testing.T) {
+	channelStore := NewChannelStore()
+	channelStore.AddUser("user", "srv", "#chan1")
+	channelStore.AddUser("user", "srv", "#chan2")
+	channelStore.AddUser("user2", "srv", "#chan3")
+	channelStore.AddUser("user", "srv2", "#chan4")
+	assert.Equal(t, []string{"#chan1", "#chan2"}, channelStore.FindUserChannels("user", "srv"))
+}

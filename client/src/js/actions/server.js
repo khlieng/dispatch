@@ -1,45 +1,76 @@
-var Reflux = require('reflux');
+import * as actions from '../actions';
+import { updateSelection } from './tab';
 
-var socket = require('../socket');
+export function connect(server, nick, options) {
+  return {
+    type: actions.CONNECT,
+    server,
+    nick,
+    options,
+    socket: {
+      type: 'connect',
+      data: {
+        server,
+        nick,
+        username: options.username || nick,
+        password: options.password,
+        realname: options.realname || nick,
+        tls: options.tls || false,
+        name: options.name || server
+      }
+    }
+  };
+}
 
-var serverActions = Reflux.createActions([
-	'connect',
-	'disconnect',
-	'whois',
-	'away',
-	'setNick',
-	'load'
-]);
+export function disconnect(server) {
+  return dispatch => {
+    dispatch({
+      type: actions.DISCONNECT,
+      server,
+      socket: {
+        type: 'quit',
+        data: { server }
+      }
+    });
+    dispatch(updateSelection());
+  };
+}
 
-serverActions.connect.preEmit = (server, nick, opts) => {
-	socket.send('connect', {
-		server,
-		nick,
-		username: opts.username || nick,
-		password: opts.password,
-		realname: opts.realname || nick,
-		tls: opts.tls || false,
-		name: opts.name || server
-	});
-};
+export function whois(user, server) {
+  return {
+    type: actions.WHOIS,
+    user,
+    server,
+    socket: {
+      type: 'whois',
+      data: { user, server }
+    }
+  };
+}
 
-serverActions.disconnect.preEmit = (server) => {
-	socket.send('quit', { server });
-};
+export function away(message, server) {
+  return {
+    type: actions.AWAY,
+    message,
+    server,
+    socket: {
+      type: 'away',
+      data: { message, server }
+    }
+  };
+}
 
-serverActions.whois.preEmit = (user, server) => {
-	socket.send('whois', { server, user });
-};
-
-serverActions.away.preEmit = (message, server) => {
-	socket.send('away', { server, message });
-};
-
-serverActions.setNick.preEmit = (nick, server) => {
-	socket.send('nick', {
-		server,
-		new: nick
-	});
-};
-
-module.exports = serverActions;
+export function setNick(nick, server) {
+  return {
+    type: actions.SET_NICK,
+    nick,
+    server,
+    socket: {
+      type: 'nick',
+      data: {
+        new: nick,
+        server
+      }
+    }
+  };
+}

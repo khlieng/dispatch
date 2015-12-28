@@ -15,7 +15,7 @@ install:
     - npm install
 
 script:
-    - gulp -p
+    - gulp build
     - cd ..
     - go vet ./...
     - go test -v -race ./...

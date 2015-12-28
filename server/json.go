@@ -27,9 +27,10 @@ type Connect struct {
 }
 
 type Nick struct {
-	Server string `json:"server"`
-	Old    string `json:"old"`
-	New    string `json:"new"`
+	Server   string   `json:"server"`
+	Old      string   `json:"old"`
+	New      string   `json:"new"`
+	Channels []string `json:"channels"`
 }
 
 type Join struct {
@@ -52,9 +53,10 @@ type Mode struct {
 }
 
 type Quit struct {
-	Server string `json:"server"`
-	User   string `json:"user"`
-	Reason string `json:"reason,omitempty"`
+	Server   string   `json:"server"`
+	User     string   `json:"user"`
+	Reason   string   `json:"reason,omitempty"`
+	Channels []string `json:"channels"`
 }
 
 type Chat struct {

@@ -54,8 +54,12 @@ npm install
 
 Run the build:
 ```bash
-gulp -p
+gulp build
 ```
 
-The server needs to be rebuilt after this. For development dropping the -p flag 
-will turn off minification and embedding, requiring only one initial server rebuild.
+The server needs to be rebuilt after this.
+
+For development with hot reloading enabled just run:
+```bash
+gulp
+```
