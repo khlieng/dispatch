@@ -59,7 +59,10 @@ func upgradeWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newWSHandler(conn).run()
+	uuid := r.URL.Query().Get("uuid")
+	if uuid != "" {
+		newWSHandler(conn, uuid).run()
+	}
 }
 
 func reconnect() {

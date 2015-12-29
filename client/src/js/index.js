@@ -9,23 +9,27 @@ import handleSocket from './socket';
 import { createUUID } from './util';
 import Root from './containers/Root';
 
-const socket = __DEV__ ?
-  new Socket(`${window.location.hostname}:1337`) :
-  new Socket(window.location.host);
-
-const store = configureStore(socket);
-const routes = createRoutes();
-const history = createBrowserHistory();
-
-syncReduxAndRouter(history, store);
-handleSocket(socket, store);
+const host = __DEV__ ? `${window.location.hostname}:1337` : window.location.host;
 
 let uuid = localStorage.uuid;
+let newUser = false;
 if (!uuid) {
-  store.dispatch(replacePath('/connect'));
-  localStorage.uuid = uuid = createUUID();
+  uuid = createUUID();
+  newUser = true;
 }
 
-socket.on('connect', () => socket.send('uuid', uuid));
+const socket = new Socket(host, uuid);
+const store = configureStore(socket);
+handleSocket(socket, store);
+
+const history = createBrowserHistory();
+syncReduxAndRouter(history, store);
+
+if (newUser) {
+  store.dispatch(replacePath('/connect'));
+  localStorage.uuid = uuid;
+}
+
+const routes = createRoutes();
 
 render(<Root store={store} routes={routes} history={history} />, document.getElementById('root'));

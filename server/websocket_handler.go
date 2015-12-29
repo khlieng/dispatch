@@ -12,20 +12,18 @@ import (
 )
 
 type wsHandler struct {
-	ws      *wsConn
-	session *Session
-
-	uuid string
-	addr string
-
+	ws       *wsConn
+	session  *Session
+	addr     string
 	handlers map[string]func([]byte)
 }
 
-func newWSHandler(conn *websocket.Conn) *wsHandler {
+func newWSHandler(conn *websocket.Conn, uuid string) *wsHandler {
 	h := &wsHandler{
 		ws:   newWSConn(conn),
 		addr: conn.RemoteAddr().String(),
 	}
+	h.init(uuid)
 	h.initHandlers()
 	return h
 }
@@ -54,13 +52,11 @@ func (h *wsHandler) dispatchRequest(req WSRequest) {
 	}
 }
 
-func (h *wsHandler) init(b []byte) {
-	json.Unmarshal(b, &h.uuid)
-
-	log.Println(h.addr, "set UUID", h.uuid)
+func (h *wsHandler) init(uuid string) {
+	log.Println(h.addr, "set UUID", uuid)
 
 	sessionLock.Lock()
-	if storedSession, exists := sessions[h.uuid]; exists {
+	if storedSession, exists := sessions[uuid]; exists {
 		sessionLock.Unlock()
 		h.session = storedSession
 		h.session.setWS(h.addr, h.ws)
@@ -84,9 +80,9 @@ func (h *wsHandler) init(b []byte) {
 		}
 	} else {
 		h.session = NewSession()
-		h.session.user = storage.NewUser(h.uuid)
+		h.session.user = storage.NewUser(uuid)
 
-		sessions[h.uuid] = h.session
+		sessions[uuid] = h.session
 		sessionLock.Unlock()
 
 		h.session.setWS(h.addr, h.ws)
@@ -237,7 +233,6 @@ func (h *wsHandler) search(b []byte) {
 
 func (h *wsHandler) initHandlers() {
 	h.handlers = map[string]func([]byte){
-		"uuid":    h.init,
 		"connect": h.connect,
 		"join":    h.join,
 		"part":    h.part,
