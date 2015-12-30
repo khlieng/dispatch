@@ -4,6 +4,12 @@ import TabListItem from './TabListItem';
 
 @pure
 export default class TabList extends Component {
+  handleTabClick = (server, channel, pm) => {
+    const { select, hideMenu } = this.props;
+    select(server, channel, pm);
+    hideMenu();
+  }
+
   handleConnectClick = () => {
     this.props.pushPath('/connect');
     this.props.hideMenu();
@@ -15,7 +21,7 @@ export default class TabList extends Component {
   }
 
   render() {
-    const { channels, servers, privateChats, showMenu, select, selected } = this.props;
+    const { channels, servers, privateChats, showMenu, selected } = this.props;
     const className = showMenu ? 'tablist off-canvas' : 'tablist';
     const tabs = [];
 
@@ -26,7 +32,7 @@ export default class TabList extends Component {
           server
           content={servers.getIn([address, 'name'])}
           selected={selected.server === address && selected.channel === null && selected.user === null}
-          onClick={() => select(address)}
+          onClick={() => this.handleTabClick(address)}
         />
       );
 
@@ -36,7 +42,7 @@ export default class TabList extends Component {
             key={address + channel.get('name')}
             content={channel.get('name')}
             selected={selected.server === address && selected.channel === name}
-            onClick={() => select(address, channel.get('name'))}
+            onClick={() => this.handleTabClick(address, channel.get('name'))}
           />
         );
       });
@@ -48,7 +54,7 @@ export default class TabList extends Component {
               key={address + nick}
               content={nick}
               selected={selected.server === address && selected.user === nick}
-              onClick={() => select(address, nick, true)}
+              onClick={() => this.handleTabClick(address, nick, true)}
             />
           );
         });
