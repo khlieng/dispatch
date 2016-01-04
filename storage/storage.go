@@ -8,8 +8,7 @@ import (
 )
 
 var (
-	appDir string
-	db     *bolt.DB
+	db *bolt.DB
 
 	bucketUsers    = []byte("Users")
 	bucketServers  = []byte("Servers")
