@@ -2,13 +2,17 @@ package server
 
 import (
 	"log"
+	"net"
 	"net/http"
-	"strconv"
+	"net/http/httputil"
+	"net/url"
+	"strings"
 	"sync"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
 
-	"github.com/khlieng/dispatch/irc"
+	"github.com/khlieng/dispatch/letsencrypt"
 	"github.com/khlieng/dispatch/storage"
 )
 
@@ -26,21 +30,66 @@ var (
 	}
 )
 
-func Run(port int) {
+func Run() {
 	defer storage.Close()
 
 	channelStore = storage.NewChannelStore()
 	sessions = make(map[string]*Session)
 
-	reconnect()
+	reconnectIRC()
+	startHTTP()
 
-	log.Println("Listening on port", port)
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), handler{}))
+	select {}
 }
 
-type handler struct{}
+func startHTTP() {
+	port := viper.GetString("port")
 
-func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if viper.GetBool("https.enabled") {
+		var err error
+		portHTTPS := viper.GetString("https.port")
+		redirect := viper.GetBool("https.redirect")
+
+		https := restartableHTTPS{
+			addr:    ":" + portHTTPS,
+			handler: http.HandlerFunc(serve),
+		}
+
+		if viper.GetBool("https.redirect") {
+			log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
+			go http.ListenAndServe(":"+port, createHTTPSRedirect(portHTTPS))
+		}
+
+		if certExists() {
+			https.cert = viper.GetString("https.cert")
+			https.key = viper.GetString("https.key")
+		} else if domain := viper.GetString("letsencrypt.domain"); domain != "" {
+			dir := storage.Path.LetsEncrypt()
+			email := viper.GetString("letsencrypt.email")
+			lePort := viper.GetString("letsencrypt.port")
+
+			if viper.GetBool("letsencrypt.proxy") && lePort != "" && (port != "80" || !redirect) {
+				log.Println("[HTTP] Listening on port 80 (Let's Encrypt Proxy))")
+				go http.ListenAndServe(":80", http.HandlerFunc(letsEncryptProxy))
+			}
+
+			https.cert, https.key, err = letsencrypt.Run(dir, domain, email, lePort, https.restart)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Fatal("Could not locate SSL certificate or private key")
+		}
+
+		log.Println("[HTTPS] Listening on port", portHTTPS)
+		https.start()
+	} else {
+		log.Println("[HTTP] Listening on port", port)
+		log.Fatal(http.ListenAndServe(":"+port, http.HandlerFunc(serve)))
+	}
+}
+
+func serve(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		return
 	}
@@ -65,32 +114,39 @@ func upgradeWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func reconnect() {
-	for _, user := range storage.LoadUsers() {
-		session := NewSession()
-		session.user = user
-		sessions[user.UUID] = session
-		go session.write()
-
-		channels := user.GetChannels()
-
-		for _, server := range user.GetServers() {
-			i := irc.NewClient(server.Nick, server.Username)
-			i.TLS = server.TLS
-			i.Password = server.Password
-			i.Realname = server.Realname
-
-			i.Connect(server.Address)
-			session.setIRC(i.Host, i)
-			go newIRCHandler(i, session).run()
-
-			var joining []string
-			for _, channel := range channels {
-				if channel.Server == server.Address {
-					joining = append(joining, channel.Name)
-				}
-			}
-			i.Join(joining...)
+func createHTTPSRedirect(portHTTPS string) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/.well-known/acme-challenge") {
+			letsEncryptProxy(w, r)
+			return
 		}
+
+		host, _, err := net.SplitHostPort(r.Host)
+		if err != nil {
+			host = r.Host
+		}
+
+		u := url.URL{
+			Scheme: "https",
+			Host:   net.JoinHostPort(host, portHTTPS),
+			Path:   r.RequestURI,
+		}
+
+		w.Header().Set("Location", u.String())
+		w.WriteHeader(http.StatusMovedPermanently)
+	})
+}
+
+func letsEncryptProxy(w http.ResponseWriter, r *http.Request) {
+	host, _, err := net.SplitHostPort(r.Host)
+	if err != nil {
+		host = r.Host
 	}
+
+	upstream := &url.URL{
+		Scheme: "http",
+		Host:   net.JoinHostPort(host, viper.GetString("letsencrypt.port")),
+	}
+
+	httputil.NewSingleHostReverseProxy(upstream).ServeHTTP(w, r)
 }

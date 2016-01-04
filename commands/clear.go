@@ -10,6 +10,6 @@ var clearCmd = &cobra.Command{
 	Use:   "clear",
 	Short: "Clear all application data",
 	Run: func(cmd *cobra.Command, args []string) {
-		storage.Clear(appDir)
+		storage.Clear()
 	},
 }

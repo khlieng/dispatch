@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"testing"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/stretchr/testify/assert"
@@ -21,8 +20,9 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	os.Mkdir(path.Join(tempdir, "logs"), 0777)
-	storage.Initialize(tempdir)
+	storage.SetDirectory(tempdir)
+	os.MkdirAll(storage.Path.Logs(), 0700)
+	storage.Initialize()
 	user = storage.NewUser("uuid")
 	channelStore = storage.NewChannelStore()
 

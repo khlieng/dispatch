@@ -3,7 +3,6 @@ package storage
 import (
 	"log"
 	"os"
-	"path"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
@@ -18,15 +17,13 @@ var (
 	bucketMessages = []byte("Messages")
 )
 
-func Initialize(dir string) {
+func Initialize() {
+	log.Println("Storing data at", Path.Root())
+
 	var err error
-	appDir = dir
-
-	log.Println("Storing data at", dir)
-
-	db, err = bolt.Open(path.Join(dir, "data.db"), 0600, nil)
+	db, err = bolt.Open(Path.Database(), 0600, nil)
 	if err != nil {
-		log.Fatal("Could not open database file")
+		log.Fatal("Could not open database:", err)
 	}
 
 	db.Update(func(tx *bolt.Tx) error {
@@ -42,7 +39,7 @@ func Close() {
 	db.Close()
 }
 
-func Clear(dir string) {
-	os.RemoveAll(path.Join(dir, "logs"))
-	os.Remove(path.Join(dir, "data.db"))
+func Clear() {
+	os.RemoveAll(Path.Logs())
+	os.Remove(Path.Database())
 }

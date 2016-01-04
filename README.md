@@ -6,6 +6,7 @@
 * Searchable history
 * Persistent connections
 * Multiple users
+* Automatic HTTPS through Let's Encrypt
 
 ## Usage
 There is a few different ways of getting it:

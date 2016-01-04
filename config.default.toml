@@ -1,1 +1,48 @@
-port = 1337
+port = 80
+
+[https]
+enabled = false
+port = 443
+# Redirect all http traffic to https
+redirect = true
+# Path to your cert and private key if you are not using
+# the Let's Encrypt integration
+cert = ""
+key = ""
+
+[letsencrypt]
+# Your domain or subdomain
+domain = ""
+# An email address lets you recover your accounts private key
+email = ""
+# The port Let's Encrypt listens on, comment this out to let it bind
+# to port 80 as needed, doing so means dispatch itself cannot use port 80
+port = 5001
+# Have dispatch proxy traffic from port 80 to the Let's Encrypt port
+proxy = true
+
+# Not implemented
+[auth]
+# Allow usage without being logged in, all channels and settings get
+# transferred when logging in or registering
+anonymous = true
+# Enable username/password login
+login = true
+# Enable username/password registration
+registration = true
+
+[auth.github]
+key = ""
+secret = ""
+
+[auth.facebook]
+key = ""
+secret = ""
+
+[auth.google]
+key = ""
+secret = ""
+
+[auth.twitter]
+key = ""
+secret = ""

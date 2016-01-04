@@ -1,12 +1,11 @@
 package commands
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/mitchellh/go-homedir"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cobra"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
 
@@ -15,49 +14,61 @@ import (
 	"github.com/khlieng/dispatch/storage"
 )
 
-var (
-	rootCmd = &cobra.Command{
-		Use:   "dispatch",
-		Short: "Web-based IRC client in Go.",
-		Run: func(cmd *cobra.Command, args []string) {
-			storage.Initialize(appDir)
-			server.Run(viper.GetInt("port"))
-		},
+const logo = `
+    ____   _                     _         _
+   |  _ \ (_) ___  _ __    __ _ | |_  ___ | |__
+   | | | || |/ __|| '_ \  / _  || __|/ __|| '_ \
+   | |_| || |\__ \| |_) || (_| || |_| (__ | | | |
+   |____/ |_||___/| .__/  \__,_| \__|\___||_| |_|
+                  |_|
+                       v0.1
+`
 
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			appDir = viper.GetString("dir")
+var rootCmd = &cobra.Command{
+	Use:   "dispatch",
+	Short: "Web-based IRC client in Go.",
+	Run: func(cmd *cobra.Command, args []string) {
+		storage.Initialize()
+		server.Run()
+	},
 
-			os.Mkdir(appDir, 0777)
-			os.Mkdir(path.Join(appDir, "logs"), 0777)
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if cmd.Use == "dispatch" {
+			fmt.Println(logo)
+		}
 
-			initConfig()
+		storage.SetDirectory(viper.GetString("dir"))
 
-			viper.SetConfigName("config")
-			viper.AddConfigPath(appDir)
-			viper.ReadInConfig()
-		},
-	}
+		err := os.MkdirAll(storage.Path.Logs(), 0700)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	appDir string
-)
+		initConfig()
 
-func init() {
-	rootCmd.AddCommand(clearCmd)
-	rootCmd.AddCommand(configCmd)
-
-	rootCmd.Flags().IntP("port", "p", 1337, "port to listen on")
-	rootCmd.PersistentFlags().String("dir", defaultDir(), "directory to store config and data in")
-
-	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
-	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
+		viper.SetConfigName("config")
+		viper.AddConfigPath(storage.Path.Root())
+		viper.ReadInConfig()
+	},
 }
 
 func Execute() {
 	rootCmd.Execute()
 }
 
+func init() {
+	rootCmd.AddCommand(clearCmd)
+	rootCmd.AddCommand(configCmd)
+
+	rootCmd.Flags().IntP("port", "p", 80, "port to listen on")
+	rootCmd.PersistentFlags().String("dir", storage.DefaultDirectory(), "directory to store config and data in")
+
+	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
+	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
+}
+
 func initConfig() {
-	configPath := path.Join(appDir, "config.toml")
+	configPath := storage.Path.Config()
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		config, err := assets.Asset("config.default.toml")
@@ -66,18 +77,11 @@ func initConfig() {
 			return
 		}
 
+		log.Println("Writing default config to", configPath)
+
 		err = ioutil.WriteFile(configPath, config, 0600)
 		if err != nil {
 			log.Println(err)
 		}
 	}
-}
-
-func defaultDir() string {
-	dir, err := homedir.Dir()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return path.Join(dir, ".dispatch")
 }
