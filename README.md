@@ -30,7 +30,7 @@ dispatch help
 
 #### 3. Docker
 ```bash
-docker run -p 8080:8080 khlieng/dispatch
+docker run -p <http port>:80 -p <https port>:443 -v <path>:/data khlieng/dispatch
 ```
 
 ## Build
