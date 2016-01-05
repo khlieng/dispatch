@@ -58,7 +58,7 @@ func Run(dir, domain, email, port string, onChange func()) (string, string, erro
 }
 
 func obtain(client *acme.Client, domain string) error {
-	cert, errors := client.ObtainCertificate([]string{domain}, false)
+	cert, errors := client.ObtainCertificate([]string{domain}, true)
 	if err := errors[domain]; err != nil {
 		if _, ok := err.(acme.TOSError); ok {
 			err := client.AgreeToTOS()
@@ -112,7 +112,7 @@ func renew(client *acme.Client, domain string) bool {
 		meta.PrivateKey = key
 
 	Renew:
-		newMeta, err := client.RenewCertificate(meta, false)
+		newMeta, err := client.RenewCertificate(meta, true)
 		if err != nil {
 			if _, ok := err.(acme.TOSError); ok {
 				err := client.AgreeToTOS()
