@@ -55,6 +55,13 @@ class Chat extends Component {
     }
   }
 
+  handleSearch = phrase => {
+    const { dispatch, tab } = this.props;
+    if (tab.channel) {
+      dispatch(searchMessages(tab.server, tab.channel, phrase));
+    }
+  }
+
   render() {
     const { tab, channel, search, history, dispatch } = this.props;
 
@@ -72,8 +79,7 @@ class Chat extends Component {
         <ChatTitle {...this.props } />
         <Search
           search={search}
-          onSearch={phrase => tab.channel &&
-            dispatch(searchMessages(tab.server, tab.channel, phrase))}
+          onSearch={this.handleSearch}
         />
         <MessageBox {...this.props } />
         <MessageInput
@@ -115,7 +121,7 @@ function mapStateToProps(state) {
 
   let title;
   if (tab.channel) {
-    title = channel.get('name');
+    title = tab.channel;
   } else if (tab.user) {
     title = tab.user;
   } else {

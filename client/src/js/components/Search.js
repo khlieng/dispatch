@@ -10,17 +10,19 @@ export default class Search extends Component {
     }
   }
 
-  render() {
-    const { search, onSearch } = this.props;
-    const results = search.results.map(result => {
-      return (
-        <p key={result.id}>{timestamp(new Date(result.time * 1000))} {result.from} {result.content}</p>
-      );
-    });
+  handleSearch = e => this.props.onSearch(e.target.value)
 
+  render() {
+    const { search } = this.props;
     const style = {
       display: search.show ? 'block' : 'none'
     };
+
+    const results = search.results.map(result => (
+      <p key={result.id}>
+        {timestamp(new Date(result.time * 1000))} {result.from} {result.content}
+      </p>
+    ));
 
     return (
       <div className="search" style={style}>
@@ -28,7 +30,7 @@ export default class Search extends Component {
           ref="input"
           className="search-input"
           type="text"
-          onChange={e => onSearch(e.target.value)}
+          onChange={this.handleSearch}
         />
         <div className="search-results">{results}</div>
       </div>

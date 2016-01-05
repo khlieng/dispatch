@@ -5,10 +5,11 @@ import { toggleMenu } from '../actions/tab';
 
 @pure
 class Navicon extends Component {
+  handleClick = () => this.props.dispatch(toggleMenu())
+
   render() {
-    const { dispatch } = this.props;
     return (
-      <i className="icon-menu navicon" onClick={() => dispatch(toggleMenu())}></i>
+      <i className="icon-menu navicon" onClick={this.handleClick}></i>
     );
   }
 }

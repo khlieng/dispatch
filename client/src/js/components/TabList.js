@@ -4,10 +4,9 @@ import TabListItem from './TabListItem';
 
 @pure
 export default class TabList extends Component {
-  handleTabClick = (server, channel, pm) => {
-    const { select, hideMenu } = this.props;
-    select(server, channel, pm);
-    hideMenu();
+  handleTabClick = (server, target) => {
+    this.props.select(server, target, target && target.charAt(0) !== '#');
+    this.props.hideMenu();
   }
 
   handleConnectClick = () => {
@@ -29,35 +28,39 @@ export default class TabList extends Component {
       tabs.push(
         <TabListItem
           key={address}
-          server
+          server={address}
           content={servers.getIn([address, 'name'])}
-          selected={selected.server === address && selected.channel === null && selected.user === null}
-          onClick={() => this.handleTabClick(address)}
+          selected={
+            selected.server === address &&
+            selected.channel === null &&
+            selected.user === null
+          }
+          onClick={this.handleTabClick}
         />
       );
 
-      server.forEach((channel, name) => {
-        tabs.push(
-          <TabListItem
-            key={address + channel.get('name')}
-            content={channel.get('name')}
-            selected={selected.server === address && selected.channel === name}
-            onClick={() => this.handleTabClick(address, channel.get('name'))}
-          />
-        );
-      });
+      server.forEach((channel, name) => tabs.push(
+        <TabListItem
+          key={address + name}
+          server={address}
+          target={name}
+          content={name}
+          selected={selected.server === address && selected.channel === name}
+          onClick={this.handleTabClick}
+        />
+      ));
 
       if (privateChats.has(address)) {
-        privateChats.get(address).forEach(nick => {
-          tabs.push(
-            <TabListItem
-              key={address + nick}
-              content={nick}
-              selected={selected.server === address && selected.user === nick}
-              onClick={() => this.handleTabClick(address, nick, true)}
-            />
-          );
-        });
+        privateChats.get(address).forEach(nick => tabs.push(
+          <TabListItem
+            key={address + nick}
+            server={address}
+            target={nick}
+            content={nick}
+            selected={selected.server === address && selected.user === nick}
+            onClick={this.handleTabClick}
+          />
+        ));
       }
     });
 

@@ -3,19 +3,25 @@ import pure from 'pure-render-decorator';
 
 @pure
 export default class TabListItem extends Component {
+  handleClick = () => {
+    const { server, target, onClick } = this.props;
+    onClick(server, target);
+  }
+
   render() {
+    const { target, content, selected } = this.props;
     const classes = [];
 
-    if (this.props.server) {
+    if (!target) {
       classes.push('tab-server');
     }
 
-    if (this.props.selected) {
+    if (selected) {
       classes.push('selected');
     }
 
     return (
-      <p className={classes.join(' ')} onClick={this.props.onClick}>{this.props.content}</p>
+      <p className={classes.join(' ')} onClick={this.handleClick}>{content}</p>
     );
   }
 }

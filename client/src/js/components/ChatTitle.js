@@ -7,10 +7,10 @@ import Navicon from '../components/Navicon';
 @pure
 export default class ChatTitle extends Component {
   handleLeaveClick = () => {
-    const { tab, channel, disconnect, part, closePrivateChat } = this.props;
+    const { tab, disconnect, part, closePrivateChat } = this.props;
 
     if (tab.channel) {
-      part([channel.get('name')], tab.server);
+      part([tab.channel], tab.server);
     } else if (tab.user) {
       closePrivateChat(tab.server, tab.user);
     } else {

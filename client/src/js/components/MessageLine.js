@@ -5,11 +5,12 @@ import pure from 'pure-render-decorator';
 @pure
 export default class MessageLine extends Component {
   render() {
-    const line = Autolinker.link(this.props.line, { stripPrefix: false });
+    const { line, type } = this.props;
+    const content = Autolinker.link(line, { stripPrefix: false });
+    const classes = ['message'];
 
-    let messageClass = 'message';
-    if (this.props.type) {
-      messageClass += ' message-' + this.props.type;
+    if (type) {
+      classes.push(`message-${type}`);
     }
 
     const style = {
@@ -17,8 +18,8 @@ export default class MessageLine extends Component {
     };
 
     return (
-      <p className={messageClass} style={style}>
-        <span dangerouslySetInnerHTML={{ __html: line }}></span>
+      <p className={classes.join(' ')} style={style}>
+        <span dangerouslySetInnerHTML={{ __html: content }}></span>
       </p>
     );
   }

@@ -17,8 +17,12 @@ export default class MessageHeader extends Component {
   render() {
     const { message } = this.props;
     const line = Autolinker.link(message.lines[0], { stripPrefix: false });
+    const classes = ['message'];
     let sender = null;
-    let messageClass = 'message';
+
+    if (message.type) {
+      classes.push(`message-${message.type}`);
+    }
 
     if (message.from) {
       sender = (
@@ -31,12 +35,8 @@ export default class MessageHeader extends Component {
       );
     }
 
-    if (message.type) {
-      messageClass += ' message-' + message.type;
-    }
-
     return (
-      <p className={messageClass}>
+      <p className={classes.join(' ')}>
         <span className="message-time">{timestamp(message.time)}</span>
         {sender}
         <span dangerouslySetInnerHTML={{ __html: ' ' + line }}></span>

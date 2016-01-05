@@ -79,19 +79,18 @@ export default createReducer(Map(), {
 
   [actions.SOCKET_JOIN](state, action) {
     const { server, channels, user } = action;
-    const channel = channels[0];
-    return state
-      .setIn([server, channel, 'name'], channels[0])
-      .updateIn([server, channel, 'users'], List(), users => {
-        return users.push(createUser(user)).sort(compareUsers);
-      });
+    return state.updateIn([server, channels[0], 'users'], List(), users => {
+      return users.push(createUser(user)).sort(compareUsers);
+    });
   },
 
   [actions.SOCKET_PART](state, action) {
     const { server, channels, user } = action;
     const channel = channels[0];
     if (state.hasIn([server, channel])) {
-      return state.updateIn([server, channel, 'users'], users => users.filter(u => u.nick !== user));
+      return state.updateIn([server, channel, 'users'], users =>
+        users.filter(u => u.nick !== user)
+      );
     }
     return state;
   },
@@ -156,8 +155,7 @@ export default createReducer(Map(), {
       action.data.forEach(channel => {
         s.setIn([channel.server, channel.name], Map({
           users: List(),
-          topic: channel.topic,
-          name: channel.name
+          topic: channel.topic
         }));
       });
     });

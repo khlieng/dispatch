@@ -29,17 +29,15 @@ export default class UserList extends Component {
     if (!tab.channel) {
       style.display = 'none';
     } else {
-      this.props.users.forEach(user => {
-        users.push(
-          <UserListItem
-            key={user.nick}
-            user={user}
-            tab={tab}
-            openPrivateChat={openPrivateChat}
-            select={select}
-          />
-        );
-      });
+      this.props.users.forEach(user => users.push(
+        <UserListItem
+          key={user.nick}
+          user={user}
+          tab={tab}
+          openPrivateChat={openPrivateChat}
+          select={select}
+        />
+      ));
     }
 
     return (
