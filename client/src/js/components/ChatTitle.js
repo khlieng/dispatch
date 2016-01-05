@@ -20,7 +20,7 @@ export default class ChatTitle extends Component {
 
   render() {
     const { title, tab, channel, toggleSearch } = this.props;
-    const topic = Autolinker.link(channel.get('topic') || '', { keepOriginalText: true });
+    const topic = Autolinker.link(channel.get('topic') || '', { stripPrefix: false });
 
     let leaveTitle;
     if (tab.channel) {
