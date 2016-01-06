@@ -5,7 +5,7 @@ import { toggleMenu } from '../actions/tab';
 
 @pure
 class Navicon extends Component {
-  handleClick = () => this.props.dispatch(toggleMenu())
+  handleClick = () => this.props.dispatch(toggleMenu());
 
   render() {
     return (

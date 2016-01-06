@@ -16,7 +16,7 @@ export default class ChatTitle extends Component {
     } else {
       disconnect(tab.server);
     }
-  }
+  };
 
   render() {
     const { title, tab, channel, toggleSearch } = this.props;

@@ -7,17 +7,17 @@ export default class TabList extends Component {
   handleTabClick = (server, target) => {
     this.props.select(server, target, target && target.charAt(0) !== '#');
     this.props.hideMenu();
-  }
+  };
 
   handleConnectClick = () => {
     this.props.pushPath('/connect');
     this.props.hideMenu();
-  }
+  };
 
   handleSettingsClick = () => {
     this.props.pushPath('/settings');
     this.props.hideMenu();
-  }
+  };
 
   render() {
     const { channels, servers, privateChats, showMenu, selected } = this.props;

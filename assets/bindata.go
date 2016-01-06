@@ -69,7 +69,7 @@ func bundle_css_gz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "bundle.css.gz", size: 1706, mode: os.FileMode(436), modTime: time.Unix(1452019133, 0)}
+	info := bindata_file_info{name: "bundle.css.gz", size: 1706, mode: os.FileMode(436), modTime: time.Unix(1452122792, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -89,7 +89,7 @@ func bundle_js_gz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "bundle.js.gz", size: 114110, mode: os.FileMode(436), modTime: time.Unix(1452019133, 0)}
+	info := bindata_file_info{name: "bundle.js.gz", size: 114110, mode: os.FileMode(436), modTime: time.Unix(1452122793, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -109,7 +109,7 @@ func config_default_toml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "config.default.toml", size: 981, mode: os.FileMode(436), modTime: time.Unix(1452019112, 0)}
+	info := bindata_file_info{name: "config.default.toml", size: 981, mode: os.FileMode(436), modTime: time.Unix(1452122765, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -129,7 +129,7 @@ func font_fontello_eot_gz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "font/fontello.eot.gz", size: 3543, mode: os.FileMode(436), modTime: time.Unix(1452019133, 0)}
+	info := bindata_file_info{name: "font/fontello.eot.gz", size: 3543, mode: os.FileMode(436), modTime: time.Unix(1452122793, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -149,7 +149,7 @@ func font_fontello_svg_gz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "font/fontello.svg.gz", size: 1707, mode: os.FileMode(436), modTime: time.Unix(1452019133, 0)}
+	info := bindata_file_info{name: "font/fontello.svg.gz", size: 1707, mode: os.FileMode(436), modTime: time.Unix(1452122793, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -169,7 +169,7 @@ func font_fontello_ttf_gz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "font/fontello.ttf.gz", size: 3490, mode: os.FileMode(436), modTime: time.Unix(1452019133, 0)}
+	info := bindata_file_info{name: "font/fontello.ttf.gz", size: 3490, mode: os.FileMode(436), modTime: time.Unix(1452122793, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -189,7 +189,7 @@ func font_fontello_woff_gz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "font/fontello.woff.gz", size: 3701, mode: os.FileMode(436), modTime: time.Unix(1452019133, 0)}
+	info := bindata_file_info{name: "font/fontello.woff.gz", size: 3701, mode: os.FileMode(436), modTime: time.Unix(1452122793, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }
@@ -209,7 +209,7 @@ func index_html_gz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindata_file_info{name: "index.html.gz", size: 252, mode: os.FileMode(436), modTime: time.Unix(1452019133, 0)}
+	info := bindata_file_info{name: "index.html.gz", size: 252, mode: os.FileMode(436), modTime: time.Unix(1452122793, 0)}
 	a := &asset{bytes: bytes, info:  info}
 	return a, nil
 }

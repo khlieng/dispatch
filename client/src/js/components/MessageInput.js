@@ -5,7 +5,7 @@ import pure from 'pure-render-decorator';
 export default class MessageInput extends Component {
   state = {
     value: ''
-  }
+  };
 
   handleKey = e => {
     const { tab, runCommand, sendMessage, addInputHistory, incrementInputHistory,
@@ -34,11 +34,11 @@ export default class MessageInput extends Component {
       this.setState({ value: e.target.value });
       resetInputHistory();
     }
-  }
+  };
 
   handleChange = e => {
     this.setState({ value: e.target.value });
-  }
+  };
 
   render() {
     return (

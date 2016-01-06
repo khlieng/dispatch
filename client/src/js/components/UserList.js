@@ -7,7 +7,7 @@ import UserListItem from './UserListItem';
 export default class UserList extends Component {
   state = {
     height: window.innerHeight - 100
-  }
+  };
 
   componentDidMount() {
     window.addEventListener('resize', this.handleResize);
@@ -19,7 +19,7 @@ export default class UserList extends Component {
 
   handleResize = () => {
     this.setState({ height: window.innerHeight - 100 });
-  }
+  };
 
   render() {
     const { tab, openPrivateChat, select } = this.props;

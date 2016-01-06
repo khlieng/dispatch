@@ -41,6 +41,9 @@ gulp.task('js', function(cb) {
     gutil.log('[webpack]', stats.toString({
       colors: true
     }));
+
+    if (stats.hasErrors()) process.exit(1);
+
     cb();
   });
 });

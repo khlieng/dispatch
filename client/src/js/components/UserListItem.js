@@ -8,7 +8,7 @@ export default class UserListItem extends Component {
 
     openPrivateChat(tab.server, user.nick);
     select(tab.server, user.nick, true);
-  }
+  };
 
   render() {
     return <p onClick={this.handleClick}>{this.props.user.renderName}</p>;

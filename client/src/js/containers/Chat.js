@@ -60,7 +60,7 @@ class Chat extends Component {
     if (tab.channel) {
       dispatch(searchMessages(tab.server, tab.channel, phrase));
     }
-  }
+  };
 
   render() {
     const { tab, channel, search, history, dispatch } = this.props;

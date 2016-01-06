@@ -12,7 +12,7 @@ export default class MessageHeader extends Component {
 
     openPrivateChat(message.server, message.from);
     select(message.server, message.from, true);
-  }
+  };
 
   render() {
     const { message } = this.props;

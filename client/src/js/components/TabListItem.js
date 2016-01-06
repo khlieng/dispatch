@@ -6,7 +6,7 @@ export default class TabListItem extends Component {
   handleClick = () => {
     const { server, target, onClick } = this.props;
     onClick(server, target);
-  }
+  };
 
   render() {
     const { target, content, selected } = this.props;

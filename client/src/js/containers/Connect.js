@@ -10,7 +10,7 @@ import { select } from '../actions/tab';
 class Connect extends Component {
   state = {
     showOptionals: false
-  }
+  };
 
   handleSubmit = (e) => {
     e.preventDefault();
@@ -38,11 +38,11 @@ class Connect extends Component {
         dispatch(join(channels, address));
       }
     }
-  }
+  };
 
   handleShowClick = () => {
     this.setState({ showOptionals: !this.state.showOptionals });
-  }
+  };
 
   render() {
     let optionals = null;

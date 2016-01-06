@@ -8,7 +8,7 @@ import MessageLine from './MessageLine';
 export default class MessageBox extends Component {
   state = {
     height: window.innerHeight - 100
-  }
+  };
 
   componentDidMount() {
     this.updateWidth();
@@ -43,12 +43,12 @@ export default class MessageBox extends Component {
         setWrapWidth(width);
       }
     }
-  }
+  };
 
   handleResize = () => {
     this.updateWidth();
     this.setState({ height: window.innerHeight - 100 });
-  }
+  };
 
   render() {
     const { tab, messages, select, openPrivateChat } = this.props;

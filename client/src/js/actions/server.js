@@ -68,7 +68,7 @@ export function setNick(nick, server) {
     socket: {
       type: 'nick',
       data: {
-        'new': nick,
+        new: nick,
         server
       }
     }
