@@ -1,9 +1,11 @@
 package letsencrypt
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xenolf/lego/acme"
@@ -14,12 +16,12 @@ const KeySize = 2048
 
 var directory Directory
 
-func Run(dir, domain, email, port string, onChange func()) (string, string, error) {
+func Run(dir, domain, email, port string) (*state, error) {
 	directory = Directory(dir)
 
 	user, err := getUser(email)
 	if err != nil {
-		return "", "", nil
+		return nil, err
 	}
 
 	client, err := acme.NewClient(URL, &user, KeySize)
@@ -29,47 +31,113 @@ func Run(dir, domain, email, port string, onChange func()) (string, string, erro
 	if user.Registration == nil {
 		user.Registration, err = client.Register()
 		if err != nil {
-			return "", "", err
+			return nil, err
 		}
 
 		err = client.AgreeToTOS()
 		if err != nil {
-			return "", "", err
+			return nil, err
 		}
 
 		err = saveUser(user)
 		if err != nil {
-			return "", "", err
+			return nil, err
 		}
+	}
+
+	s := &state{
+		client: client,
+		domain: domain,
 	}
 
 	if certExists(domain) {
-		renew(client, domain)
+		if !s.renew() {
+			err = s.loadCert()
+			if err != nil {
+				return nil, err
+			}
+		}
+		s.refreshOCSP()
 	} else {
-		err = obtain(client, domain)
+		err = s.obtain()
 		if err != nil {
-			return "", "", err
+			return nil, err
 		}
 	}
 
-	go keepRenewed(client, domain, onChange)
+	go s.maintain()
 
-	return directory.Cert(domain), directory.Key(domain), nil
+	return s, nil
 }
 
-func obtain(client *acme.Client, domain string) error {
-	cert, errors := client.ObtainCertificate([]string{domain}, true)
-	if err := errors[domain]; err != nil {
+type state struct {
+	client  *acme.Client
+	domain  string
+	cert    *tls.Certificate
+	certPEM []byte
+	lock    sync.Mutex
+}
+
+func (s *state) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+	s.lock.Lock()
+	cert := s.cert
+	s.lock.Unlock()
+
+	return cert, nil
+}
+
+func (s *state) getCertPEM() []byte {
+	s.lock.Lock()
+	certPEM := s.certPEM
+	s.lock.Unlock()
+
+	return certPEM
+}
+
+func (s *state) setCert(meta acme.CertificateResource) {
+	cert, err := tls.X509KeyPair(meta.Certificate, meta.PrivateKey)
+	if err == nil {
+		s.lock.Lock()
+		if s.cert != nil {
+			cert.OCSPStaple = s.cert.OCSPStaple
+		}
+
+		s.cert = &cert
+		s.certPEM = meta.Certificate
+		s.lock.Unlock()
+	}
+}
+
+func (s *state) setOCSP(ocsp []byte) {
+	cert := tls.Certificate{
+		OCSPStaple: ocsp,
+	}
+
+	s.lock.Lock()
+	if s.cert != nil {
+		cert.Certificate = s.cert.Certificate
+		cert.PrivateKey = s.cert.PrivateKey
+	}
+	s.cert = &cert
+	s.lock.Unlock()
+}
+
+func (s *state) obtain() error {
+	cert, errors := s.client.ObtainCertificate([]string{s.domain}, true)
+	if err := errors[s.domain]; err != nil {
 		if _, ok := err.(acme.TOSError); ok {
-			err := client.AgreeToTOS()
+			err := s.client.AgreeToTOS()
 			if err != nil {
 				return err
 			}
-			return obtain(client, domain)
+			return s.obtain()
 		}
 
 		return err
 	}
+
+	s.setCert(cert)
+	s.refreshOCSP()
 
 	err := saveCert(cert)
 	if err != nil {
@@ -79,8 +147,8 @@ func obtain(client *acme.Client, domain string) error {
 	return nil
 }
 
-func renew(client *acme.Client, domain string) bool {
-	cert, err := ioutil.ReadFile(directory.Cert(domain))
+func (s *state) renew() bool {
+	cert, err := ioutil.ReadFile(directory.Cert(s.domain))
 	if err != nil {
 		return false
 	}
@@ -93,12 +161,12 @@ func renew(client *acme.Client, domain string) bool {
 	daysLeft := int(exp.Sub(time.Now().UTC()).Hours() / 24)
 
 	if daysLeft <= 30 {
-		metaBytes, err := ioutil.ReadFile(directory.Meta(domain))
+		metaBytes, err := ioutil.ReadFile(directory.Meta(s.domain))
 		if err != nil {
 			return false
 		}
 
-		key, err := ioutil.ReadFile(directory.Key(domain))
+		key, err := ioutil.ReadFile(directory.Key(s.domain))
 		if err != nil {
 			return false
 		}
@@ -112,10 +180,10 @@ func renew(client *acme.Client, domain string) bool {
 		meta.PrivateKey = key
 
 	Renew:
-		newMeta, err := client.RenewCertificate(meta, true)
+		newMeta, err := s.client.RenewCertificate(meta, true)
 		if err != nil {
 			if _, ok := err.(acme.TOSError); ok {
-				err := client.AgreeToTOS()
+				err := s.client.AgreeToTOS()
 				if err != nil {
 					return false
 				}
@@ -123,6 +191,8 @@ func renew(client *acme.Client, domain string) bool {
 			}
 			return false
 		}
+
+		s.setCert(newMeta)
 
 		err = saveCert(newMeta)
 		if err != nil {
@@ -135,13 +205,44 @@ func renew(client *acme.Client, domain string) bool {
 	return false
 }
 
-func keepRenewed(client *acme.Client, domain string, onChange func()) {
+func (s *state) refreshOCSP() {
+	ocsp, resp, err := acme.GetOCSPForCert(s.getCertPEM())
+	if err == nil && resp.Status == acme.OCSPGood {
+		s.setOCSP(ocsp)
+	}
+}
+
+func (s *state) maintain() {
+	renew := time.Tick(24 * time.Hour)
+	ocsp := time.Tick(1 * time.Hour)
 	for {
-		time.Sleep(24 * time.Hour)
-		if renew(client, domain) {
-			onChange()
+		select {
+		case <-renew:
+			s.renew()
+
+		case <-ocsp:
+			s.refreshOCSP()
 		}
 	}
+}
+
+func (s *state) loadCert() error {
+	cert, err := ioutil.ReadFile(directory.Cert(s.domain))
+	if err != nil {
+		return err
+	}
+
+	key, err := ioutil.ReadFile(directory.Key(s.domain))
+	if err != nil {
+		return err
+	}
+
+	s.setCert(acme.CertificateResource{
+		Certificate: cert,
+		PrivateKey:  key,
+	})
+
+	return nil
 }
 
 func certExists(domain string) bool {

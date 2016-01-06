@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/tls"
 	"log"
 	"net"
 	"net/http"
@@ -46,23 +47,22 @@ func startHTTP() {
 	port := viper.GetString("port")
 
 	if viper.GetBool("https.enabled") {
-		var err error
 		portHTTPS := viper.GetString("https.port")
 		redirect := viper.GetBool("https.redirect")
 
-		https := restartableHTTPS{
-			addr:    ":" + portHTTPS,
-			handler: http.HandlerFunc(serve),
-		}
-
-		if viper.GetBool("https.redirect") {
+		if redirect {
 			log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
 			go http.ListenAndServe(":"+port, createHTTPSRedirect(portHTTPS))
 		}
 
+		server := &http.Server{
+			Addr:    ":" + portHTTPS,
+			Handler: http.HandlerFunc(serve),
+		}
+
 		if certExists() {
-			https.cert = viper.GetString("https.cert")
-			https.key = viper.GetString("https.key")
+			log.Println("[HTTPS] Listening on port", portHTTPS)
+			server.ListenAndServeTLS(viper.GetString("https.cert"), viper.GetString("https.key"))
 		} else if domain := viper.GetString("letsencrypt.domain"); domain != "" {
 			dir := storage.Path.LetsEncrypt()
 			email := viper.GetString("letsencrypt.email")
@@ -73,16 +73,18 @@ func startHTTP() {
 				go http.ListenAndServe(":80", http.HandlerFunc(letsEncryptProxy))
 			}
 
-			https.cert, https.key, err = letsencrypt.Run(dir, domain, email, lePort, https.restart)
+			letsEncrypt, err := letsencrypt.Run(dir, domain, email, lePort)
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			server.TLSConfig = &tls.Config{GetCertificate: letsEncrypt.GetCertificate}
+
+			log.Println("[HTTPS] Listening on port", portHTTPS)
+			log.Fatal(listenAndServeTLS(server))
 		} else {
 			log.Fatal("Could not locate SSL certificate or private key")
 		}
-
-		log.Println("[HTTPS] Listening on port", portHTTPS)
-		https.start()
 	} else {
 		log.Println("[HTTP] Listening on port", port)
 		log.Fatal(http.ListenAndServe(":"+port, http.HandlerFunc(serve)))

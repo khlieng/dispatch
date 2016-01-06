@@ -10,43 +10,16 @@ import (
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
 )
 
-type restartableHTTPS struct {
-	listener net.Listener
-	handler  http.Handler
-	addr     string
-	cert     string
-	key      string
-}
+func listenAndServeTLS(srv *http.Server) error {
+	srv.TLSConfig.NextProtos = []string{"http/1.1"}
 
-func (r *restartableHTTPS) start() error {
-	var err error
-
-	config := &tls.Config{
-		NextProtos:   []string{"http/1.1"},
-		Certificates: make([]tls.Certificate, 1),
-	}
-
-	config.Certificates[0], err = tls.LoadX509KeyPair(r.cert, r.key)
+	ln, err := net.Listen("tcp", srv.Addr)
 	if err != nil {
 		return err
 	}
 
-	ln, err := net.Listen("tcp", r.addr)
-	if err != nil {
-		return err
-	}
-
-	r.listener = tls.NewListener(tcpKeepAliveListener{ln.(*net.TCPListener)}, config)
-	return http.Serve(r.listener, r.handler)
-}
-
-func (r *restartableHTTPS) stop() {
-	r.listener.Close()
-}
-
-func (r *restartableHTTPS) restart() {
-	r.stop()
-	go r.start()
+	tlsListener := tls.NewListener(tcpKeepAliveListener{ln.(*net.TCPListener)}, srv.TLSConfig)
+	return srv.Serve(tlsListener)
 }
 
 type tcpKeepAliveListener struct {
