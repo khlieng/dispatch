@@ -27,28 +27,25 @@ const logo = `
 var rootCmd = &cobra.Command{
 	Use:   "dispatch",
 	Short: "Web-based IRC client in Go.",
-	Run: func(cmd *cobra.Command, args []string) {
-		storage.Initialize()
-		server.Run()
-	},
-
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if cmd.Use == "dispatch" {
 			fmt.Println(logo)
 		}
 
-		storage.SetDirectory(viper.GetString("dir"))
+		storage.Initialize(viper.GetString("dir"))
 
-		err := os.MkdirAll(storage.Path.Logs(), 0700)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		initConfig()
+		initConfig(storage.Path.Config())
 
 		viper.SetConfigName("config")
 		viper.AddConfigPath(storage.Path.Root())
 		viper.ReadInConfig()
+	},
+
+	Run: func(cmd *cobra.Command, args []string) {
+		log.Println("Storing data at", storage.Path.Root())
+
+		storage.Open()
+		server.Run()
 	},
 }
 
@@ -67,9 +64,7 @@ func init() {
 	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
 }
 
-func initConfig() {
-	configPath := storage.Path.Config()
-
+func initConfig(configPath string) {
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		config, err := assets.Asset("config.default.toml")
 		if err != nil {

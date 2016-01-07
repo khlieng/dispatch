@@ -6,12 +6,6 @@ import (
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/mitchellh/go-homedir"
 )
 
-var Path directory
-
-func SetDirectory(dir string) {
-	Path = directory(dir)
-}
-
 func DefaultDirectory() string {
 	home, _ := homedir.Dir()
 	return filepath.Join(home, ".dispatch")

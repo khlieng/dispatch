@@ -20,9 +20,8 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	storage.SetDirectory(tempdir)
-	os.MkdirAll(storage.Path.Logs(), 0700)
-	storage.Initialize()
+	storage.Initialize(tempdir)
+	storage.Open()
 	user = storage.NewUser("uuid")
 	channelStore = storage.NewChannelStore()
 
