@@ -11,7 +11,9 @@ import (
 )
 
 func listenAndServeTLS(srv *http.Server) error {
-	srv.TLSConfig.NextProtos = []string{"http/1.1"}
+	if srv.TLSConfig.NextProtos == nil {
+		srv.TLSConfig.NextProtos = []string{"http/1.1"}
+	}
 
 	ln, err := net.Listen("tcp", srv.Addr)
 	if err != nil {

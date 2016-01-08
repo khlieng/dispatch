@@ -1,7 +1,6 @@
 package server
 
 import (
-	"crypto/tls"
 	"log"
 	"net"
 	"net/http"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/golang.org/x/net/http2"
 
 	"github.com/khlieng/dispatch/letsencrypt"
 	"github.com/khlieng/dispatch/storage"
@@ -60,6 +60,8 @@ func startHTTP() {
 			Handler: http.HandlerFunc(serve),
 		}
 
+		http2.ConfigureServer(server, nil)
+
 		if certExists() {
 			log.Println("[HTTPS] Listening on port", portHTTPS)
 			server.ListenAndServeTLS(viper.GetString("https.cert"), viper.GetString("https.key"))
@@ -78,7 +80,7 @@ func startHTTP() {
 				log.Fatal(err)
 			}
 
-			server.TLSConfig = &tls.Config{GetCertificate: letsEncrypt.GetCertificate}
+			server.TLSConfig.GetCertificate = letsEncrypt.GetCertificate
 
 			log.Println("[HTTPS] Listening on port", portHTTPS)
 			log.Fatal(listenAndServeTLS(server))

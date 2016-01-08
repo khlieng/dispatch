@@ -166,6 +166,10 @@
 			"Rev": "644910e6da851dcd66a424c71d068d971cfacba5"
 		},
 		{
+			"ImportPath": "golang.org/x/net/http2",
+			"Rev": "f1d3149ecb40ffadf4a28d39a30f9a125fe57bdf"
+		},
+		{
 			"ImportPath": "golang.org/x/text/transform",
 			"Rev": "c92eb3cd6e70951a111680995e651ea4b2c35539"
 		},
