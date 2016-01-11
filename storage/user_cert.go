@@ -12,13 +12,21 @@ var (
 	ErrCouldNotSaveCert = errors.New("Could not save certificate")
 )
 
+func (u *User) GetCertificate() *tls.Certificate {
+	u.lock.Lock()
+	cert := u.certificate
+	u.lock.Unlock()
+
+	return cert
+}
+
 func (u *User) SetCertificate(certPEM, keyPEM []byte) error {
 	cert, err := tls.X509KeyPair(certPEM, keyPEM)
 	if err != nil {
 		return ErrInvalidCert
 	}
 	u.lock.Lock()
-	u.Certificate = &cert
+	u.certificate = &cert
 	u.lock.Unlock()
 
 	err = os.MkdirAll(Path.User(u.UUID), 0700)
@@ -55,6 +63,6 @@ func (u *User) loadCertificate() error {
 		return err
 	}
 
-	u.Certificate = &cert
+	u.certificate = &cert
 	return nil
 }

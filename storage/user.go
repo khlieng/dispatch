@@ -41,11 +41,11 @@ type Message struct {
 }
 
 type User struct {
-	UUID        string
-	Certificate *tls.Certificate `json:"-"`
+	UUID string
 
 	messageLog   *bolt.DB
 	messageIndex bleve.Index
+	certificate  *tls.Certificate
 	lock         sync.Mutex
 }
 

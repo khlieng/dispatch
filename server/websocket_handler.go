@@ -105,9 +105,9 @@ func (h *wsHandler) connect(b []byte) {
 		i.Password = data.Password
 		i.Realname = data.Realname
 
-		if h.session.user.Certificate != nil {
+		if cert := h.session.user.GetCertificate(); cert != nil {
 			i.TLSConfig = &tls.Config{
-				Certificates: []tls.Certificate{*h.session.user.Certificate},
+				Certificates: []tls.Certificate{*cert},
 			}
 		}
 

@@ -22,9 +22,9 @@ func reconnectIRC() {
 			i.Password = server.Password
 			i.Realname = server.Realname
 
-			if user.Certificate != nil {
+			if cert := user.GetCertificate(); cert != nil {
 				i.TLSConfig = &tls.Config{
-					Certificates: []tls.Certificate{*user.Certificate},
+					Certificates: []tls.Certificate{*cert},
 				}
 			}
 
