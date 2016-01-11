@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"log"
 	"strings"
@@ -103,6 +104,12 @@ func (h *wsHandler) connect(b []byte) {
 		i.TLS = data.TLS
 		i.Password = data.Password
 		i.Realname = data.Realname
+
+		if h.session.user.Certificate != nil {
+			i.TLSConfig = &tls.Config{
+				Certificates: []tls.Certificate{*h.session.user.Certificate},
+			}
+		}
 
 		if idx := strings.Index(data.Server, ":"); idx < 0 {
 			h.session.setIRC(data.Server, i)
@@ -231,6 +238,19 @@ func (h *wsHandler) search(b []byte) {
 	}()
 }
 
+func (h *wsHandler) cert(b []byte) {
+	var data ClientCert
+	json.Unmarshal(b, &data)
+
+	err := h.session.user.SetCertificate(data.Cert, data.Key)
+	if err != nil {
+		h.session.sendJSON("cert_fail", Error{Message: err.Error()})
+		return
+	}
+
+	h.session.sendJSON("cert_success", nil)
+}
+
 func (h *wsHandler) initHandlers() {
 	h.handlers = map[string]func([]byte){
 		"connect": h.connect,
@@ -244,5 +264,6 @@ func (h *wsHandler) initHandlers() {
 		"whois":   h.whois,
 		"away":    h.away,
 		"search":  h.search,
+		"cert":    h.cert,
 	}
 }

@@ -127,6 +127,11 @@ type SearchResult struct {
 	Results []storage.Message `json:"results"`
 }
 
+type ClientCert struct {
+	Cert []byte `json:"cert"`
+	Key  []byte `json:"key"`
+}
+
 type Error struct {
 	Server  string `json:"server"`
 	Message string `json:"message"`

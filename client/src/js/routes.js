@@ -3,7 +3,7 @@ import { Route, IndexRoute } from 'react-router';
 import App from './containers/App';
 import Connect from './containers/Connect';
 import Chat from './containers/Chat';
-import Settings from './components/Settings';
+import Settings from './containers/Settings';
 
 export default function createRoutes() {
   return (
@@ -13,7 +13,7 @@ export default function createRoutes() {
       <Route path="/:server" component={Chat} />
       <Route path="/:server/:channel" component={Chat} />
       <Route path="/:server/pm/:user" component={Chat} />
-      <IndexRoute component={Settings} />
+      <IndexRoute component={null} />
     </Route>
   );
 }

@@ -96,7 +96,7 @@ gulp.task('dev', ['html', 'css', 'fonts', 'config', 'gzip:dev', 'bindata:dev'], 
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 
-  app.listen(3000, 'localhost', function (err) {
+  app.listen(3000, function (err) {
     if (err) {
       console.log(err);
       return;

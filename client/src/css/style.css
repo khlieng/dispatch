@@ -9,6 +9,15 @@ body {
   background: #f0f0f0;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: Montserrat, sans-serif;
+  font-weight: 400;
+}
+
+h1 {
+  font-weight: 700;
+}
+
 input {
   font: 16px Droid Sans Mono, monospace;
   border: none;
@@ -134,14 +143,13 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   bottom: 0;
 }
 
-.connect .navicon {
+.connect .navicon, .settings .navicon {
   position: absolute;
   top: 0;
   left: 0;
 }
 
 .connect-form h1 {
-  font: 32px Montserrat, sans-serif;
   margin-bottom: 15px;
   text-align: center;
 }
@@ -404,6 +412,58 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .userlist p:hover {
   background: #DDD;
+}
+
+.settings {
+  text-align: center;
+}
+
+.settings p {
+  color: #999;
+}
+
+.settings h1 {
+  margin: 20px;
+}
+
+.settings h2 {
+  margin: 15px;
+}
+
+.settings button {
+  margin: 5px;
+  color: #FFF;
+  background: #6BB758;
+  padding: 10px 20px;
+  width: 200px;
+}
+
+.settings button:hover {
+  background: #7BBF6A;
+}
+
+.settings button:active {
+  background: #6BB758;
+}
+
+.settings div {
+  display: inline-block;
+}
+
+.settings .error {
+  margin: 10px;
+  color: #F6546A;
+}
+
+.input-file {
+  color: #FFF;
+  background: #222 !important;
+  padding: 10px;
+  margin: 5px;
+  width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 600px) {

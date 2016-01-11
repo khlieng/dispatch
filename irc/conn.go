@@ -49,20 +49,24 @@ func (c *Client) connect() error {
 
 	if c.TLS {
 		if c.TLSConfig == nil {
-			c.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+			c.TLSConfig = &tls.Config{
+				InsecureSkipVerify: true,
+			}
 		}
 
-		if conn, err := tls.DialWithDialer(c.dialer, "tcp", c.Server, c.TLSConfig); err != nil {
+		conn, err := tls.DialWithDialer(c.dialer, "tcp", c.Server, c.TLSConfig)
+		if err != nil {
 			return err
-		} else {
-			c.conn = conn
 		}
+
+		c.conn = conn
 	} else {
-		if conn, err := c.dialer.Dial("tcp", c.Server); err != nil {
+		conn, err := c.dialer.Dial("tcp", c.Server)
+		if err != nil {
 			return err
-		} else {
-			c.conn = conn
 		}
+
+		c.conn = conn
 	}
 
 	c.connected = true

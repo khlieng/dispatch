@@ -1,6 +1,8 @@
 package server
 
 import (
+	"crypto/tls"
+
 	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
 )
@@ -19,6 +21,12 @@ func reconnectIRC() {
 			i.TLS = server.TLS
 			i.Password = server.Password
 			i.Realname = server.Realname
+
+			if user.Certificate != nil {
+				i.TLSConfig = &tls.Config{
+					Certificates: []tls.Certificate{*user.Certificate},
+				}
+			}
 
 			i.Connect(server.Address)
 			session.setIRC(i.Host, i)

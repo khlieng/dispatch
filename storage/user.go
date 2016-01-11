@@ -2,10 +2,12 @@ package storage
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve"
@@ -39,10 +41,12 @@ type Message struct {
 }
 
 type User struct {
-	UUID string
+	UUID        string
+	Certificate *tls.Certificate `json:"-"`
 
 	messageLog   *bolt.DB
 	messageIndex bleve.Index
+	lock         sync.Mutex
 }
 
 func NewUser(uuid string) *User {
@@ -73,6 +77,7 @@ func LoadUsers() []*User {
 		b.ForEach(func(k, v []byte) error {
 			user := User{UUID: string(k)}
 			user.openMessageLog()
+			user.loadCertificate()
 
 			users = append(users, &user)
 

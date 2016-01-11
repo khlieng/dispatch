@@ -7,6 +7,7 @@ import messages from './messages';
 import privateChats from './privateChats';
 import search from './search';
 import servers from './servers';
+import settings from './settings';
 import showMenu from './showMenu';
 import tab from './tab';
 
@@ -19,6 +20,7 @@ export default combineReducers({
   privateChats,
   search,
   servers,
+  settings,
   showMenu,
   tab
 });

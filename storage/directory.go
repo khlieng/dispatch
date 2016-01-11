@@ -33,6 +33,22 @@ func (d directory) Index(userID string) string {
 	return filepath.Join(d.Logs(), userID+".idx")
 }
 
+func (d directory) Users() string {
+	return filepath.Join(d.Root(), "users")
+}
+
+func (d directory) User(userID string) string {
+	return filepath.Join(d.Users(), userID)
+}
+
+func (d directory) Certificate(userID string) string {
+	return filepath.Join(d.User(userID), "cert.pem")
+}
+
+func (d directory) Key(userID string) string {
+	return filepath.Join(d.User(userID), "key.pem")
+}
+
 func (d directory) Config() string {
 	return filepath.Join(d.Root(), "config.toml")
 }
