@@ -46,15 +46,3 @@ export function setSelectedUser(server, user = null) {
     user
   };
 }
-
-export function hideMenu() {
-  return {
-    type: actions.HIDE_MENU
-  };
-}
-
-export function toggleMenu() {
-  return {
-    type: actions.TOGGLE_MENU
-  };
-}

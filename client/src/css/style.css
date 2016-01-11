@@ -252,6 +252,15 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   background: #DDD;
 }
 
+.button-userlist {
+  display: none;
+  border-left: 1px solid #DDD;
+}
+
+.chat-server .button-userlist, .chat-private .button-userlist {
+  display: none;
+}
+
 .chat-title {
   margin-left: 15px;
   font-size: 24px;
@@ -309,7 +318,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   top: 50px;
   bottom: 50px;
   right: 200px;
-  z-index: 2;
+  z-index: 3;
   background: #f0f0f0;
 }
 
@@ -398,6 +407,9 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   right: 0;
   width: 200px;
   border-left: 1px solid #DDD;
+  background: #f0f0f0;
+  z-index: 2;
+  transition: transform .2s;
 }
 
 .userlist > div {
@@ -491,5 +503,33 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
   .chat-title {
     margin-left: 0;
+  }
+
+  .userlist-bar {
+    display: none;
+  }
+
+  .userlist {
+    transform: translateX(200px);
+  }
+
+  .userlist.off-canvas {
+    transform: translateX(0);
+  }
+
+  .chat-channel .chat-title-bar, .chat-channel .messagebox {
+    right: 0;
+  }
+
+  .button-userlist {
+    display: inline-block;
+  }
+
+  .chat-topic {
+    display: none;
+  }
+
+  .search {
+    right: 0;
   }
 }

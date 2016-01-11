@@ -8,8 +8,8 @@ import privateChats from './privateChats';
 import search from './search';
 import servers from './servers';
 import settings from './settings';
-import showMenu from './showMenu';
 import tab from './tab';
+import ui from './ui';
 
 export default combineReducers({
   routing: routeReducer,
@@ -21,6 +21,6 @@ export default combineReducers({
   search,
   servers,
   settings,
-  showMenu,
-  tab
+  tab,
+  ui
 });

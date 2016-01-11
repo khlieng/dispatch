@@ -22,7 +22,8 @@ export default class UserList extends Component {
   };
 
   render() {
-    const { tab, openPrivateChat, select } = this.props;
+    const { tab, openPrivateChat, select, showUserList } = this.props;
+    const className = showUserList ? 'userlist off-canvas' : 'userlist';
     const users = [];
     const style = {};
 
@@ -41,7 +42,7 @@ export default class UserList extends Component {
     }
 
     return (
-      <div className="userlist" style={style}>
+      <div className={className} style={style}>
         <Infinite containerHeight={this.state.height} elementHeight={24}>
           {users}
         </Infinite>

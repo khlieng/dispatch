@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import pure from 'pure-render-decorator';
-import { toggleMenu } from '../actions/tab';
+import { toggleMenu } from '../actions/ui';
 
 @pure
 class Navicon extends Component {

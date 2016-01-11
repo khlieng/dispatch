@@ -39,5 +39,6 @@ export const SOCKET_USERS = 'SOCKET_USERS';
 export const TAB_HISTORY_POP = 'TAB_HISTORY_POP';
 export const TOGGLE_MENU = 'TOGGLE_MENU';
 export const TOGGLE_SEARCH = 'TOGGLE_SEARCH';
+export const TOGGLE_USERLIST = 'TOGGLE_USERLIST';
 export const UPLOAD_CERT = 'UPLOAD_CERT';
 export const WHOIS = 'WHOIS';

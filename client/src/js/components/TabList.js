@@ -20,8 +20,8 @@ export default class TabList extends Component {
   };
 
   render() {
-    const { channels, servers, privateChats, showMenu, selected } = this.props;
-    const className = showMenu ? 'tablist off-canvas' : 'tablist';
+    const { channels, servers, privateChats, showTabList, selected } = this.props;
+    const className = showTabList ? 'tablist off-canvas' : 'tablist';
     const tabs = [];
 
     channels.forEach((server, address) => {

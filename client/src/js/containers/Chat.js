@@ -15,9 +15,10 @@ import { searchMessages, toggleSearch } from '../actions/search';
 import { select, setSelectedChannel, setSelectedUser } from '../actions/tab';
 import { runCommand, sendMessage } from '../actions/message';
 import { disconnect } from '../actions/server';
-import * as inputHistoryActions from '../actions/inputHistory';
 import { setWrapWidth, setCharWidth } from '../actions/environment';
 import { stringWidth, wrapMessages } from '../util';
+import { toggleUserList } from '../actions/ui';
+import * as inputHistoryActions from '../actions/inputHistory';
 
 function updateSelected({ params, dispatch }) {
   if (params.channel) {
@@ -134,6 +135,7 @@ function mapStateToProps(state) {
     users: channel.get('users', List()),
     history: state.input.index === -1 ? null : state.input.history.get(state.input.index),
     messages: wrappedMessagesSelector(state),
+    showUserList: state.ui.showUserList,
     channel,
     tab
   };
@@ -145,6 +147,7 @@ function mapDispatchToProps(dispatch) {
     ...bindActionCreators({
       select,
       toggleSearch,
+      toggleUserList,
       searchMessages,
       runCommand,
       sendMessage,

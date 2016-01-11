@@ -19,7 +19,7 @@ export default class ChatTitle extends Component {
   };
 
   render() {
-    const { title, tab, channel, toggleSearch } = this.props;
+    const { title, tab, channel, toggleSearch, toggleUserList } = this.props;
     const topic = Autolinker.link(channel.get('topic') || '', { stripPrefix: false });
 
     let leaveTitle;
@@ -45,6 +45,7 @@ export default class ChatTitle extends Component {
             title={leaveTitle}
             onClick={this.handleLeaveClick}
           />
+          <i className="icon-user button-userlist" onClick={toggleUserList} />
         </div>
         <div className="userlist-bar">
           <i className="icon-user" />

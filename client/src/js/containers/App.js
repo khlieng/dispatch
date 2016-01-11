@@ -3,13 +3,14 @@ import { connect } from 'react-redux';
 import { pushPath } from 'redux-simple-router';
 import pure from 'pure-render-decorator';
 import TabList from '../components/TabList';
-import * as actions from '../actions/tab';
+import { select } from '../actions/tab';
+import { hideMenu } from '../actions/ui';
 
 @pure
 class App extends Component {
   render() {
-    const { showMenu, children } = this.props;
-    const mainClass = showMenu ? 'main-container off-canvas' : 'main-container';
+    const { showTabList, children } = this.props;
+    const mainClass = showTabList ? 'main-container off-canvas' : 'main-container';
     return (
       <div>
         <TabList {...this.props} />
@@ -26,9 +27,9 @@ function mapStateToProps(state) {
     servers: state.servers,
     channels: state.channels,
     privateChats: state.privateChats,
-    showMenu: state.showMenu,
+    showTabList: state.ui.showTabList,
     selected: state.tab.selected
   };
 }
 
-export default connect(mapStateToProps, { pushPath, ...actions })(App);
+export default connect(mapStateToProps, { pushPath, select, hideMenu })(App);
