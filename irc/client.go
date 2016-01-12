@@ -84,7 +84,9 @@ func (c *Client) Quit() {
 		}
 		close(c.quit)
 		c.lock.Lock()
-		c.conn.Close()
+		if c.conn != nil {
+			c.conn.Close()
+		}
 		c.lock.Unlock()
 	}()
 }
