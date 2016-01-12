@@ -31,6 +31,7 @@ type Client struct {
 	quit      chan struct{}
 	reconnect chan struct{}
 	ready     sync.WaitGroup
+	sendRecv  sync.WaitGroup
 	once      resync.Once
 	lock      sync.Mutex
 }
@@ -83,11 +84,6 @@ func (c *Client) Quit() {
 			c.write("QUIT")
 		}
 		close(c.quit)
-		c.lock.Lock()
-		if c.conn != nil {
-			c.conn.Close()
-		}
-		c.lock.Unlock()
 	}()
 }
 

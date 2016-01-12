@@ -7,6 +7,8 @@ import (
 	"net"
 	"strings"
 	"time"
+
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/jpillora/backoff"
 )
 
 func (c *Client) Connect(address string) {
@@ -82,11 +84,15 @@ func (c *Client) connect() error {
 }
 
 func (c *Client) tryConnect() {
-	// TODO: backoff
+	b := &backoff.Backoff{
+		Jitter: true,
+	}
+
 	for {
 		select {
 		case <-c.quit:
 			return
+
 		default:
 		}
 
@@ -94,30 +100,36 @@ func (c *Client) tryConnect() {
 		if err == nil {
 			return
 		}
+
+		time.Sleep(b.Duration())
 	}
 }
 
 func (c *Client) run() {
 	c.tryConnect()
+
 	for {
 		select {
 		case <-c.quit:
 			c.close()
-			c.lock.Lock()
-			c.connected = false
-			c.lock.Unlock()
 			return
 
 		case <-c.reconnect:
+			c.sendRecv.Wait()
 			c.reconnect = make(chan struct{})
 			c.once.Reset()
+
 			c.tryConnect()
 		}
 	}
 }
 
 func (c *Client) send() {
+	c.sendRecv.Add(1)
+	defer c.sendRecv.Done()
+
 	c.ready.Wait()
+
 	for {
 		select {
 		case <-c.quit:
@@ -136,18 +148,24 @@ func (c *Client) send() {
 }
 
 func (c *Client) recv() {
-	defer c.conn.Close()
+	c.sendRecv.Add(1)
+	defer c.sendRecv.Done()
+
 	for {
 		line, err := c.reader.ReadString('\n')
 		if err != nil {
-			c.lock.Lock()
-			c.connected = false
-			c.lock.Unlock()
-			c.once.Do(c.ready.Done)
 			select {
 			case <-c.quit:
 				return
+
 			default:
+				c.lock.Lock()
+				c.connected = false
+				c.lock.Unlock()
+
+				c.once.Do(c.ready.Done)
+				c.conn.Close()
+
 				close(c.reconnect)
 				return
 			}
@@ -168,8 +186,14 @@ func (c *Client) recv() {
 
 func (c *Client) close() {
 	if c.Connected() {
+		c.lock.Lock()
+		c.connected = false
+		c.lock.Unlock()
+
 		c.once.Do(c.ready.Done)
+		c.conn.Close()
 	}
+
 	close(c.out)
 	close(c.Messages)
 }
