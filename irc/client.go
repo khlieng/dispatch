@@ -12,14 +12,15 @@ import (
 )
 
 type Client struct {
-	Server    string
-	Host      string
-	TLS       bool
-	TLSConfig *tls.Config
-	Password  string
-	Username  string
-	Realname  string
-	Messages  chan *Message
+	Server            string
+	Host              string
+	TLS               bool
+	TLSConfig         *tls.Config
+	Password          string
+	Username          string
+	Realname          string
+	Messages          chan *Message
+	ConnectionChanged chan bool
 
 	nick string
 
@@ -40,13 +41,14 @@ type Client struct {
 
 func NewClient(nick, username string) *Client {
 	return &Client{
-		nick:      nick,
-		Username:  username,
-		Realname:  nick,
-		Messages:  make(chan *Message, 32),
-		out:       make(chan string, 32),
-		quit:      make(chan struct{}),
-		reconnect: make(chan struct{}),
+		nick:              nick,
+		Username:          username,
+		Realname:          nick,
+		Messages:          make(chan *Message, 32),
+		ConnectionChanged: make(chan bool, 16),
+		out:               make(chan string, 32),
+		quit:              make(chan struct{}),
+		reconnect:         make(chan struct{}),
 		backoff: &backoff.Backoff{
 			Jitter: true,
 		},

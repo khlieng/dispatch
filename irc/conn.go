@@ -10,6 +10,8 @@ import (
 )
 
 func (c *Client) Connect(address string) {
+	c.ConnectionChanged <- false
+
 	if idx := strings.Index(address, ":"); idx < 0 {
 		c.Host = address
 
@@ -70,6 +72,7 @@ func (c *Client) connect() error {
 	}
 
 	c.connected = true
+	c.ConnectionChanged <- true
 	c.reader = bufio.NewReader(c.conn)
 
 	c.register()
@@ -154,6 +157,7 @@ func (c *Client) recv() {
 				return
 
 			default:
+				c.ConnectionChanged <- false
 				c.lock.Lock()
 				c.connected = false
 				c.lock.Unlock()
@@ -181,6 +185,7 @@ func (c *Client) recv() {
 
 func (c *Client) close() {
 	if c.Connected() {
+		c.ConnectionChanged <- false
 		c.lock.Lock()
 		c.connected = false
 		c.lock.Unlock()

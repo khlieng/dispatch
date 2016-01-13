@@ -8,8 +8,9 @@ import (
 )
 
 type Session struct {
-	irc     map[string]*irc.Client
-	ircLock sync.Mutex
+	irc             map[string]*irc.Client
+	connectionState map[string]bool
+	ircLock         sync.Mutex
 
 	ws     map[string]*wsConn
 	wsLock sync.Mutex
@@ -20,9 +21,10 @@ type Session struct {
 
 func NewSession() *Session {
 	return &Session{
-		irc: make(map[string]*irc.Client),
-		ws:  make(map[string]*wsConn),
-		out: make(chan WSResponse, 32),
+		irc:             make(map[string]*irc.Client),
+		connectionState: make(map[string]bool),
+		ws:              make(map[string]*wsConn),
+		out:             make(chan WSResponse, 32),
 	}
 }
 
@@ -37,12 +39,14 @@ func (s *Session) getIRC(server string) (*irc.Client, bool) {
 func (s *Session) setIRC(server string, i *irc.Client) {
 	s.ircLock.Lock()
 	s.irc[server] = i
+	s.connectionState[server] = false
 	s.ircLock.Unlock()
 }
 
 func (s *Session) deleteIRC(server string) {
 	s.ircLock.Lock()
 	delete(s.irc, server)
+	delete(s.connectionState, server)
 	s.ircLock.Unlock()
 }
 
@@ -52,6 +56,24 @@ func (s *Session) numIRC() int {
 	s.ircLock.Unlock()
 
 	return n
+}
+
+func (s *Session) getConnectionStates() map[string]bool {
+	s.ircLock.Lock()
+	state := make(map[string]bool, len(s.connectionState))
+
+	for k, v := range s.connectionState {
+		state[k] = v
+	}
+	s.ircLock.Unlock()
+
+	return state
+}
+
+func (s *Session) setConnectionState(server string, connected bool) {
+	s.ircLock.Lock()
+	s.connectionState[server] = connected
+	s.ircLock.Unlock()
 }
 
 func (s *Session) setWS(addr string, w *wsConn) {

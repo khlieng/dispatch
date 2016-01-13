@@ -61,6 +61,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .tablist p {
   padding: 3px 15px;
+  padding-right: 10px;
   cursor: pointer;
 }
 
@@ -77,9 +78,28 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   border-left: 5px solid #6BB758;
 }
 
+.tab-content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .tab-server {
+  display: flex;
+  align-items: center;
   color: #999;
   margin-top: 10px !important;
+}
+
+.tab-server .tab-content {
+  flex: 1;
+  margin-right: 5px;
+}
+
+.tab-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }
 
 .button-connect {

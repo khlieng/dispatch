@@ -35,6 +35,7 @@ export default class TabList extends Component {
             selected.channel === null &&
             selected.user === null
           }
+          connected={servers.getIn([address, 'connected'])}
           onClick={this.handleTabClick}
         />
       );

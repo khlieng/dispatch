@@ -20,8 +20,24 @@ export default class TabListItem extends Component {
       classes.push('selected');
     }
 
+    let indicator = null;
+    if (this.props.connected !== undefined) {
+      const style = {};
+
+      if (this.props.connected) {
+        style.background = '#6BB758';
+      } else {
+        style.background = '#F6546A';
+      }
+
+      indicator = <i className="tab-indicator" style={style}></i>;
+    }
+
     return (
-      <p className={classes.join(' ')} onClick={this.handleClick}>{content}</p>
+      <p className={classes.join(' ')} onClick={this.handleClick}>
+        <span className="tab-content">{content}</span>
+        {indicator}
+      </p>
     );
   }
 }

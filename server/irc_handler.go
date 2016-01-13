@@ -31,13 +31,21 @@ func newIRCHandler(client *irc.Client, session *Session) *ircHandler {
 
 func (i *ircHandler) run() {
 	for {
-		msg, ok := <-i.client.Messages
-		if !ok {
-			i.session.deleteIRC(i.client.Host)
-			return
-		}
+		select {
+		case msg, ok := <-i.client.Messages:
+			if !ok {
+				i.session.deleteIRC(i.client.Host)
+				return
+			}
 
-		i.dispatchMessage(msg)
+			i.dispatchMessage(msg)
+
+		case connected := <-i.client.ConnectionChanged:
+			i.session.sendJSON("connection_update", map[string]bool{
+				i.client.Host: connected,
+			})
+			i.session.setConnectionState(i.client.Host, connected)
+		}
 	}
 }
 

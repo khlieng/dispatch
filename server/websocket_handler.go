@@ -71,6 +71,7 @@ func (h *wsHandler) init(uuid string) {
 
 		h.session.sendJSON("channels", channels)
 		h.session.sendJSON("servers", h.session.user.GetServers())
+		h.session.sendJSON("connection_update", h.session.getConnectionStates())
 
 		for _, channel := range channels {
 			h.session.sendJSON("users", Userlist{

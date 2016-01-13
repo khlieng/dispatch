@@ -1,10 +1,12 @@
 import { Map, Record } from 'immutable';
 import createReducer from '../util/createReducer';
 import * as actions from '../actions';
+import forEach from 'lodash/collection/forEach';
 
 const Server = Record({
   nick: null,
-  name: null
+  name: null,
+  connected: false
 });
 
 export default createReducer(Map(), {
@@ -42,5 +44,13 @@ export default createReducer(Map(), {
         s.set(server.address, new Server(server));
       });
     });
+  },
+
+  [actions.SOCKET_CONNECTION_UPDATE](state, action) {
+    return state.withMutations(s => forEach(action, (connected, server) => {
+      if (s.has(server)) {
+        s.setIn([server, 'connected'], connected);
+      }
+    }));
   }
 });
