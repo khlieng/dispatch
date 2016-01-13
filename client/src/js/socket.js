@@ -23,14 +23,15 @@ export default function handleSocket(socket, { dispatch, getState }) {
   socket.on('join', data => {
     const state = getState();
     const { server, channel } = state.tab.selected;
-    const { nick } = state.servers.get(server);
-    const [joinedChannel] = data.channels;
-    if (channel &&
-      server === data.server &&
-      nick === data.user &&
-      channel !== joinedChannel &&
-      normalizeChannel(channel) === normalizeChannel(joinedChannel)) {
-      dispatch(select(server, joinedChannel));
+    if (server && channel) {
+      const { nick } = state.servers.get(server);
+      const [joinedChannel] = data.channels;
+      if (server === data.server &&
+        nick === data.user &&
+        channel !== joinedChannel &&
+        normalizeChannel(channel) === normalizeChannel(joinedChannel)) {
+        dispatch(select(server, joinedChannel));
+      }
     }
   });
 
