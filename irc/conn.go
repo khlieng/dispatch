@@ -146,6 +146,10 @@ func (c *Client) send() {
 }
 
 func (c *Client) recv() {
+	defer func() {
+		recover()
+	}()
+
 	c.sendRecv.Add(1)
 	defer c.sendRecv.Done()
 

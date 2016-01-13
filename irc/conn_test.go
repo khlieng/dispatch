@@ -132,6 +132,19 @@ func TestRecv(t *testing.T) {
 	initTestClient()
 }
 
+func TestRecvRecoversPanic(t *testing.T) {
+	defer func() {
+		assert.Nil(t, recover())
+	}()
+
+	buf := bytes.NewBuffer([]byte("CMD\r\n"))
+	c.reader = bufio.NewReader(buf)
+	close(c.Messages)
+	c.recv()
+
+	c.Messages = make(chan *Message, 32)
+}
+
 /*func TestRecvTriggersReconnect(t *testing.T) {
 	c.reader = bufio.NewReader(&bytes.Buffer{})
 	c.ready.Add(1)
