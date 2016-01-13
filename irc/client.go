@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/jpillora/backoff"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/matryer/resync"
 )
 
@@ -26,6 +27,7 @@ type Client struct {
 	connected bool
 	dialer    *net.Dialer
 	reader    *bufio.Reader
+	backoff   *backoff.Backoff
 	out       chan string
 
 	quit      chan struct{}
@@ -45,6 +47,9 @@ func NewClient(nick, username string) *Client {
 		out:       make(chan string, 32),
 		quit:      make(chan struct{}),
 		reconnect: make(chan struct{}),
+		backoff: &backoff.Backoff{
+			Jitter: true,
+		},
 	}
 }
 

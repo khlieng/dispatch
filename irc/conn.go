@@ -7,8 +7,6 @@ import (
 	"net"
 	"strings"
 	"time"
-
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/jpillora/backoff"
 )
 
 func (c *Client) Connect(address string) {
@@ -84,10 +82,6 @@ func (c *Client) connect() error {
 }
 
 func (c *Client) tryConnect() {
-	b := &backoff.Backoff{
-		Jitter: true,
-	}
-
 	for {
 		select {
 		case <-c.quit:
@@ -98,10 +92,11 @@ func (c *Client) tryConnect() {
 
 		err := c.connect()
 		if err == nil {
+			c.backoff.Reset()
 			return
 		}
 
-		time.Sleep(b.Duration())
+		time.Sleep(c.backoff.Duration())
 	}
 }
 
