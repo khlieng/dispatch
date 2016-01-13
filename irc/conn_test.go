@@ -145,7 +145,7 @@ func TestRecvRecoversPanic(t *testing.T) {
 	c.Messages = make(chan *Message, 32)
 }
 
-/*func TestRecvTriggersReconnect(t *testing.T) {
+func TestRecvTriggersReconnect(t *testing.T) {
 	c.reader = bufio.NewReader(&bytes.Buffer{})
 	c.ready.Add(1)
 	done := make(chan struct{})
@@ -164,7 +164,7 @@ func TestRecvRecoversPanic(t *testing.T) {
 	case <-time.After(100 * time.Millisecond):
 		t.Error("Reconnect not triggered")
 	}
-}*/
+}
 
 func TestClose(t *testing.T) {
 	defer initTestClient()
