@@ -78,45 +78,50 @@ func (i *mockIrcd) handle(conn net.Conn) {
 }
 
 func TestConnect(t *testing.T) {
+	c := testClient()
 	c.Connect("127.0.0.1:45678")
 	assert.Equal(t, c.Host, "127.0.0.1")
 	assert.Equal(t, c.Server, "127.0.0.1:45678")
-	waitConnAndClose(t)
-	initTestClient()
+	waitConnAndClose(t, c)
 }
 
 func TestConnectTLS(t *testing.T) {
+	c := testClient()
 	c.TLS = true
 	c.Connect("127.0.0.1:45679")
 	assert.Equal(t, c.Host, "127.0.0.1")
 	assert.Equal(t, c.Server, "127.0.0.1:45679")
-	waitConnAndClose(t)
-	initTestClient()
+	waitConnAndClose(t, c)
 }
 
 func TestConnectDefaultPorts(t *testing.T) {
+	c := testClient()
 	c.Connect("127.0.0.1")
 	assert.Equal(t, "127.0.0.1:6667", c.Server)
-	initTestClient()
 
+	c = testClient()
 	c.TLS = true
 	c.Connect("127.0.0.1")
 	assert.Equal(t, "127.0.0.1:6697", c.Server)
-	initTestClient()
 }
 
 func TestWrite(t *testing.T) {
+	c, out := testClientSend()
 	c.write("test")
-	assert.Equal(t, "test\r\n", <-conn.hook)
+	assert.Equal(t, "test\r\n", <-out)
 	c.Write("test")
-	assert.Equal(t, "test\r\n", <-conn.hook)
+	assert.Equal(t, "test\r\n", <-out)
 	c.writef("test %d", 2)
-	assert.Equal(t, "test 2\r\n", <-conn.hook)
+	assert.Equal(t, "test 2\r\n", <-out)
 	c.Writef("test %d", 2)
-	assert.Equal(t, "test 2\r\n", <-conn.hook)
+	assert.Equal(t, "test 2\r\n", <-out)
 }
 
 func TestRecv(t *testing.T) {
+	c := testClient()
+	conn := &mockConn{hook: make(chan string, 16)}
+	c.conn = conn
+
 	buf := &bytes.Buffer{}
 	buf.WriteString("CMD\r\n")
 	buf.WriteString("PING :test\r\n")
@@ -124,12 +129,12 @@ func TestRecv(t *testing.T) {
 	c.reader = bufio.NewReader(buf)
 
 	c.ready.Add(1)
+	go c.send()
 	close(c.quit)
 	go c.recv()
 
 	assert.Equal(t, "PONG :test\r\n", <-conn.hook)
 	assert.Equal(t, &Message{Command: "CMD"}, <-c.Messages)
-	initTestClient()
 }
 
 func TestRecvRecoversPanic(t *testing.T) {
@@ -137,17 +142,19 @@ func TestRecvRecoversPanic(t *testing.T) {
 		assert.Nil(t, recover())
 	}()
 
+	c := testClient()
+
 	buf := bytes.NewBuffer([]byte("CMD\r\n"))
 	c.reader = bufio.NewReader(buf)
 	close(c.Messages)
 	c.recv()
-
-	c.Messages = make(chan *Message, 32)
 }
 
 func TestRecvTriggersReconnect(t *testing.T) {
-	c.reader = bufio.NewReader(&bytes.Buffer{})
+	c := testClient()
+	c.conn = &mockConn{}
 	c.ready.Add(1)
+	c.reader = bufio.NewReader(&bytes.Buffer{})
 	done := make(chan struct{})
 	ok := false
 	go func() {
@@ -167,7 +174,7 @@ func TestRecvTriggersReconnect(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	defer initTestClient()
+	c := testClient()
 	c.close()
 	ok := false
 	done := make(chan struct{})
@@ -187,7 +194,7 @@ func TestClose(t *testing.T) {
 	}
 }
 
-func waitConnAndClose(t *testing.T) {
+func waitConnAndClose(t *testing.T, c *Client) {
 	done := make(chan struct{})
 	quit := make(chan struct{})
 	go func() {
