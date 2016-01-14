@@ -176,7 +176,11 @@ export default createReducer(Map(), {
   },
 
   [actions.CONNECT](state, action) {
-    const { server } = action;
+    let { server } = action;
+    const i = server.indexOf(':');
+    if (i > 0) {
+      server = server.slice(0, i);
+    }
     if (!state.has(server)) {
       return state.set(server, Map());
     }

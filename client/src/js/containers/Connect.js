@@ -16,7 +16,7 @@ class Connect extends Component {
     e.preventDefault();
 
     const { dispatch } = this.props;
-    const address = e.target.address.value.trim();
+    let address = e.target.address.value.trim();
     const nick = e.target.nick.value.trim();
     const channels = e.target.channels.value.split(',').map(s => s.trim()).filter(s => s);
     const opts = {
@@ -32,6 +32,12 @@ class Connect extends Component {
 
     if (address.indexOf('.') > 0 && nick) {
       dispatch(serverActions.connect(address, nick, opts));
+
+      const i = address.indexOf(':');
+      if (i > 0) {
+        address = address.slice(0, i);
+      }
+
       dispatch(select(address));
 
       if (channels.length > 0) {
