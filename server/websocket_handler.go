@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
 
 	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
@@ -113,7 +114,8 @@ func (h *wsHandler) connect(b []byte) {
 
 		if cert := h.session.user.GetCertificate(); cert != nil {
 			i.TLSConfig = &tls.Config{
-				Certificates: []tls.Certificate{*cert},
+				Certificates:       []tls.Certificate{*cert},
+				InsecureSkipVerify: !viper.GetBool("verify_client_certificates"),
 			}
 		}
 

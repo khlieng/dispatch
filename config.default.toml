@@ -1,4 +1,5 @@
 port = 80
+verify_client_certificates = true
 
 [https]
 enabled = false

@@ -17,16 +17,16 @@ func TestUser(t *testing.T) {
 	Open()
 
 	srv := Server{
-		Name:    "Freenode",
-		Address: "irc.freenode.net",
-		Nick:    "test",
+		Name: "Freenode",
+		Host: "irc.freenode.net",
+		Nick: "test",
 	}
 	chan1 := Channel{
-		Server: srv.Address,
+		Server: srv.Host,
 		Name:   "#test",
 	}
 	chan2 := Channel{
-		Server: srv.Address,
+		Server: srv.Host,
 		Name:   "#testing",
 	}
 
@@ -51,15 +51,15 @@ func TestUser(t *testing.T) {
 	assert.Equal(t, chan1, channels[0])
 	assert.Equal(t, chan2, channels[1])
 
-	user.SetNick("bob", srv.Address)
+	user.SetNick("bob", srv.Host)
 	assert.Equal(t, "bob", user.GetServers()[0].Nick)
 
-	user.RemoveChannel(srv.Address, chan1.Name)
+	user.RemoveChannel(srv.Host, chan1.Name)
 	channels = user.GetChannels()
 	assert.Len(t, channels, 1)
 	assert.Equal(t, chan2, channels[0])
 
-	user.RemoveServer(srv.Address)
+	user.RemoveServer(srv.Host)
 	assert.Len(t, user.GetServers(), 0)
 	assert.Len(t, user.GetChannels(), 0)
 }

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 	"time"
@@ -51,12 +50,6 @@ func (c *Client) connect() error {
 	defer c.lock.Unlock()
 
 	if c.TLS {
-		if c.TLSConfig == nil {
-			c.TLSConfig = &tls.Config{
-				InsecureSkipVerify: true,
-			}
-		}
-
 		conn, err := tls.DialWithDialer(c.dialer, "tcp", c.Server, c.TLSConfig)
 		if err != nil {
 			return err
@@ -100,7 +93,6 @@ func (c *Client) tryConnect() {
 			return
 		}
 
-		log.Println(err)
 		time.Sleep(c.backoff.Duration())
 	}
 }

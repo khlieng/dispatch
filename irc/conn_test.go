@@ -88,6 +88,9 @@ func TestConnect(t *testing.T) {
 func TestConnectTLS(t *testing.T) {
 	c := testClient()
 	c.TLS = true
+	c.TLSConfig = &tls.Config{
+		InsecureSkipVerify: true,
+	}
 	c.Connect("127.0.0.1:45679")
 	assert.Equal(t, c.Host, "127.0.0.1")
 	assert.Equal(t, c.Server, "127.0.0.1:45679")
