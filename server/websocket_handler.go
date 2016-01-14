@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"log"
-	"strings"
+	"net"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
 
@@ -98,7 +98,12 @@ func (h *wsHandler) connect(b []byte) {
 	var data Connect
 	json.Unmarshal(b, &data)
 
-	if _, ok := h.session.getIRC(data.Server); !ok {
+	host, port, err := net.SplitHostPort(data.Server)
+	if err != nil {
+		host = data.Server
+	}
+
+	if _, ok := h.session.getIRC(host); !ok {
 		log.Println(h.addr, "connecting to", data.Server)
 
 		i := irc.NewClient(data.Nick, data.Username)
@@ -112,18 +117,14 @@ func (h *wsHandler) connect(b []byte) {
 			}
 		}
 
-		if idx := strings.Index(data.Server, ":"); idx < 0 {
-			h.session.setIRC(data.Server, i)
-		} else {
-			h.session.setIRC(data.Server[:idx], i)
-		}
-
+		h.session.setIRC(host, i)
 		i.Connect(data.Server)
 		go newIRCHandler(i, h.session).run()
 
 		h.session.user.AddServer(storage.Server{
 			Name:     data.Name,
-			Address:  i.Host,
+			Host:     host,
+			Port:     port,
 			TLS:      data.TLS,
 			Password: data.Password,
 			Nick:     data.Nick,

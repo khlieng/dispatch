@@ -168,22 +168,20 @@ export default createReducer(Map(), {
 
     return state.withMutations(s => {
       action.data.forEach(server => {
-        if (!state.has(server.address)) {
-          s.set(server.address, Map());
+        if (!state.has(server.host)) {
+          s.set(server.host, Map());
         }
       });
     });
   },
 
   [actions.CONNECT](state, action) {
-    let { server } = action;
-    const i = server.indexOf(':');
-    if (i > 0) {
-      server = server.slice(0, i);
+    const { host } = action;
+
+    if (!state.has(host)) {
+      return state.set(host, Map());
     }
-    if (!state.has(server)) {
-      return state.set(server, Map());
-    }
+
     return state;
   },
 

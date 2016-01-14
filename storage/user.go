@@ -16,7 +16,8 @@ import (
 
 type Server struct {
 	Name     string `json:"name"`
-	Address  string `json:"address"`
+	Host     string `json:"host"`
+	Port     string `json:"port,omitempty"`
 	TLS      bool   `json:"tls"`
 	Password string `json:"password,omitempty"`
 	Nick     string `json:"nick"`
@@ -134,7 +135,7 @@ func (u *User) AddServer(server Server) {
 		b := tx.Bucket([]byte("Servers"))
 		data, _ := json.Marshal(server)
 
-		b.Put([]byte(u.UUID+":"+server.Address), data)
+		b.Put([]byte(u.UUID+":"+server.Host), data)
 
 		return nil
 	})

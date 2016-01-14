@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/tls"
+	"net"
 
 	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
@@ -28,13 +29,13 @@ func reconnectIRC() {
 				}
 			}
 
-			i.Connect(server.Address)
-			session.setIRC(i.Host, i)
+			session.setIRC(server.Host, i)
+			i.Connect(net.JoinHostPort(server.Host, server.Port))
 			go newIRCHandler(i, session).run()
 
 			var joining []string
 			for _, channel := range channels {
-				if channel.Server == server.Address {
+				if channel.Server == server.Host {
 					joining = append(joining, channel.Name)
 				}
 			}

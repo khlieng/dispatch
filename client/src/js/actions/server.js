@@ -2,9 +2,15 @@ import * as actions from '../actions';
 import { updateSelection } from './tab';
 
 export function connect(server, nick, options) {
+  let host = server;
+  const i = server.indexOf(':');
+  if (i > 0) {
+    host = server.slice(0, i);
+  }
+
   return {
     type: actions.CONNECT,
-    server,
+    host,
     nick,
     options,
     socket: {

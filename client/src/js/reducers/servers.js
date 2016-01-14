@@ -11,18 +11,16 @@ const Server = Record({
 
 export default createReducer(Map(), {
   [actions.CONNECT](state, action) {
-    let { server } = action;
-    const { nick, options } = action;
+    const { host, nick, options } = action;
 
-    const i = server.indexOf(':');
-    if (i > 0) {
-      server = server.slice(0, i);
+    if (!state.has(host)) {
+      return state.set(host, new Server({
+        nick,
+        name: options.name || host
+      }));
     }
 
-    return state.set(server, new Server({
-      nick,
-      name: options.name || server
-    }));
+    return state;
   },
 
   [actions.DISCONNECT](state, action) {
@@ -41,7 +39,7 @@ export default createReducer(Map(), {
 
     return state.withMutations(s => {
       action.data.forEach(server => {
-        s.set(server.address, new Server(server));
+        s.set(server.host, new Server(server));
       });
     });
   },
