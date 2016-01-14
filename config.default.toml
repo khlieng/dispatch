@@ -1,6 +1,16 @@
 port = 80
 verify_client_certificates = true
 
+# Not implemented
+[defaults]
+name = "Freenode"
+address = "chat.freenode.net"
+password = ""
+channels = [
+  "#dispatch",
+  "#go-nuts"
+]
+
 [https]
 enabled = false
 port = 443
