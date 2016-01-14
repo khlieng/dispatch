@@ -62,6 +62,8 @@ func init() {
 
 	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
 	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
+
+	viper.SetDefault("verify_client_certificates", true)
 }
 
 func initConfig(configPath string) {
