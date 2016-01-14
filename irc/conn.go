@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 	"time"
@@ -99,6 +100,7 @@ func (c *Client) tryConnect() {
 			return
 		}
 
+		log.Println(err)
 		time.Sleep(c.backoff.Duration())
 	}
 }
