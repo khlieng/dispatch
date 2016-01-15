@@ -17,10 +17,16 @@ import (
 	"github.com/khlieng/dispatch/storage"
 )
 
+const (
+	cookieName = "dispatch"
+)
+
 var (
 	channelStore *storage.ChannelStore
-	sessions     map[string]*Session
+	sessions     map[uint64]*Session
 	sessionLock  sync.Mutex
+
+	hmacKey []byte
 
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -35,7 +41,13 @@ func Run() {
 	defer storage.Close()
 
 	channelStore = storage.NewChannelStore()
-	sessions = make(map[string]*Session)
+	sessions = make(map[uint64]*Session)
+
+	var err error
+	hmacKey, err = getHMACKey()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	reconnectIRC()
 	startHTTP()
@@ -95,27 +107,32 @@ func startHTTP() {
 
 func serve(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
+		w.WriteHeader(404)
 		return
 	}
 
 	if r.URL.Path == "/ws" {
-		upgradeWS(w, r)
+		session := handleAuth(w, r)
+		if session == nil {
+			log.Println("[Auth] No session")
+			w.WriteHeader(500)
+			return
+		}
+
+		upgradeWS(w, r, session)
 	} else {
 		serveFiles(w, r)
 	}
 }
 
-func upgradeWS(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+func upgradeWS(w http.ResponseWriter, r *http.Request, session *Session) {
+	conn, err := upgrader.Upgrade(w, r, w.Header())
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	uuid := r.URL.Query().Get("uuid")
-	if uuid != "" {
-		newWSHandler(conn, uuid).run()
-	}
+	newWSHandler(conn, session).run()
 }
 
 func createHTTPSRedirect(portHTTPS string) http.HandlerFunc {

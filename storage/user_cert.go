@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"io/ioutil"
-	"os"
 )
 
 var (
@@ -29,17 +28,12 @@ func (u *User) SetCertificate(certPEM, keyPEM []byte) error {
 	u.certificate = &cert
 	u.lock.Unlock()
 
-	err = os.MkdirAll(Path.User(u.UUID), 0700)
+	err = ioutil.WriteFile(Path.Certificate(u.Username), certPEM, 0600)
 	if err != nil {
 		return ErrCouldNotSaveCert
 	}
 
-	err = ioutil.WriteFile(Path.Certificate(u.UUID), certPEM, 0600)
-	if err != nil {
-		return ErrCouldNotSaveCert
-	}
-
-	err = ioutil.WriteFile(Path.Key(u.UUID), keyPEM, 0600)
+	err = ioutil.WriteFile(Path.Key(u.Username), keyPEM, 0600)
 	if err != nil {
 		return ErrCouldNotSaveCert
 	}
@@ -48,12 +42,12 @@ func (u *User) SetCertificate(certPEM, keyPEM []byte) error {
 }
 
 func (u *User) loadCertificate() error {
-	certPEM, err := ioutil.ReadFile(Path.Certificate(u.UUID))
+	certPEM, err := ioutil.ReadFile(Path.Certificate(u.Username))
 	if err != nil {
 		return err
 	}
 
-	keyPEM, err := ioutil.ReadFile(Path.Key(u.UUID))
+	keyPEM, err := ioutil.ReadFile(Path.Key(u.Username))
 	if err != nil {
 		return err
 	}

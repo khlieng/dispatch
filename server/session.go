@@ -19,12 +19,13 @@ type Session struct {
 	user *storage.User
 }
 
-func NewSession() *Session {
+func NewSession(user *storage.User) *Session {
 	return &Session{
 		irc:             make(map[string]*irc.Client),
 		connectionState: make(map[string]bool),
 		ws:              make(map[string]*wsConn),
 		out:             make(chan WSResponse, 32),
+		user:            user,
 	}
 }
 
@@ -86,6 +87,14 @@ func (s *Session) deleteWS(addr string) {
 	s.wsLock.Lock()
 	delete(s.ws, addr)
 	s.wsLock.Unlock()
+}
+
+func (s *Session) numWS() int {
+	s.ircLock.Lock()
+	n := len(s.ws)
+	s.ircLock.Unlock()
+
+	return n
 }
 
 func (s *Session) sendJSON(t string, v interface{}) {

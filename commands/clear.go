@@ -11,7 +11,7 @@ import (
 
 var clearCmd = &cobra.Command{
 	Use:   "clear",
-	Short: "Clear database and message logs",
+	Short: "Clear all user data",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := os.Remove(storage.Path.Database())
 		if err == nil || os.IsNotExist(err) {
@@ -20,9 +20,16 @@ var clearCmd = &cobra.Command{
 			log.Println(err)
 		}
 
-		err = os.RemoveAll(storage.Path.Logs())
+		err = os.RemoveAll(storage.Path.HMACKey())
+		if err == nil || os.IsNotExist(err) {
+			log.Println("HMAC key cleared")
+		} else {
+			log.Println(err)
+		}
+
+		err = os.RemoveAll(storage.Path.Users())
 		if err == nil {
-			log.Println("Logs cleared")
+			log.Println("User data cleared")
 		} else {
 			log.Println(err)
 		}

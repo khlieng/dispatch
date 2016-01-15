@@ -20,13 +20,14 @@ type wsHandler struct {
 	handlers map[string]func([]byte)
 }
 
-func newWSHandler(conn *websocket.Conn, uuid string) *wsHandler {
+func newWSHandler(conn *websocket.Conn, session *Session) *wsHandler {
 	h := &wsHandler{
-		ws:   newWSConn(conn),
-		addr: conn.RemoteAddr().String(),
+		ws:      newWSConn(conn),
+		session: session,
+		addr:    conn.RemoteAddr().String(),
 	}
-	h.init(uuid)
 	h.initHandlers()
+	h.init()
 	return h
 }
 
@@ -54,44 +55,28 @@ func (h *wsHandler) dispatchRequest(req WSRequest) {
 	}
 }
 
-func (h *wsHandler) init(uuid string) {
-	log.Println(h.addr, "set UUID", uuid)
+func (h *wsHandler) init() {
+	h.session.setWS(h.addr, h.ws)
 
-	sessionLock.Lock()
-	if storedSession, exists := sessions[uuid]; exists {
-		sessionLock.Unlock()
-		h.session = storedSession
-		h.session.setWS(h.addr, h.ws)
+	log.Println(h.addr, "[Session] User ID:", h.session.user.ID, "|",
+		h.session.numIRC(), "IRC connections |",
+		h.session.numWS(), "WebSocket connections")
 
-		log.Println(h.addr, "attached to", h.session.numIRC(), "existing IRC connections")
+	channels := h.session.user.GetChannels()
+	for i, channel := range channels {
+		channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
+	}
 
-		channels := h.session.user.GetChannels()
-		for i, channel := range channels {
-			channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
-		}
+	h.session.sendJSON("channels", channels)
+	h.session.sendJSON("servers", h.session.user.GetServers())
+	h.session.sendJSON("connection_update", h.session.getConnectionStates())
 
-		h.session.sendJSON("channels", channels)
-		h.session.sendJSON("servers", h.session.user.GetServers())
-		h.session.sendJSON("connection_update", h.session.getConnectionStates())
-
-		for _, channel := range channels {
-			h.session.sendJSON("users", Userlist{
-				Server:  channel.Server,
-				Channel: channel.Name,
-				Users:   channelStore.GetUsers(channel.Server, channel.Name),
-			})
-		}
-	} else {
-		h.session = NewSession()
-		h.session.user = storage.NewUser(uuid)
-
-		sessions[uuid] = h.session
-		sessionLock.Unlock()
-
-		h.session.setWS(h.addr, h.ws)
-		h.session.sendJSON("servers", nil)
-
-		go h.session.write()
+	for _, channel := range channels {
+		h.session.sendJSON("users", Userlist{
+			Server:  channel.Server,
+			Channel: channel.Name,
+			Users:   channelStore.GetUsers(channel.Server, channel.Name),
+		})
 	}
 }
 
@@ -105,7 +90,7 @@ func (h *wsHandler) connect(b []byte) {
 	}
 
 	if _, ok := h.session.getIRC(host); !ok {
-		log.Println(h.addr, "connecting to", data.Server)
+		log.Println(h.addr, "[IRC] Add server", data.Server)
 
 		i := irc.NewClient(data.Nick, data.Username)
 		i.TLS = data.TLS
@@ -134,7 +119,7 @@ func (h *wsHandler) connect(b []byte) {
 			Realname: data.Realname,
 		})
 	} else {
-		log.Println(h.addr, "already connected to", data.Server)
+		log.Println(h.addr, "[IRC]", data.Server, "already added")
 	}
 }
 
@@ -161,6 +146,8 @@ func (h *wsHandler) quit(b []byte) {
 	json.Unmarshal(b, &data)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
+		log.Println(h.addr, "[IRC] Remove server", data.Server)
+
 		i.Quit()
 		h.session.deleteIRC(data.Server)
 		channelStore.RemoveUserAll(i.GetNick(), data.Server)

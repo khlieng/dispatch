@@ -29,7 +29,13 @@ type File struct {
 
 func serveFiles(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
+		handleAuth(w, r)
 		serveFile(w, r, "index.html.gz", "text/html")
+		return
+	}
+
+	if strings.HasSuffix(r.URL.Path, "favicon.ico") {
+		w.WriteHeader(404)
 		return
 	}
 
@@ -40,6 +46,7 @@ func serveFiles(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	handleAuth(w, r)
 	serveFile(w, r, "index.html.gz", "text/html")
 }
 

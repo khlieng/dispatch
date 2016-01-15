@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 
 	storage.Initialize(tempdir)
 	storage.Open()
-	user = storage.NewUser("uuid")
+	user = storage.NewUser()
 	channelStore = storage.NewChannelStore()
 
 	code := m.Run()
@@ -34,8 +34,7 @@ func TestMain(m *testing.M) {
 func dispatchMessage(msg *irc.Message) WSResponse {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s := NewSession()
-	s.user = user
+	s := NewSession(user)
 
 	newIRCHandler(c, s).dispatchMessage(msg)
 
@@ -168,7 +167,7 @@ func TestHandleIRCWelcome(t *testing.T) {
 func TestHandleIRCWhois(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s := NewSession()
+	s := NewSession(nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
@@ -212,7 +211,7 @@ func TestHandleIRCTopic(t *testing.T) {
 func TestHandleIRCNames(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s := NewSession()
+	s := NewSession(nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
@@ -240,7 +239,7 @@ func TestHandleIRCNames(t *testing.T) {
 func TestHandleIRCMotd(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s := NewSession()
+	s := NewSession(nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{

@@ -10,9 +10,8 @@ import (
 
 func reconnectIRC() {
 	for _, user := range storage.LoadUsers() {
-		session := NewSession()
-		session.user = user
-		sessions[user.UUID] = session
+		session := NewSession(user)
+		sessions[user.ID] = session
 		go session.write()
 
 		channels := user.GetChannels()
@@ -30,7 +29,13 @@ func reconnectIRC() {
 			}
 
 			session.setIRC(server.Host, i)
-			i.Connect(net.JoinHostPort(server.Host, server.Port))
+
+			if server.Port != "" {
+				i.Connect(net.JoinHostPort(server.Host, server.Port))
+			} else {
+				i.Connect(server.Host)
+			}
+
 			go newIRCHandler(i, session).run()
 
 			var joining []string

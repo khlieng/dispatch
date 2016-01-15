@@ -2,15 +2,11 @@ import EventEmitter2 from 'eventemitter2';
 import Backoff from 'backo';
 
 export default class Socket extends EventEmitter2 {
-  constructor(host, uuid) {
+  constructor(host) {
     super();
 
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     this.url = `${protocol}://${host}/ws`;
-
-    if (uuid) {
-      this.url += `?uuid=${uuid}`;
-    }
 
     this.connectTimeout = 20000;
     this.pingTimeout = 30000;

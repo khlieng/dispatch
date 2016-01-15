@@ -13,6 +13,11 @@ func tempdir() string {
 }
 
 func TestUser(t *testing.T) {
+	defer func() {
+		r := recover()
+		assert.Nil(t, r)
+	}()
+
 	Initialize(tempdir())
 	Open()
 
@@ -30,7 +35,7 @@ func TestUser(t *testing.T) {
 		Name:   "#testing",
 	}
 
-	user := NewUser("unique")
+	user := NewUser()
 	user.AddServer(srv)
 	user.AddChannel(chan1)
 	user.AddChannel(chan2)
@@ -40,7 +45,7 @@ func TestUser(t *testing.T) {
 	assert.Len(t, users, 1)
 
 	user = users[0]
-	assert.Equal(t, "unique", user.UUID)
+	assert.Equal(t, uint64(1), user.ID)
 
 	servers := user.GetServers()
 	assert.Len(t, servers, 1)
