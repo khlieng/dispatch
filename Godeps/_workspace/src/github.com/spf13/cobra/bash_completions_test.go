@@ -34,7 +34,7 @@ COMPREPLY=( "hello" )
 func TestBashCompletions(t *testing.T) {
 	c := initializeWithRootCmd()
 	cmdEcho.AddCommand(cmdTimes)
-	c.AddCommand(cmdEcho, cmdPrint, cmdDeprecated)
+	c.AddCommand(cmdEcho, cmdPrint, cmdDeprecated, cmdColon)
 
 	// custom completion function
 	c.BashCompletionFunction = bash_completion_func
@@ -42,23 +42,30 @@ func TestBashCompletions(t *testing.T) {
 	// required flag
 	c.MarkFlagRequired("introot")
 
-	// valid nounds
+	// valid nouns
 	validArgs := []string{"pods", "nodes", "services", "replicationControllers"}
 	c.ValidArgs = validArgs
 
-	// filename extentions
-	annotations := make([]string, 3)
-	annotations[0] = "json"
-	annotations[1] = "yaml"
-	annotations[2] = "yml"
-
-	annotation := make(map[string][]string)
-	annotation[BashCompFilenameExt] = annotations
-
+	// filename
 	var flagval string
 	c.Flags().StringVar(&flagval, "filename", "", "Enter a filename")
-	flag := c.Flags().Lookup("filename")
-	flag.Annotations = annotation
+	c.MarkFlagFilename("filename", "json", "yaml", "yml")
+
+	// persistent filename
+	var flagvalPersistent string
+	c.PersistentFlags().StringVar(&flagvalPersistent, "persistent-filename", "", "Enter a filename")
+	c.MarkPersistentFlagFilename("persistent-filename")
+	c.MarkPersistentFlagRequired("persistent-filename")
+
+	// filename extensions
+	var flagvalExt string
+	c.Flags().StringVar(&flagvalExt, "filename-ext", "", "Enter a filename (extension limited)")
+	c.MarkFlagFilename("filename-ext")
+
+	// subdirectories in a given directory
+	var flagvalTheme string
+	c.Flags().StringVar(&flagvalTheme, "theme", "", "theme to use (located in /themes/THEMENAME/)")
+	c.Flags().SetAnnotation("theme", BashCompSubdirsInDir, []string{"themes"})
 
 	out := new(bytes.Buffer)
 	c.GenBashCompletion(out)
@@ -68,15 +75,21 @@ func TestBashCompletions(t *testing.T) {
 	check(t, str, "_cobra-test_echo")
 	check(t, str, "_cobra-test_echo_times")
 	check(t, str, "_cobra-test_print")
+	check(t, str, "_cobra-test_cmd__colon")
 
 	// check for required flags
 	check(t, str, `must_have_one_flag+=("--introot=")`)
+	check(t, str, `must_have_one_flag+=("--persistent-filename=")`)
 	// check for custom completion function
 	check(t, str, `COMPREPLY=( "hello" )`)
 	// check for required nouns
 	check(t, str, `must_have_one_noun+=("pods")`)
-	// check for filename extention flags
-	check(t, str, `flags_completion+=("_filedir '@(json|yaml|yml)'")`)
+	// check for filename extension flags
+	check(t, str, `flags_completion+=("_filedir")`)
+	// check for filename extension flags
+	check(t, str, `flags_completion+=("__handle_filename_extension_flag json|yaml|yml")`)
+	// check for subdirs_in_dir flags
+	check(t, str, `flags_completion+=("__handle_subdirs_in_dir_flag themes")`)
 
 	checkOmit(t, str, cmdDeprecated.Name())
 }

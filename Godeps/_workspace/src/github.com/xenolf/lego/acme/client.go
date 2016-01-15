@@ -1,6 +1,7 @@
 package acme
 
 import (
+	"crypto"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
@@ -9,7 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
+	"net"
 	"regexp"
 	"strconv"
 	"strings"
@@ -99,20 +100,38 @@ func NewClient(caDirURL string, user User, keyBits int) (*Client, error) {
 	return &Client{directory: dir, user: user, jws: jws, keyBits: keyBits, solvers: solvers}, nil
 }
 
-// SetHTTPPort specifies a custom port to be used for HTTP based challenges.
-// If this option is not used, the default port 80 will be used.
-func (c *Client) SetHTTPPort(port string) {
-	if chlng, ok := c.solvers["http-01"]; ok {
-		chlng.(*httpChallenge).optPort = port
+// SetHTTPAddress specifies a custom interface:port to be used for HTTP based challenges.
+// If this option is not used, the default port 80 and all interfaces will be used.
+// To only specify a port and no interface use the ":port" notation.
+func (c *Client) SetHTTPAddress(iface string) error {
+	host, port, err := net.SplitHostPort(iface)
+	if err != nil {
+		return err
 	}
+
+	if chlng, ok := c.solvers["http-01"]; ok {
+		chlng.(*httpChallenge).iface = host
+		chlng.(*httpChallenge).port = port
+	}
+
+	return nil
 }
 
-// SetTLSPort specifies a custom port to be used for TLS based challenges.
-// If this option is not used, the default port 443 will be used.
-func (c *Client) SetTLSPort(port string) {
-	if chlng, ok := c.solvers["tls-sni-01"]; ok {
-		chlng.(*tlsSNIChallenge).optPort = port
+// SetTLSAddress specifies a custom interface:port to be used for TLS based challenges.
+// If this option is not used, the default port 443 and all interfaces will be used.
+// To only specify a port and no interface use the ":port" notation.
+func (c *Client) SetTLSAddress(iface string) error {
+	host, port, err := net.SplitHostPort(iface)
+	if err != nil {
+		return err
 	}
+
+	if chlng, ok := c.solvers["tls-sni-01"]; ok {
+		chlng.(*tlsSNIChallenge).iface = host
+		chlng.(*tlsSNIChallenge).port = port
+	}
+
+	return nil
 }
 
 // ExcludeChallenges explicitly removes challenges from the pool for solving.
@@ -175,12 +194,14 @@ func (c *Client) AgreeToTOS() error {
 
 // ObtainCertificate tries to obtain a single certificate using all domains passed into it.
 // The first domain in domains is used for the CommonName field of the certificate, all other
-// domains are added using the Subject Alternate Names extension.
+// domains are added using the Subject Alternate Names extension. A new private key is generated
+// for every invocation of this function. If you do not want that you can supply your own private key
+// in the privKey parameter. If this parameter is non-nil it will be used instead of generating a new one.
 // If bundle is true, the []byte contains both the issuer certificate and
 // your issued certificate as a bundle.
 // This function will never return a partial certificate. If one domain in the list fails,
 // the whole certificate will fail.
-func (c *Client) ObtainCertificate(domains []string, bundle bool) (CertificateResource, map[string]error) {
+func (c *Client) ObtainCertificate(domains []string, bundle bool, privKey crypto.PrivateKey) (CertificateResource, map[string]error) {
 	if bundle {
 		logf("[INFO][%s] acme: Obtaining bundled SAN certificate", strings.Join(domains, ", "))
 	} else {
@@ -201,7 +222,7 @@ func (c *Client) ObtainCertificate(domains []string, bundle bool) (CertificateRe
 
 	logf("[INFO][%s] acme: Validations succeeded; requesting certificates", strings.Join(domains, ", "))
 
-	cert, err := c.requestCertificate(challenges, bundle)
+	cert, err := c.requestCertificate(challenges, bundle, privKey)
 	if err != nil {
 		for _, chln := range challenges {
 			failures[chln.Domain] = err
@@ -236,6 +257,7 @@ func (c *Client) RevokeCertificate(certificate []byte) error {
 // this function will start a new-cert flow where a new certificate gets generated.
 // If bundle is true, the []byte contains both the issuer certificate and
 // your issued certificate as a bundle.
+// For private key reuse the PrivateKey property of the passed in CertificateResource should be non-nil.
 func (c *Client) RenewCertificate(cert CertificateResource, bundle bool) (CertificateResource, error) {
 	// Input certificate is PEM encoded. Decode it here as we may need the decoded
 	// cert later on in the renewal process. The input may be a bundle or a single certificate.
@@ -255,7 +277,7 @@ func (c *Client) RenewCertificate(cert CertificateResource, bundle bool) (Certif
 
 	// The first step of renewal is to check if we get a renewed cert
 	// directly from the cert URL.
-	resp, err := http.Get(cert.CertURL)
+	resp, err := httpGet(cert.CertURL)
 	if err != nil {
 		return CertificateResource{}, err
 	}
@@ -297,7 +319,15 @@ func (c *Client) RenewCertificate(cert CertificateResource, bundle bool) (Certif
 		return cert, nil
 	}
 
-	newCert, failures := c.ObtainCertificate([]string{cert.Domain}, bundle)
+	var privKey crypto.PrivateKey
+	if cert.PrivateKey != nil {
+		privKey, err = parsePEMPrivateKey(cert.PrivateKey)
+		if err != nil {
+			return CertificateResource{}, err
+		}
+	}
+
+	newCert, failures := c.ObtainCertificate([]string{cert.Domain}, bundle, privKey)
 	return newCert, failures[cert.Domain]
 }
 
@@ -393,15 +423,18 @@ func (c *Client) getChallenges(domains []string) ([]authorizationResource, map[s
 	return challenges, failures
 }
 
-func (c *Client) requestCertificate(authz []authorizationResource, bundle bool) (CertificateResource, error) {
+func (c *Client) requestCertificate(authz []authorizationResource, bundle bool, privKey crypto.PrivateKey) (CertificateResource, error) {
 	if len(authz) == 0 {
 		return CertificateResource{}, errors.New("Passed no authorizations to requestCertificate!")
 	}
 
 	commonName := authz[0]
-	privKey, err := generatePrivateKey(rsakey, c.keyBits)
-	if err != nil {
-		return CertificateResource{}, err
+	var err error
+	if privKey == nil {
+		privKey, err = generatePrivateKey(rsakey, c.keyBits)
+		if err != nil {
+			return CertificateResource{}, err
+		}
 	}
 
 	var san []string
@@ -435,11 +468,8 @@ func (c *Client) requestCertificate(authz []authorizationResource, bundle bool) 
 		PrivateKey: privateKeyPem}
 
 	for {
-
 		switch resp.StatusCode {
-		case 202:
-		case 201:
-
+		case 201, 202:
 			cert, err := ioutil.ReadAll(limitReader(resp.Body, 1024*1024))
 			resp.Body.Close()
 			if err != nil {
@@ -492,7 +522,7 @@ func (c *Client) requestCertificate(authz []authorizationResource, bundle bool) 
 			return CertificateResource{}, handleHTTPError(resp)
 		}
 
-		resp, err = http.Get(cerRes.CertURL)
+		resp, err = httpGet(cerRes.CertURL)
 		if err != nil {
 			return CertificateResource{}, err
 		}
@@ -507,7 +537,7 @@ func (c *Client) getIssuerCertificate(url string) ([]byte, error) {
 		return c.issuerCert, nil
 	}
 
-	resp, err := http.Get(url)
+	resp, err := httpGet(url)
 	if err != nil {
 		return nil, err
 	}
@@ -584,45 +614,4 @@ func validate(j *jws, domain, uri string, chlng challenge) error {
 			return err
 		}
 	}
-}
-
-// getJSON performs an HTTP GET request and parses the response body
-// as JSON, into the provided respBody object.
-func getJSON(uri string, respBody interface{}) (http.Header, error) {
-	resp, err := http.Get(uri)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get %q: %v", uri, err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= http.StatusBadRequest {
-		return resp.Header, handleHTTPError(resp)
-	}
-
-	return resp.Header, json.NewDecoder(resp.Body).Decode(respBody)
-}
-
-// postJSON performs an HTTP POST request and parses the response body
-// as JSON, into the provided respBody object.
-func postJSON(j *jws, uri string, reqBody, respBody interface{}) (http.Header, error) {
-	jsonBytes, err := json.Marshal(reqBody)
-	if err != nil {
-		return nil, errors.New("Failed to marshal network message...")
-	}
-
-	resp, err := j.post(uri, jsonBytes)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to post JWS message. -> %v", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= http.StatusBadRequest {
-		return resp.Header, handleHTTPError(resp)
-	}
-
-	if respBody == nil {
-		return resp.Header, nil
-	}
-
-	return resp.Header, json.NewDecoder(resp.Body).Decode(respBody)
 }

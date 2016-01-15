@@ -29,8 +29,8 @@
 		},
 		{
 			"ImportPath": "github.com/boltdb/bolt",
-			"Comment": "v1.0-43-gcf33c9e",
-			"Rev": "cf33c9e0ca0a23509b8bb8edfc63e4776bb1a330"
+			"Comment": "v1.1.0-61-g6465994",
+			"Rev": "6465994716bf6400605746e79224cf1e7ed68725"
 		},
 		{
 			"ImportPath": "github.com/coreos/go-etcd/etcd",
@@ -52,7 +52,7 @@
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",
-			"Rev": "ecff5aabe41f13b4cdf897e3c0c9bbccbe552a29"
+			"Rev": "3986be78bf859e01f01af631ad76da5b269d270c"
 		},
 		{
 			"ImportPath": "github.com/inconshreveable/mousetrap",
@@ -82,7 +82,7 @@
 		},
 		{
 			"ImportPath": "github.com/mitchellh/go-homedir",
-			"Rev": "1f6da4a72e57d4e7edd4a7295a585e0a3999a2d4"
+			"Rev": "d682a8f0cf139663a984ff12528da460ca963de9"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/mapstructure",
@@ -94,11 +94,11 @@
 		},
 		{
 			"ImportPath": "github.com/spf13/cast",
-			"Rev": "4d07383ffe94b5e5a6fa3af9211374a4507a0184"
+			"Rev": "ee7b3e0353166ab1f3a605294ac8cd2b77953778"
 		},
 		{
 			"ImportPath": "github.com/spf13/cobra",
-			"Rev": "3ee9552eebbb5db27cb81abcae66c6f1430cad29"
+			"Rev": "9c9300901990faada0c5fb3b5730f452585c7c2b"
 		},
 		{
 			"ImportPath": "github.com/spf13/jwalterweatherman",
@@ -106,11 +106,11 @@
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
-			"Rev": "32bfad653e29e893e4ed3812fdc0294a05126c08"
+			"Rev": "7f60f83a2c81bc3c3c0d5297f61ddfa68da9d3b7"
 		},
 		{
 			"ImportPath": "github.com/spf13/viper",
-			"Rev": "d62d4bb4c68a773c3b5f4e72844913a2d5de0de0"
+			"Rev": "a212099cbe6fbe8d07476bfda8d2d39b6ff8f325"
 		},
 		{
 			"ImportPath": "github.com/square/go-jose",
@@ -140,8 +140,8 @@
 		},
 		{
 			"ImportPath": "github.com/xenolf/lego/acme",
-			"Comment": "v0.1.1-34-g12b5de7",
-			"Rev": "12b5de7e8cb451949aabad64cce93e4b846e2aa7"
+			"Comment": "v0.2.0-6-gdb3a956",
+			"Rev": "db3a956d52bf23cc5201fe98bc9c9787d3b32c2d"
 		},
 		{
 			"ImportPath": "github.com/xordataexchange/crypt/backend",

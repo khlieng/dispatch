@@ -87,7 +87,7 @@ func startHTTP() {
 				go http.ListenAndServe(":80", http.HandlerFunc(letsEncryptProxy))
 			}
 
-			letsEncrypt, err := letsencrypt.Run(dir, domain, email, lePort)
+			letsEncrypt, err := letsencrypt.Run(dir, domain, email, ":"+lePort)
 			if err != nil {
 				log.Fatal(err)
 			}

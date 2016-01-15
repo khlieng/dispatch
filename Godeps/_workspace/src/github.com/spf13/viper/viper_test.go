@@ -8,7 +8,10 @@ package viper
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -27,6 +30,8 @@ hobbies:
 clothing:
   jacket: leather
   trousers: denim
+  pants:
+    size: large
 age: 35
 eyes : brown
 beard: true
@@ -55,6 +60,26 @@ var jsonExample = []byte(`{
     }
 }`)
 
+var hclExample = []byte(`
+id = "0001"
+type = "donut"
+name = "Cake"
+ppu = 0.55
+foos {
+	foo {
+		key = 1
+	}
+	foo {
+		key = 2
+	}
+	foo {
+		key = 3
+	}
+	foo {
+		key = 4
+	}
+}`)
+
 var propertiesExample = []byte(`
 p_id: 0001
 p_type: donut
@@ -73,23 +98,27 @@ func initConfigs() {
 	Reset()
 	SetConfigType("yaml")
 	r := bytes.NewReader(yamlExample)
-	marshalReader(r, v.config)
+	unmarshalReader(r, v.config)
 
 	SetConfigType("json")
 	r = bytes.NewReader(jsonExample)
-	marshalReader(r, v.config)
+	unmarshalReader(r, v.config)
+
+	SetConfigType("hcl")
+	r = bytes.NewReader(hclExample)
+	unmarshalReader(r, v.config)
 
 	SetConfigType("properties")
 	r = bytes.NewReader(propertiesExample)
-	marshalReader(r, v.config)
+	unmarshalReader(r, v.config)
 
 	SetConfigType("toml")
 	r = bytes.NewReader(tomlExample)
-	marshalReader(r, v.config)
+	unmarshalReader(r, v.config)
 
 	SetConfigType("json")
 	remote := bytes.NewReader(remoteExample)
-	marshalReader(remote, v.kvstore)
+	unmarshalReader(remote, v.kvstore)
 }
 
 func initYAML() {
@@ -97,7 +126,7 @@ func initYAML() {
 	SetConfigType("yaml")
 	r := bytes.NewReader(yamlExample)
 
-	marshalReader(r, v.config)
+	unmarshalReader(r, v.config)
 }
 
 func initJSON() {
@@ -105,7 +134,7 @@ func initJSON() {
 	SetConfigType("json")
 	r := bytes.NewReader(jsonExample)
 
-	marshalReader(r, v.config)
+	unmarshalReader(r, v.config)
 }
 
 func initProperties() {
@@ -113,7 +142,7 @@ func initProperties() {
 	SetConfigType("properties")
 	r := bytes.NewReader(propertiesExample)
 
-	marshalReader(r, v.config)
+	unmarshalReader(r, v.config)
 }
 
 func initTOML() {
@@ -121,7 +150,56 @@ func initTOML() {
 	SetConfigType("toml")
 	r := bytes.NewReader(tomlExample)
 
-	marshalReader(r, v.config)
+	unmarshalReader(r, v.config)
+}
+
+func initHcl() {
+	Reset()
+	SetConfigType("hcl")
+	r := bytes.NewReader(hclExample)
+
+	unmarshalReader(r, v.config)
+}
+
+// make directories for testing
+func initDirs(t *testing.T) (string, string, func()) {
+
+	var (
+		testDirs = []string{`a a`, `b`, `c\c`, `D_`}
+		config   = `improbable`
+	)
+
+	root, err := ioutil.TempDir("", "")
+
+	cleanup := true
+	defer func() {
+		if cleanup {
+			os.Chdir("..")
+			os.RemoveAll(root)
+		}
+	}()
+
+	assert.Nil(t, err)
+
+	err = os.Chdir(root)
+	assert.Nil(t, err)
+
+	for _, dir := range testDirs {
+		err = os.Mkdir(dir, 0750)
+		assert.Nil(t, err)
+
+		err = ioutil.WriteFile(
+			path.Join(dir, config+".toml"),
+			[]byte("key = \"value is "+dir+"\"\n"),
+			0640)
+		assert.Nil(t, err)
+	}
+
+	cleanup = false
+	return root, config, func() {
+		os.Chdir("..")
+		os.RemoveAll(root)
+	}
 }
 
 //stubs for PFlag Values
@@ -153,18 +231,27 @@ func TestBasics(t *testing.T) {
 func TestDefault(t *testing.T) {
 	SetDefault("age", 45)
 	assert.Equal(t, 45, Get("age"))
+
+	SetDefault("clothing.jacket", "slacks")
+	assert.Equal(t, "slacks", Get("clothing.jacket"))
+
+	SetConfigType("yaml")
+	err := ReadConfig(bytes.NewBuffer(yamlExample))
+
+	assert.NoError(t, err)
+	assert.Equal(t, "leather", Get("clothing.jacket"))
 }
 
-func TestMarshalling(t *testing.T) {
+func TestUnmarshalling(t *testing.T) {
 	SetConfigType("yaml")
 	r := bytes.NewReader(yamlExample)
 
-	marshalReader(r, v.config)
+	unmarshalReader(r, v.config)
 	assert.True(t, InConfig("name"))
 	assert.False(t, InConfig("state"))
 	assert.Equal(t, "steve", Get("name"))
 	assert.Equal(t, []interface{}{"skateboarding", "snowboarding", "go"}, Get("hobbies"))
-	assert.Equal(t, map[interface{}]interface{}{"jacket": "leather", "trousers": "denim"}, Get("clothing"))
+	assert.Equal(t, map[interface{}]interface{}{"jacket": "leather", "trousers": "denim", "pants": map[interface{}]interface{}{"size": "large"}}, Get("clothing"))
 	assert.Equal(t, 35, Get("age"))
 }
 
@@ -215,12 +302,23 @@ func TestTOML(t *testing.T) {
 	assert.Equal(t, "TOML Example", Get("title"))
 }
 
+func TestHCL(t *testing.T) {
+	initHcl()
+	assert.Equal(t, "0001", Get("id"))
+	assert.Equal(t, 0.55, Get("ppu"))
+	assert.Equal(t, "donut", Get("type"))
+	assert.Equal(t, "Cake", Get("name"))
+	Set("id", "0002")
+	assert.Equal(t, "0002", Get("id"))
+	assert.NotEqual(t, "cronut", Get("type"))
+}
+
 func TestRemotePrecedence(t *testing.T) {
 	initJSON()
 
 	remote := bytes.NewReader(remoteExample)
 	assert.Equal(t, "0001", Get("id"))
-	marshalReader(remote, v.kvstore)
+	unmarshalReader(remote, v.kvstore)
 	assert.Equal(t, "0001", Get("id"))
 	assert.NotEqual(t, "cronut", Get("type"))
 	assert.Equal(t, "remote", Get("newkey"))
@@ -302,9 +400,9 @@ func TestSetEnvReplacer(t *testing.T) {
 func TestAllKeys(t *testing.T) {
 	initConfigs()
 
-	ks := sort.StringSlice{"title", "newkey", "owner", "name", "beard", "ppu", "batters", "hobbies", "clothing", "age", "hacker", "id", "type", "eyes", "p_id", "p_ppu", "p_batters.batter.type", "p_type", "p_name"}
+	ks := sort.StringSlice{"title", "newkey", "owner", "name", "beard", "ppu", "batters", "hobbies", "clothing", "age", "hacker", "id", "type", "eyes", "p_id", "p_ppu", "p_batters.batter.type", "p_type", "p_name", "foos"}
 	dob, _ := time.Parse(time.RFC3339, "1979-05-27T07:32:00Z")
-	all := map[string]interface{}{"owner": map[string]interface{}{"organization": "MongoDB", "Bio": "MongoDB Chief Developer Advocate & Hacker at Large", "dob": dob}, "title": "TOML Example", "ppu": 0.55, "eyes": "brown", "clothing": map[interface{}]interface{}{"trousers": "denim", "jacket": "leather"}, "id": "0001", "batters": map[string]interface{}{"batter": []interface{}{map[string]interface{}{"type": "Regular"}, map[string]interface{}{"type": "Chocolate"}, map[string]interface{}{"type": "Blueberry"}, map[string]interface{}{"type": "Devil's Food"}}}, "hacker": true, "beard": true, "hobbies": []interface{}{"skateboarding", "snowboarding", "go"}, "age": 35, "type": "donut", "newkey": "remote", "name": "Cake", "p_id": "0001", "p_ppu": "0.55", "p_name": "Cake", "p_batters.batter.type": "Regular", "p_type": "donut"}
+	all := map[string]interface{}{"owner": map[string]interface{}{"organization": "MongoDB", "Bio": "MongoDB Chief Developer Advocate & Hacker at Large", "dob": dob}, "title": "TOML Example", "ppu": 0.55, "eyes": "brown", "clothing": map[interface{}]interface{}{"trousers": "denim", "jacket": "leather", "pants": map[interface{}]interface{}{"size": "large"}}, "id": "0001", "batters": map[string]interface{}{"batter": []interface{}{map[string]interface{}{"type": "Regular"}, map[string]interface{}{"type": "Chocolate"}, map[string]interface{}{"type": "Blueberry"}, map[string]interface{}{"type": "Devil's Food"}}}, "hacker": true, "beard": true, "hobbies": []interface{}{"skateboarding", "snowboarding", "go"}, "age": 35, "type": "donut", "newkey": "remote", "name": "Cake", "p_id": "0001", "p_ppu": "0.55", "p_name": "Cake", "p_batters.batter.type": "Regular", "p_type": "donut", "foos": []map[string]interface{}{map[string]interface{}{"foo": []map[string]interface{}{map[string]interface{}{"key": 1}, map[string]interface{}{"key": 2}, map[string]interface{}{"key": 3}, map[string]interface{}{"key": 4}}}}}
 
 	var allkeys sort.StringSlice
 	allkeys = AllKeys()
@@ -332,7 +430,7 @@ func TestRecursiveAliases(t *testing.T) {
 	RegisterAlias("Roo", "baz")
 }
 
-func TestMarshal(t *testing.T) {
+func TestUnmarshal(t *testing.T) {
 	SetDefault("port", 1313)
 	Set("name", "Steve")
 
@@ -343,7 +441,7 @@ func TestMarshal(t *testing.T) {
 
 	var C config
 
-	err := Marshal(&C)
+	err := Unmarshal(&C)
 	if err != nil {
 		t.Fatalf("unable to decode into struct, %v", err)
 	}
@@ -351,7 +449,7 @@ func TestMarshal(t *testing.T) {
 	assert.Equal(t, &C, &config{Name: "Steve", Port: 1313})
 
 	Set("port", 1234)
-	err = Marshal(&C)
+	err = Unmarshal(&C)
 	if err != nil {
 		t.Fatalf("unable to decode into struct, %v", err)
 	}
@@ -524,11 +622,33 @@ func TestFindsNestedKeys(t *testing.T) {
 		"clothing": map[interface{}]interface{}{
 			"jacket":   "leather",
 			"trousers": "denim",
+			"pants": map[interface{}]interface{}{
+				"size": "large",
+			},
 		},
-		"clothing.jacket":   "leather",
-		"clothing.trousers": "denim",
-		"owner.dob":         dob,
-		"beard":             true,
+		"clothing.jacket":     "leather",
+		"clothing.pants.size": "large",
+		"clothing.trousers":   "denim",
+		"owner.dob":           dob,
+		"beard":               true,
+		"foos": []map[string]interface{}{
+			map[string]interface{}{
+				"foo": []map[string]interface{}{
+					map[string]interface{}{
+						"key": 1,
+					},
+					map[string]interface{}{
+						"key": 2,
+					},
+					map[string]interface{}{
+						"key": 3,
+					},
+					map[string]interface{}{
+						"key": 4,
+					},
+				},
+			},
+		},
 	}
 
 	for key, expectedValue := range expected {
@@ -548,6 +668,173 @@ func TestReadBufConfig(t *testing.T) {
 	assert.False(t, v.InConfig("state"))
 	assert.Equal(t, "steve", v.Get("name"))
 	assert.Equal(t, []interface{}{"skateboarding", "snowboarding", "go"}, v.Get("hobbies"))
-	assert.Equal(t, map[interface{}]interface{}{"jacket": "leather", "trousers": "denim"}, v.Get("clothing"))
+	assert.Equal(t, map[interface{}]interface{}{"jacket": "leather", "trousers": "denim", "pants": map[interface{}]interface{}{"size": "large"}}, v.Get("clothing"))
 	assert.Equal(t, 35, v.Get("age"))
+}
+
+func TestIsSet(t *testing.T) {
+	v := New()
+	v.SetConfigType("yaml")
+	v.ReadConfig(bytes.NewBuffer(yamlExample))
+	assert.True(t, v.IsSet("clothing.jacket"))
+	assert.False(t, v.IsSet("clothing.jackets"))
+	assert.False(t, v.IsSet("helloworld"))
+	v.Set("helloworld", "fubar")
+	assert.True(t, v.IsSet("helloworld"))
+}
+
+func TestDirsSearch(t *testing.T) {
+
+	root, config, cleanup := initDirs(t)
+	defer cleanup()
+
+	v := New()
+	v.SetConfigName(config)
+	v.SetDefault(`key`, `default`)
+
+	entries, err := ioutil.ReadDir(root)
+	for _, e := range entries {
+		if e.IsDir() {
+			v.AddConfigPath(e.Name())
+		}
+	}
+
+	err = v.ReadInConfig()
+	assert.Nil(t, err)
+
+	assert.Equal(t, `value is `+path.Base(v.configPaths[0]), v.GetString(`key`))
+}
+
+func TestWrongDirsSearchNotFound(t *testing.T) {
+
+	_, config, cleanup := initDirs(t)
+	defer cleanup()
+
+	v := New()
+	v.SetConfigName(config)
+	v.SetDefault(`key`, `default`)
+
+	v.AddConfigPath(`whattayoutalkingbout`)
+	v.AddConfigPath(`thispathaintthere`)
+
+	err := v.ReadInConfig()
+	assert.Equal(t, reflect.TypeOf(UnsupportedConfigError("")), reflect.TypeOf(err))
+
+	// Even though config did not load and the error might have
+	// been ignored by the client, the default still loads
+	assert.Equal(t, `default`, v.GetString(`key`))
+}
+
+func TestSub(t *testing.T) {
+	v := New()
+	v.SetConfigType("yaml")
+	v.ReadConfig(bytes.NewBuffer(yamlExample))
+
+	subv := v.Sub("clothing")
+	assert.Equal(t, v.Get("clothing.pants.size"), subv.Get("pants.size"))
+
+	subv = v.Sub("clothing.pants")
+	assert.Equal(t, v.Get("clothing.pants.size"), subv.Get("size"))
+
+	subv = v.Sub("clothing.pants.size")
+	assert.Equal(t, subv, (*Viper)(nil))
+}
+
+var yamlMergeExampleTgt = []byte(`
+hello:
+    pop: 37890
+    world:
+    - us
+    - uk
+    - fr
+    - de
+`)
+
+var yamlMergeExampleSrc = []byte(`
+hello:
+    pop: 45000
+    universe:
+    - mw
+    - ad
+fu: bar
+`)
+
+func TestMergeConfig(t *testing.T) {
+	v := New()
+	v.SetConfigType("yml")
+	if err := v.ReadConfig(bytes.NewBuffer(yamlMergeExampleTgt)); err != nil {
+		t.Fatal(err)
+	}
+
+	if pop := v.GetInt("hello.pop"); pop != 37890 {
+		t.Fatalf("pop != 37890, = %d", pop)
+	}
+
+	if world := v.GetStringSlice("hello.world"); len(world) != 4 {
+		t.Fatalf("len(world) != 4, = %d", len(world))
+	}
+
+	if fu := v.GetString("fu"); fu != "" {
+		t.Fatalf("fu != \"\", = %s", fu)
+	}
+
+	if err := v.MergeConfig(bytes.NewBuffer(yamlMergeExampleSrc)); err != nil {
+		t.Fatal(err)
+	}
+
+	if pop := v.GetInt("hello.pop"); pop != 45000 {
+		t.Fatalf("pop != 45000, = %d", pop)
+	}
+
+	if world := v.GetStringSlice("hello.world"); len(world) != 4 {
+		t.Fatalf("len(world) != 4, = %d", len(world))
+	}
+
+	if universe := v.GetStringSlice("hello.universe"); len(universe) != 2 {
+		t.Fatalf("len(universe) != 2, = %d", len(universe))
+	}
+
+	if fu := v.GetString("fu"); fu != "bar" {
+		t.Fatalf("fu != \"bar\", = %s", fu)
+	}
+}
+
+func TestMergeConfigNoMerge(t *testing.T) {
+	v := New()
+	v.SetConfigType("yml")
+	if err := v.ReadConfig(bytes.NewBuffer(yamlMergeExampleTgt)); err != nil {
+		t.Fatal(err)
+	}
+
+	if pop := v.GetInt("hello.pop"); pop != 37890 {
+		t.Fatalf("pop != 37890, = %d", pop)
+	}
+
+	if world := v.GetStringSlice("hello.world"); len(world) != 4 {
+		t.Fatalf("len(world) != 4, = %d", len(world))
+	}
+
+	if fu := v.GetString("fu"); fu != "" {
+		t.Fatalf("fu != \"\", = %s", fu)
+	}
+
+	if err := v.ReadConfig(bytes.NewBuffer(yamlMergeExampleSrc)); err != nil {
+		t.Fatal(err)
+	}
+
+	if pop := v.GetInt("hello.pop"); pop != 45000 {
+		t.Fatalf("pop != 45000, = %d", pop)
+	}
+
+	if world := v.GetStringSlice("hello.world"); len(world) != 0 {
+		t.Fatalf("len(world) != 0, = %d", len(world))
+	}
+
+	if universe := v.GetStringSlice("hello.universe"); len(universe) != 2 {
+		t.Fatalf("len(universe) != 2, = %d", len(universe))
+	}
+
+	if fu := v.GetString("fu"); fu != "bar" {
+		t.Fatalf("fu != \"bar\", = %s", fu)
+	}
 }

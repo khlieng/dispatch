@@ -26,7 +26,7 @@ func Run(dir, domain, email, port string) (*state, error) {
 
 	client, err := acme.NewClient(URL, &user, KeySize)
 	client.ExcludeChallenges([]string{"tls-sni-01"})
-	client.SetHTTPPort(port)
+	client.SetHTTPAddress(port)
 
 	if user.Registration == nil {
 		user.Registration, err = client.Register()
@@ -123,7 +123,7 @@ func (s *state) setOCSP(ocsp []byte) {
 }
 
 func (s *state) obtain() error {
-	cert, errors := s.client.ObtainCertificate([]string{s.domain}, true)
+	cert, errors := s.client.ObtainCertificate([]string{s.domain}, true, nil)
 	if err := errors[s.domain]; err != nil {
 		if _, ok := err.(acme.TOSError); ok {
 			err := s.client.AgreeToTOS()

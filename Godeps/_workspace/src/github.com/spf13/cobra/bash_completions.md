@@ -118,20 +118,23 @@ and you'll get something like
 -c            --container=  -p            --pod=  
 ```
 
-# Specify valid filename extentions for flags that take a filename
+# Specify valid filename extensions for flags that take a filename
 
 In this example we use --filename= and expect to get a json or yaml file as the argument. To make this easier we annotate the --filename flag with valid filename extensions.
 
 ```go
-	annotations := make([]string, 3)
-	annotations[0] = "json"
-	annotations[1] = "yaml"
-	annotations[2] = "yml"
-
+	annotations := []string{"json", "yaml", "yml"}
 	annotation := make(map[string][]string)
 	annotation[cobra.BashCompFilenameExt] = annotations
 
-	flag := &pflag.Flag{"filename", "f", usage, value, value.String(), false, annotation}
+	flag := &pflag.Flag{
+		Name:        "filename",
+		Shorthand:   "f",
+		Usage:       usage,
+		Value:       value,
+		DefValue:    value.String(),
+		Annotations: annotation,
+	}
 	cmd.Flags().AddFlag(flag)
 ```
 

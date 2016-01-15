@@ -63,7 +63,7 @@ func GetOCSPForCert(bundle []byte) ([]byte, *ocsp.Response, error) {
 			return nil, nil, errors.New("no issuing certificate URL")
 		}
 
-		resp, err := http.Get(certificates[0].IssuingCertificateURL[0])
+		resp, err := httpGet(certificates[0].IssuingCertificateURL[0])
 		if err != nil {
 			return nil, nil, err
 		}
@@ -97,7 +97,7 @@ func GetOCSPForCert(bundle []byte) ([]byte, *ocsp.Response, error) {
 	}
 
 	reader := bytes.NewReader(ocspReq)
-	req, err := http.Post(issuedCert.OCSPServer[0], "application/ocsp-request", reader)
+	req, err := httpPost(issuedCert.OCSPServer[0], "application/ocsp-request", reader)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -177,22 +177,21 @@ func performECDH(priv *ecdsa.PrivateKey, pub *ecdsa.PublicKey, outLen int, label
 // a slice of x509 certificates. This function will error if no certificates are found.
 func parsePEMBundle(bundle []byte) ([]*x509.Certificate, error) {
 	var certificates []*x509.Certificate
+	var certDERBlock *pem.Block
 
-	remaining := bundle
-	for len(remaining) != 0 {
-		certBlock, rem := pem.Decode(remaining)
-		// Thanks golang for having me do this :[
-		remaining = rem
-		if certBlock == nil {
-			return nil, errors.New("Could not decode certificate.")
+	for {
+		certDERBlock, bundle = pem.Decode(bundle)
+		if certDERBlock == nil {
+			break
 		}
 
-		cert, err := x509.ParseCertificate(certBlock.Bytes)
-		if err != nil {
-			return nil, err
+		if certDERBlock.Type == "CERTIFICATE" {
+			cert, err := x509.ParseCertificate(certDERBlock.Bytes)
+			if err != nil {
+				return nil, err
+			}
+			certificates = append(certificates, cert)
 		}
-
-		certificates = append(certificates, cert)
 	}
 
 	if len(certificates) == 0 {
@@ -200,6 +199,19 @@ func parsePEMBundle(bundle []byte) ([]*x509.Certificate, error) {
 	}
 
 	return certificates, nil
+}
+
+func parsePEMPrivateKey(key []byte) (crypto.PrivateKey, error) {
+	keyBlock, _ := pem.Decode(key)
+
+	switch keyBlock.Type {
+	case "RSA PRIVATE KEY":
+		return x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
+	case "EC PRIVATE KEY":
+		return x509.ParseECPrivateKey(keyBlock.Bytes)
+	default:
+		return nil, errors.New("Unknown PEM header value")
+	}
 }
 
 func generatePrivateKey(t keyType, keyLength int) (crypto.PrivateKey, error) {

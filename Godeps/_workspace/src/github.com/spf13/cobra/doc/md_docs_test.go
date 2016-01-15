@@ -1,4 +1,4 @@
-package cobra
+package doc
 
 import (
 	"bytes"
@@ -21,7 +21,9 @@ func TestGenMdDoc(t *testing.T) {
 	out := new(bytes.Buffer)
 
 	// We generate on s subcommand so we have both subcommands and parents
-	GenMarkdown(cmdEcho, out)
+	if err := GenMarkdown(cmdEcho, out); err != nil {
+		t.Fatal(err)
+	}
 	found := out.String()
 
 	// Our description
@@ -64,4 +66,23 @@ func TestGenMdDoc(t *testing.T) {
 	if strings.Contains(found, unexpected) {
 		t.Errorf("Unexpected response.\nFound: %v\nBut should not have!!\n", unexpected)
 	}
+}
+
+func TestGenMdNoTag(t *testing.T) {
+	c := initializeWithRootCmd()
+	// Need two commands to run the command alphabetical sort
+	cmdEcho.AddCommand(cmdTimes, cmdEchoSub, cmdDeprecated)
+	c.AddCommand(cmdPrint, cmdEcho)
+	c.DisableAutoGenTag = true
+	cmdRootWithRun.PersistentFlags().StringVarP(&flags2a, "rootflag", "r", "two", strtwoParentHelp)
+	out := new(bytes.Buffer)
+
+	if err := GenMarkdown(c, out); err != nil {
+		t.Fatal(err)
+	}
+	found := out.String()
+
+	unexpected := "Auto generated"
+	checkStringOmits(t, found, unexpected)
+
 }
