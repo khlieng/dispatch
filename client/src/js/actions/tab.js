@@ -1,14 +1,14 @@
-import { pushPath } from 'redux-simple-router';
+import { routeActions } from 'redux-simple-router';
 import * as actions from '../actions';
 
 export function select(server, channel, pm) {
   if (pm) {
-    return pushPath(`/${server}/pm/${channel}`);
+    return routeActions.push(`/${server}/pm/${channel}`);
   } else if (channel) {
-    return pushPath(`/${server}/${encodeURIComponent(channel)}`);
+    return routeActions.push(`/${server}/${encodeURIComponent(channel)}`);
   }
 
-  return pushPath(`/${server}`);
+  return routeActions.push(`/${server}`);
 }
 
 export function updateSelection() {
@@ -19,14 +19,14 @@ export function updateSelection() {
     const { server } = state.tab.selected;
 
     if (servers.size === 0) {
-      dispatch(pushPath('/connect'));
+      dispatch(routeActions.replace('/connect'));
     } else if (history.size > 0) {
       const tab = history.last();
       dispatch(select(tab.server, tab.channel || tab.user, tab.user));
     } else if (servers.has(server)) {
       dispatch(select(server));
     } else {
-      dispatch(pushPath('/'));
+      dispatch(routeActions.replace('/'));
     }
   };
 }

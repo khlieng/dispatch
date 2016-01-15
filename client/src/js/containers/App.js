@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { pushPath } from 'redux-simple-router';
+import { routeActions } from 'redux-simple-router';
 import pure from 'pure-render-decorator';
 import TabList from '../components/TabList';
 import { select } from '../actions/tab';
@@ -32,4 +32,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, { pushPath, select, hideMenu })(App);
+export default connect(mapStateToProps, { pushPath: routeActions.push, select, hideMenu })(App);

@@ -1,4 +1,4 @@
-import { replacePath } from 'redux-simple-router';
+import { routeActions } from 'redux-simple-router';
 import { broadcast, inform, addMessage, addMessages } from './actions/message';
 import { select } from './actions/tab';
 import { normalizeChannel } from './util';
@@ -37,7 +37,7 @@ export default function handleSocket(socket, { dispatch, getState }) {
 
   socket.on('servers', data => {
     if (!data) {
-      dispatch(replacePath('/connect'));
+      dispatch(routeActions.replace('/connect'));
     }
   });
 

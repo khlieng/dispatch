@@ -1,7 +1,7 @@
 import { Map, Record } from 'immutable';
 import createReducer from '../util/createReducer';
 import * as actions from '../actions';
-import forEach from 'lodash/collection/forEach';
+import forEach from 'lodash/forEach';
 
 const Server = Record({
   nick: null,
