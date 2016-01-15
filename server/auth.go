@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/dgrijalva/jwt-go"
 
 	"github.com/khlieng/dispatch/storage"
 )
