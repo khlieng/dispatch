@@ -21,8 +21,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/hashicorp/hcl"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/BurntSushi/toml"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/hashicorp/hcl"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/magiconair/properties"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cast"
 	jww "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/jwalterweatherman"

@@ -36,7 +36,7 @@ import (
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cast"
 	jww "github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/jwalterweatherman"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/pflag"
-	"gopkg.in/fsnotify.v1"
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/gopkg.in/fsnotify.v1"
 )
 
 var v *Viper
