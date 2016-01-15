@@ -45,6 +45,61 @@ func (c *Client) writef(format string, a ...interface{}) {
 	fmt.Fprintf(c.conn, format+"\r\n", a...)
 }
 
+func (c *Client) run() {
+	c.tryConnect()
+
+	for {
+		select {
+		case <-c.quit:
+			if c.Connected() {
+				c.disconnect()
+			}
+
+			c.sendRecv.Wait()
+			close(c.Messages)
+			return
+
+		case <-c.reconnect:
+			c.disconnect()
+
+			c.sendRecv.Wait()
+			c.reconnect = make(chan struct{})
+			c.once.Reset()
+
+			c.tryConnect()
+		}
+	}
+}
+
+func (c *Client) disconnect() {
+	c.ConnectionChanged <- false
+	c.lock.Lock()
+	c.connected = false
+	c.lock.Unlock()
+
+	c.once.Do(c.ready.Done)
+	c.conn.Close()
+}
+
+func (c *Client) tryConnect() {
+	for {
+		select {
+		case <-c.quit:
+			return
+
+		default:
+		}
+
+		err := c.connect()
+		if err == nil {
+			c.backoff.Reset()
+			return
+		}
+
+		time.Sleep(c.backoff.Duration())
+	}
+}
+
 func (c *Client) connect() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -72,52 +127,14 @@ func (c *Client) connect() error {
 	c.register()
 
 	c.ready.Add(1)
+	c.sendRecv.Add(2)
 	go c.send()
 	go c.recv()
 
 	return nil
 }
 
-func (c *Client) tryConnect() {
-	for {
-		select {
-		case <-c.quit:
-			return
-
-		default:
-		}
-
-		err := c.connect()
-		if err == nil {
-			c.backoff.Reset()
-			return
-		}
-
-		time.Sleep(c.backoff.Duration())
-	}
-}
-
-func (c *Client) run() {
-	c.tryConnect()
-
-	for {
-		select {
-		case <-c.quit:
-			c.close()
-			return
-
-		case <-c.reconnect:
-			c.sendRecv.Wait()
-			c.reconnect = make(chan struct{})
-			c.once.Reset()
-
-			c.tryConnect()
-		}
-	}
-}
-
 func (c *Client) send() {
-	c.sendRecv.Add(1)
 	defer c.sendRecv.Done()
 
 	c.ready.Wait()
@@ -140,11 +157,6 @@ func (c *Client) send() {
 }
 
 func (c *Client) recv() {
-	defer func() {
-		recover()
-	}()
-
-	c.sendRecv.Add(1)
 	defer c.sendRecv.Done()
 
 	for {
@@ -155,21 +167,19 @@ func (c *Client) recv() {
 				return
 
 			default:
-				c.ConnectionChanged <- false
-				c.lock.Lock()
-				c.connected = false
-				c.lock.Unlock()
-
-				c.once.Do(c.ready.Done)
-				c.conn.Close()
-
 				close(c.reconnect)
 				return
 			}
 		}
 
 		msg := parseMessage(line)
-		c.Messages <- msg
+
+		select {
+		case <-c.quit:
+			return
+
+		case c.Messages <- msg:
+		}
 
 		switch msg.Command {
 		case Ping:
@@ -179,19 +189,4 @@ func (c *Client) recv() {
 			c.once.Do(c.ready.Done)
 		}
 	}
-}
-
-func (c *Client) close() {
-	if c.Connected() {
-		c.ConnectionChanged <- false
-		c.lock.Lock()
-		c.connected = false
-		c.lock.Unlock()
-
-		c.once.Do(c.ready.Done)
-		c.conn.Close()
-	}
-
-	close(c.out)
-	close(c.Messages)
 }

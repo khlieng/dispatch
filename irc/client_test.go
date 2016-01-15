@@ -15,6 +15,7 @@ func testClientSend() (*Client, chan string) {
 	c := testClient()
 	conn := &mockConn{hook: make(chan string, 16)}
 	c.conn = conn
+	c.sendRecv.Add(1)
 	go c.send()
 	return c, conn.hook
 }

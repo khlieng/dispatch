@@ -132,25 +132,12 @@ func TestRecv(t *testing.T) {
 	c.reader = bufio.NewReader(buf)
 
 	c.ready.Add(1)
+	c.sendRecv.Add(2)
 	go c.send()
-	close(c.quit)
 	go c.recv()
 
 	assert.Equal(t, "PONG :test\r\n", <-conn.hook)
 	assert.Equal(t, &Message{Command: "CMD"}, <-c.Messages)
-}
-
-func TestRecvRecoversPanic(t *testing.T) {
-	defer func() {
-		assert.Nil(t, recover())
-	}()
-
-	c := testClient()
-
-	buf := bytes.NewBuffer([]byte("CMD\r\n"))
-	c.reader = bufio.NewReader(buf)
-	close(c.Messages)
-	c.recv()
 }
 
 func TestRecvTriggersReconnect(t *testing.T) {
@@ -161,6 +148,7 @@ func TestRecvTriggersReconnect(t *testing.T) {
 	done := make(chan struct{})
 	ok := false
 	go func() {
+		c.sendRecv.Add(1)
 		c.recv()
 		_, ok = <-c.reconnect
 		close(done)
@@ -178,14 +166,15 @@ func TestRecvTriggersReconnect(t *testing.T) {
 
 func TestClose(t *testing.T) {
 	c := testClient()
-	c.close()
+	close(c.quit)
 	ok := false
 	done := make(chan struct{})
 	go func() {
-		_, ok = <-c.out
 		_, ok = <-c.Messages
 		close(done)
 	}()
+
+	c.run()
 
 	select {
 	case <-done:
