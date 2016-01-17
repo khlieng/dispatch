@@ -2,6 +2,7 @@ package storage
 
 import (
 	"io/ioutil"
+	"strconv"
 	"testing"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/stretchr/testify/assert"
@@ -35,7 +36,8 @@ func TestUser(t *testing.T) {
 		Name:   "#testing",
 	}
 
-	user := NewUser()
+	user, err := NewUser()
+	assert.Nil(t, err)
 	user.AddServer(srv)
 	user.AddChannel(chan1)
 	user.AddChannel(chan2)
@@ -67,4 +69,63 @@ func TestUser(t *testing.T) {
 	user.RemoveServer(srv.Host)
 	assert.Len(t, user.GetServers(), 0)
 	assert.Len(t, user.GetChannels(), 0)
+}
+
+func TestMessages(t *testing.T) {
+	Initialize(tempdir())
+	Open()
+
+	user, err := NewUser()
+	assert.Nil(t, err)
+
+	messages, err := user.GetMessages("irc.freenode.net", "#go-nuts", 10, 6)
+	assert.Nil(t, err)
+	assert.Len(t, messages, 0)
+
+	messages, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 10)
+	assert.Nil(t, err)
+	assert.Len(t, messages, 0)
+
+	messages, err = user.SearchMessages("irc.freenode.net", "#go-nuts", "message")
+	assert.Nil(t, err)
+	assert.Len(t, messages, 0)
+
+	for i := 0; i < 5; i++ {
+		err = user.LogMessage("irc.freenode.net", "nick", "#go-nuts", "message"+strconv.Itoa(i))
+		assert.Nil(t, err)
+	}
+
+	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, 6)
+	assert.Equal(t, "message0", messages[0].Content)
+	assert.Equal(t, "message4", messages[4].Content)
+	assert.Nil(t, err)
+	assert.Len(t, messages, 5)
+
+	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, 100)
+	assert.Nil(t, err)
+	assert.Len(t, messages, 5)
+
+	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, 4)
+	assert.Equal(t, "message0", messages[0].Content)
+	assert.Equal(t, "message2", messages[2].Content)
+	assert.Nil(t, err)
+	assert.Len(t, messages, 3)
+
+	messages, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 10)
+	assert.Equal(t, "message0", messages[0].Content)
+	assert.Equal(t, "message2", messages[2].Content)
+	assert.Nil(t, err)
+	assert.Len(t, messages, 5)
+
+	messages, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 3)
+	assert.Equal(t, "message2", messages[0].Content)
+	assert.Equal(t, "message4", messages[2].Content)
+	assert.Nil(t, err)
+	assert.Len(t, messages, 3)
+
+	messages, err = user.SearchMessages("irc.freenode.net", "#go-nuts", "message")
+	assert.Nil(t, err)
+	assert.Len(t, messages, 5)
+
+	Close()
 }

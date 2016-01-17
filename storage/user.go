@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"log"
 	"strconv"
 	"sync"
 
@@ -41,39 +40,34 @@ type Channel struct {
 	Topic  string   `json:"topic,omitempty"`
 }
 
-func NewUser() *User {
+func NewUser() (*User, error) {
 	user := &User{}
 
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketUsers)
 
-		var err error
-		user.ID, err = b.NextSequence()
-		if err != nil {
-			return err
-		}
-
+		user.ID, _ = b.NextSequence()
 		user.Username = strconv.FormatUint(user.ID, 10)
-		user.id = idToBytes(user.ID)
 
 		data, err := json.Marshal(user)
 		if err != nil {
 			return err
 		}
 
+		user.id = idToBytes(user.ID)
 		return b.Put(user.id, data)
 	})
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	err = user.openMessageLog()
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
-	return user
+	return user, nil
 }
 
 func LoadUsers() []*User {

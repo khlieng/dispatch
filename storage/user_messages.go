@@ -15,38 +15,42 @@ type Message struct {
 	ID      uint64 `json:"id"`
 	Server  string `json:"server"`
 	From    string `json:"from"`
-	To      string `json:"to"`
+	To      string `json:"to,omitempty"`
 	Content string `json:"content"`
 	Time    int64  `json:"time"`
 }
 
-func (u *User) LogMessage(server, from, to, content string) {
+func (u *User) LogMessage(server, from, to, content string) error {
+	message := Message{
+		Server:  server,
+		From:    from,
+		To:      to,
+		Content: content,
+		Time:    time.Now().Unix(),
+	}
 	bucketKey := server + ":" + to
-	var id uint64
-	var idStr string
-	var message Message
 
-	u.messageLog.Update(func(tx *bolt.Tx) error {
-		b, _ := tx.Bucket(bucketMessages).CreateBucketIfNotExists([]byte(bucketKey))
-		id, _ = b.NextSequence()
-		idStr = strconv.FormatUint(id, 10)
-
-		message = Message{
-			ID:      id,
-			Content: content,
-			Server:  server,
-			From:    from,
-			To:      to,
-			Time:    time.Now().Unix(),
+	err := u.messageLog.Batch(func(tx *bolt.Tx) error {
+		b, err := tx.Bucket(bucketMessages).CreateBucketIfNotExists([]byte(bucketKey))
+		if err != nil {
+			return err
 		}
 
-		data, _ := json.Marshal(message)
-		b.Put([]byte(idStr), data)
+		message.ID, _ = b.NextSequence()
 
-		return nil
+		data, err := json.Marshal(message)
+		if err != nil {
+			return err
+		}
+
+		return b.Put(idToBytes(message.ID), data)
 	})
 
-	u.messageIndex.Index(bucketKey+":"+idStr, message)
+	if err != nil {
+		return err
+	}
+
+	return u.messageIndex.Index(bucketKey+":"+strconv.FormatUint(message.ID, 10), message)
 }
 
 func (u *User) GetLastMessages(server, channel string, count int) ([]Message, error) {
@@ -60,7 +64,7 @@ func (u *User) GetLastMessages(server, channel string, count int) ([]Message, er
 
 		c := b.Cursor()
 
-		for k, v := c.Last(); count > 0 && k != nil; k, v = c.Prev() {
+		for _, v := c.Last(); count > 0 && v != nil; _, v = c.Prev() {
 			count--
 			json.Unmarshal(v, &messages[count])
 		}
@@ -85,7 +89,7 @@ func (u *User) GetMessages(server, channel string, count int, fromID uint64) ([]
 		}
 
 		c := b.Cursor()
-		c.Seek([]byte(strconv.FormatUint(fromID, 10)))
+		c.Seek(idToBytes(fromID))
 
 		for k, v := c.Prev(); count > 0 && k != nil; k, v = c.Prev() {
 			count--
@@ -107,7 +111,7 @@ func (u *User) SearchMessages(server, channel, phrase string) ([]Message, error)
 	serverQuery.SetField("server")
 	channelQuery := bleve.NewMatchQuery(channel)
 	channelQuery.SetField("to")
-	contentQuery := bleve.NewMatchQuery(phrase)
+	contentQuery := bleve.NewFuzzyQuery(phrase)
 	contentQuery.SetField("content")
 
 	query := bleve.NewBooleanQuery([]bleve.Query{serverQuery, channelQuery, contentQuery}, nil, nil)
@@ -125,9 +129,10 @@ func (u *User) SearchMessages(server, channel, phrase string) ([]Message, error)
 		for _, hit := range searchResults.Hits {
 			idx := strings.LastIndex(hit.ID, ":")
 			bc := b.Bucket([]byte(hit.ID[:idx]))
-			var message Message
+			id, _ := strconv.ParseUint(hit.ID[idx+1:], 10, 64)
 
-			json.Unmarshal(bc.Get([]byte(hit.ID[idx+1:])), &message)
+			var message Message
+			json.Unmarshal(bc.Get(idToBytes(id)), &message)
 			messages = append(messages, message)
 		}
 

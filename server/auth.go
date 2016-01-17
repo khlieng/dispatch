@@ -49,8 +49,8 @@ func handleAuth(w http.ResponseWriter, r *http.Request) *Session {
 }
 
 func newUser(w http.ResponseWriter, r *http.Request) *Session {
-	user := storage.NewUser()
-	if user == nil {
+	user, err := storage.NewUser()
+	if err != nil {
 		return nil
 	}
 

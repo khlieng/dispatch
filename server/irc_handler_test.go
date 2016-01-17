@@ -22,7 +22,10 @@ func TestMain(m *testing.M) {
 
 	storage.Initialize(tempdir)
 	storage.Open()
-	user = storage.NewUser()
+	user, err = storage.NewUser()
+	if err != nil {
+		os.Exit(1)
+	}
 	channelStore = storage.NewChannelStore()
 
 	code := m.Run()
