@@ -17,7 +17,7 @@ func TestAddRemoveUser(t *testing.T) {
 	channelStore := NewChannelStore()
 	channelStore.AddUser("user", "srv", "#chan")
 	channelStore.AddUser("user2", "srv", "#chan")
-	assert.Equal(t, channelStore.GetUsers("srv", "#chan"), []string{"user", "user2"})
+	assert.Equal(t, []string{"user", "user2"}, channelStore.GetUsers("srv", "#chan"))
 	channelStore.RemoveUser("user", "srv", "#chan")
 	assert.Equal(t, []string{"user2"}, channelStore.GetUsers("srv", "#chan"))
 }

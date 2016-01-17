@@ -108,7 +108,7 @@ func (h *wsHandler) connect(b []byte) {
 		i.Connect(data.Server)
 		go newIRCHandler(i, h.session).run()
 
-		h.session.user.AddServer(storage.Server{
+		go h.session.user.AddServer(storage.Server{
 			Name:     data.Name,
 			Host:     host,
 			Port:     port,
@@ -151,7 +151,7 @@ func (h *wsHandler) quit(b []byte) {
 		i.Quit()
 		h.session.deleteIRC(data.Server)
 		channelStore.RemoveUserAll(i.GetNick(), data.Server)
-		h.session.user.RemoveServer(data.Server)
+		go h.session.user.RemoveServer(data.Server)
 	}
 }
 
@@ -170,7 +170,7 @@ func (h *wsHandler) nick(b []byte) {
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Nick(data.New)
-		h.session.user.SetNick(data.New, data.Server)
+		go h.session.user.SetNick(data.New, data.Server)
 	}
 }
 

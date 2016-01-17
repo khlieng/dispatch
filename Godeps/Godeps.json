@@ -80,6 +80,10 @@
 			"Rev": "f7d28d5aeab42b9b95d2e6d6b956f73a290077fc"
 		},
 		{
+			"ImportPath": "github.com/philhofer/fwd",
+			"Rev": "f429d72be3997413f67cdb6e3c87bfc72475e717"
+		},
+		{
 			"ImportPath": "github.com/ryszard/goskiplist/skiplist",
 			"Rev": "2dfbae5fcf46374f166f8969cb07e167f1be6273"
 		},
@@ -123,6 +127,11 @@
 		{
 			"ImportPath": "github.com/syndtr/gosnappy/snappy",
 			"Rev": "156a073208e131d7d2e212cb749feae7c339e846"
+		},
+		{
+			"ImportPath": "github.com/tinylib/msgp/msgp",
+			"Comment": "v1.0-beta-4-g0d29f4b",
+			"Rev": "0d29f4bb1d9c5d1ad8ad54e0507ca54c0fa50482"
 		},
 		{
 			"ImportPath": "github.com/willf/bitset",

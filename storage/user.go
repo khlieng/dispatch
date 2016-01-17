@@ -2,54 +2,21 @@ package storage
 
 import (
 	"bytes"
-	"crypto/tls"
-	"encoding/json"
 	"strconv"
-	"sync"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
-
-type User struct {
-	ID       uint64
-	Username string
-
-	id           []byte
-	messageLog   *bolt.DB
-	messageIndex bleve.Index
-	certificate  *tls.Certificate
-	lock         sync.Mutex
-}
-
-type Server struct {
-	Name     string `json:"name"`
-	Host     string `json:"host"`
-	Port     string `json:"port,omitempty"`
-	TLS      bool   `json:"tls"`
-	Password string `json:"password,omitempty"`
-	Nick     string `json:"nick"`
-	Username string `json:"username"`
-	Realname string `json:"realname"`
-}
-
-type Channel struct {
-	Server string   `json:"server"`
-	Name   string   `json:"name"`
-	Users  []string `json:"users,omitempty"`
-	Topic  string   `json:"topic,omitempty"`
-}
 
 func NewUser() (*User, error) {
 	user := &User{}
 
-	err := db.Update(func(tx *bolt.Tx) error {
+	err := db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketUsers)
 
 		user.ID, _ = b.NextSequence()
 		user.Username = strconv.FormatUint(user.ID, 10)
 
-		data, err := json.Marshal(user)
+		data, err := user.MarshalMsg(nil)
 		if err != nil {
 			return err
 		}
@@ -108,8 +75,8 @@ func (u *User) GetServers() []Server {
 		c := tx.Bucket(bucketServers).Cursor()
 
 		for k, v := c.Seek(u.id); bytes.HasPrefix(k, u.id); k, v = c.Next() {
-			var server Server
-			json.Unmarshal(v, &server)
+			server := Server{}
+			server.UnmarshalMsg(v)
 			servers = append(servers, server)
 		}
 
@@ -126,8 +93,8 @@ func (u *User) GetChannels() []Channel {
 		c := tx.Bucket(bucketChannels).Cursor()
 
 		for k, v := c.Seek(u.id); bytes.HasPrefix(k, u.id); k, v = c.Next() {
-			var channel Channel
-			json.Unmarshal(v, &channel)
+			channel := Channel{}
+			channel.UnmarshalMsg(v)
 			channels = append(channels, channel)
 		}
 
@@ -138,9 +105,9 @@ func (u *User) GetChannels() []Channel {
 }
 
 func (u *User) AddServer(server Server) {
-	db.Update(func(tx *bolt.Tx) error {
+	db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketServers)
-		data, _ := json.Marshal(server)
+		data, _ := server.MarshalMsg(nil)
 
 		b.Put(u.serverID(server.Host), data)
 
@@ -149,9 +116,9 @@ func (u *User) AddServer(server Server) {
 }
 
 func (u *User) AddChannel(channel Channel) {
-	db.Update(func(tx *bolt.Tx) error {
+	db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketChannels)
-		data, _ := json.Marshal(channel)
+		data, _ := channel.MarshalMsg(nil)
 
 		b.Put(u.channelID(channel.Server, channel.Name), data)
 
@@ -160,15 +127,15 @@ func (u *User) AddChannel(channel Channel) {
 }
 
 func (u *User) SetNick(nick, address string) {
-	db.Update(func(tx *bolt.Tx) error {
+	db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketServers)
 		id := u.serverID(address)
-		var server Server
 
-		json.Unmarshal(b.Get(id), &server)
+		server := Server{}
+		server.UnmarshalMsg(b.Get(id))
 		server.Nick = nick
 
-		data, _ := json.Marshal(server)
+		data, _ := server.MarshalMsg(nil)
 		b.Put(id, data)
 
 		return nil
@@ -176,7 +143,7 @@ func (u *User) SetNick(nick, address string) {
 }
 
 func (u *User) RemoveServer(address string) {
-	db.Update(func(tx *bolt.Tx) error {
+	db.Batch(func(tx *bolt.Tx) error {
 		serverID := u.serverID(address)
 		tx.Bucket(bucketServers).Delete(serverID)
 
@@ -192,7 +159,7 @@ func (u *User) RemoveServer(address string) {
 }
 
 func (u *User) RemoveChannel(server, channel string) {
-	db.Update(func(tx *bolt.Tx) error {
+	db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketChannels)
 		id := u.channelID(server, channel)
 

@@ -102,6 +102,8 @@ func TestMessages(t *testing.T) {
 	assert.Len(t, messages, 5)
 
 	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, 100)
+	assert.Equal(t, "message0", messages[0].Content)
+	assert.Equal(t, "message4", messages[4].Content)
 	assert.Nil(t, err)
 	assert.Len(t, messages, 5)
 

@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"encoding/json"
 	"os"
 	"strconv"
 	"strings"
@@ -10,15 +9,6 @@ import (
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
 )
-
-type Message struct {
-	ID      uint64 `json:"id"`
-	Server  string `json:"server"`
-	From    string `json:"from"`
-	To      string `json:"to,omitempty"`
-	Content string `json:"content"`
-	Time    int64  `json:"time"`
-}
 
 func (u *User) LogMessage(server, from, to, content string) error {
 	message := Message{
@@ -38,7 +28,7 @@ func (u *User) LogMessage(server, from, to, content string) error {
 
 		message.ID, _ = b.NextSequence()
 
-		data, err := json.Marshal(message)
+		data, err := message.MarshalMsg(nil)
 		if err != nil {
 			return err
 		}
@@ -66,7 +56,7 @@ func (u *User) GetLastMessages(server, channel string, count int) ([]Message, er
 
 		for _, v := c.Last(); count > 0 && v != nil; _, v = c.Prev() {
 			count--
-			json.Unmarshal(v, &messages[count])
+			messages[count].UnmarshalMsg(v)
 		}
 
 		return nil
@@ -93,7 +83,7 @@ func (u *User) GetMessages(server, channel string, count int, fromID uint64) ([]
 
 		for k, v := c.Prev(); count > 0 && k != nil; k, v = c.Prev() {
 			count--
-			json.Unmarshal(v, &messages[count])
+			messages[count].UnmarshalMsg(v)
 		}
 
 		return nil
@@ -131,8 +121,8 @@ func (u *User) SearchMessages(server, channel, phrase string) ([]Message, error)
 			bc := b.Bucket([]byte(hit.ID[:idx]))
 			id, _ := strconv.ParseUint(hit.ID[idx+1:], 10, 64)
 
-			var message Message
-			json.Unmarshal(bc.Get(idToBytes(id)), &message)
+			message := Message{}
+			message.UnmarshalMsg(bc.Get(idToBytes(id)))
 			messages = append(messages, message)
 		}
 
