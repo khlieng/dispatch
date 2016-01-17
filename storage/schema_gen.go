@@ -632,7 +632,7 @@ func (z *User) DecodeMsg(dc *msgp.Reader) (err error) {
 }
 
 // EncodeMsg implements msgp.Encodable
-func (z User) EncodeMsg(en *msgp.Writer) (err error) {
+func (z *User) EncodeMsg(en *msgp.Writer) (err error) {
 	// map header, size 2
 	// write "ID"
 	err = en.Append(0x82, 0xa2, 0x49, 0x44)
@@ -656,7 +656,7 @@ func (z User) EncodeMsg(en *msgp.Writer) (err error) {
 }
 
 // MarshalMsg implements msgp.Marshaler
-func (z User) MarshalMsg(b []byte) (o []byte, err error) {
+func (z *User) MarshalMsg(b []byte) (o []byte, err error) {
 	o = msgp.Require(b, z.Msgsize())
 	// map header, size 2
 	// string "ID"
@@ -705,7 +705,7 @@ func (z *User) UnmarshalMsg(bts []byte) (o []byte, err error) {
 	return
 }
 
-func (z User) Msgsize() (s int) {
+func (z *User) Msgsize() (s int) {
 	s = 1 + 3 + msgp.Uint64Size + 9 + msgp.StringPrefixSize + len(z.Username)
 	return
 }
