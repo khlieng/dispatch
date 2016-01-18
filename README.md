@@ -5,8 +5,9 @@
 ### Features
 * Searchable history
 * Persistent connections
-* Multiple users
+* Multiple servers and users
 * Automatic HTTPS through Let's Encrypt
+* Client certificates
 
 ## Usage
 There is a few different ways of getting it:
@@ -64,3 +65,20 @@ For development with hot reloading enabled just run:
 ```bash
 gulp
 ```
+
+## Libraries
+The libraries this project is built with.
+
+### Server
+- [Bolt](https://github.com/boltdb/bolt)
+- [Bleve](https://github.com/blevesearch/bleve)
+- [Cobra](https://github.com/spf13/cobra)
+- [Viper](https://github.com/spf13/viper)
+- [Lego](https://github.com/xenolf/lego)
+
+### Client
+- [React](https://github.com/facebook/react)
+- [Redux](https://github.com/rackt/redux)
+- [React Router](https://github.com/rackt/react-router)
+- [Immutable](https://github.com/facebook/immutable-js)
+- [Lodash](https://github.com/lodash/lodash)
