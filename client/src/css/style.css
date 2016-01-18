@@ -350,10 +350,22 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   right: 0;
 }
 
-.search-input {
+.search-input-wrap {
+  display: flex;
   width: 100%;
-  padding: 15px;
+  background: #FFF;
   border-bottom: 1px solid #DDD;
+}
+
+.search i {
+  padding: 15px;
+  color: #DDD;
+}
+
+.search-input {
+  flex: 1;
+  padding: 15px;
+  padding-left: 0;
 }
 
 .search-results {

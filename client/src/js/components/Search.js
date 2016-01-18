@@ -26,12 +26,15 @@ export default class Search extends Component {
 
     return (
       <div className="search" style={style}>
-        <input
-          ref="input"
-          className="search-input"
-          type="text"
-          onChange={this.handleSearch}
-        />
+        <div className="search-input-wrap">
+          <i className="icon-search" />
+          <input
+            ref="input"
+            className="search-input"
+            type="text"
+            onChange={this.handleSearch}
+          />
+        </div>
         <div className="search-results">{results}</div>
       </div>
     );

@@ -62,11 +62,13 @@ func (u *User) GetLastMessages(server, channel string, count int) ([]Message, er
 		return nil
 	})
 
-	if count < len(messages) {
+	if count == 0 {
+		return messages, nil
+	} else if count < len(messages) {
 		return messages[count:], nil
-	} else {
-		return nil, nil
 	}
+
+	return nil, nil
 }
 
 func (u *User) GetMessages(server, channel string, count int, fromID uint64) ([]Message, error) {
@@ -89,7 +91,9 @@ func (u *User) GetMessages(server, channel string, count int, fromID uint64) ([]
 		return nil
 	})
 
-	if count < len(messages) {
+	if count == 0 {
+		return messages, nil
+	} else if count < len(messages) {
 		return messages[count:], nil
 	}
 

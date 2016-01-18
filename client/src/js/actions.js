@@ -35,6 +35,7 @@ export const SOCKET_PART = 'SOCKET_PART';
 export const SOCKET_PM = 'SOCKET_PM';
 export const SOCKET_QUIT = 'SOCKET_QUIT';
 export const SOCKET_SERVERS = 'SOCKET_SERVERS';
+export const SOCKET_SEARCH = 'SOCKET_SEARCH';
 export const SOCKET_TOPIC = 'SOCKET_TOPIC';
 export const SOCKET_USERS = 'SOCKET_USERS';
 export const TAB_HISTORY_POP = 'TAB_HISTORY_POP';
