@@ -1,4 +1,5 @@
 build
+release
 client/dist
 client/node_modules
 ca-certificates.crt
