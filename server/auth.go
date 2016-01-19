@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/dgrijalva/jwt-go"
 
@@ -75,6 +76,7 @@ func newUser(w http.ResponseWriter, r *http.Request) *Session {
 		Name:     cookieName,
 		Value:    tokenString,
 		Path:     "/",
+		Expires:  time.Now().AddDate(0, 1, 0),
 		HttpOnly: true,
 		Secure:   r.TLS != nil,
 	})
