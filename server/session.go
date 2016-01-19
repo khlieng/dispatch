@@ -2,9 +2,14 @@ package server
 
 import (
 	"sync"
+	"time"
 
 	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
+)
+
+const (
+	AnonymousSessionExpiration = 24 * time.Hour
 )
 
 type Session struct {
@@ -16,7 +21,9 @@ type Session struct {
 	wsLock sync.Mutex
 	out    chan WSResponse
 
-	user *storage.User
+	user       *storage.User
+	expiration *time.Timer
+	reset      chan time.Duration
 }
 
 func NewSession(user *storage.User) *Session {
@@ -26,6 +33,8 @@ func NewSession(user *storage.User) *Session {
 		ws:              make(map[string]*wsConn),
 		out:             make(chan WSResponse, 32),
 		user:            user,
+		expiration:      time.NewTimer(AnonymousSessionExpiration),
+		reset:           make(chan time.Duration, 1),
 	}
 }
 
@@ -42,6 +51,8 @@ func (s *Session) setIRC(server string, i *irc.Client) {
 	s.irc[server] = i
 	s.connectionState[server] = false
 	s.ircLock.Unlock()
+
+	s.reset <- 0
 }
 
 func (s *Session) deleteIRC(server string) {
@@ -49,6 +60,8 @@ func (s *Session) deleteIRC(server string) {
 	delete(s.irc, server)
 	delete(s.connectionState, server)
 	s.ircLock.Unlock()
+
+	s.resetExpirationIfEmpty()
 }
 
 func (s *Session) numIRC() int {
@@ -81,12 +94,16 @@ func (s *Session) setWS(addr string, w *wsConn) {
 	s.wsLock.Lock()
 	s.ws[addr] = w
 	s.wsLock.Unlock()
+
+	s.reset <- 0
 }
 
 func (s *Session) deleteWS(addr string) {
 	s.wsLock.Lock()
 	delete(s.ws, addr)
 	s.wsLock.Unlock()
+
+	s.resetExpirationIfEmpty()
 }
 
 func (s *Session) numWS() int {
@@ -108,12 +125,35 @@ func (s *Session) sendError(err error, server string) {
 	})
 }
 
-func (s *Session) write() {
-	for res := range s.out {
-		s.wsLock.Lock()
-		for _, ws := range s.ws {
-			ws.out <- res
+func (s *Session) resetExpirationIfEmpty() {
+	if s.numIRC() == 0 && s.numWS() == 0 {
+		s.reset <- AnonymousSessionExpiration
+	}
+}
+
+func (s *Session) run() {
+	for {
+		select {
+		case res := <-s.out:
+			s.wsLock.Lock()
+			for _, ws := range s.ws {
+				ws.out <- res
+			}
+			s.wsLock.Unlock()
+
+		case <-s.expiration.C:
+			sessionLock.Lock()
+			delete(sessions, s.user.ID)
+			sessionLock.Unlock()
+			s.user.Remove()
+			return
+
+		case duration := <-s.reset:
+			if duration == 0 {
+				s.expiration.Stop()
+			} else {
+				s.expiration.Reset(duration)
+			}
 		}
-		s.wsLock.Unlock()
 	}
 }

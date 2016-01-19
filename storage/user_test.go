@@ -2,6 +2,7 @@ package storage
 
 import (
 	"io/ioutil"
+	"os"
 	"strconv"
 	"testing"
 
@@ -41,7 +42,7 @@ func TestUser(t *testing.T) {
 	user.AddServer(srv)
 	user.AddChannel(chan1)
 	user.AddChannel(chan2)
-	user.Close()
+	user.closeMessageLog()
 
 	users := LoadUsers()
 	assert.Len(t, users, 1)
@@ -69,6 +70,14 @@ func TestUser(t *testing.T) {
 	user.RemoveServer(srv.Host)
 	assert.Len(t, user.GetServers(), 0)
 	assert.Len(t, user.GetChannels(), 0)
+
+	user.Remove()
+	_, err = os.Stat(Path.User(user.Username))
+	assert.True(t, os.IsNotExist(err))
+
+	for _, storedUser := range LoadUsers() {
+		assert.NotEqual(t, user.ID, storedUser.ID)
+	}
 }
 
 func TestMessages(t *testing.T) {

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"bytes"
+	"os"
 	"strconv"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
@@ -169,9 +170,12 @@ func (u *User) RemoveChannel(server, channel string) {
 	})
 }
 
-func (u *User) Close() {
-	u.messageLog.Close()
-	u.messageIndex.Close()
+func (u *User) Remove() {
+	db.Batch(func(tx *bolt.Tx) error {
+		return tx.Bucket(bucketUsers).Delete(u.id)
+	})
+	u.closeMessageLog()
+	os.RemoveAll(Path.User(u.Username))
 }
 
 func (u *User) serverID(address string) []byte {

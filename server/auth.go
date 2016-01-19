@@ -36,6 +36,11 @@ func handleAuth(w http.ResponseWriter, r *http.Request) *Session {
 			sessionLock.Lock()
 			session = sessions[userID]
 			sessionLock.Unlock()
+
+			if session == nil {
+				// A previous anonymous session has been cleaned up, create a new one
+				session = newUser(w, r)
+			}
 		} else {
 			if err != nil {
 				authLog(r, "Invalid token: "+err.Error())
@@ -63,7 +68,7 @@ func newUser(w http.ResponseWriter, r *http.Request) *Session {
 	sessions[user.ID] = session
 	sessionLock.Unlock()
 
-	go session.write()
+	go session.run()
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims["UserID"] = user.ID

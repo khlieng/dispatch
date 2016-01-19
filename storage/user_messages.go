@@ -167,3 +167,8 @@ func (u *User) openMessageLog() error {
 
 	return nil
 }
+
+func (u *User) closeMessageLog() {
+	u.messageLog.Close()
+	u.messageIndex.Close()
+}
