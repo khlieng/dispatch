@@ -12,10 +12,13 @@
 ## Usage
 There is a few different ways of getting it:
 
-#### 1. Binary
-There will be binary releases.
+### 1. Binary
+- **[Windows (x64)](https://github.com/khlieng/dispatch/releases/download/v0.1/dispatch_windows_amd64.zip)**
+- **[OS X (x64)](https://github.com/khlieng/dispatch/releases/download/v0.1/dispatch_darwin_amd64.tar.gz)**
+- **[Linux (x64)](https://github.com/khlieng/dispatch/releases/download/v0.1/dispatch_linux_amd64.tar.gz)**
+- [Other versions](https://github.com/khlieng/dispatch/releases)
 
-#### 2. Go
+### 2. Go
 This requires a [Go environment](http://golang.org/doc/install).
 
 ```bash
@@ -29,7 +32,7 @@ To get some help run:
 dispatch help
 ```
 
-#### 3. Docker
+### 3. Docker
 ```bash
 docker run -p <http port>:80 -p <https port>:443 -v <path>:/data khlieng/dispatch
 ```
@@ -44,7 +47,7 @@ go install
 ```
 
 ### Client
-This requires [Node.js](https://nodejs.org/download/).
+This requires [Node.js](https://nodejs.org).
 
 Fetch the dependencies:
 ```bash
