@@ -2,6 +2,8 @@
 
 ####[Try it!](https://dispatch.khlieng.com)
 
+![Dispatch](https://khlieng.com/dispatch.png)
+
 ### Features
 * Searchable history
 * Persistent connections
