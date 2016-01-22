@@ -1,0 +1,30 @@
+struct User {
+  ID       uint64
+  Username string
+}
+
+struct Server {
+  Name     string
+  Host     string
+  Port     string
+  TLS      bool
+  Password string
+  Nick     string
+  Username string
+  Realname string
+}
+
+struct Channel {
+  Server string
+  Name   string
+  Topic  string
+}
+
+struct Message {
+  ID      uint64
+  Server  string
+  From    string
+  To      string
+  Content string
+  Time    int64
+}
