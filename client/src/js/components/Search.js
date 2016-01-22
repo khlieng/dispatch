@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import pure from 'pure-render-decorator';
-import { timestamp } from '../util';
+import SearchResult from './SearchResult';
 
 @pure
 export default class Search extends Component {
@@ -19,9 +19,7 @@ export default class Search extends Component {
     };
 
     const results = search.results.map(result => (
-      <p key={result.id}>
-        {timestamp(new Date(result.time * 1000))} {result.from} {result.content}
-      </p>
+      <SearchResult key={result.id} result={result} />
     ));
 
     return (
