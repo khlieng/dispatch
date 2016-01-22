@@ -51,6 +51,13 @@ func (c *ChannelStore) AddUser(user, server, channel string) {
 	}
 
 	if users, ok := c.users[server][channel]; ok {
+		for _, u := range users {
+			if u == user {
+				c.userLock.Unlock()
+				return
+			}
+		}
+
 		c.users[server][channel] = append(users, user)
 	} else {
 		c.users[server][channel] = []string{user}
