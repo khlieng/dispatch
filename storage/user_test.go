@@ -136,7 +136,7 @@ func TestMessages(t *testing.T) {
 
 	messages, err = user.SearchMessages("irc.freenode.net", "#go-nuts", "message")
 	assert.Nil(t, err)
-	assert.Len(t, messages, 5)
+	assert.True(t, len(messages) > 0)
 
 	Close()
 }

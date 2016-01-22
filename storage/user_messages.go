@@ -109,13 +109,14 @@ func (u *User) GetMessages(server, channel string, count int, fromID uint64) ([]
 	return nil, nil
 }
 
-func (u *User) SearchMessages(server, channel, phrase string) ([]Message, error) {
+func (u *User) SearchMessages(server, channel, q string) ([]Message, error) {
 	serverQuery := bleve.NewMatchQuery(server)
 	serverQuery.SetField("server")
 	channelQuery := bleve.NewMatchQuery(channel)
 	channelQuery.SetField("to")
-	contentQuery := bleve.NewFuzzyQuery(phrase)
+	contentQuery := bleve.NewMatchQuery(q)
 	contentQuery.SetField("content")
+	contentQuery.SetFuzziness(2)
 
 	query := bleve.NewBooleanQuery([]bleve.Query{serverQuery, channelQuery, contentQuery}, nil, nil)
 
