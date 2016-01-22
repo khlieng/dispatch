@@ -31,7 +31,7 @@ function updateSelected({ params, dispatch }) {
 }
 
 function updateCharWidth() {
-  const charWidth = stringWidth(' ', '16px Droid Sans Mono');
+  const charWidth = stringWidth(' ', '16px Roboto Mono');
   window.messageIndent = 6 * charWidth;
   return setCharWidth(charWidth);
 }
