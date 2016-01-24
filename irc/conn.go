@@ -173,13 +173,7 @@ func (c *Client) recv() {
 		}
 
 		msg := parseMessage(line)
-
-		select {
-		case <-c.quit:
-			return
-
-		case c.Messages <- msg:
-		}
+		c.Messages <- msg
 
 		switch msg.Command {
 		case Ping:
