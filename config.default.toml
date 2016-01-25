@@ -58,3 +58,10 @@ secret = ""
 [auth.twitter]
 key = ""
 secret = ""
+
+# Strict-Transport-Security
+[https.hsts]
+enabled = false
+max_age = 31536000
+include_subdomains = false
+preload = false

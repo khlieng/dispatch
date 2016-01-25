@@ -17,40 +17,44 @@ import (
 	"github.com/khlieng/dispatch/assets"
 )
 
-var files = []File{
-	File{
-		Path:         "bundle.js",
-		Asset:        "bundle.js.gz",
-		ContentType:  "text/javascript",
-		CacheControl: "max-age=31536000",
-	},
-	File{
-		Path:         "bundle.css",
-		Asset:        "bundle.css.gz",
-		ContentType:  "text/css",
-		CacheControl: "max-age=31536000",
-	},
-	File{
-		Path:        "font/fontello.woff",
-		Asset:       "font/fontello.woff.gz",
-		ContentType: "application/font-woff",
-	},
-	File{
-		Path:        "font/fontello.ttf",
-		Asset:       "font/fontello.ttf.gz",
-		ContentType: "application/x-font-ttf",
-	},
-	File{
-		Path:        "font/fontello.eot",
-		Asset:       "font/fontello.eot.gz",
-		ContentType: "application/vnd.ms-fontobject",
-	},
-	File{
-		Path:        "font/fontello.svg",
-		Asset:       "font/fontello.svg.gz",
-		ContentType: "image/svg+xml",
-	},
-}
+var (
+	files = []File{
+		File{
+			Path:         "bundle.js",
+			Asset:        "bundle.js.gz",
+			ContentType:  "text/javascript",
+			CacheControl: "max-age=31536000",
+		},
+		File{
+			Path:         "bundle.css",
+			Asset:        "bundle.css.gz",
+			ContentType:  "text/css",
+			CacheControl: "max-age=31536000",
+		},
+		File{
+			Path:        "font/fontello.woff",
+			Asset:       "font/fontello.woff.gz",
+			ContentType: "application/font-woff",
+		},
+		File{
+			Path:        "font/fontello.ttf",
+			Asset:       "font/fontello.ttf.gz",
+			ContentType: "application/x-font-ttf",
+		},
+		File{
+			Path:        "font/fontello.eot",
+			Asset:       "font/fontello.eot.gz",
+			ContentType: "application/vnd.ms-fontobject",
+		},
+		File{
+			Path:        "font/fontello.svg",
+			Asset:       "font/fontello.svg.gz",
+			ContentType: "image/svg+xml",
+		},
+	}
+
+	hstsHeader string
+)
 
 type File struct {
 	Path         string
@@ -76,6 +80,17 @@ func initFileServer() {
 
 		hash = md5.Sum(data)
 		files[1].Path = "bundle." + base64.RawURLEncoding.EncodeToString(hash[:]) + ".css"
+
+		if viper.GetBool("https.hsts.enabled") {
+			hstsHeader = "max-age=" + viper.GetString("https.hsts.max_age")
+
+			if viper.GetBool("https.hsts.include_subdomains") {
+				hstsHeader += "; includeSubDomains"
+			}
+			if viper.GetBool("https.hsts.preload") {
+				hstsHeader += "; preload"
+			}
+		}
 	}
 }
 
@@ -112,11 +127,19 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("X-Frame-Options", "deny")
+	w.Header().Set("X-XSS-Protection", "1; mode=block")
+
+	if hstsHeader != "" {
+		w.Header().Set("Strict-Transport-Security", hstsHeader)
+	}
 
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w.Header().Set("Content-Encoding", "gzip")
+
 		gzw := gzip.NewWriter(w)
 		renderIndex(gzw, session)
 		gzw.Close()
