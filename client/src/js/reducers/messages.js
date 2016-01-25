@@ -14,7 +14,7 @@ const Message = Record({
 });
 
 function addMessage(state, message) {
-  let dest = message.to || message.from;
+  let dest = message.to || message.from || message.server;
   if (message.from && message.from.indexOf('.') !== -1) {
     dest = message.server;
   }
