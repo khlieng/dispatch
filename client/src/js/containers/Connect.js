@@ -51,13 +51,19 @@ class Connect extends Component {
   };
 
   render() {
+    const defaults = window.__ENV__.defaults;
     let optionals = null;
 
     if (this.state.showOptionals) {
       optionals = (
         <div>
           <input name="username" type="text" placeholder="Username" />
-          <input name="password" type="text" placeholder="Password" />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            defaultValue={defaults.password}
+          />
           <input name="realname" type="text" placeholder="Realname" />
         </div>
       );
@@ -68,13 +74,18 @@ class Connect extends Component {
         <Navicon />
         <form ref="form" className="connect-form" onSubmit={this.handleSubmit}>
           <h1>Connect</h1>
-          <input name="name" type="text" placeholder="Name" defaultValue="Freenode" />
-          <input name="address" type="text" placeholder="Address" defaultValue="irc.freenode.net" />
+          <input name="name" type="text" placeholder="Name" defaultValue={defaults.name} />
+          <input name="address" type="text" placeholder="Address" defaultValue={defaults.address} />
           <input name="nick" type="text" placeholder="Nick" />
-          <input name="channels" type="text" placeholder="Channels" />
+          <input
+            name="channels"
+            type="text"
+            placeholder="Channels"
+            defaultValue={defaults.channels ? defaults.channels.join(',') : null}
+          />
           {optionals}
           <p>
-            <label><input name="ssl" type="checkbox" />SSL</label>
+            <label><input name="ssl" type="checkbox" defaultChecked={defaults.ssl} />SSL</label>
             <i className="icon-ellipsis" onClick={this.handleShowClick}></i>
           </p>
           <input type="submit" value="Connect" />

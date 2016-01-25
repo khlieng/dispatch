@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,8 +30,7 @@ type File struct {
 
 func serveFiles(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
-		handleAuth(w, r)
-		serveFile(w, r, "index.html.gz", "text/html")
+		serveIndex(w, r)
 		return
 	}
 
@@ -46,8 +46,27 @@ func serveFiles(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	handleAuth(w, r)
-	serveFile(w, r, "index.html.gz", "text/html")
+	serveIndex(w, r)
+}
+
+func serveIndex(w http.ResponseWriter, r *http.Request) {
+	session := handleAuth(w, r)
+	if session == nil {
+		log.Println("[Auth] No session")
+		w.WriteHeader(500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		gzw := gzip.NewWriter(w)
+		renderIndex(gzw, session)
+		gzw.Close()
+	} else {
+		renderIndex(w, session)
+	}
 }
 
 func serveFile(w http.ResponseWriter, r *http.Request, path, contentType string) {

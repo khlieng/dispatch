@@ -1,5 +1,6 @@
 var path = require('path');
 var exec = require('child_process').exec;
+var url = require('url');
 
 var gulp = require('gulp');
 var gutil = require('gulp-util');
@@ -10,6 +11,7 @@ var gzip = require('gulp-gzip');
 var concat = require('gulp-concat');
 var cache = require('gulp-cached');
 var express = require('express');
+var proxy = require('express-http-proxy');
 var webpack = require('webpack');
 
 gulp.task('html', function() {
@@ -64,8 +66,8 @@ function compress() {
     .pipe(gulp.dest('dist/gz'));
 }
 
-gulp.task('gzip', ['html', 'css', 'js', 'fonts'], compress);
-gulp.task('gzip:dev', ['html', 'css', 'fonts'], compress);
+gulp.task('gzip', ['css', 'js', 'fonts'], compress);
+gulp.task('gzip:dev', ['css', 'fonts'], compress);
 
 gulp.task('bindata', ['gzip', 'config'], function(cb) {
   exec('go-bindata -nomemcopy -nocompress -pkg assets -o ../assets/bindata.go -prefix "dist/gz" dist/gz/...', cb);
@@ -75,8 +77,7 @@ gulp.task('bindata:dev', ['gzip:dev', 'config'], function(cb) {
   exec('go-bindata -debug -pkg assets -o ../assets/bindata.go -prefix "dist/gz" dist/gz/...', cb);
 });
 
-gulp.task('dev', ['html', 'css', 'fonts', 'config', 'gzip:dev', 'bindata:dev'], function() {
-  gulp.watch('src/*.html', ['html']);
+gulp.task('dev', ['css', 'fonts', 'config', 'gzip:dev', 'bindata:dev'], function() {
   gulp.watch('src/css/*.css', ['css']);
 
   var config = require('./webpack.config.dev.js');
@@ -92,9 +93,11 @@ gulp.task('dev', ['html', 'css', 'fonts', 'config', 'gzip:dev', 'bindata:dev'], 
 
   app.use('/', express.static('dist'));
 
-  app.get('*', function (req, res) {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-  });
+  app.use('*', proxy('localhost:1337', {
+    forwardPath: function(req, res) {
+      return url.parse(req.url).path;
+    }
+  }));
 
   app.listen(3000, function (err) {
     if (err) {
@@ -106,6 +109,6 @@ gulp.task('dev', ['html', 'css', 'fonts', 'config', 'gzip:dev', 'bindata:dev'], 
   });
 });
 
-gulp.task('build', ['html', 'css', 'js', 'fonts', 'config', 'gzip', 'bindata']);
+gulp.task('build', ['css', 'js', 'fonts', 'config', 'gzip', 'bindata']);
 
 gulp.task('default', ['dev']);
