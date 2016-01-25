@@ -8,8 +8,10 @@ import (
 )
 
 var (
-	index_start = []byte(`<!DOCTYPE html><html lang=en><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Dispatch</title><link href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto+Mono:400,700" rel=stylesheet><link href=/bundle.css rel=stylesheet></head><body><div id=root></div><script>window.__ENV__=`)
-	index_end   = []byte(`;</script><script src=/bundle.js></script></body></html>`)
+	index_0 = []byte(`<!DOCTYPE html><html lang=en><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Dispatch</title><link href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto+Mono:400,700" rel=stylesheet><link href=/`)
+	index_1 = []byte(` rel=stylesheet></head><body><div id=root></div><script>window.__ENV__=`)
+	index_2 = []byte(`;</script><script src=/`)
+	index_3 = []byte(`></script></body></html>`)
 )
 
 type connectDefaults struct {
@@ -25,7 +27,9 @@ type indexData struct {
 }
 
 func renderIndex(w io.Writer, session *Session) {
-	w.Write(index_start)
+	w.Write(index_0)
+	w.Write([]byte(files[1].Path))
+	w.Write(index_1)
 
 	json.NewEncoder(w).Encode(indexData{
 		Defaults: connectDefaults{
@@ -37,5 +41,7 @@ func renderIndex(w io.Writer, session *Session) {
 		},
 	})
 
-	w.Write(index_end)
+	w.Write(index_2)
+	w.Write([]byte(files[0].Path))
+	w.Write(index_3)
 }

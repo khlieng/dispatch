@@ -66,9 +66,10 @@ gulp build
 
 The server needs to be rebuilt after this.
 
-For development with hot reloading enabled just run:
+For development with hot reloading enabled run:
 ```bash
 gulp
+dispatch --dev
 ```
 
 ## Libraries

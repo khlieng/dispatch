@@ -13,7 +13,7 @@ import (
 func reconnectIRC() {
 	for _, user := range storage.LoadUsers() {
 		session := NewSession(user)
-		sessions[user.ID] = session
+		sessions.set(user.ID, session)
 		go session.run()
 
 		channels := user.GetChannels()

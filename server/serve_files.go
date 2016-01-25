@@ -3,6 +3,8 @@ package server
 import (
 	"bytes"
 	"compress/gzip"
+	"crypto/md5"
+	"encoding/base64"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -10,22 +12,71 @@ import (
 	"strings"
 	"time"
 
+	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
+
 	"github.com/khlieng/dispatch/assets"
 )
 
 var files = []File{
-	File{"vendor.js", "text/javascript"},
-	File{"bundle.js", "text/javascript"},
-	File{"bundle.css", "text/css"},
-	File{"font/fontello.woff", "application/font-woff"},
-	File{"font/fontello.ttf", "application/x-font-ttf"},
-	File{"font/fontello.eot", "application/vnd.ms-fontobject"},
-	File{"font/fontello.svg", "image/svg+xml"},
+	File{
+		Path:         "bundle.js",
+		Asset:        "bundle.js.gz",
+		ContentType:  "text/javascript",
+		CacheControl: "max-age=31536000",
+	},
+	File{
+		Path:         "bundle.css",
+		Asset:        "bundle.css.gz",
+		ContentType:  "text/css",
+		CacheControl: "max-age=31536000",
+	},
+	File{
+		Path:        "font/fontello.woff",
+		Asset:       "font/fontello.woff.gz",
+		ContentType: "application/font-woff",
+	},
+	File{
+		Path:        "font/fontello.ttf",
+		Asset:       "font/fontello.ttf.gz",
+		ContentType: "application/x-font-ttf",
+	},
+	File{
+		Path:        "font/fontello.eot",
+		Asset:       "font/fontello.eot.gz",
+		ContentType: "application/vnd.ms-fontobject",
+	},
+	File{
+		Path:        "font/fontello.svg",
+		Asset:       "font/fontello.svg.gz",
+		ContentType: "image/svg+xml",
+	},
 }
 
 type File struct {
-	Path        string
-	ContentType string
+	Path         string
+	Asset        string
+	ContentType  string
+	CacheControl string
+}
+
+func initFileServer() {
+	if !viper.GetBool("dev") {
+		data, err := assets.Asset(files[0].Asset)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		hash := md5.Sum(data)
+		files[0].Path = "bundle." + base64.RawURLEncoding.EncodeToString(hash[:]) + ".js"
+
+		data, err = assets.Asset(files[1].Asset)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		hash = md5.Sum(data)
+		files[1].Path = "bundle." + base64.RawURLEncoding.EncodeToString(hash[:]) + ".css"
+	}
 }
 
 func serveFiles(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +92,11 @@ func serveFiles(w http.ResponseWriter, r *http.Request) {
 
 	for _, file := range files {
 		if strings.HasSuffix(r.URL.Path, file.Path) {
-			serveFile(w, r, file.Path+".gz", file.ContentType)
+			if file.CacheControl != "" {
+				w.Header().Set("Cache-Control", file.CacheControl)
+			}
+
+			serveFile(w, r, file.Asset, file.ContentType)
 			return
 		}
 	}
@@ -57,6 +112,7 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Content-Type", "text/html")
 
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {

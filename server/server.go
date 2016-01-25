@@ -7,7 +7,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
-	"sync"
 
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
 	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
@@ -17,16 +16,9 @@ import (
 	"github.com/khlieng/dispatch/storage"
 )
 
-const (
-	cookieName = "dispatch"
-)
-
 var (
+	sessions     *sessionStore
 	channelStore *storage.ChannelStore
-	sessions     map[uint64]*Session
-	sessionLock  sync.Mutex
-
-	hmacKey []byte
 
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -38,21 +30,13 @@ var (
 )
 
 func Run() {
-	defer storage.Close()
-
+	sessions = newSessionStore()
 	channelStore = storage.NewChannelStore()
-	sessions = make(map[uint64]*Session)
-
-	var err error
-	hmacKey, err = getHMACKey()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	reconnectIRC()
+	initAuth()
+	initFileServer()
 	startHTTP()
-
-	select {}
 }
 
 func startHTTP() {

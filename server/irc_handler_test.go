@@ -41,7 +41,7 @@ func dispatchMessage(msg *irc.Message) WSResponse {
 
 	newIRCHandler(c, s).dispatchMessage(msg)
 
-	return <-s.out
+	return <-s.broadcast
 }
 
 func checkResponse(t *testing.T, expectedType string, expectedData interface{}, res WSResponse) {
@@ -194,7 +194,7 @@ func TestHandleIRCWhois(t *testing.T) {
 		Realname: "realname",
 		Server:   "srv.com",
 		Channels: []string{"#chan", "#chan1"},
-	}, <-s.out)
+	}, <-s.broadcast)
 }
 
 func TestHandleIRCTopic(t *testing.T) {
@@ -236,7 +236,7 @@ func TestHandleIRCNames(t *testing.T) {
 		Server:  "host.com",
 		Channel: "#chan",
 		Users:   []string{"a", "b", "c", "d"},
-	}, <-s.out)
+	}, <-s.broadcast)
 }
 
 func TestHandleIRCMotd(t *testing.T) {
@@ -263,5 +263,5 @@ func TestHandleIRCMotd(t *testing.T) {
 		Server:  "host.com",
 		Title:   "motd title",
 		Content: []string{"line 1", "line 2"},
-	}, <-s.out)
+	}, <-s.broadcast)
 }

@@ -45,6 +45,8 @@ var rootCmd = &cobra.Command{
 		log.Println("Storing data at", storage.Path.Root())
 
 		storage.Open()
+		defer storage.Close()
+
 		server.Run()
 	},
 }
@@ -57,11 +59,13 @@ func init() {
 	rootCmd.AddCommand(clearCmd)
 	rootCmd.AddCommand(configCmd)
 
-	rootCmd.Flags().IntP("port", "p", 80, "port to listen on")
 	rootCmd.PersistentFlags().String("dir", storage.DefaultDirectory(), "directory to store config and data in")
+	rootCmd.Flags().IntP("port", "p", 80, "port to listen on")
+	rootCmd.Flags().Bool("dev", false, "development mode")
 
-	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
 	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
+	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
+	viper.BindPFlag("dev", rootCmd.Flags().Lookup("dev"))
 
 	viper.SetDefault("verify_client_certificates", true)
 }

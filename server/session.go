@@ -17,9 +17,9 @@ type Session struct {
 	connectionState map[string]bool
 	ircLock         sync.Mutex
 
-	ws     map[string]*wsConn
-	wsLock sync.Mutex
-	out    chan WSResponse
+	ws        map[string]*wsConn
+	wsLock    sync.Mutex
+	broadcast chan WSResponse
 
 	user       *storage.User
 	expiration *time.Timer
@@ -31,7 +31,7 @@ func NewSession(user *storage.User) *Session {
 		irc:             make(map[string]*irc.Client),
 		connectionState: make(map[string]bool),
 		ws:              make(map[string]*wsConn),
-		out:             make(chan WSResponse, 32),
+		broadcast:       make(chan WSResponse, 32),
 		user:            user,
 		expiration:      time.NewTimer(AnonymousSessionExpiration),
 		reset:           make(chan time.Duration, 1),
@@ -115,7 +115,7 @@ func (s *Session) numWS() int {
 }
 
 func (s *Session) sendJSON(t string, v interface{}) {
-	s.out <- WSResponse{t, v}
+	s.broadcast <- WSResponse{t, v}
 }
 
 func (s *Session) sendError(err error, server string) {
@@ -134,7 +134,7 @@ func (s *Session) resetExpirationIfEmpty() {
 func (s *Session) run() {
 	for {
 		select {
-		case res := <-s.out:
+		case res := <-s.broadcast:
 			s.wsLock.Lock()
 			for _, ws := range s.ws {
 				ws.out <- res
@@ -142,9 +142,7 @@ func (s *Session) run() {
 			s.wsLock.Unlock()
 
 		case <-s.expiration.C:
-			sessionLock.Lock()
-			delete(sessions, s.user.ID)
-			sessionLock.Unlock()
+			sessions.delete(s.user.ID)
 			s.user.Remove()
 			return
 
@@ -156,4 +154,34 @@ func (s *Session) run() {
 			}
 		}
 	}
+}
+
+type sessionStore struct {
+	sessions map[uint64]*Session
+	lock     sync.Mutex
+}
+
+func newSessionStore() *sessionStore {
+	return &sessionStore{
+		sessions: make(map[uint64]*Session),
+	}
+}
+
+func (s *sessionStore) get(userid uint64) *Session {
+	s.lock.Lock()
+	session := s.sessions[userid]
+	s.lock.Unlock()
+	return session
+}
+
+func (s *sessionStore) set(userid uint64, session *Session) {
+	s.lock.Lock()
+	s.sessions[userid] = session
+	s.lock.Unlock()
+}
+
+func (s *sessionStore) delete(userid uint64) {
+	s.lock.Lock()
+	delete(s.sessions, userid)
+	s.lock.Unlock()
 }
