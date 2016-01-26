@@ -26,8 +26,8 @@ func newWSHandler(conn *websocket.Conn, session *Session) *wsHandler {
 		session: session,
 		addr:    conn.RemoteAddr().String(),
 	}
-	h.initHandlers()
 	h.init()
+	h.initHandlers()
 	return h
 }
 
@@ -63,13 +63,13 @@ func (h *wsHandler) init() {
 		h.session.numWS(), "WebSocket connections")
 
 	channels := h.session.user.GetChannels()
-	for i, channel := range channels {
+	/*for i, channel := range channels {
 		channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
 	}
 
 	h.session.sendJSON("channels", channels)
 	h.session.sendJSON("servers", h.session.user.GetServers())
-	h.session.sendJSON("connection_update", h.session.getConnectionStates())
+	h.session.sendJSON("connection_update", h.session.getConnectionStates())*/
 
 	for _, channel := range channels {
 		h.session.sendJSON("users", Userlist{

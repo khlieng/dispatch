@@ -3,8 +3,6 @@ package server
 import (
 	"encoding/json"
 	"io"
-
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
 )
 
 var (
@@ -14,32 +12,12 @@ var (
 	index_3 = []byte(`></script></body></html>`)
 )
 
-type connectDefaults struct {
-	Name     string   `json:"name"`
-	Address  string   `json:"address"`
-	Channels []string `json:"channels"`
-	Password string   `json:"password"`
-	SSL      bool     `json:"ssl"`
-}
-
-type indexData struct {
-	Defaults connectDefaults `json:"defaults"`
-}
-
-func renderIndex(w io.Writer, session *Session) {
+func renderIndex(w io.Writer, data interface{}) {
 	w.Write(index_0)
 	w.Write([]byte(files[1].Path))
 	w.Write(index_1)
 
-	json.NewEncoder(w).Encode(indexData{
-		Defaults: connectDefaults{
-			Name:     viper.GetString("defaults.name"),
-			Address:  viper.GetString("defaults.address"),
-			Channels: viper.GetStringSlice("defaults.channels"),
-			Password: viper.GetString("defaults.password"),
-			SSL:      viper.GetBool("defaults.ssl"),
-		},
-	})
+	json.NewEncoder(w).Encode(data)
 
 	w.Write(index_2)
 	w.Write([]byte(files[0].Path))

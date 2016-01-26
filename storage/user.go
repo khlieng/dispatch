@@ -23,14 +23,15 @@ type User struct {
 }
 
 type Server struct {
-	Name     string `json:"name"`
-	Host     string `json:"host"`
-	Port     string `json:"port,omitempty"`
-	TLS      bool   `json:"tls"`
-	Password string `json:"password,omitempty"`
-	Nick     string `json:"nick"`
-	Username string `json:"username"`
-	Realname string `json:"realname"`
+	Name      string `json:"name"`
+	Host      string `json:"host"`
+	Port      string `json:"port,omitempty"`
+	TLS       bool   `json:"tls,omitempty"`
+	Password  string `json:"password,omitempty"`
+	Nick      string `json:"nick"`
+	Username  string `json:"username,omitempty"`
+	Realname  string `json:"realname,omitempty"`
+	Connected bool   `json:"connected"`
 }
 
 type Channel struct {

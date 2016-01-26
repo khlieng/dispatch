@@ -141,10 +141,10 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Encoding", "gzip")
 
 		gzw := gzip.NewWriter(w)
-		renderIndex(gzw, session)
+		renderIndex(gzw, getIndexData(r, session))
 		gzw.Close()
 	} else {
-		renderIndex(w, session)
+		renderIndex(w, getIndexData(r, session))
 	}
 }
 
