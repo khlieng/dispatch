@@ -9,7 +9,8 @@ import { select } from '../actions/tab';
 @pure
 class Connect extends Component {
   state = {
-    showOptionals: false
+    showOptionals: false,
+    passwordTouched: false
   };
 
   handleSubmit = (e) => {
@@ -27,7 +28,10 @@ class Connect extends Component {
     if (this.state.showOptionals) {
       opts.realname = e.target.realname.value.trim();
       opts.username = e.target.username.value.trim();
-      opts.password = e.target.password.value.trim();
+
+      if (this.state.passwordTouched) {
+        opts.password = e.target.password.value.trim();
+      }
     }
 
     if (address.indexOf('.') > 0 && nick) {
@@ -50,6 +54,10 @@ class Connect extends Component {
     this.setState({ showOptionals: !this.state.showOptionals });
   };
 
+  handlePasswordChange = () => {
+    this.setState({ passwordTouched: true });
+  };
+
   render() {
     const defaults = window.__ENV__.defaults;
     let optionals = null;
@@ -62,7 +70,8 @@ class Connect extends Component {
             name="password"
             type="password"
             placeholder="Password"
-            defaultValue={defaults.password}
+            defaultValue={defaults.password ? '      ' : null}
+            onChange={this.handlePasswordChange}
           />
           <input name="realname" type="text" placeholder="Realname" />
         </div>

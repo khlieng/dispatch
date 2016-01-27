@@ -97,6 +97,12 @@ func (h *wsHandler) connect(b []byte) {
 		i.Password = data.Password
 		i.Realname = data.Realname
 
+		if data.Password == "" && viper.GetString("defaults.password") != "" {
+			i.Password = viper.GetString("defaults.password")
+		} else {
+			i.Password = data.Password
+		}
+
 		if cert := h.session.user.GetCertificate(); cert != nil {
 			i.TLSConfig = &tls.Config{
 				Certificates:       []tls.Certificate{*cert},
