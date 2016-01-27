@@ -94,10 +94,11 @@ func (h *wsHandler) connect(b []byte) {
 
 		i := irc.NewClient(data.Nick, data.Username)
 		i.TLS = data.TLS
-		i.Password = data.Password
 		i.Realname = data.Realname
 
-		if data.Password == "" && viper.GetString("defaults.password") != "" {
+		if data.Password == "" &&
+			viper.GetString("defaults.password") != "" &&
+			data.Server == viper.GetString("defaults.address") {
 			i.Password = viper.GetString("defaults.password")
 		} else {
 			i.Password = data.Password
