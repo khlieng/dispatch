@@ -30,6 +30,12 @@ func Run() {
 	sessions = newSessionStore()
 	channelStore = storage.NewChannelStore()
 
+	if viper.GetBool("dev") {
+		upgrader.CheckOrigin = func(r *http.Request) bool {
+			return true
+		}
+	}
+
 	reconnectIRC()
 	initAuth()
 	initFileServer()
