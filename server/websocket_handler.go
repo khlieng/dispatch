@@ -217,6 +217,15 @@ func (h *wsHandler) away(b []byte) {
 	}
 }
 
+func (h *wsHandler) raw(b []byte) {
+	var data Raw
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Write(data.Message)
+	}
+}
+
 func (h *wsHandler) search(b []byte) {
 	go func() {
 		var data SearchRequest
@@ -261,6 +270,7 @@ func (h *wsHandler) initHandlers() {
 		"kick":    h.kick,
 		"whois":   h.whois,
 		"away":    h.away,
+		"raw":     h.raw,
 		"search":  h.search,
 		"cert":    h.cert,
 	}

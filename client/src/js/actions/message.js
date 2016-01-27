@@ -75,3 +75,15 @@ export function runCommand(command, channel, server) {
     server
   };
 }
+
+export function raw(message, server) {
+  return {
+    type: actions.RAW,
+    message,
+    server,
+    socket: {
+      type: 'raw',
+      data: { message, server }
+    }
+  };
+}

@@ -115,6 +115,11 @@ type Away struct {
 	Message string `json:"message"`
 }
 
+type Raw struct {
+	Server  string `json:"server"`
+	Message string `json:"message"`
+}
+
 type SearchRequest struct {
 	Server  string `json:"server"`
 	Channel string `json:"channel"`

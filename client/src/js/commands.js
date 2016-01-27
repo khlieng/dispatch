@@ -4,7 +4,7 @@ import { COMMAND } from './actions';
 import { setNick, disconnect, whois, away } from './actions/server';
 import { join, part, invite, kick } from './actions/channel';
 import { select } from './actions/tab';
-import { sendMessage, addMessage, inform } from './actions/message';
+import { sendMessage, addMessage, inform, raw } from './actions/message';
 
 const help = [
   '/join <channel> - Join a channel',
@@ -18,7 +18,8 @@ const help = [
   '/invite <user> [channel] - Invite user to the current or specified channel',
   '/kick <user> - Kick user from the current channel',
   '/whois <user> - Get information about user',
-  '/away [message] - Set or clear away message'
+  '/away [message] - Set or clear away message',
+  '/raw [message] - Send raw IRC message to the current server'
 ].map(_.escape);
 
 export default createCommandMiddleware(COMMAND, {
@@ -100,6 +101,12 @@ export default createCommandMiddleware(COMMAND, {
 
   away({ dispatch, server }, message) {
     dispatch(away(message, server));
+  },
+
+  raw({ dispatch, server }, ...message) {
+    if (message) {
+      dispatch(raw(message.join(' '), server));
+    }
   },
 
   help({ dispatch, server, channel }) {
