@@ -183,7 +183,7 @@ func (i *ircHandler) topic(msg *irc.Message) {
 }
 
 func (i *ircHandler) names(msg *irc.Message) {
-	users := strings.Split(msg.Trailing, " ")
+	users := strings.Split(strings.TrimSuffix(msg.Trailing, " "), " ")
 	userBuffer := i.userBuffers[msg.Params[2]]
 	i.userBuffers[msg.Params[2]] = append(userBuffer, users...)
 }
