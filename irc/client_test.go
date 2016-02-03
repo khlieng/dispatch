@@ -152,3 +152,14 @@ func TestRegister(t *testing.T) {
 	assert.Equal(t, "NICK nick\r\n", <-out)
 	assert.Equal(t, "USER user 0 * :rn\r\n", <-out)
 }
+
+func TestFlushChannels(t *testing.T) {
+	c, out := testClientSend()
+	c.addChannel("#chan1")
+	c.flushChannels()
+	assert.Equal(t, <-out, "JOIN #chan1\r\n")
+	c.addChannel("#chan2")
+	c.addChannel("#chan3")
+	c.flushChannels()
+	assert.Equal(t, <-out, "JOIN #chan2,#chan3\r\n")
+}

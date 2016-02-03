@@ -22,7 +22,8 @@ type Client struct {
 	Messages          chan *Message
 	ConnectionChanged chan bool
 
-	nick string
+	nick     string
+	channels []string
 
 	conn      net.Conn
 	connected bool
@@ -148,4 +149,19 @@ func (c *Client) register() {
 	}
 	c.writeNick(c.nick)
 	c.writeUser(c.Username, c.Realname)
+}
+
+func (c *Client) addChannel(channel string) {
+	c.lock.Lock()
+	c.channels = append(c.channels, channel)
+	c.lock.Unlock()
+}
+
+func (c *Client) flushChannels() {
+	c.lock.Lock()
+	if len(c.channels) > 0 {
+		c.Join(c.channels...)
+		c.channels = []string{}
+	}
+	c.lock.Unlock()
 }

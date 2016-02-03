@@ -93,6 +93,8 @@ func (c *Client) tryConnect() {
 		err := c.connect()
 		if err == nil {
 			c.backoff.Reset()
+
+			c.flushChannels()
 			return
 		}
 
@@ -178,6 +180,11 @@ func (c *Client) recv() {
 		switch msg.Command {
 		case Ping:
 			go c.write("PONG :" + msg.Trailing)
+
+		case Join:
+			if msg.Nick == c.GetNick() {
+				c.addChannel(msg.Params[0])
+			}
 
 		case ReplyWelcome:
 			c.once.Do(c.ready.Done)
