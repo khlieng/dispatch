@@ -13,26 +13,33 @@ const socket = new Socket(host);
 
 const store = configureStore(socket, browserHistory);
 
-if (window.__ENV__.servers) {
+const env = JSON.parse(document.getElementById('env').innerHTML);
+
+// TODO: Handle this properly
+window.__ENV__ = {
+  defaults: env.defaults
+};
+
+if (env.servers) {
   store.dispatch({
     type: 'SOCKET_SERVERS',
-    data: window.__ENV__.servers
+    data: env.servers
   });
 } else {
   store.dispatch(routeActions.replace('/connect'));
 }
 
-if (window.__ENV__.channels) {
+if (env.channels) {
   store.dispatch({
     type: 'SOCKET_CHANNELS',
-    data: window.__ENV__.channels
+    data: env.channels
   });
 }
 
-if (window.__ENV__.users) {
+if (env.users) {
   store.dispatch({
     type: 'SOCKET_USERS',
-    ...window.__ENV__.users
+    ...env.users
   });
 }
 

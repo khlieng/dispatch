@@ -51,6 +51,7 @@ var (
 	}
 
 	hstsHeader string
+	cspEnabled bool
 )
 
 func initFileServer() {
@@ -88,7 +89,7 @@ func initFileServer() {
 			})
 		}
 
-		if viper.GetBool("https.hsts.enabled") {
+		if viper.GetBool("https.hsts.enabled") && viper.GetBool("https.enabled") {
 			hstsHeader = "max-age=" + viper.GetString("https.hsts.max_age")
 
 			if viper.GetBool("https.hsts.include_subdomains") {
@@ -98,6 +99,8 @@ func initFileServer() {
 				hstsHeader += "; preload"
 			}
 		}
+
+		cspEnabled = true
 	}
 }
 
@@ -128,6 +131,17 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		log.Println("[Auth] No session")
 		w.WriteHeader(500)
 		return
+	}
+
+	if cspEnabled {
+		var connectSrc string
+		if r.TLS != nil {
+			connectSrc = "wss://" + r.Host
+		} else {
+			connectSrc = "ws://" + r.Host
+		}
+
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src "+connectSrc)
 	}
 
 	w.Header().Set("Content-Type", "text/html")
