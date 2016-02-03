@@ -1,6 +1,7 @@
 language: go
 
 go:
+    - 1.6rc1
     - 1.5.3
     - tip
 
