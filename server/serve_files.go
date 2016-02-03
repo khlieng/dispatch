@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -17,51 +18,40 @@ import (
 	"github.com/khlieng/dispatch/assets"
 )
 
-var (
-	files = []File{
-		File{
-			Path:         "bundle.js",
-			Asset:        "bundle.js.gz",
-			ContentType:  "text/javascript",
-			CacheControl: "max-age=31536000",
-		},
-		File{
-			Path:         "bundle.css",
-			Asset:        "bundle.css.gz",
-			ContentType:  "text/css",
-			CacheControl: "max-age=31536000",
-		},
-		File{
-			Path:        "font/fontello.woff",
-			Asset:       "font/fontello.woff.gz",
-			ContentType: "application/font-woff",
-		},
-		File{
-			Path:        "font/fontello.ttf",
-			Asset:       "font/fontello.ttf.gz",
-			ContentType: "application/x-font-ttf",
-		},
-		File{
-			Path:        "font/fontello.eot",
-			Asset:       "font/fontello.eot.gz",
-			ContentType: "application/vnd.ms-fontobject",
-		},
-		File{
-			Path:        "font/fontello.svg",
-			Asset:       "font/fontello.svg.gz",
-			ContentType: "image/svg+xml",
-		},
-	}
-
-	hstsHeader string
-)
-
 type File struct {
 	Path         string
 	Asset        string
 	ContentType  string
 	CacheControl string
+	Gzip         bool
 }
+
+var (
+	files = []*File{
+		&File{
+			Path:         "bundle.js",
+			Asset:        "bundle.js.gz",
+			ContentType:  "text/javascript",
+			CacheControl: "max-age=31536000",
+			Gzip:         true,
+		},
+		&File{
+			Path:         "bundle.css",
+			Asset:        "bundle.css.gz",
+			ContentType:  "text/css",
+			CacheControl: "max-age=31536000",
+			Gzip:         true,
+		},
+	}
+
+	contentTypes = map[string]string{
+		".woff2": "font/woff2",
+		".woff":  "application/font-woff",
+		".ttf":   "application/x-font-ttf",
+	}
+
+	hstsHeader string
+)
 
 func initFileServer() {
 	if !viper.GetBool("dev") {
@@ -80,6 +70,23 @@ func initFileServer() {
 
 		hash = md5.Sum(data)
 		files[1].Path = "bundle." + base64.RawURLEncoding.EncodeToString(hash[:]) + ".css"
+
+		fonts, err := assets.AssetDir("font")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, font := range fonts {
+			path := strings.TrimSuffix(font, ".gz")
+
+			files = append(files, &File{
+				Path:         filepath.Join("font", path),
+				Asset:        filepath.Join("font", font),
+				ContentType:  contentTypes[filepath.Ext(path)],
+				CacheControl: "max-age=31536000",
+				Gzip:         strings.HasSuffix(font, ".gz"),
+			})
+		}
 
 		if viper.GetBool("https.hsts.enabled") {
 			hstsHeader = "max-age=" + viper.GetString("https.hsts.max_age")
@@ -107,11 +114,7 @@ func serveFiles(w http.ResponseWriter, r *http.Request) {
 
 	for _, file := range files {
 		if strings.HasSuffix(r.URL.Path, file.Path) {
-			if file.CacheControl != "" {
-				w.Header().Set("Cache-Control", file.CacheControl)
-			}
-
-			serveFile(w, r, file.Asset, file.ContentType)
+			serveFile(w, r, file)
 			return
 		}
 	}
@@ -148,8 +151,8 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func serveFile(w http.ResponseWriter, r *http.Request, path, contentType string) {
-	info, err := assets.AssetInfo(path)
+func serveFile(w http.ResponseWriter, r *http.Request, file *File) {
+	info, err := assets.AssetInfo(file.Asset)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
@@ -159,16 +162,23 @@ func serveFile(w http.ResponseWriter, r *http.Request, path, contentType string)
 		return
 	}
 
-	data, err := assets.Asset(path)
+	data, err := assets.Asset(file.Asset)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", contentType)
+	if file.CacheControl != "" {
+		w.Header().Set("Cache-Control", file.CacheControl)
+	}
 
-	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+	w.Header().Set("Content-Type", file.ContentType)
+
+	if file.Gzip && strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+		w.Write(data)
+	} else if !file.Gzip {
 		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
 		w.Write(data)
 	} else {

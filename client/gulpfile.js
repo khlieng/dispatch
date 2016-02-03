@@ -24,7 +24,7 @@ gulp.task('html', function() {
 });
 
 gulp.task('css', function() {
-  return gulp.src(['src/css/fontello.css', 'src/css/style.css'])
+  return gulp.src(['src/css/fonts.css', 'src/css/fontello.css', 'src/css/style.css'])
     .pipe(concat('bundle.css'))
     .pipe(autoprefixer())
     .pipe(nano())
@@ -55,13 +55,18 @@ gulp.task('fonts', function() {
     .pipe(gulp.dest('dist/font'));
 });
 
+gulp.task('fonts:woff', function() {
+  return gulp.src('src/font/*(*.woff|*.woff2)')
+    .pipe(gulp.dest('dist/gz/font'));
+});
+
 gulp.task('config', function() {
   return gulp.src('../config.default.toml')
     .pipe(gulp.dest('dist/gz'));
 });
 
 function compress() {
-  return gulp.src(['dist/**/!(*.gz)', '!dist/{gz,gz/**}'])
+  return gulp.src(['dist/**/!(*.gz|*.woff|*.woff2)', '!dist/{gz,gz/**}'])
     .pipe(gzip())
     .pipe(gulp.dest('dist/gz'));
 }
@@ -77,7 +82,7 @@ gulp.task('bindata:dev', ['gzip:dev', 'config'], function(cb) {
   exec('go-bindata -debug -pkg assets -o ../assets/bindata.go -prefix "dist/gz" dist/gz/...', cb);
 });
 
-gulp.task('dev', ['css', 'fonts', 'config', 'gzip:dev', 'bindata:dev'], function() {
+gulp.task('dev', ['css', 'fonts', 'fonts:woff', 'config', 'gzip:dev', 'bindata:dev'], function() {
   gulp.watch('src/css/*.css', ['css']);
 
   var config = require('./webpack.config.dev.js');
@@ -109,6 +114,6 @@ gulp.task('dev', ['css', 'fonts', 'config', 'gzip:dev', 'bindata:dev'], function
   });
 });
 
-gulp.task('build', ['css', 'js', 'fonts', 'config', 'gzip', 'bindata']);
+gulp.task('build', ['css', 'js', 'fonts', 'fonts:woff', 'config', 'gzip', 'bindata']);
 
 gulp.task('default', ['dev']);
