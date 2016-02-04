@@ -13,7 +13,7 @@ export function normalizeChannel(channel) {
 export function timestamp(date = new Date()) {
   const h = padStart(date.getHours(), 2, '0');
   const m = padStart(date.getMinutes(), 2, '0');
-  return h + ':' + m;
+  return `${h}:${m}`;
 }
 
 const canvas = document.createElement('canvas');

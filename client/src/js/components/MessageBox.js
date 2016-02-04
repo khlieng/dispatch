@@ -68,7 +68,7 @@ export default class MessageBox extends Component {
 
       for (let i = 1; i < message.lines.length; i++) {
         lines.push(
-          <MessageLine key={key + '-' + i} type={message.type} line={message.lines[i]} />
+          <MessageLine key={`${key}-${i}`} type={message.type} line={message.lines[i]} />
         );
       }
     });

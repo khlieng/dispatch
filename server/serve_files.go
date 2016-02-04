@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -78,12 +79,12 @@ func initFileServer() {
 		}
 
 		for _, font := range fonts {
-			path := strings.TrimSuffix(font, ".gz")
+			p := strings.TrimSuffix(font, ".gz")
 
 			files = append(files, &File{
-				Path:         filepath.Join("font", path),
-				Asset:        filepath.Join("font", font),
-				ContentType:  contentTypes[filepath.Ext(path)],
+				Path:         path.Join("font", p),
+				Asset:        path.Join("font", font),
+				ContentType:  contentTypes[filepath.Ext(p)],
 				CacheControl: "max-age=31536000",
 				Gzip:         strings.HasSuffix(font, ".gz"),
 			})

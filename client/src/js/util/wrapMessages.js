@@ -37,7 +37,7 @@ export default function wrapMessages(messages, width, charWidth, indent = 0) {
             wrapped.push(line);
 
             if (i !== wlen - 1) {
-              line = word + ' ';
+              line = `${word} `;
               lineWidth = (word.length + 1) * charWidth;
               wordCount = 1;
             } else {
@@ -51,7 +51,7 @@ export default function wrapMessages(messages, width, charWidth, indent = 0) {
 
           hasWrapped = true;
         } else if (i !== wlen - 1) {
-          line += word + ' ';
+          line += `${word} `;
           lineWidth += charWidth;
         } else {
           line += word;

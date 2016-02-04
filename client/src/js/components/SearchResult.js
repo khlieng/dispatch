@@ -10,8 +10,8 @@ export default class Search extends Component {
     const content = Autolinker.link(result.content, { stripPrefix: false });
 
     const style = {
-      paddingLeft: window.messageIndent + 'px',
-      textIndent: -window.messageIndent + 'px'
+      paddingLeft: `${window.messageIndent}px`,
+      textIndent: `-${window.messageIndent}px`
     };
 
     return (
@@ -21,7 +21,7 @@ export default class Search extends Component {
           {' '}
           <span className="message-sender">{result.from}</span>
         </span>
-        <span dangerouslySetInnerHTML={{ __html: ' ' + content }}></span>
+        <span dangerouslySetInnerHTML={{ __html: ` ${content}` }}></span>
       </p>
     );
   }

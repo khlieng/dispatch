@@ -1,4 +1,4 @@
-import { routeActions } from 'redux-simple-router';
+import { routeActions } from 'react-router-redux';
 import { broadcast, inform, addMessage, addMessages } from './actions/message';
 import { select } from './actions/tab';
 import { normalizeChannel } from './util';
@@ -58,13 +58,11 @@ export default function handleSocket(socket, { dispatch, getState }) {
   );
 
   socket.on('motd', ({ content, server }) =>
-    dispatch(addMessages(content.map(line => {
-      return {
-        server,
-        to: server,
-        message: line
-      };
-    })))
+    dispatch(addMessages(content.map(line => ({
+      server,
+      to: server,
+      message: line
+    }))))
   );
 
   socket.on('whois', data => {

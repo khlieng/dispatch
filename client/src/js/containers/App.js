@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { routeActions } from 'redux-simple-router';
+import { routeActions } from 'react-router-redux';
 import pure from 'pure-render-decorator';
 import TabList from '../components/TabList';
 import { select } from '../actions/tab';

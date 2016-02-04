@@ -14,7 +14,7 @@ export default class MessageLine extends Component {
     }
 
     const style = {
-      paddingLeft: window.messageIndent + 'px'
+      paddingLeft: `${window.messageIndent}px`
     };
 
     return (

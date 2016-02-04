@@ -1,6 +1,6 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
-import { syncHistory } from 'redux-simple-router';
+import { syncHistory } from 'react-router-redux';
 import reducer from '../reducers';
 import createSocketMiddleware from '../middleware/socket';
 import commands from '../commands';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { browserHistory } from 'react-router';
-import { routeActions } from 'redux-simple-router';
+import { routeActions } from 'react-router-redux';
 import configureStore from './store';
 import createRoutes from './routes';
 import Socket from './util/Socket';

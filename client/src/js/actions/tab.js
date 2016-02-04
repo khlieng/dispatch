@@ -1,4 +1,4 @@
-import { routeActions } from 'redux-simple-router';
+import { routeActions } from 'react-router-redux';
 import * as actions from '../actions';
 
 export function select(server, channel, pm) {

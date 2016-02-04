@@ -39,7 +39,7 @@ export default class MessageHeader extends Component {
       <p className={classes.join(' ')}>
         <span className="message-time">{timestamp(message.time)}</span>
         {sender}
-        <span dangerouslySetInnerHTML={{ __html: ' ' + line }}></span>
+        <span dangerouslySetInnerHTML={{ __html: ` ${line}` }}></span>
       </p>
     );
   }

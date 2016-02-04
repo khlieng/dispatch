@@ -1,5 +1,5 @@
 import { Record, List } from 'immutable';
-import { UPDATE_LOCATION } from 'redux-simple-router';
+import { UPDATE_LOCATION } from 'react-router-redux';
 import createReducer from '../util/createReducer';
 import * as actions from '../actions';
 
@@ -39,7 +39,7 @@ export default createReducer(new State(), {
   },
 
   [UPDATE_LOCATION](state, action) {
-    if (action.location.pathname.indexOf('.') === -1 && state.selected.server) {
+    if (action.payload.pathname.indexOf('.') === -1 && state.selected.server) {
       return state.set('selected', new Tab());
     }
 

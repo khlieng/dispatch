@@ -12,9 +12,9 @@ function updateRenderName(user) {
   let name = user.nick;
 
   if (user.mode.indexOf('o') !== -1) {
-    name = '@' + name;
+    name = `@${name}`;
   } else if (user.mode.indexOf('v') !== -1) {
-    name = '+' + name;
+    name = `+${name}`;
   }
 
   return user.set('renderName', name);
@@ -79,9 +79,9 @@ export default createReducer(Map(), {
 
   [actions.SOCKET_JOIN](state, action) {
     const { server, channels, user } = action;
-    return state.updateIn([server, channels[0], 'users'], List(), users => {
-      return users.push(createUser(user)).sort(compareUsers);
-    });
+    return state.updateIn([server, channels[0], 'users'], List(), users =>
+      users.push(createUser(user)).sort(compareUsers)
+    );
   },
 
   [actions.SOCKET_PART](state, action) {
@@ -110,9 +110,9 @@ export default createReducer(Map(), {
       channels.forEach(channel => {
         s.updateIn([server, channel, 'users'], users => {
           const i = users.findIndex(user => user.nick === action.old);
-          return users.update(i, user => {
-            return updateRenderName(user.set('nick', action.new));
-          }).sort(compareUsers);
+          return users.update(i, user =>
+            updateRenderName(user.set('nick', action.new))
+          ).sort(compareUsers);
         });
       });
     });
