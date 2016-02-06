@@ -457,11 +457,6 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   transition: transform .2s;
 }
 
-.userlist > div {
-  overflow-y: auto !important;
-  padding: 10px 0px;
-}
-
 .userlist p {
   padding: 0px 15px;
   cursor: pointer;

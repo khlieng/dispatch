@@ -8,6 +8,8 @@ import Socket from './util/Socket';
 import handleSocket from './socket';
 import Root from './containers/Root';
 
+import 'react-virtualized/styles.css';
+
 const host = __DEV__ ? `${window.location.hostname}:1337` : window.location.host;
 const socket = new Socket(host);
 

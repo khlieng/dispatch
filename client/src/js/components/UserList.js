@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Infinite from 'react-infinite';
+import { VirtualScroll } from 'react-virtualized';
 import pure from 'pure-render-decorator';
 import UserListItem from './UserListItem';
 
@@ -17,35 +17,55 @@ export default class UserList extends Component {
     window.removeEventListener('resize', this.handleResize);
   }
 
+  getRowHeight = index => {
+    if (index === 0 || index === this.props.users.size + 1) {
+      return 10;
+    }
+
+    return 24;
+  };
+
   handleResize = () => {
     this.setState({ height: window.innerHeight - 100 });
   };
 
+  renderUser = index => {
+    const { users } = this.props;
+
+    if (index === 0 || index === users.size + 1) {
+      return <span style={{ height: '10px' }}></span>;
+    }
+
+    const { tab, openPrivateChat, select } = this.props;
+    const user = users.get(index - 1);
+    return (
+      <UserListItem
+        key={user.nick}
+        user={user}
+        tab={tab}
+        openPrivateChat={openPrivateChat}
+        select={select}
+      />
+    );
+  };
+
   render() {
-    const { tab, openPrivateChat, select, showUserList } = this.props;
+    const { tab, showUserList } = this.props;
     const className = showUserList ? 'userlist off-canvas' : 'userlist';
-    const users = [];
     const style = {};
 
     if (!tab.channel) {
       style.display = 'none';
-    } else {
-      this.props.users.forEach(user => users.push(
-        <UserListItem
-          key={user.nick}
-          user={user}
-          tab={tab}
-          openPrivateChat={openPrivateChat}
-          select={select}
-        />
-      ));
     }
 
     return (
       <div className={className} style={style}>
-        <Infinite containerHeight={this.state.height} elementHeight={24}>
-          {users}
-        </Infinite>
+        <VirtualScroll
+          height={this.state.height}
+          rowsCount={this.props.users.size + 2}
+          rowHeight={this.getRowHeight}
+          rowRenderer={this.renderUser}
+        />
       </div>
     );
   }
