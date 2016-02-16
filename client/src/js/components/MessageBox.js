@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import Infinite from 'react-infinite';
+import { VirtualScroll } from 'react-virtualized';
 import pure from 'pure-render-decorator';
-import MessageHeader from './MessageHeader';
-import MessageLine from './MessageLine';
+import Message from './Message';
 
 @pure
 export default class MessageBox extends Component {
@@ -15,16 +14,22 @@ export default class MessageBox extends Component {
     window.addEventListener('resize', this.handleResize);
   }
 
-  componentWillUpdate() {
-    const el = this.refs.list.refs.scrollable;
+  componentWillReceiveProps() {
+    const el = this.refs.list.refs.scrollingContainer;
     this.autoScroll = el.scrollTop + el.offsetHeight === el.scrollHeight;
   }
 
+  componentWillUpdate(nextProps) {
+    if (nextProps.messages !== this.props.messages) {
+      this.refs.list.recomputeRowHeights();
+    }
+  }
+
   componentDidUpdate() {
-    setTimeout(this.updateWidth, 0);
+    this.updateWidth();
 
     if (this.autoScroll) {
-      const el = this.refs.list.refs.scrollable;
+      const el = this.refs.list.refs.scrollingContainer;
       el.scrollTop = el.scrollHeight;
     }
   }
@@ -33,57 +38,71 @@ export default class MessageBox extends Component {
     window.removeEventListener('resize', this.handleResize);
   }
 
-  updateWidth = () => {
-    const { setWrapWidth } = this.props;
+  getRowHeight = index => {
+    const { messages } = this.props;
+
+    if (index === 0 || index === messages.size + 1) {
+      return 7;
+    }
+
+    return messages.get(index - 1).height;
+  };
+
+  updateWidth = resize => {
+    const { isChannel, setWrapWidth, updateMessageHeight } = this.props;
     const { list } = this.refs;
     if (list) {
-      const width = list.refs.scrollable.offsetWidth - 30;
+      let width = list.refs.scrollingContainer.clientWidth - 30;
+
+      if (isChannel) {
+        width += 200;
+      }
+
       if (this.width !== width) {
         this.width = width;
         setWrapWidth(width);
+
+        if (resize) {
+          updateMessageHeight();
+        }
       }
     }
   };
 
   handleResize = () => {
-    this.updateWidth();
+    this.updateWidth(true);
     this.setState({ height: window.innerHeight - 100 });
   };
 
-  render() {
-    const { tab, messages, select, openPrivateChat } = this.props;
-    const dest = tab.channel || tab.user || tab.server;
-    const lines = [];
+  renderMessage = index => {
+    const { messages } = this.props;
 
-    messages.forEach((message, j) => {
-      const key = message.server + dest + j;
-      lines.push(
-        <MessageHeader
-          key={key}
-          message={message}
-          select={select}
-          openPrivateChat={openPrivateChat}
-        />
-      );
+    if (index === 0 || index === messages.size + 1) {
+      return <span style={{ height: '7px' }}></span>;
+    }
 
-      for (let i = 1; i < message.lines.length; i++) {
-        lines.push(
-          <MessageLine key={`${key}-${i}`} type={message.type} line={message.lines[i]} />
-        );
-      }
-    });
+    const { select, openPrivateChat } = this.props;
+    const message = messages.get(index - 1);
 
     return (
+      <Message
+        message={message}
+        select={select}
+        openPrivateChat={openPrivateChat}
+      />
+    );
+  };
+
+  render() {
+    return (
       <div className="messagebox">
-        <Infinite
+        <VirtualScroll
           ref="list"
-          className="messagebox-scrollable"
-          containerHeight={this.state.height}
-          elementHeight={24}
-          displayBottomUpwards={false}
-        >
-          {lines}
-        </Infinite>
+          height={this.state.height}
+          rowsCount={this.props.messages.size + 2}
+          rowHeight={this.getRowHeight}
+          rowRenderer={this.renderMessage}
+        />
       </div>
     );
   }

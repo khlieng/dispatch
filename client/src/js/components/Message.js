@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
 import Autolinker from 'autolinker';
+import pure from 'pure-render-decorator';
 import { timestamp } from '../util';
 
-export default class MessageHeader extends Component {
-  shouldComponentUpdate(nextProps) {
-    return nextProps.message.lines[0] !== this.props.message.lines[0];
-  }
-
+@pure
+export default class Message extends Component {
   handleSenderClick = () => {
     const { message, openPrivateChat, select } = this.props;
 
@@ -16,7 +14,7 @@ export default class MessageHeader extends Component {
 
   render() {
     const { message } = this.props;
-    const line = Autolinker.link(message.lines[0], { stripPrefix: false });
+    const content = Autolinker.link(message.message, { stripPrefix: false });
     const classes = ['message'];
     let sender = null;
 
@@ -35,11 +33,16 @@ export default class MessageHeader extends Component {
       );
     }
 
+    const style = {
+      paddingLeft: `${window.messageIndent + 15}px`,
+      textIndent: `-${window.messageIndent}px`
+    };
+
     return (
-      <p className={classes.join(' ')}>
+      <p className={classes.join(' ')} style={style}>
         <span className="message-time">{timestamp(message.time)}</span>
         {sender}
-        <span dangerouslySetInnerHTML={{ __html: ` ${line}` }}></span>
+        <span dangerouslySetInnerHTML={{ __html: ` ${content}` }}></span>
       </p>
     );
   }

@@ -1,5 +1,6 @@
 import { List, Map, Record } from 'immutable';
 import createReducer from '../util/createReducer';
+import { messageHeight } from '../util';
 import * as actions from '../actions';
 
 const Message = Record({
@@ -10,15 +11,11 @@ const Message = Record({
   message: '',
   time: null,
   type: null,
-  lines: []
+  height: 0,
+  channel: false
 });
 
 function addMessage(state, message) {
-  let dest = message.to || message.from || message.server;
-  if (message.from && message.from.indexOf('.') !== -1) {
-    dest = message.server;
-  }
-
   if (message.message.indexOf('\x01ACTION') === 0) {
     const from = message.from;
     message.from = null;
@@ -26,7 +23,8 @@ function addMessage(state, message) {
     message.message = from + message.message.slice(7);
   }
 
-  return state.updateIn([message.server, dest], List(), list => list.push(new Message(message)));
+  return state.updateIn([message.server, message.dest], List(),
+    list => list.push(new Message(message)));
 }
 
 export default createReducer(Map(), {
@@ -45,15 +43,7 @@ export default createReducer(Map(), {
       )
     );
   },
-/*
-  [actions.SOCKET_MESSAGE](state, action) {
-    return addMessage(state, action);
-  },
 
-  [actions.SOCKET_PM](state, action) {
-    return addMessage(state, action);
-  },
-*/
   [actions.DISCONNECT](state, action) {
     return state.delete(action.server);
   },
@@ -62,6 +52,18 @@ export default createReducer(Map(), {
     return state.withMutations(s =>
       action.channels.forEach(channel =>
         s.deleteIn([action.server, channel])
+      )
+    );
+  },
+
+  [actions.UPDATE_MESSAGE_HEIGHT](state, action) {
+    return state.withMutations(s =>
+      s.forEach((server, serverKey) =>
+        server.forEach((target, targetKey) =>
+          target.forEach((message, index) => s.setIn([serverKey, targetKey, index, 'height'],
+            messageHeight(message, action.wrapWidth, action.charWidth, 6 * action.charWidth))
+          )
+        )
       )
     );
   }

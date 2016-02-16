@@ -396,19 +396,19 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   bottom: 50px;
   right: 0;
   z-index: 1;
+  overflow: hidden;
 }
 
 .chat-channel .messagebox {
   right: 200px;
 }
 
-.messagebox-scrollable {
-  padding: 10px 15px;
-  overflow-y: auto !important;
+.VirtualScroll {
+  overflow-x: hidden !important;
 }
 
 .message {
-  white-space: nowrap;
+  padding: 3px 15px;
 }
 
 .message-info {

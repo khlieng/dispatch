@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { createSelector, createStructuredSelector } from 'reselect';
 import { List, Map } from 'immutable';
 import pure from 'pure-render-decorator';
 import ChatTitle from '../components/ChatTitle';
@@ -13,10 +13,10 @@ import { part } from '../actions/channel';
 import { openPrivateChat, closePrivateChat } from '../actions/privateChat';
 import { searchMessages, toggleSearch } from '../actions/search';
 import { select, setSelectedChannel, setSelectedUser } from '../actions/tab';
-import { runCommand, sendMessage } from '../actions/message';
+import { runCommand, sendMessage, updateMessageHeight } from '../actions/message';
 import { disconnect } from '../actions/server';
 import { setWrapWidth, setCharWidth } from '../actions/environment';
-import { stringWidth, wrapMessages } from '../util';
+import { stringWidth } from '../util';
 import { toggleUserList } from '../actions/ui';
 import * as inputHistoryActions from '../actions/inputHistory';
 
@@ -64,7 +64,8 @@ class Chat extends Component {
   };
 
   render() {
-    const { tab, channel, search, history, dispatch } = this.props;
+    const { title, tab, channel, search, history,
+      messages, users, showUserList, inputActions } = this.props;
 
     let chatClass;
     if (tab.channel) {
@@ -77,21 +78,43 @@ class Chat extends Component {
 
     return (
       <div className={chatClass}>
-        <ChatTitle {...this.props } />
+        <ChatTitle
+          title={title}
+          tab={tab}
+          channel={channel}
+          toggleSearch={this.props.toggleSearch}
+          toggleUserList={this.props.toggleUserList}
+          disconnect={this.props.disconnect}
+          part={this.props.part}
+          closePrivateChat={this.props.closePrivateChat}
+        />
         <Search
           search={search}
           onSearch={this.handleSearch}
         />
-        <MessageBox {...this.props } />
+        <MessageBox
+          messages={messages}
+          isChannel={tab.channel !== null}
+          setWrapWidth={this.props.setWrapWidth}
+          updateMessageHeight={this.props.updateMessageHeight}
+          select={this.props.select}
+          openPrivateChat={this.props.openPrivateChat}
+        />
         <MessageInput
           tab={tab}
           channel={channel}
+          history={history}
           runCommand={this.props.runCommand}
           sendMessage={this.props.sendMessage}
-          history={history}
-          {...bindActionCreators(inputHistoryActions, dispatch)}
+          {...inputActions}
         />
-        <UserList {...this.props} />
+        <UserList
+          users={users}
+          tab={tab}
+          showUserList={showUserList}
+          select={this.props.select}
+          openPrivateChat={this.props.openPrivateChat}
+        />
       </div>
     );
   }
@@ -99,6 +122,12 @@ class Chat extends Component {
 
 const tabSelector = state => state.tab.selected;
 const messageSelector = state => state.messages;
+const serverSelector = state => state.servers;
+const channelSelector = state => state.channels;
+const searchSelector = state => state.search;
+const showUserListSelector = state => state.ui.showUserList;
+const historySelector = state =>
+  state.input.index === -1 ? null : state.input.history.get(state.input.index);
 
 const selectedMessagesSelector = createSelector(
   tabSelector,
@@ -106,40 +135,33 @@ const selectedMessagesSelector = createSelector(
   (tab, messages) => messages.getIn([tab.server, tab.channel || tab.user || tab.server], List())
 );
 
-const wrapWidthSelector = state => state.environment.get('wrapWidth');
-const charWidthSelector = state => state.environment.get('charWidth');
-
-const wrappedMessagesSelector = createSelector(
-  selectedMessagesSelector,
-  wrapWidthSelector,
-  charWidthSelector,
-  (messages, width, charWidth) => wrapMessages(messages, width, charWidth, 6 * charWidth)
+const selectedChannelSelector = createSelector(
+  tabSelector,
+  channelSelector,
+  (tab, channels) => channels.getIn([tab.server, tab.channel], Map())
 );
 
-function mapStateToProps(state) {
-  const tab = state.tab.selected;
-  const channel = state.channels.getIn([tab.server, tab.channel], Map());
+const usersSelector = createSelector(
+  selectedChannelSelector,
+  channel => channel.get('users', List())
+);
 
-  let title;
-  if (tab.channel) {
-    title = tab.channel;
-  } else if (tab.user) {
-    title = tab.user;
-  } else {
-    title = state.servers.getIn([tab.server, 'name']);
-  }
+const titleSelector = createSelector(
+  tabSelector,
+  serverSelector,
+  (tab, servers) => tab.channel || tab.user || servers.getIn([tab.server, 'name'])
+);
 
-  return {
-    title,
-    search: state.search,
-    users: channel.get('users', List()),
-    history: state.input.index === -1 ? null : state.input.history.get(state.input.index),
-    messages: wrappedMessagesSelector(state),
-    showUserList: state.ui.showUserList,
-    channel,
-    tab
-  };
-}
+const mapStateToProps = createStructuredSelector({
+  title: titleSelector,
+  tab: tabSelector,
+  channel: selectedChannelSelector,
+  messages: selectedMessagesSelector,
+  users: usersSelector,
+  showUserList: showUserListSelector,
+  search: searchSelector,
+  history: historySelector
+});
 
 function mapDispatchToProps(dispatch) {
   return {
@@ -155,8 +177,10 @@ function mapDispatchToProps(dispatch) {
       disconnect,
       openPrivateChat,
       closePrivateChat,
-      setWrapWidth
-    }, dispatch)
+      setWrapWidth,
+      updateMessageHeight
+    }, dispatch),
+    inputActions: bindActionCreators(inputHistoryActions, dispatch)
   };
 }
 

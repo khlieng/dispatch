@@ -13,6 +13,12 @@ export default class UserList extends Component {
     window.addEventListener('resize', this.handleResize);
   }
 
+  componentWillUpdate(nextProps) {
+    if (nextProps.users.size === this.props.users.size) {
+      this.refs.list.forceUpdate();
+    }
+  }
+
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
   }
@@ -25,9 +31,7 @@ export default class UserList extends Component {
     return 24;
   };
 
-  handleResize = () => {
-    this.setState({ height: window.innerHeight - 100 });
-  };
+  handleResize = () => this.setState({ height: window.innerHeight - 100 });
 
   renderUser = index => {
     const { users } = this.props;
@@ -61,6 +65,7 @@ export default class UserList extends Component {
     return (
       <div className={className} style={style}>
         <VirtualScroll
+          ref="list"
           height={this.state.height}
           rowsCount={this.props.users.size + 2}
           rowHeight={this.getRowHeight}

@@ -1,6 +1,6 @@
 import padStart from 'lodash/padStart';
 
-export wrapMessages from './wrapMessages';
+export messageHeight from './messageHeight';
 
 export function normalizeChannel(channel) {
   if (channel.indexOf('#') !== 0) {

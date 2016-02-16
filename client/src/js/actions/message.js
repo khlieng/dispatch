@@ -1,36 +1,75 @@
 import * as actions from '../actions';
+import { messageHeight } from '../util';
+
+function initMessage(message, state) {
+  message.dest = message.to || message.from || message.server;
+  if (message.from && message.from.indexOf('.') !== -1) {
+    message.dest = message.server;
+  }
+
+  if (message.dest.charAt(0) === '#') {
+    message.channel = true;
+  }
+
+  // Combine multiple adjacent spaces into a single one
+  message.message = message.message.replace(/\s\s+/g, ' ');
+
+  const charWidth = state.environment.get('charWidth');
+  const wrapWidth = state.environment.get('wrapWidth');
+
+  message.height = messageHeight(message, wrapWidth, charWidth, 6 * charWidth);
+
+  return message;
+}
+
+export function updateMessageHeight() {
+  return (dispatch, getState) => dispatch({
+    type: actions.UPDATE_MESSAGE_HEIGHT,
+    wrapWidth: getState().environment.get('wrapWidth'),
+    charWidth: getState().environment.get('charWidth')
+  });
+}
 
 export function sendMessage(message, to, server) {
-  return (dispatch, getState) => dispatch({
-    type: actions.SEND_MESSAGE,
-    from: getState().servers.getIn([server, 'nick']),
-    message,
-    to,
-    server,
-    time: new Date(),
-    socket: {
-      type: 'chat',
-      data: { message, to, server }
-    }
-  });
+  return (dispatch, getState) => {
+    const state = getState();
+
+    dispatch(initMessage({
+      type: actions.SEND_MESSAGE,
+      from: state.servers.getIn([server, 'nick']),
+      message,
+      to,
+      server,
+      time: new Date(),
+      socket: {
+        type: 'chat',
+        data: { message, to, server }
+      }
+    }, state));
+  };
 }
 
 export function addMessage(message) {
   message.time = new Date();
 
-  return {
+  return (dispatch, getState) => dispatch({
     type: actions.ADD_MESSAGE,
-    message
-  };
+    message: initMessage(message, getState())
+  });
 }
 
 export function addMessages(messages) {
   const now = new Date();
-  messages.forEach(message => message.time = now);
 
-  return {
-    type: actions.ADD_MESSAGES,
-    messages
+  return (dispatch, getState) => {
+    const state = getState();
+
+    messages.forEach(message => initMessage(message, state).time = now);
+
+    dispatch({
+      type: actions.ADD_MESSAGES,
+      messages
+    });
   };
 }
 
