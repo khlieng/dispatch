@@ -1,6 +1,7 @@
 import padStart from 'lodash/padStart';
 
 export messageHeight from './messageHeight';
+export linkify from './linkify.js';
 
 export function normalizeChannel(channel) {
   if (channel.indexOf('#') !== 0) {

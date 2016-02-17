@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import Autolinker from 'autolinker';
 import pure from 'pure-render-decorator';
-import { timestamp } from '../util';
+import { timestamp, linkify } from '../util';
 
 @pure
 export default class Message extends Component {
@@ -14,7 +13,6 @@ export default class Message extends Component {
 
   render() {
     const { message } = this.props;
-    const content = Autolinker.link(message.message, { stripPrefix: false });
     const classes = ['message'];
     let sender = null;
 
@@ -42,7 +40,7 @@ export default class Message extends Component {
       <p className={classes.join(' ')} style={style}>
         <span className="message-time">{timestamp(message.time)}</span>
         {sender}
-        <span dangerouslySetInnerHTML={{ __html: ` ${content}` }}></span>
+        <span>{' '}{linkify(message.message)}</span>
       </p>
     );
   }

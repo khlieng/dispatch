@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { List } from 'immutable';
-import Autolinker from 'autolinker';
 import pure from 'pure-render-decorator';
 import Navicon from '../components/Navicon';
+import { linkify } from '../util';
 
 @pure
 export default class ChatTitle extends Component {
@@ -20,7 +20,8 @@ export default class ChatTitle extends Component {
 
   render() {
     const { title, tab, channel, toggleSearch, toggleUserList } = this.props;
-    const topic = Autolinker.link(channel.get('topic') || '', { stripPrefix: false });
+    const _topic = channel.get('topic');
+    const topic = _topic ? linkify(_topic) : null;
 
     let leaveTitle;
     if (tab.channel) {
@@ -37,7 +38,7 @@ export default class ChatTitle extends Component {
           <Navicon />
           <span className="chat-title">{title}</span>
           <div className="chat-topic-wrap">
-            <span className="chat-topic" dangerouslySetInnerHTML={{ __html: topic }}></span>
+            <span className="chat-topic">{topic}</span>
           </div>
           <i className="icon-search" title="Search" onClick={toggleSearch} />
           <i
