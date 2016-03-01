@@ -23,6 +23,12 @@ There is a few different ways of getting it:
 ### 2. Go
 This requires a [Go environment](http://golang.org/doc/install).
 
+If running go 1.5 this environment variable is needed, versions <1.5 are not supported:
+```bash
+export GO15VENDOREXPERIMENT=1
+```
+
+Fetch, compile and run dispatch:
 ```bash
 go get github.com/khlieng/dispatch
 
