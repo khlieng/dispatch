@@ -3,7 +3,7 @@ package storage
 import (
 	"path/filepath"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 )
 
 func DefaultDirectory() string {

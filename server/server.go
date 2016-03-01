@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/golang.org/x/net/http2"
+	"github.com/gorilla/websocket"
+	"github.com/spf13/viper"
+	"golang.org/x/net/http2"
 
 	"github.com/khlieng/dispatch/letsencrypt"
 	"github.com/khlieng/dispatch/storage"

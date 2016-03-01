@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cobra"
+	"github.com/spf13/cobra"
 
 	"github.com/khlieng/dispatch/storage"
 )

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/blevesearch/bleve"
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/boltdb/bolt"
+	"github.com/blevesearch/bleve"
+	"github.com/boltdb/bolt"
 )
 
 type Message struct {

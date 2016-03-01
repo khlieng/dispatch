@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xenolf/lego/acme"
+	"github.com/xenolf/lego/acme"
 )
 
 const URL = "https://acme-v01.api.letsencrypt.org/directory"

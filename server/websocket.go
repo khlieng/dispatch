@@ -3,7 +3,7 @@ package server
 import (
 	"time"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/gorilla/websocket"
+	"github.com/gorilla/websocket"
 )
 
 type wsConn struct {

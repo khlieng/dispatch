@@ -8,13 +8,14 @@ go:
 install:
     - go get github.com/jteeuwen/go-bindata/...
     - cd client
-    - nvm install 5.0
-    - nvm use 5.0
+    - nvm install 4.3.1
+    - nvm use 4.3.1
     - npm install -g gulp
     - npm install
 
 script:
     - gulp build
     - cd ..
-    - go vet ./...
-    - go test -v -race ./...
+    - export GO15VENDOREXPERIMENT=1
+    - go vet $(go list ./... | grep -v '/vendor/')
+    - go test -v -race $(go list ./... | grep -v '/vendor/')

@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/cobra"
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/spf13/viper"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/khlieng/dispatch/assets"
 	"github.com/khlieng/dispatch/server"

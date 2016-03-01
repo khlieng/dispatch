@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/jpillora/backoff"
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/matryer/resync"
+	"github.com/jpillora/backoff"
+	"github.com/matryer/resync"
 )
 
 type Client struct {

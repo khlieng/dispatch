@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xenolf/lego/acme"
+	"github.com/xenolf/lego/acme"
 )
 
 const defaultUser = "default"

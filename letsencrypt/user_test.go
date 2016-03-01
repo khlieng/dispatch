@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/stretchr/testify/assert"
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/xenolf/lego/acme"
+	"github.com/stretchr/testify/assert"
+	"github.com/xenolf/lego/acme"
 )
 
 func tempdir() string {

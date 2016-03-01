@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/khlieng/dispatch/Godeps/_workspace/src/github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
