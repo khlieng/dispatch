@@ -8,6 +8,8 @@ const autolinker = new Autolinker({
     if (match.getType() === 'url') {
       return <a target="_blank" href={match.getAnchorHref()}>{match.getAnchorText()}</a>;
     }
+
+    return null;
   },
   React
 });

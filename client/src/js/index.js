@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { browserHistory } from 'react-router';
-import { routeActions } from 'react-router-redux';
+import { syncHistoryWithStore, replace } from 'react-router-redux';
 import configureStore from './store';
 import createRoutes from './routes';
 import Socket from './util/Socket';
@@ -28,7 +28,7 @@ if (env.servers) {
     data: env.servers
   });
 } else {
-  store.dispatch(routeActions.replace('/connect'));
+  store.dispatch(replace('/connect'));
 }
 
 if (env.channels) {
@@ -48,8 +48,9 @@ if (env.users) {
 handleSocket(socket, store);
 
 const routes = createRoutes();
+const history = syncHistoryWithStore(browserHistory, store);
 
 render(
-  <Root store={store} routes={routes} history={browserHistory} />,
+  <Root store={store} routes={routes} history={history} />,
   document.getElementById('root')
 );

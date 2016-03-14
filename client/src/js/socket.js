@@ -8,8 +8,8 @@ function withReason(message, reason) {
 }
 
 export default function handleSocket(socket, { dispatch, getState }) {
-  socket.onAny(data => {
-    const type = `SOCKET_${socket.event.toUpperCase()}`;
+  socket.onAny((event, data) => {
+    const type = `SOCKET_${event.toUpperCase()}`;
     if (Array.isArray(data)) {
       dispatch({ type, data });
     } else {

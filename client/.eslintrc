@@ -6,7 +6,8 @@
     "new-cap": [2, { "capIsNewExceptions": ["Map", "List", "Record", "Set"] }],
     "no-console": 0,
     "no-param-reassign": 0,
-    "react/prop-types": 0
+    "react/prop-types": 0,
+    "react/prefer-stateless-function": 0
   },
   "globals": {
     "__DEV__": true

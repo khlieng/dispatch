@@ -64,7 +64,9 @@ export function addMessages(messages) {
   return (dispatch, getState) => {
     const state = getState();
 
-    messages.forEach(message => initMessage(message, state).time = now);
+    messages.forEach(message => {
+      initMessage(message, state).time = now;
+    });
 
     dispatch({
       type: actions.ADD_MESSAGES,

@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { routeReducer } from 'react-router-redux';
+import { routerReducer } from 'react-router-redux';
 import channels from './channels';
 import environment from './environment';
 import input from './input';
@@ -12,7 +12,7 @@ import tab from './tab';
 import ui from './ui';
 
 export default combineReducers({
-  routing: routeReducer,
+  routing: routerReducer,
   channels,
   environment,
   input,
