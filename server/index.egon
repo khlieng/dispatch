@@ -1,0 +1,20 @@
+<%! data *indexData, cssPath, jsPath string %>
+
+<%% import "encoding/json" %%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Dispatch</title>
+
+  <link href="/<%== cssPath %>" rel="stylesheet">
+</head>
+<body>
+  <div id="root"></div>
+  <script id="env" type="application/json"><% json.NewEncoder(w).Encode(data) %></script>
+  <script src="/<%== jsPath %>"></script>
+</body>
+</html>

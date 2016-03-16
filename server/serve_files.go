@@ -159,10 +159,10 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Encoding", "gzip")
 
 		gzw := gzip.NewWriter(w)
-		renderIndex(gzw, getIndexData(r, session))
+		IndexTemplate(gzw, getIndexData(r, session), files[1].Path, files[0].Path)
 		gzw.Close()
 	} else {
-		renderIndex(w, getIndexData(r, session))
+		IndexTemplate(w, getIndexData(r, session), files[1].Path, files[0].Path)
 	}
 }
 
