@@ -4,7 +4,6 @@ var url = require('url');
 
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var htmlmin = require('gulp-htmlmin');
 var nano = require('gulp-cssnano');
 var autoprefixer = require('gulp-autoprefixer');
 var gzip = require('gulp-gzip');
@@ -13,15 +12,6 @@ var cache = require('gulp-cached');
 var express = require('express');
 var proxy = require('express-http-proxy');
 var webpack = require('webpack');
-
-gulp.task('html', function() {
-  return gulp.src('src/*.html')
-    .pipe(htmlmin({
-      collapseWhitespace: true,
-      removeAttributeQuotes: true
-    }))
-    .pipe(gulp.dest('dist'));
-});
 
 gulp.task('css', function() {
   return gulp.src(['src/css/fonts.css', 'src/css/fontello.css', 'src/css/style.css'])
