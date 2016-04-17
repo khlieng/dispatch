@@ -126,8 +126,13 @@ const serverSelector = state => state.servers;
 const channelSelector = state => state.channels;
 const searchSelector = state => state.search;
 const showUserListSelector = state => state.ui.showUserList;
-const historySelector = state =>
-  state.input.index === -1 ? null : state.input.history.get(state.input.index);
+const historySelector = state => {
+  if (state.input.index === -1) {
+    return null;
+  }
+
+  return state.input.history.get(state.input.index);
+};
 
 const selectedMessagesSelector = createSelector(
   tabSelector,
