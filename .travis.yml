@@ -2,14 +2,15 @@ language: go
 
 go:
     - 1.5.4
-    - 1.6.2
+    - 1.6.3
+    - 1.7.1
     - tip
 
 install:
     - go get github.com/jteeuwen/go-bindata/...
     - cd client
-    - nvm install 4.4.3
-    - nvm use 4.4.3
+    - nvm install 4.6.0
+    - nvm use 4.6.0
     - npm install -g npm
     - npm install -g gulp
     - npm install
