@@ -15,9 +15,9 @@ install:
     - cd client
     - nvm install 4.6.0
     - nvm use 4.6.0
-    - npm install -g npm
+    - npm install -g yarn
     - npm install -g gulp
-    - npm install
+    - yarn
 
 script:
     - gulp build
