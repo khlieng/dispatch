@@ -14,11 +14,10 @@ func TestParseMessage(t *testing.T) {
 		{
 			":user CMD #chan :some message\r\n",
 			&Message{
-				Prefix:   "user",
-				Nick:     "user",
-				Command:  "CMD",
-				Params:   []string{"#chan", "some message"},
-				Trailing: "some message",
+				Prefix:  "user",
+				Nick:    "user",
+				Command: "CMD",
+				Params:  []string{"#chan", "some message"},
 			},
 		}, {
 			":nick!user@host.com CMD a b\r\n",
@@ -32,7 +31,7 @@ func TestParseMessage(t *testing.T) {
 			"CMD a b :\r\n",
 			&Message{
 				Command: "CMD",
-				Params:  []string{"a", "b"},
+				Params:  []string{"a", "b", ""},
 			},
 		}, {
 			"CMD a b\r\n",
@@ -48,9 +47,8 @@ func TestParseMessage(t *testing.T) {
 		}, {
 			"CMD :tests and stuff\r\n",
 			&Message{
-				Command:  "CMD",
-				Params:   []string{"tests and stuff"},
-				Trailing: "tests and stuff",
+				Command: "CMD",
+				Params:  []string{"tests and stuff"},
 			},
 		}, {
 			":nick@host.com CMD\r\n",

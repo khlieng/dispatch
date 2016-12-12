@@ -59,11 +59,11 @@ func (i *ircHandler) nick(msg *irc.Message) {
 	i.session.sendJSON("nick", Nick{
 		Server:   i.client.Host,
 		Old:      msg.Nick,
-		New:      msg.Trailing,
+		New:      msg.Params[len(msg.Params)-1],
 		Channels: channelStore.FindUserChannels(msg.Nick, i.client.Host),
 	})
 
-	channelStore.RenameUser(msg.Nick, msg.Trailing, i.client.Host)
+	channelStore.RenameUser(msg.Nick, msg.Params[len(msg.Params)-1], i.client.Host)
 }
 
 func (i *ircHandler) join(msg *irc.Message) {
@@ -84,13 +84,20 @@ func (i *ircHandler) join(msg *irc.Message) {
 }
 
 func (i *ircHandler) part(msg *irc.Message) {
+	var chans []string
+	for i, param := range msg.Params {
+		if i != len(msg.Params)-1 {
+			chans = append(chans, param)
+		}
+	}
+
 	i.session.sendJSON("part", Part{
 		Join: Join{
 			Server:   i.client.Host,
 			User:     msg.Nick,
-			Channels: msg.Params,
+			Channels: chans,
 		},
-		Reason: msg.Trailing,
+		Reason: msg.Params[len(msg.Params)-1],
 	})
 
 	channelStore.RemoveUser(msg.Nick, i.client.Host, msg.Params[0])
@@ -118,7 +125,7 @@ func (i *ircHandler) message(msg *irc.Message) {
 	message := Chat{
 		Server:  i.client.Host,
 		From:    msg.Nick,
-		Message: msg.Trailing,
+		Message: msg.Params[len(msg.Params)-1],
 	}
 
 	if msg.Params[0] == i.client.GetNick() {
@@ -129,7 +136,7 @@ func (i *ircHandler) message(msg *irc.Message) {
 	}
 
 	if msg.Params[0] != "*" {
-		go i.session.user.LogMessage(i.client.Host, msg.Nick, msg.Params[0], msg.Trailing)
+		go i.session.user.LogMessage(i.client.Host, msg.Nick, msg.Params[0], msg.Params[len(msg.Params)-1])
 	}
 }
 
@@ -137,7 +144,7 @@ func (i *ircHandler) quit(msg *irc.Message) {
 	i.session.sendJSON("quit", Quit{
 		Server:   i.client.Host,
 		User:     msg.Nick,
-		Reason:   msg.Trailing,
+		Reason:   msg.Params[len(msg.Params)-1],
 		Channels: channelStore.FindUserChannels(msg.Nick, i.client.Host),
 	})
 
@@ -164,7 +171,7 @@ func (i *ircHandler) whoisServer(msg *irc.Message) {
 }
 
 func (i *ircHandler) whoisChannels(msg *irc.Message) {
-	i.whois.Channels = append(i.whois.Channels, strings.Split(strings.TrimRight(msg.Trailing, " "), " ")...)
+	i.whois.Channels = append(i.whois.Channels, strings.Split(strings.TrimRight(msg.Params[len(msg.Params)-1], " "), " ")...)
 }
 
 func (i *ircHandler) whoisEnd(msg *irc.Message) {
@@ -176,14 +183,14 @@ func (i *ircHandler) topic(msg *irc.Message) {
 	i.session.sendJSON("topic", Topic{
 		Server:  i.client.Host,
 		Channel: msg.Params[1],
-		Topic:   msg.Trailing,
+		Topic:   msg.Params[len(msg.Params)-1],
 	})
 
-	channelStore.SetTopic(msg.Trailing, i.client.Host, msg.Params[1])
+	channelStore.SetTopic(msg.Params[len(msg.Params)-1], i.client.Host, msg.Params[1])
 }
 
 func (i *ircHandler) names(msg *irc.Message) {
-	users := strings.Split(strings.TrimSuffix(msg.Trailing, " "), " ")
+	users := strings.Split(strings.TrimSuffix(msg.Params[len(msg.Params)-1], " "), " ")
 	userBuffer := i.userBuffers[msg.Params[2]]
 	i.userBuffers[msg.Params[2]] = append(userBuffer, users...)
 }
@@ -204,11 +211,11 @@ func (i *ircHandler) namesEnd(msg *irc.Message) {
 
 func (i *ircHandler) motdStart(msg *irc.Message) {
 	i.motdBuffer.Server = i.client.Host
-	i.motdBuffer.Title = msg.Trailing
+	i.motdBuffer.Title = msg.Params[len(msg.Params)-1]
 }
 
 func (i *ircHandler) motd(msg *irc.Message) {
-	i.motdBuffer.Content = append(i.motdBuffer.Content, msg.Trailing)
+	i.motdBuffer.Content = append(i.motdBuffer.Content, msg.Params[len(msg.Params)-1])
 }
 
 func (i *ircHandler) motdEnd(msg *irc.Message) {
@@ -270,5 +277,5 @@ func isChannel(s string) bool {
 }
 
 func printMessage(msg *irc.Message, i *irc.Client) {
-	log.Println(i.GetNick()+":", msg.Prefix, msg.Command, msg.Params, msg.Trailing)
+	log.Println(i.GetNick()+":", msg.Prefix, msg.Command, msg.Params, msg.Params[len(msg.Params)-1])
 }
