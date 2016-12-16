@@ -84,18 +84,11 @@ func (i *ircHandler) join(msg *irc.Message) {
 }
 
 func (i *ircHandler) part(msg *irc.Message) {
-	var chans []string
-	for i, param := range msg.Params {
-		if i != len(msg.Params)-1 {
-			chans = append(chans, param)
-		}
-	}
-
 	i.session.sendJSON("part", Part{
 		Join: Join{
 			Server:   i.client.Host,
 			User:     msg.Nick,
-			Channels: chans,
+			Channels: msg.Params[:len(msg.Params)-1],
 		},
 		Reason: msg.Params[len(msg.Params)-1],
 	})
