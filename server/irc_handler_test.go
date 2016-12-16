@@ -51,9 +51,9 @@ func checkResponse(t *testing.T, expectedType string, expectedData interface{}, 
 
 func TestHandleIRCNick(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command:  irc.Nick,
-		Nick:     "old",
-		Trailing: "new",
+		Command: irc.Nick,
+		Nick:    "old",
+		Params:  []string{"new"},
 	})
 
 	checkResponse(t, "nick", Nick{
@@ -79,10 +79,9 @@ func TestHandleIRCJoin(t *testing.T) {
 
 func TestHandleIRCPart(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command:  irc.Part,
-		Nick:     "parting",
-		Params:   []string{"#chan"},
-		Trailing: "the reason",
+		Command: irc.Part,
+		Nick:    "parting",
+		Params:  []string{"#chan", "the reason"},
 	})
 
 	checkResponse(t, "part", Part{
@@ -112,10 +111,9 @@ func TestHandleIRCMode(t *testing.T) {
 
 func TestHandleIRCMessage(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command:  irc.Privmsg,
-		Nick:     "nick",
-		Params:   []string{"#chan"},
-		Trailing: "the message",
+		Command: irc.Privmsg,
+		Nick:    "nick",
+		Params:  []string{"#chan", "the message"},
 	})
 
 	checkResponse(t, "message", Chat{
@@ -126,10 +124,9 @@ func TestHandleIRCMessage(t *testing.T) {
 	}, res)
 
 	res = dispatchMessage(&irc.Message{
-		Command:  irc.Privmsg,
-		Nick:     "someone",
-		Params:   []string{"nick"},
-		Trailing: "the message",
+		Command: irc.Privmsg,
+		Nick:    "someone",
+		Params:  []string{"nick", "the message"},
 	})
 
 	checkResponse(t, "pm", Chat{
@@ -141,9 +138,9 @@ func TestHandleIRCMessage(t *testing.T) {
 
 func TestHandleIRCQuit(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command:  irc.Quit,
-		Nick:     "nick",
-		Trailing: "the reason",
+		Command: irc.Quit,
+		Nick:    "nick",
+		Params:  []string{"the reason"},
 	})
 
 	checkResponse(t, "quit", Quit{
@@ -182,8 +179,8 @@ func TestHandleIRCWhois(t *testing.T) {
 		Params:  []string{"", "", "srv.com"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command:  irc.ReplyWhoisChannels,
-		Trailing: "#chan #chan1",
+		Command: irc.ReplyWhoisChannels,
+		Params:  []string{"#chan #chan1"},
 	})
 	i.dispatchMessage(&irc.Message{Command: irc.ReplyEndOfWhois})
 
@@ -199,9 +196,8 @@ func TestHandleIRCWhois(t *testing.T) {
 
 func TestHandleIRCTopic(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command:  irc.ReplyTopic,
-		Params:   []string{"target", "#chan"},
-		Trailing: "the topic",
+		Command: irc.ReplyTopic,
+		Params:  []string{"target", "#chan", "the topic"},
 	})
 
 	checkResponse(t, "topic", Topic{
@@ -218,14 +214,12 @@ func TestHandleIRCNames(t *testing.T) {
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
-		Command:  irc.ReplyNamReply,
-		Params:   []string{"", "", "#chan"},
-		Trailing: "a b c",
+		Command: irc.ReplyNamReply,
+		Params:  []string{"", "", "#chan", "a b c"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command:  irc.ReplyNamReply,
-		Params:   []string{"", "", "#chan"},
-		Trailing: "d",
+		Command: irc.ReplyNamReply,
+		Params:  []string{"", "", "#chan", "d"},
 	})
 	i.dispatchMessage(&irc.Message{
 		Command: irc.ReplyEndOfNames,
@@ -246,16 +240,16 @@ func TestHandleIRCMotd(t *testing.T) {
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
-		Command:  irc.ReplyMotdStart,
-		Trailing: "motd title",
+		Command: irc.ReplyMotdStart,
+		Params:  []string{"motd title"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command:  irc.ReplyMotd,
-		Trailing: "line 1",
+		Command: irc.ReplyMotd,
+		Params:  []string{"line 1"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command:  irc.ReplyMotd,
-		Trailing: "line 2",
+		Command: irc.ReplyMotd,
+		Params:  []string{"line 2"},
 	})
 	i.dispatchMessage(&irc.Message{Command: irc.ReplyEndOfMotd})
 

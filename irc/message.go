@@ -5,11 +5,10 @@ import (
 )
 
 type Message struct {
-	Prefix   string
-	Nick     string
-	Command  string
-	Params   []string
-	Trailing string
+	Prefix  string
+	Nick    string
+	Command string
+	Params  []string
 }
 
 func parseMessage(line string) *Message {
@@ -31,9 +30,13 @@ func parseMessage(line string) *Message {
 		}
 	}
 
+	var usesTrailing bool
+	var trailing string
+
 	if i := strings.Index(line, " :"); i > 0 {
 		cmdEnd = i
-		msg.Trailing = line[i+2:]
+		trailing = line[i+2:]
+		usesTrailing = true
 	}
 
 	cmd := strings.Split(line[cmdStart:cmdEnd], " ")
@@ -42,8 +45,8 @@ func parseMessage(line string) *Message {
 		msg.Params = cmd[1:]
 	}
 
-	if msg.Trailing != "" {
-		msg.Params = append(msg.Params, msg.Trailing)
+	if usesTrailing {
+		msg.Params = append(msg.Params, trailing)
 	}
 
 	return &msg
