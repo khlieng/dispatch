@@ -11,6 +11,10 @@ type Message struct {
 	Params  []string
 }
 
+func (m *Message) LastParam() string {
+	return m.Params[len(m.Params)-1]
+}
+
 func parseMessage(line string) *Message {
 	line = strings.Trim(line, "\r\n")
 	msg := Message{}

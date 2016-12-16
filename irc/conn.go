@@ -179,7 +179,7 @@ func (c *Client) recv() {
 
 		switch msg.Command {
 		case Ping:
-			go c.write("PONG :" + msg.Params[len(msg.Params)-1])
+			go c.write("PONG :" + msg.LastParam())
 
 		case Join:
 			if msg.Nick == c.GetNick() {
