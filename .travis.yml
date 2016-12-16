@@ -2,8 +2,8 @@ language: go
 
 go:
     - 1.5.4
-    - 1.6.3
-    - 1.7.1
+    - 1.6.4
+    - 1.7.4
     - tip
 
 matrix:
@@ -13,8 +13,8 @@ matrix:
 install:
     - go get github.com/jteeuwen/go-bindata/...
     - cd client
-    - nvm install 4.6.0
-    - nvm use 4.6.0
+    - nvm install 6.9.2
+    - nvm use 6.9.2
     - npm install -g yarn
     - npm install -g gulp
     - yarn
