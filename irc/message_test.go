@@ -71,3 +71,10 @@ func TestParseMessage(t *testing.T) {
 		assert.Equal(t, tc.expected, parseMessage(tc.input))
 	}
 }
+
+func TestBadMessagePanic(t *testing.T) {
+	parseMessage(":user\r\n")
+	parseMessage(":\r\n")
+	parseMessage(":")
+	parseMessage("")
+}

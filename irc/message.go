@@ -19,7 +19,13 @@ func parseMessage(line string) *Message {
 
 	if strings.HasPrefix(line, ":") {
 		cmdStart = strings.Index(line, " ") + 1
-		msg.Prefix = line[1 : cmdStart-1]
+
+		if cmdStart > 0 {
+			msg.Prefix = line[1 : cmdStart-1]
+		} else {
+			// Invalid message
+			return &msg
+		}
 
 		if i := strings.Index(msg.Prefix, "!"); i > 0 {
 			msg.Nick = msg.Prefix[:i]
