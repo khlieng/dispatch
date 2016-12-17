@@ -73,23 +73,6 @@ func initFileServer() {
 		hash = md5.Sum(data)
 		files[1].Path = "bundle." + base64.RawURLEncoding.EncodeToString(hash[:]) + ".css"
 
-		fonts, err := assets.AssetDir("font")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for _, font := range fonts {
-			p := strings.TrimSuffix(font, ".gz")
-
-			files = append(files, &File{
-				Path:         path.Join("font", p),
-				Asset:        path.Join("font", font),
-				ContentType:  contentTypes[filepath.Ext(p)],
-				CacheControl: "max-age=31536000",
-				Gzip:         strings.HasSuffix(font, ".gz"),
-			})
-		}
-
 		if viper.GetBool("https.hsts.enabled") && viper.GetBool("https.enabled") {
 			hstsHeader = "max-age=" + viper.GetString("https.hsts.max_age")
 
@@ -102,6 +85,24 @@ func initFileServer() {
 		}
 
 		cspEnabled = true
+	}
+
+	// serve fonts like this whether we're in dev mode or not
+	fonts, err := assets.AssetDir("font")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, font := range fonts {
+		p := strings.TrimSuffix(font, ".gz")
+
+		files = append(files, &File{
+			Path:         path.Join("font", p),
+			Asset:        path.Join("font", font),
+			ContentType:  contentTypes[filepath.Ext(p)],
+			CacheControl: "max-age=31536000",
+			Gzip:         strings.HasSuffix(font, ".gz"),
+		})
 	}
 }
 
