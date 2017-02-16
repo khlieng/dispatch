@@ -70,8 +70,8 @@ export default class TabList extends Component {
         <button className="button-connect" onClick={this.handleConnectClick}>Connect</button>
         <div className="tab-container">{tabs}</div>
         <div className="side-buttons">
-          <i className="icon-user"></i>
-          <i className="icon-cog" onClick={this.handleSettingsClick}></i>
+          <i className="icon-user" />
+          <i className="icon-cog" onClick={this.handleSettingsClick} />
         </div>
       </div>
     );

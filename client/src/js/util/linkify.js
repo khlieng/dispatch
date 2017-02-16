@@ -6,7 +6,7 @@ const autolinker = new Autolinker({
   doJoin: false,
   replaceFn: (linker, match) => {
     if (match.getType() === 'url') {
-      return <a target="_blank" href={match.getAnchorHref()}>{match.getAnchorText()}</a>;
+      return <a target="_blank" rel="noopener noreferrer" href={match.getAnchorHref()}>{match.getAnchorText()}</a>;
     }
 
     return null;

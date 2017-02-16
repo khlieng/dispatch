@@ -20,8 +20,8 @@ export default class ChatTitle extends Component {
 
   render() {
     const { title, tab, channel, toggleSearch, toggleUserList } = this.props;
-    const _topic = channel.get('topic');
-    const topic = _topic ? linkify(_topic) : null;
+    let topic = channel.get('topic');
+    topic = topic ? linkify(topic) : null;
 
     let leaveTitle;
     if (tab.channel) {

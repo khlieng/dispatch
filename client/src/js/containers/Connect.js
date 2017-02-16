@@ -13,7 +13,7 @@ class Connect extends Component {
     passwordTouched: false
   };
 
-  handleSubmit = (e) => {
+  handleSubmit = e => {
     e.preventDefault();
 
     const { dispatch } = this.props;
@@ -59,7 +59,7 @@ class Connect extends Component {
   };
 
   render() {
-    const defaults = window.__ENV__.defaults;
+    const defaults = window.ENV.defaults;
     let optionals = null;
 
     if (this.state.showOptionals) {
@@ -81,7 +81,7 @@ class Connect extends Component {
     return (
       <div className="connect">
         <Navicon />
-        <form ref="form" className="connect-form" onSubmit={this.handleSubmit}>
+        <form className="connect-form" onSubmit={this.handleSubmit}>
           <h1>Connect</h1>
           <input name="name" type="text" placeholder="Name" defaultValue={defaults.name} />
           <input name="address" type="text" placeholder="Address" defaultValue={defaults.address} />
@@ -94,8 +94,8 @@ class Connect extends Component {
           />
           {optionals}
           <p>
-            <label><input name="ssl" type="checkbox" defaultChecked={defaults.ssl} />SSL</label>
-            <i className="icon-ellipsis" onClick={this.handleShowClick}></i>
+            <label htmlFor="ssl"><input name="ssl" type="checkbox" defaultChecked={defaults.ssl} />SSL</label>
+            <i className="icon-ellipsis" onClick={this.handleShowClick} />
           </p>
           <input type="submit" value="Connect" />
         </form>

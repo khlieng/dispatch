@@ -1,16 +1,24 @@
 {
   "extends": "airbnb",
   "parser": "babel-eslint",
+  "env": {
+    "browser": true
+  },
   "rules": {
+    "arrow-parens": 0,
     "comma-dangle": [2, "never"],
+    "jsx-a11y/no-static-element-interactions": 0,
     "new-cap": [2, { "capIsNewExceptions": ["Map", "List", "Record", "Set"] }],
     "no-console": 0,
     "no-param-reassign": 0,
+    "no-plusplus": 0,
+    "react/jsx-filename-extension": 0,
+    "react/no-array-index-key": 0,
     "react/prop-types": 0,
     "react/prefer-stateless-function": 0,
     "react/require-render-return": 0
   },
   "globals": {
-    "__DEV__": true
+    "DEV": true
   }
 }

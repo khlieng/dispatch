@@ -30,7 +30,7 @@ export default class TabListItem extends Component {
         style.background = '#F6546A';
       }
 
-      indicator = <i className="tab-indicator" style={style}></i>;
+      indicator = <i className="tab-indicator" style={style} />;
     }
 
     return (

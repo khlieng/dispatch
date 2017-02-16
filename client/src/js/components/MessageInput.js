@@ -44,7 +44,6 @@ export default class MessageInput extends Component {
     return (
       <div className="message-input-wrap">
         <input
-          ref="input"
           className="message-input"
           type="text"
           value={this.props.history || this.state.value}

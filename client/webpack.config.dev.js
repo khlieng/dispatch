@@ -13,18 +13,16 @@ module.exports = {
     publicPath: '/'
   },
   module: {
-    preLoaders: [
-      { test: /\.js$/, loader: 'eslint', exclude: /node_modules/ }
-    ],
-    loaders: [
-      { test: /\.js$/, loader: 'babel', exclude: /node_modules/ },
-      { test: /\.css$/, loader: 'style!css' },
-      { test: /node_modules/, loader: 'ify' }
+    rules: [
+      { test: /\.js$/, loader: 'eslint-loader', exclude: /node_modules/, enforce: 'pre' },
+      { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
+      { test: /\.css$/, loader: 'style-loader!css-loader' },
+      { test: /node_modules/, loader: 'ify-loader' }
     ]
   },
   plugins: [
     new webpack.DefinePlugin({
-      __DEV__: true,
+      DEV: true,
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin()

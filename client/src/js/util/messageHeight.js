@@ -8,7 +8,7 @@ export default function messageHeight(message, width, charWidth, indent = 0) {
     width -= 200;
   }
 
-  if (pad + message.message.length * charWidth < width) {
+  if (pad + (message.message.length * charWidth) < width) {
     return height;
   }
 
@@ -21,7 +21,7 @@ export default function messageHeight(message, width, charWidth, indent = 0) {
     if (c === ' ' || c === '-') {
       const end = c === ' ' ? i : i + 1;
 
-      if (pad + (end - prevBreak) * charWidth >= width) {
+      if (pad + ((end - prevBreak) * charWidth) >= width) {
         prevBreak = prevPos;
         pad = indent;
         height += lineHeight;
@@ -29,7 +29,7 @@ export default function messageHeight(message, width, charWidth, indent = 0) {
 
       prevPos = i + 1;
     } else if (i === len - 1) {
-      if (pad + (len - prevBreak) * charWidth >= width) {
+      if (pad + ((len - prevBreak) * charWidth) >= width) {
         height += lineHeight;
       }
     }

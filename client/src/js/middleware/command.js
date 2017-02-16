@@ -5,7 +5,7 @@ export default function createCommandMiddleware(type, handlers) {
       const command = words[0];
       const params = words.slice(1);
 
-      if (handlers.hasOwnProperty(command)) {
+      if (Object.prototype.hasOwnProperty.call(handlers, command)) {
         handlers[command]({
           dispatch: store.dispatch,
           getState: store.getState,

@@ -9,7 +9,7 @@ class Navicon extends Component {
 
   render() {
     return (
-      <i className="icon-menu navicon" onClick={this.handleClick}></i>
+      <i className="icon-menu navicon" onClick={this.handleClick} />
     );
   }
 }

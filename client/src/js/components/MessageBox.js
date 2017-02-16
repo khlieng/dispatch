@@ -15,13 +15,13 @@ export default class MessageBox extends Component {
   }
 
   componentWillReceiveProps() {
-    const el = this.refs.list.refs.scrollingContainer;
+    const el = this.list.refs.scrollingContainer;
     this.autoScroll = el.scrollTop + el.offsetHeight === el.scrollHeight;
   }
 
   componentWillUpdate(nextProps) {
     if (nextProps.messages !== this.props.messages) {
-      this.refs.list.recomputeRowHeights();
+      this.list.recomputeRowHeights();
     }
   }
 
@@ -29,7 +29,7 @@ export default class MessageBox extends Component {
     this.updateWidth();
 
     if (this.autoScroll) {
-      const el = this.refs.list.refs.scrollingContainer;
+      const el = this.list.refs.scrollingContainer;
       el.scrollTop = el.scrollHeight;
     }
   }
@@ -50,9 +50,8 @@ export default class MessageBox extends Component {
 
   updateWidth = resize => {
     const { isChannel, setWrapWidth, updateMessageHeight } = this.props;
-    const { list } = this.refs;
-    if (list) {
-      let width = list.refs.scrollingContainer.clientWidth - 30;
+    if (this.list) {
+      let width = this.list.refs.scrollingContainer.clientWidth - 30;
 
       if (isChannel) {
         width += 200;
@@ -78,7 +77,7 @@ export default class MessageBox extends Component {
     const { messages } = this.props;
 
     if (index === 0 || index === messages.size + 1) {
-      return <span style={{ height: '7px' }}></span>;
+      return <span style={{ height: '7px' }} />;
     }
 
     const { select, openPrivateChat } = this.props;
@@ -97,7 +96,7 @@ export default class MessageBox extends Component {
     return (
       <div className="messagebox">
         <VirtualScroll
-          ref="list"
+          ref={el => { this.list = el; }}
           height={this.state.height}
           rowsCount={this.props.messages.size + 2}
           rowHeight={this.getRowHeight}

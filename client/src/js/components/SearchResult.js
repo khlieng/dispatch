@@ -21,7 +21,7 @@ export default class Search extends Component {
           {' '}
           <span className="message-sender">{result.from}</span>
         </span>
-        <span dangerouslySetInnerHTML={{ __html: ` ${content}` }}></span>
+        <span dangerouslySetInnerHTML={{ __html: ` ${content}` }} />
       </p>
     );
   }

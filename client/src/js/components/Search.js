@@ -6,7 +6,7 @@ import SearchResult from './SearchResult';
 export default class Search extends Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.search.show && this.props.search.show) {
-      this.refs.input.focus();
+      this.input.focus();
     }
   }
 
@@ -27,7 +27,7 @@ export default class Search extends Component {
         <div className="search-input-wrap">
           <i className="icon-search" />
           <input
-            ref="input"
+            ref={el => { this.input = el; }}
             className="search-input"
             type="text"
             onChange={this.handleSearch}
