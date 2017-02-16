@@ -68,6 +68,8 @@ export default class MessageBox extends Component {
     }
   };
 
+  listRef = el => { this.list = el; };
+
   handleResize = () => {
     this.updateWidth(true);
     this.setState({ height: window.innerHeight - 100 });
@@ -96,7 +98,7 @@ export default class MessageBox extends Component {
     return (
       <div className="messagebox">
         <VirtualScroll
-          ref={el => { this.list = el; }}
+          ref={this.listRef}
           height={this.state.height}
           rowsCount={this.props.messages.size + 2}
           rowHeight={this.getRowHeight}

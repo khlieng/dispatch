@@ -10,6 +10,8 @@ export default class Search extends Component {
     }
   }
 
+  inputRef = el => { this.input = el; };
+
   handleSearch = e => this.props.onSearch(e.target.value);
 
   render() {
@@ -27,7 +29,7 @@ export default class Search extends Component {
         <div className="search-input-wrap">
           <i className="icon-search" />
           <input
-            ref={el => { this.input = el; }}
+            ref={this.inputRef}
             className="search-input"
             type="text"
             onChange={this.handleSearch}

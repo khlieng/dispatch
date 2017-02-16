@@ -31,6 +31,8 @@ export default class UserList extends Component {
     return 24;
   };
 
+  listRef = el => { this.list = el; };
+
   handleResize = () => this.setState({ height: window.innerHeight - 100 });
 
   renderUser = index => {
@@ -65,7 +67,7 @@ export default class UserList extends Component {
     return (
       <div className={className} style={style}>
         <VirtualScroll
-          ref={el => { this.list = el; }}
+          ref={this.listRef}
           height={this.state.height}
           rowsCount={this.props.users.size + 2}
           rowHeight={this.getRowHeight}
