@@ -1,9 +1,7 @@
-import React, { Component } from 'react';
-import pure from 'pure-render-decorator';
+import React, { PureComponent } from 'react';
 import TabListItem from './TabListItem';
 
-@pure
-export default class TabList extends Component {
+export default class TabList extends PureComponent {
   handleTabClick = (server, target) => {
     this.props.select(server, target, target && target.charAt(0) !== '#');
     this.props.hideMenu();

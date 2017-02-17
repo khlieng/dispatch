@@ -1,9 +1,8 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { createSelector, createStructuredSelector } from 'reselect';
 import { List, Map } from 'immutable';
-import pure from 'pure-render-decorator';
 import ChatTitle from '../components/ChatTitle';
 import Search from '../components/Search';
 import MessageBox from '../components/MessageBox';
@@ -36,8 +35,7 @@ function updateCharWidth() {
   return setCharWidth(charWidth);
 }
 
-@pure
-class Chat extends Component {
+class Chat extends PureComponent {
   componentWillMount() {
     const { dispatch } = this.props;
     dispatch(updateCharWidth());

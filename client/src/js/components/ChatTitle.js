@@ -1,11 +1,9 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { List } from 'immutable';
-import pure from 'pure-render-decorator';
 import Navicon from '../components/Navicon';
 import { linkify } from '../util';
 
-@pure
-export default class ChatTitle extends Component {
+export default class ChatTitle extends PureComponent {
   handleLeaveClick = () => {
     const { tab, disconnect, part, closePrivateChat } = this.props;
 

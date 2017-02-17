@@ -1,10 +1,8 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import Autolinker from 'autolinker';
-import pure from 'pure-render-decorator';
 import { timestamp } from '../util';
 
-@pure
-export default class Search extends Component {
+export default class Search extends PureComponent {
   render() {
     const { result } = this.props;
     const content = Autolinker.link(result.content, { stripPrefix: false });

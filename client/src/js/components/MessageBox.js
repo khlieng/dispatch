@@ -1,10 +1,8 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { VirtualScroll } from 'react-virtualized';
-import pure from 'pure-render-decorator';
 import Message from './Message';
 
-@pure
-export default class MessageBox extends Component {
+export default class MessageBox extends PureComponent {
   state = {
     height: window.innerHeight - 100
   };

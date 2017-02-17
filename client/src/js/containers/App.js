@@ -1,13 +1,11 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
-import pure from 'pure-render-decorator';
 import TabList from '../components/TabList';
 import { select } from '../actions/tab';
 import { hideMenu } from '../actions/ui';
 
-@pure
-class App extends Component {
+class App extends PureComponent {
   render() {
     const { showTabList, children } = this.props;
     const mainClass = showTabList ? 'main-container off-canvas' : 'main-container';

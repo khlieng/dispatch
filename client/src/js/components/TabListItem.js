@@ -1,8 +1,6 @@
-import React, { Component } from 'react';
-import pure from 'pure-render-decorator';
+import React, { PureComponent } from 'react';
 
-@pure
-export default class TabListItem extends Component {
+export default class TabListItem extends PureComponent {
   handleClick = () => {
     const { server, target, onClick } = this.props;
     onClick(server, target);

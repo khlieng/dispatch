@@ -1,9 +1,7 @@
-import React, { Component } from 'react';
-import pure from 'pure-render-decorator';
+import React, { PureComponent } from 'react';
 import { timestamp, linkify } from '../util';
 
-@pure
-export default class Message extends Component {
+export default class Message extends PureComponent {
   handleSenderClick = () => {
     const { message, openPrivateChat, select } = this.props;
 

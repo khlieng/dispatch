@@ -1,13 +1,11 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import pure from 'pure-render-decorator';
 import Navicon from '../components/Navicon';
 import * as serverActions from '../actions/server';
 import { join } from '../actions/channel';
 import { select } from '../actions/tab';
 
-@pure
-class Connect extends Component {
+class Connect extends PureComponent {
   state = {
     showOptionals: false,
     passwordTouched: false

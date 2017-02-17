@@ -1,12 +1,10 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import pure from 'pure-render-decorator';
 import Navicon from '../components/Navicon';
 import FileInput from '../components/FileInput';
 import { setCert, setKey, uploadCert } from '../actions/settings';
 
-@pure
-class Settings extends Component {
+class Settings extends PureComponent {
   handleCertChange = (name, data) => this.props.dispatch(setCert(name, data));
   handleKeyChange = (name, data) => this.props.dispatch(setKey(name, data));
   handleCertUpload = () => this.props.dispatch(uploadCert());

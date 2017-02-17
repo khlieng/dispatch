@@ -1,8 +1,6 @@
-import React, { Component } from 'react';
-import pure from 'pure-render-decorator';
+import React, { PureComponent } from 'react';
 
-@pure
-export default class FileInput extends Component {
+export default class FileInput extends PureComponent {
   componentWillMount() {
     this.input = window.document.createElement('input');
     this.input.setAttribute('type', 'file');

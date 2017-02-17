@@ -1,10 +1,8 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { VirtualScroll } from 'react-virtualized';
-import pure from 'pure-render-decorator';
 import UserListItem from './UserListItem';
 
-@pure
-export default class UserList extends Component {
+export default class UserList extends PureComponent {
   state = {
     height: window.innerHeight - 100
   };

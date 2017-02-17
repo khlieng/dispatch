@@ -1,10 +1,8 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import pure from 'pure-render-decorator';
 import { toggleMenu } from '../actions/ui';
 
-@pure
-class Navicon extends Component {
+class Navicon extends PureComponent {
   handleClick = () => this.props.dispatch(toggleMenu());
 
   render() {

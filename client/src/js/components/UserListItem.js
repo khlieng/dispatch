@@ -1,8 +1,6 @@
-import React, { Component } from 'react';
-import pure from 'pure-render-decorator';
+import React, { PureComponent } from 'react';
 
-@pure
-export default class UserListItem extends Component {
+export default class UserListItem extends PureComponent {
   handleClick = () => {
     const { tab, user, openPrivateChat, select } = this.props;
 

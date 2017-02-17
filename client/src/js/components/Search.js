@@ -1,9 +1,7 @@
-import React, { Component } from 'react';
-import pure from 'pure-render-decorator';
+import React, { PureComponent } from 'react';
 import SearchResult from './SearchResult';
 
-@pure
-export default class Search extends Component {
+export default class Search extends PureComponent {
   componentDidUpdate(prevProps) {
     if (!prevProps.search.show && this.props.search.show) {
       this.input.focus();
