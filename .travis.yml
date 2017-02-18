@@ -1,28 +1,32 @@
 language: go
 
 go:
-    - 1.5.4
-    - 1.6.4
-    - 1.7.5
-    - 1.8
-    - tip
+  - 1.5.4
+  - 1.6.4
+  - 1.7.5
+  - 1.8
+  - tip
+
+os:
+  - linux
+  - osx
 
 matrix:
   allow_failures:
     - go: tip
 
 install:
-    - go get github.com/jteeuwen/go-bindata/...
-    - cd client
-    - nvm install 6.9.4
-    - nvm use 6.9.4
-    - npm install -g yarn
-    - npm install -g gulp
-    - yarn
+  - go get github.com/jteeuwen/go-bindata/...
+  - cd client
+  - nvm install 6.9.4
+  - nvm use 6.9.4
+  - npm install -g yarn
+  - npm install -g gulp
+  - yarn
 
 script:
-    - gulp build
-    - cd ..
-    - export GO15VENDOREXPERIMENT=1
-    - go vet $(go list ./... | grep -v '/vendor/')
-    - go test -v -race $(go list ./... | grep -v '/vendor/')
+  - gulp build
+  - cd ..
+  - export GO15VENDOREXPERIMENT=1
+  - go vet $(go list ./... | grep -v '/vendor/')
+  - go test -v -race $(go list ./... | grep -v '/vendor/')
