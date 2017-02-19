@@ -66,9 +66,13 @@ func TestFindUserChannels(t *testing.T) {
 	channelStore.AddUser("user", "srv", "#chan2")
 	channelStore.AddUser("user2", "srv", "#chan3")
 	channelStore.AddUser("user", "srv2", "#chan4")
+	channelStore.AddUser("@gotop", "srv", "#chan1")
 
 	channels := channelStore.FindUserChannels("user", "srv")
 	assert.Len(t, channels, 2)
 	assert.Contains(t, channels, "#chan1")
 	assert.Contains(t, channels, "#chan2")
+	channels = channelStore.FindUserChannels("gotop", "srv")
+	assert.Len(t, channels, 1)
+	assert.Contains(t, channels, "#chan1")
 }

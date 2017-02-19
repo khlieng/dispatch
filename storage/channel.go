@@ -108,7 +108,7 @@ func (c *ChannelStore) FindUserChannels(user, server string) []string {
 	c.userLock.Lock()
 	for channel, users := range c.users[server] {
 		for _, nick := range users {
-			if user == nick {
+			if user == strings.TrimLeft(nick, "@+") {
 				channels = append(channels, channel)
 				break
 			}
