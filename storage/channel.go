@@ -92,11 +92,11 @@ func (c *ChannelStore) SetMode(server, channel, user, add, remove string) {
 	c.userLock.Lock()
 
 	if strings.Contains(add, "o") {
-		c.rename(server, channel, user, "@"+user)
+		c.setPrefix(server, channel, user, "@")
 	} else if strings.Contains(add, "v") {
-		c.rename(server, channel, user, "+"+user)
+		c.setPrefix(server, channel, user, "+")
 	} else if strings.IndexAny(remove, "ov") > -1 {
-		c.rename(server, channel, user, user)
+		c.setPrefix(server, channel, user, "")
 	}
 
 	c.userLock.Unlock()
@@ -139,17 +139,28 @@ func (c *ChannelStore) SetTopic(topic, server, channel string) {
 
 func (c *ChannelStore) rename(server, channel, oldNick, newNick string) {
 	for i, u := range c.users[server][channel] {
-		u = strings.TrimLeft(u, "@+")
+		if strings.TrimLeft(u, "@+") == oldNick {
+			if u[0] == '@' || u[0] == '+' {
+				newNick = u[:1] + newNick
+			}
 
-		if u == oldNick {
 			c.users[server][channel][i] = newNick
 			return
 		}
 	}
 }
 
+func (c *ChannelStore) setPrefix(server, channel, user, prefix string) {
+	for i, u := range c.users[server][channel] {
+		if strings.TrimLeft(u, "@+") == user {
+			c.users[server][channel][i] = prefix + user
+			return
+		}
+	}
+}
+
 func (c *ChannelStore) renameAll(server, oldNick, newNick string) {
-	for channel, _ := range c.users[server] {
+	for channel := range c.users[server] {
 		c.rename(server, channel, oldNick, newNick)
 	}
 }

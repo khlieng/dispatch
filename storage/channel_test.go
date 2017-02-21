@@ -40,6 +40,10 @@ func TestRenameUser(t *testing.T) {
 	channelStore.RenameUser("user", "new", "srv")
 	assert.Equal(t, []string{"new"}, channelStore.GetUsers("srv", "#chan1"))
 	assert.Equal(t, []string{"new"}, channelStore.GetUsers("srv", "#chan2"))
+
+	channelStore.AddUser("@gotop", "srv", "#chan3")
+	channelStore.RenameUser("gotop", "stillgotit", "srv")
+	assert.Equal(t, []string{"@stillgotit"}, channelStore.GetUsers("srv", "#chan3"))
 }
 
 func TestMode(t *testing.T) {
