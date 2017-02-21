@@ -39,7 +39,6 @@ func (c *ChannelStore) SetUsers(users []string, server, channel string) {
 	}
 
 	c.users[server][channel] = users
-
 	c.userLock.Unlock()
 }
 
@@ -51,8 +50,8 @@ func (c *ChannelStore) AddUser(user, server, channel string) {
 	}
 
 	if users, ok := c.users[server][channel]; ok {
-		for _, u := range users {
-			if u == user {
+		for _, nick := range users {
+			if nick == user {
 				c.userLock.Unlock()
 				return
 			}
@@ -75,7 +74,7 @@ func (c *ChannelStore) RemoveUser(user, server, channel string) {
 func (c *ChannelStore) RemoveUserAll(user, server string) {
 	c.userLock.Lock()
 
-	for channel, _ := range c.users[server] {
+	for channel := range c.users[server] {
 		c.removeUser(user, server, channel)
 	}
 
@@ -106,14 +105,16 @@ func (c *ChannelStore) FindUserChannels(user, server string) []string {
 	var channels []string
 
 	c.userLock.Lock()
+
 	for channel, users := range c.users[server] {
 		for _, nick := range users {
-			if user == strings.TrimLeft(nick, "@+") {
+			if strings.TrimLeft(nick, "@+") == user {
 				channels = append(channels, channel)
 				break
 			}
 		}
 	}
+
 	c.userLock.Unlock()
 
 	return channels
@@ -138,10 +139,10 @@ func (c *ChannelStore) SetTopic(topic, server, channel string) {
 }
 
 func (c *ChannelStore) rename(server, channel, oldNick, newNick string) {
-	for i, u := range c.users[server][channel] {
-		if strings.TrimLeft(u, "@+") == oldNick {
-			if u[0] == '@' || u[0] == '+' {
-				newNick = u[:1] + newNick
+	for i, nick := range c.users[server][channel] {
+		if strings.TrimLeft(nick, "@+") == oldNick {
+			if nick[0] == '@' || nick[0] == '+' {
+				newNick = nick[:1] + newNick
 			}
 
 			c.users[server][channel][i] = newNick
@@ -151,8 +152,8 @@ func (c *ChannelStore) rename(server, channel, oldNick, newNick string) {
 }
 
 func (c *ChannelStore) setPrefix(server, channel, user, prefix string) {
-	for i, u := range c.users[server][channel] {
-		if strings.TrimLeft(u, "@+") == user {
+	for i, nick := range c.users[server][channel] {
+		if strings.TrimLeft(nick, "@+") == user {
 			c.users[server][channel][i] = prefix + user
 			return
 		}
@@ -166,10 +167,8 @@ func (c *ChannelStore) renameAll(server, oldNick, newNick string) {
 }
 
 func (c *ChannelStore) removeUser(user, server, channel string) {
-	for i, u := range c.users[server][channel] {
-		u = strings.TrimLeft(u, "@+")
-
-		if u == user {
+	for i, nick := range c.users[server][channel] {
+		if strings.TrimLeft(nick, "@+") == user {
 			users := c.users[server][channel]
 			c.users[server][channel] = append(users[:i], users[i+1:]...)
 			return
