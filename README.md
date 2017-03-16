@@ -1,6 +1,6 @@
 # dispatch [![Build Status](https://travis-ci.org/khlieng/dispatch.svg?branch=master)](https://travis-ci.org/khlieng/dispatch)
 
-####[Try it!](https://dispatch.khlieng.com)
+###[Try it!](https://dispatch.khlieng.com)
 
 ![Dispatch](https://khlieng.com/dispatch.png)
 
