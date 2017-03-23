@@ -10,7 +10,7 @@ import (
 func IndexTemplate(w io.Writer, data *indexData, cssPath, jsPath string) error {
 io.WriteString(w, "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Dispatch</title><link href=\"/")
 io.WriteString(w,  cssPath )
-io.WriteString(w, "\" rel=\"stylesheet\"></head><body><div id=\"root\"></div><script id=\"env\" type=\"application/json\">")
+io.WriteString(w, "\" rel=\"stylesheet\"><link rel=\"icon\" href=\"data:;base64,=\"></head><body><div id=\"root\"></div><script id=\"env\" type=\"application/json\">")
  json.NewEncoder(w).Encode(data) 
 io.WriteString(w, "</script><script src=\"/")
 io.WriteString(w,  jsPath )

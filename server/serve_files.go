@@ -142,7 +142,7 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 			connectSrc = "ws://" + r.Host
 		}
 
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src "+connectSrc)
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src data:; connect-src "+connectSrc)
 	}
 
 	w.Header().Set("Content-Type", "text/html")

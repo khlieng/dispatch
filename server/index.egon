@@ -11,6 +11,7 @@
   <title>Dispatch</title>
 
   <link href="/<%== cssPath %>" rel="stylesheet">
+  <link rel="icon" href="data:;base64,=">
 </head>
 <body>
   <div id="root"></div>
