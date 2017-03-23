@@ -31,7 +31,8 @@ export default class Message extends PureComponent {
 
     const style = {
       paddingLeft: `${window.messageIndent + 15}px`,
-      textIndent: `-${window.messageIndent}px`
+      textIndent: `-${window.messageIndent}px`,
+      ...this.props.style
     };
 
     return (

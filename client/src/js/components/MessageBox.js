@@ -1,20 +1,17 @@
 import React, { PureComponent } from 'react';
-import { VirtualScroll } from 'react-virtualized';
+import { List } from 'react-virtualized/dist/commonjs/List';
+import { AutoSizer } from 'react-virtualized/dist/commonjs/AutoSizer';
 import Message from './Message';
+import { scrollBarWidth } from '../util';
+
+const sbWidth = scrollBarWidth();
+const listStyle = { padding: '7px 0', boxSizing: 'content-box' };
 
 export default class MessageBox extends PureComponent {
-  state = {
-    height: window.innerHeight - 100
-  };
-
-  componentDidMount() {
-    this.updateWidth();
-    window.addEventListener('resize', this.handleResize);
-  }
-
-  componentWillReceiveProps() {
-    const el = this.list.refs.scrollingContainer;
-    this.autoScroll = el.scrollTop + el.offsetHeight === el.scrollHeight;
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.tab !== this.props.tab) {
+      this.bottom = true;
+    }
   }
 
   componentWillUpdate(nextProps) {
@@ -24,70 +21,57 @@ export default class MessageBox extends PureComponent {
   }
 
   componentDidUpdate() {
+    if (this.bottom) {
+      this.list.scrollToRow(this.props.messages.size);
+    }
+
     this.updateWidth();
-
-    if (this.autoScroll) {
-      const el = this.list.refs.scrollingContainer;
-      el.scrollTop = el.scrollHeight;
-    }
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleResize);
-  }
-
-  getRowHeight = index => {
-    const { messages } = this.props;
-
-    if (index === 0 || index === messages.size + 1) {
-      return 7;
-    }
-
-    return messages.get(index - 1).height;
-  };
-
-  updateWidth = resize => {
-    const { isChannel, setWrapWidth, updateMessageHeight } = this.props;
-    if (this.list) {
-      let width = this.list.refs.scrollingContainer.clientWidth - 30;
-
-      if (isChannel) {
-        width += 200;
-      }
-
-      if (this.width !== width) {
-        this.width = width;
-        setWrapWidth(width);
-
-        if (resize) {
-          updateMessageHeight();
-        }
-      }
-    }
-  };
+  getRowHeight = ({ index }) => this.props.messages.get(index).height;
 
   listRef = el => { this.list = el; };
 
-  handleResize = () => {
-    this.updateWidth(true);
-    this.setState({ height: window.innerHeight - 100 });
-  };
+  updateWidth = () => {
+    const { isChannel, setWrapWidth, updateMessageHeight } = this.props;
+    let wrapWidth = this.width;
 
-  renderMessage = index => {
-    const { messages } = this.props;
-
-    if (index === 0 || index === messages.size + 1) {
-      return <span style={{ height: '7px' }} />;
+    if (isChannel) {
+      wrapWidth += 200;
     }
 
-    const { select, openPrivateChat } = this.props;
-    const message = messages.get(index - 1);
+    // eslint-disable-next-line no-underscore-dangle
+    const c = this.list.Grid._scrollingContainer;
+    if (c.scrollHeight > c.clientHeight) {
+      wrapWidth -= sbWidth;
+    }
+
+    if (this.wrapWidth !== wrapWidth) {
+      this.wrapWidth = wrapWidth;
+      setWrapWidth(wrapWidth);
+      updateMessageHeight();
+    }
+  };
+
+  handleResize = size => {
+    this.width = size.width - 30;
+    this.updateWidth();
+  };
+
+  handleScroll = ({ scrollTop, clientHeight, scrollHeight }) => {
+    this.bottom = scrollTop + clientHeight >= scrollHeight;
+  };
+
+  renderMessage = ({ index, style, key }) => {
+    const { messages, select, openPrivateChat } = this.props;
 
     return (
       <Message
-        message={message}
+        key={key}
+        message={messages.get(index)}
         select={select}
         openPrivateChat={openPrivateChat}
+        style={style}
       />
     );
   };
@@ -95,13 +79,20 @@ export default class MessageBox extends PureComponent {
   render() {
     return (
       <div className="messagebox">
-        <VirtualScroll
-          ref={this.listRef}
-          height={this.state.height}
-          rowsCount={this.props.messages.size + 2}
-          rowHeight={this.getRowHeight}
-          rowRenderer={this.renderMessage}
-        />
+        <AutoSizer onResize={this.handleResize}>
+          {({ width, height }) => (
+            <List
+              ref={this.listRef}
+              width={width}
+              height={height - 14}
+              rowCount={this.props.messages.size}
+              rowHeight={this.getRowHeight}
+              rowRenderer={this.renderMessage}
+              onScroll={this.handleScroll}
+              style={listStyle}
+            />
+          )}
+        </AutoSizer>
       </div>
     );
   }

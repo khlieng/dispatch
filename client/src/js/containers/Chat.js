@@ -93,6 +93,7 @@ class Chat extends PureComponent {
         <MessageBox
           messages={messages}
           isChannel={tab.channel !== null}
+          tab={tab}
           setWrapWidth={this.props.setWrapWidth}
           updateMessageHeight={this.props.updateMessageHeight}
           select={this.props.select}

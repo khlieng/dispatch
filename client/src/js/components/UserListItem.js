@@ -9,6 +9,10 @@ export default class UserListItem extends PureComponent {
   };
 
   render() {
-    return <p onClick={this.handleClick}>{this.props.user.renderName}</p>;
+    return (
+      <p style={this.props.style} onClick={this.handleClick}>
+        {this.props.user.renderName}
+      </p>
+    );
   }
 }

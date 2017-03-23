@@ -518,6 +518,10 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   text-overflow: ellipsis;
 }
 
+.ReactVirtualized__Grid {
+  outline: none;
+}
+
 @media (max-width: 600px) {
   .tablist {
     width: 200px;
