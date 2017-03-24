@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { timestamp, linkify } from '../util';
 
-export default class Search extends PureComponent {
+export default class SearchResult extends PureComponent {
   render() {
     const { result } = this.props;
     const style = {
