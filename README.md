@@ -90,7 +90,8 @@ The libraries this project is built with.
 
 ### Client
 - [React](https://github.com/facebook/react)
-- [Redux](https://github.com/rackt/redux)
-- [React Router](https://github.com/rackt/react-router)
+- [Redux](https://github.com/reactjs/redux)
+- [React Router](https://github.com/ReactTraining/react-router)
+- [React Virtualized](https://github.com/bvaughn/react-virtualized)
 - [Immutable](https://github.com/facebook/immutable-js)
 - [Lodash](https://github.com/lodash/lodash)
