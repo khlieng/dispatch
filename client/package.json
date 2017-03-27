@@ -54,6 +54,6 @@
     "react-virtualized": "^9.3.0",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",
-    "reselect": "^2.5.4"
+    "reselect": "^3.0.0"
   }
 }
