@@ -32,12 +32,16 @@ export default class MessageBox extends PureComponent {
 
   listRef = el => { this.list = el; };
 
-  updateWidth = () => {
+  updateWidth = (width) => {
     const { isChannel, setWrapWidth, updateMessageHeight } = this.props;
-    let wrapWidth = this.width;
+    let wrapWidth = width || this.width;
 
-    if (isChannel) {
-      wrapWidth += 200;
+    if (width) {
+      if (isChannel && window.innerWidth > 600) {
+        wrapWidth += 200;
+      }
+
+      this.width = wrapWidth;
     }
 
     // eslint-disable-next-line no-underscore-dangle
@@ -54,8 +58,7 @@ export default class MessageBox extends PureComponent {
   };
 
   handleResize = size => {
-    this.width = size.width - 30;
-    this.updateWidth();
+    this.updateWidth(size.width - 30);
   };
 
   handleScroll = ({ scrollTop, clientHeight, scrollHeight }) => {
