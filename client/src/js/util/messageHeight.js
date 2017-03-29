@@ -1,11 +1,20 @@
 const lineHeight = 24;
+let prevWidth;
+let windowWidth;
 
 export default function messageHeight(message, width, charWidth, indent = 0) {
   let pad = (6 + (message.from ? message.from.length + 1 : 0)) * charWidth;
   let height = lineHeight + 4;
 
   if (message.channel) {
-    width -= 200;
+    if (width !== prevWidth) {
+      prevWidth = width;
+      windowWidth = window.innerWidth;
+    }
+
+    if (windowWidth > 600) {
+      width -= 200;
+    }
   }
 
   if (pad + (message.message.length * charWidth) < width) {
