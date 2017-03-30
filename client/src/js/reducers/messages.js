@@ -20,7 +20,7 @@ function addMessage(state, message) {
     const from = message.from;
     message.from = null;
     message.type = 'action';
-    message.message = from + message.message.slice(7);
+    message.message = from + message.message.slice(7, -1);
   }
 
   return state.updateIn([message.server, message.dest], List(),
