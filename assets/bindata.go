@@ -90,7 +90,7 @@ func bundleCssGz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "bundle.css.gz", size: 2116, mode: os.FileMode(436), modTime: time.Unix(1490839924, 0)}
+	info := bindataFileInfo{name: "bundle.css.gz", size: 2116, mode: os.FileMode(436), modTime: time.Unix(1490840238, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -110,7 +110,7 @@ func bundleJsGz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "bundle.js.gz", size: 122088, mode: os.FileMode(436), modTime: time.Unix(1490839924, 0)}
+	info := bindataFileInfo{name: "bundle.js.gz", size: 122088, mode: os.FileMode(436), modTime: time.Unix(1490840238, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -130,7 +130,7 @@ func configDefaultToml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "config.default.toml", size: 1302, mode: os.FileMode(436), modTime: time.Unix(1490839895, 0)}
+	info := bindataFileInfo{name: "config.default.toml", size: 1302, mode: os.FileMode(436), modTime: time.Unix(1490840203, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -150,7 +150,7 @@ func fontMontserratBoldTtfGz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/Montserrat-Bold.ttf.gz", size: 13513, mode: os.FileMode(436), modTime: time.Unix(1490839924, 0)}
+	info := bindataFileInfo{name: "font/Montserrat-Bold.ttf.gz", size: 13513, mode: os.FileMode(436), modTime: time.Unix(1490840238, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -170,7 +170,7 @@ func fontMontserratBoldWoff() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/Montserrat-Bold.woff", size: 14076, mode: os.FileMode(436), modTime: time.Unix(1490839895, 0)}
+	info := bindataFileInfo{name: "font/Montserrat-Bold.woff", size: 14076, mode: os.FileMode(436), modTime: time.Unix(1490840203, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -190,7 +190,7 @@ func fontMontserratBoldWoff2() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/Montserrat-Bold.woff2", size: 9636, mode: os.FileMode(436), modTime: time.Unix(1490839895, 0)}
+	info := bindataFileInfo{name: "font/Montserrat-Bold.woff2", size: 9636, mode: os.FileMode(436), modTime: time.Unix(1490840204, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -210,7 +210,7 @@ func fontMontserratRegularTtfGz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/Montserrat-Regular.ttf.gz", size: 13517, mode: os.FileMode(436), modTime: time.Unix(1490839924, 0)}
+	info := bindataFileInfo{name: "font/Montserrat-Regular.ttf.gz", size: 13517, mode: os.FileMode(436), modTime: time.Unix(1490840238, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -230,7 +230,7 @@ func fontMontserratRegularWoff() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/Montserrat-Regular.woff", size: 14100, mode: os.FileMode(436), modTime: time.Unix(1490839897, 0)}
+	info := bindataFileInfo{name: "font/Montserrat-Regular.woff", size: 14100, mode: os.FileMode(436), modTime: time.Unix(1490840206, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -250,7 +250,7 @@ func fontMontserratRegularWoff2() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/Montserrat-Regular.woff2", size: 9688, mode: os.FileMode(436), modTime: time.Unix(1490839899, 0)}
+	info := bindataFileInfo{name: "font/Montserrat-Regular.woff2", size: 9688, mode: os.FileMode(436), modTime: time.Unix(1490840208, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -270,7 +270,7 @@ func fontRobotomonoBoldTtfGz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/RobotoMono-Bold.ttf.gz", size: 19877, mode: os.FileMode(436), modTime: time.Unix(1490839924, 0)}
+	info := bindataFileInfo{name: "font/RobotoMono-Bold.ttf.gz", size: 19877, mode: os.FileMode(436), modTime: time.Unix(1490840238, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -290,7 +290,7 @@ func fontRobotomonoBoldWoff() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/RobotoMono-Bold.woff", size: 20304, mode: os.FileMode(436), modTime: time.Unix(1490839902, 0)}
+	info := bindataFileInfo{name: "font/RobotoMono-Bold.woff", size: 20304, mode: os.FileMode(436), modTime: time.Unix(1490840212, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -310,7 +310,7 @@ func fontRobotomonoBoldWoff2() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/RobotoMono-Bold.woff2", size: 16028, mode: os.FileMode(436), modTime: time.Unix(1490839908, 0)}
+	info := bindataFileInfo{name: "font/RobotoMono-Bold.woff2", size: 16028, mode: os.FileMode(436), modTime: time.Unix(1490840219, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -330,7 +330,7 @@ func fontRobotomonoRegularTtfGz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/RobotoMono-Regular.ttf.gz", size: 19871, mode: os.FileMode(436), modTime: time.Unix(1490839924, 0)}
+	info := bindataFileInfo{name: "font/RobotoMono-Regular.ttf.gz", size: 19871, mode: os.FileMode(436), modTime: time.Unix(1490840238, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -350,7 +350,7 @@ func fontRobotomonoRegularWoff() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/RobotoMono-Regular.woff", size: 20316, mode: os.FileMode(436), modTime: time.Unix(1490839909, 0)}
+	info := bindataFileInfo{name: "font/RobotoMono-Regular.woff", size: 20316, mode: os.FileMode(436), modTime: time.Unix(1490840220, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -370,7 +370,7 @@ func fontRobotomonoRegularWoff2() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/RobotoMono-Regular.woff2", size: 16108, mode: os.FileMode(436), modTime: time.Unix(1490839909, 0)}
+	info := bindataFileInfo{name: "font/RobotoMono-Regular.woff2", size: 16108, mode: os.FileMode(436), modTime: time.Unix(1490840220, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -390,7 +390,7 @@ func fontFontelloTtfGz() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/fontello.ttf.gz", size: 3490, mode: os.FileMode(436), modTime: time.Unix(1490839924, 0)}
+	info := bindataFileInfo{name: "font/fontello.ttf.gz", size: 3490, mode: os.FileMode(436), modTime: time.Unix(1490840238, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -410,7 +410,7 @@ func fontFontelloWoff() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/fontello.woff", size: 3736, mode: os.FileMode(436), modTime: time.Unix(1490839909, 0)}
+	info := bindataFileInfo{name: "font/fontello.woff", size: 3736, mode: os.FileMode(436), modTime: time.Unix(1490840220, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -430,7 +430,7 @@ func fontFontelloWoff2() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "font/fontello.woff2", size: 3100, mode: os.FileMode(436), modTime: time.Unix(1490839909, 0)}
+	info := bindataFileInfo{name: "font/fontello.woff2", size: 3100, mode: os.FileMode(436), modTime: time.Unix(1490840220, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -25,7 +25,7 @@ export function stringWidth(str, font) {
   return ctx.measureText(str).width;
 }
 
-export function scrollBarWidth() {
+export function measureScrollBarWidth() {
   const outer = document.createElement('div');
   outer.style.visibility = 'hidden';
   outer.style.width = '100px';

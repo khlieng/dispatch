@@ -2,9 +2,9 @@ import React, { PureComponent } from 'react';
 import { List } from 'react-virtualized/dist/commonjs/List';
 import { AutoSizer } from 'react-virtualized/dist/commonjs/AutoSizer';
 import Message from './Message';
-import { scrollBarWidth } from '../util';
+import { measureScrollBarWidth } from '../util';
 
-const sbWidth = scrollBarWidth();
+const scrollBarWidth = measureScrollBarWidth();
 const listStyle = { padding: '7px 0', boxSizing: 'content-box' };
 
 export default class MessageBox extends PureComponent {
@@ -45,9 +45,9 @@ export default class MessageBox extends PureComponent {
     }
 
     // eslint-disable-next-line no-underscore-dangle
-    const c = this.list.Grid._scrollingContainer;
-    if (c.scrollHeight > c.clientHeight) {
-      wrapWidth -= sbWidth;
+    const container = this.list.Grid._scrollingContainer;
+    if (container.scrollHeight > container.clientHeight) {
+      wrapWidth -= scrollBarWidth;
     }
 
     if (this.wrapWidth !== wrapWidth) {
