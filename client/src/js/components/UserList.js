@@ -14,14 +14,13 @@ export default class UserList extends PureComponent {
 
   listRef = el => { this.list = el; };
 
-  renderUser = ({ index, style }) => {
+  renderUser = ({ index, style, key }) => {
     const { users, tab, openPrivateChat, select } = this.props;
-    const user = users.get(index);
 
     return (
       <UserListItem
-        key={user.nick}
-        user={user}
+        key={key}
+        user={users.get(index)}
         tab={tab}
         openPrivateChat={openPrivateChat}
         select={select}
