@@ -8,7 +8,7 @@ const listStyle = { padding: '10px 0', boxSizing: 'content-box' };
 export default class UserList extends PureComponent {
   componentWillUpdate(nextProps) {
     if (nextProps.users.size === this.props.users.size) {
-      this.list.forceUpdate();
+      this.list.forceUpdateGrid();
     }
   }
 
