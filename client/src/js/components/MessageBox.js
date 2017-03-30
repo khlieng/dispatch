@@ -8,13 +8,11 @@ const scrollBarWidth = measureScrollBarWidth();
 const listStyle = { padding: '7px 0', boxSizing: 'content-box' };
 
 export default class MessageBox extends PureComponent {
-  componentWillReceiveProps(nextProps) {
+  componentWillUpdate(nextProps) {
     if (nextProps.tab !== this.props.tab) {
       this.bottom = true;
     }
-  }
 
-  componentWillUpdate(nextProps) {
     if (nextProps.messages !== this.props.messages) {
       this.list.recomputeRowHeights();
     }
