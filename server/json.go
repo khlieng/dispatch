@@ -40,8 +40,11 @@ type Join struct {
 }
 
 type Part struct {
-	Join
-	Reason string `json:"reason,omitempty"`
+	Server   string   `json:"server"`
+	User     string   `json:"user"`
+	Channel  string   `json:"channel,omitempty"`
+	Channels []string `json:"channels,omitempty"`
+	Reason   string   `json:"reason,omitempty"`
 }
 
 type Mode struct {

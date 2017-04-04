@@ -85,12 +85,22 @@ func TestHandleIRCPart(t *testing.T) {
 	})
 
 	checkResponse(t, "part", Part{
-		Join: Join{
-			Server:   "host.com",
-			User:     "parting",
-			Channels: []string{"#chan"},
-		},
-		Reason: "the reason",
+		Server:  "host.com",
+		User:    "parting",
+		Channel: "#chan",
+		Reason:  "the reason",
+	}, res)
+
+	res = dispatchMessage(&irc.Message{
+		Command: irc.Part,
+		Nick:    "parting",
+		Params:  []string{"#chan"},
+	})
+
+	checkResponse(t, "part", Part{
+		Server:  "host.com",
+		User:    "parting",
+		Channel: "#chan",
 	}, res)
 }
 

@@ -85,8 +85,7 @@ export default createReducer(Map(), {
   },
 
   [actions.SOCKET_PART](state, action) {
-    const { server, channels, user } = action;
-    const channel = channels[0];
+    const { server, channel, user } = action;
     if (state.hasIn([server, channel])) {
       return state.updateIn([server, channel, 'users'], users =>
         users.filter(u => u.nick !== user)

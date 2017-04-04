@@ -45,8 +45,8 @@ export default function handleSocket(socket, { dispatch, getState }) {
     dispatch(inform(`${user} joined the channel`, server, channels[0]))
   );
 
-  socket.on('part', ({ user, server, channels, reason }) =>
-    dispatch(inform(withReason(`${user} left the channel`, reason), server, channels[0]))
+  socket.on('part', ({ user, server, channel, reason }) =>
+    dispatch(inform(withReason(`${user} left the channel`, reason), server, channel))
   );
 
   socket.on('quit', ({ user, server, reason, channels }) =>

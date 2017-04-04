@@ -84,19 +84,22 @@ func (i *ircHandler) join(msg *irc.Message) {
 }
 
 func (i *ircHandler) part(msg *irc.Message) {
-	i.session.sendJSON("part", Part{
-		Join: Join{
-			Server:   i.client.Host,
-			User:     msg.Nick,
-			Channels: msg.Params[:len(msg.Params)-1],
-		},
-		Reason: msg.LastParam(),
-	})
+	part := Part{
+		Server:  i.client.Host,
+		User:    msg.Nick,
+		Channel: msg.Params[0],
+	}
 
-	channelStore.RemoveUser(msg.Nick, i.client.Host, msg.Params[0])
+	if len(msg.Params) == 2 {
+		part.Reason = msg.Params[1]
+	}
+
+	i.session.sendJSON("part", part)
+
+	channelStore.RemoveUser(msg.Nick, i.client.Host, part.Channel)
 
 	if msg.Nick == i.client.GetNick() {
-		go i.session.user.RemoveChannel(i.client.Host, msg.Params[0])
+		go i.session.user.RemoveChannel(i.client.Host, part.Channel)
 	}
 }
 
