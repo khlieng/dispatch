@@ -189,7 +189,7 @@ func (c *Client) recv() {
 		case ReplyWelcome:
 			c.once.Do(c.ready.Done)
 
-		case "433":
+		case ErrNicknameInUse:
 			if c.HandleNickInUse != nil {
 				c.nick = c.HandleNickInUse(c.nick)
 				c.writeNick(c.nick)

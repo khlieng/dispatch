@@ -32,4 +32,5 @@ const (
 	ReplyMotd          = "372"
 	ReplyMotdStart     = "375"
 	ReplyEndOfMotd     = "376"
+	ErrNicknameInUse   = "433"
 )
