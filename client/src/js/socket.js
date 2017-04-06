@@ -77,4 +77,6 @@ export default function handleSocket(socket, { dispatch, getState }) {
       `Channels: ${data.channels}`
     ], tab.server, tab.channel));
   });
+
+  socket.on('print', ({ server, message }) => dispatch(inform(message, server)));
 }

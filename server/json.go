@@ -64,7 +64,7 @@ type Quit struct {
 
 type Chat struct {
 	Server  string `json:"server"`
-	From    string `json:"from"`
+	From    string `json:"from,omitempty"`
 	To      string `json:"to,omitempty"`
 	Message string `json:"message"`
 }

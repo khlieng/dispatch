@@ -21,6 +21,7 @@ type Client struct {
 	Realname          string
 	Messages          chan *Message
 	ConnectionChanged chan bool
+	HandleNickInUse   func(string) string
 
 	nick     string
 	channels []string

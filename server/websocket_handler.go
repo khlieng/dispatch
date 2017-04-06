@@ -63,13 +63,6 @@ func (h *wsHandler) init() {
 		h.session.numWS(), "WebSocket connections")
 
 	channels := h.session.user.GetChannels()
-	/*for i, channel := range channels {
-		channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
-	}
-
-	h.session.sendJSON("channels", channels)
-	h.session.sendJSON("servers", h.session.user.GetServers())
-	h.session.sendJSON("connection_update", h.session.getConnectionStates())*/
 
 	for _, channel := range channels {
 		h.session.sendJSON("users", Userlist{
@@ -95,6 +88,7 @@ func (h *wsHandler) connect(b []byte) {
 		i := irc.NewClient(data.Nick, data.Username)
 		i.TLS = data.TLS
 		i.Realname = data.Realname
+		i.HandleNickInUse = createNickInUseHandler(i, h.session)
 
 		if data.Password == "" &&
 			viper.GetString("defaults.password") != "" &&

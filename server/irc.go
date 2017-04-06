@@ -10,6 +10,17 @@ import (
 	"github.com/khlieng/dispatch/storage"
 )
 
+func createNickInUseHandler(i *irc.Client, session *Session) func(string) string {
+	return func(nick string) string {
+		newNick := nick + "_"
+
+		session.print(i.Host, "Nickname", nick, "is already in use, using", newNick, "instead")
+		go session.user.SetNick(newNick, i.Host)
+
+		return newNick
+	}
+}
+
 func reconnectIRC() {
 	for _, user := range storage.LoadUsers() {
 		session := NewSession(user)
@@ -23,6 +34,7 @@ func reconnectIRC() {
 			i.TLS = server.TLS
 			i.Password = server.Password
 			i.Realname = server.Realname
+			i.HandleNickInUse = createNickInUseHandler(i, session)
 
 			if cert := user.GetCertificate(); cert != nil {
 				i.TLSConfig = &tls.Config{

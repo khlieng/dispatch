@@ -4,6 +4,8 @@ import (
 	"sync"
 	"time"
 
+	"fmt"
+
 	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
 )
@@ -122,6 +124,13 @@ func (s *Session) sendError(err error, server string) {
 	s.sendJSON("error", Error{
 		Server:  server,
 		Message: err.Error(),
+	})
+}
+
+func (s *Session) print(server string, a ...interface{}) {
+	s.sendJSON("print", Chat{
+		Server:  server,
+		Message: fmt.Sprintln(a...),
 	})
 }
 
