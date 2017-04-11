@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { browserHistory } from 'react-router';
 import { syncHistoryWithStore, replace } from 'react-router-redux';
+import { AppContainer } from 'react-hot-loader';
 import 'react-virtualized/styles.css';
 
 import configureStore from './store';
@@ -50,7 +51,17 @@ handleSocket(socket, store);
 const routes = createRoutes();
 const history = syncHistoryWithStore(browserHistory, store);
 
-render(
-  <Root store={store} routes={routes} history={history} />,
-  document.getElementById('root')
-);
+const renderRoot = () => {
+  render(
+    <AppContainer>
+      <Root store={store} routes={routes} history={history} />
+    </AppContainer>,
+    document.getElementById('root')
+  );
+};
+
+renderRoot();
+
+if (module.hot) {
+  module.hot.accept('./routes', () => renderRoot());
+}
