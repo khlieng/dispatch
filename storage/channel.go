@@ -101,25 +101,6 @@ func (c *ChannelStore) SetMode(server, channel, user, add, remove string) {
 	c.userLock.Unlock()
 }
 
-func (c *ChannelStore) FindUserChannels(user, server string) []string {
-	var channels []string
-
-	c.userLock.Lock()
-
-	for channel, users := range c.users[server] {
-		for _, nick := range users {
-			if strings.TrimLeft(nick, "@+") == user {
-				channels = append(channels, channel)
-				break
-			}
-		}
-	}
-
-	c.userLock.Unlock()
-
-	return channels
-}
-
 func (c *ChannelStore) GetTopic(server, channel string) string {
 	c.topicLock.Lock()
 	defer c.topicLock.Unlock()

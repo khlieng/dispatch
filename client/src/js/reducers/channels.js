@@ -104,15 +104,15 @@ export default createReducer(Map(), {
   },
 
   [actions.SOCKET_NICK](state, action) {
-    const { server, channels } = action;
+    const { server } = action;
     return state.withMutations(s => {
-      channels.forEach(channel => {
-        s.updateIn([server, channel, 'users'], users => {
-          const i = users.findIndex(user => user.nick === action.old);
-          return users.update(i, user =>
-            updateRenderName(user.set('nick', action.new))
-          ).sort(compareUsers);
-        });
+      s.get(server).forEach((v, channel) => {
+        s.updateIn([server, channel, 'users'], users =>
+          users.update(
+            users.findIndex(user => user.nick === action.old),
+            user => updateRenderName(user.set('nick', action.new))
+          ).sort(compareUsers)
+        );
       });
     });
   },

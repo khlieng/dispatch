@@ -1,14 +1,14 @@
 export default function createCommandMiddleware(type, handlers) {
-  return store => next => action => {
+  return ({ dispatch, getState }) => next => action => {
     if (action.type === type) {
       const words = action.command.slice(1).split(' ');
       const command = words[0];
       const params = words.slice(1);
 
-      if (Object.prototype.hasOwnProperty.call(handlers, command)) {
+      if (command in handlers) {
         handlers[command]({
-          dispatch: store.dispatch,
-          getState: store.getState,
+          dispatch,
+          getState,
           server: action.server,
           channel: action.channel
         }, ...params);

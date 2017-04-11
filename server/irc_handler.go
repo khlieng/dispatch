@@ -57,10 +57,9 @@ func (i *ircHandler) dispatchMessage(msg *irc.Message) {
 
 func (i *ircHandler) nick(msg *irc.Message) {
 	i.session.sendJSON("nick", Nick{
-		Server:   i.client.Host,
-		Old:      msg.Nick,
-		New:      msg.LastParam(),
-		Channels: channelStore.FindUserChannels(msg.Nick, i.client.Host),
+		Server: i.client.Host,
+		Old:    msg.Nick,
+		New:    msg.LastParam(),
 	})
 
 	channelStore.RenameUser(msg.Nick, msg.LastParam(), i.client.Host)
@@ -138,10 +137,9 @@ func (i *ircHandler) message(msg *irc.Message) {
 
 func (i *ircHandler) quit(msg *irc.Message) {
 	i.session.sendJSON("quit", Quit{
-		Server:   i.client.Host,
-		User:     msg.Nick,
-		Reason:   msg.LastParam(),
-		Channels: channelStore.FindUserChannels(msg.Nick, i.client.Host),
+		Server: i.client.Host,
+		User:   msg.Nick,
+		Reason: msg.LastParam(),
 	})
 
 	channelStore.RemoveUserAll(msg.Nick, i.client.Host)

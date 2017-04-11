@@ -1,10 +1,7 @@
-import EventEmitter2 from 'eventemitter2';
 import Backoff from 'backo';
 
-export default class Socket extends EventEmitter2 {
+export default class Socket {
   constructor(host) {
-    super();
-
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     this.url = `${protocol}://${host}/ws`;
 
@@ -15,6 +12,7 @@ export default class Socket extends EventEmitter2 {
       max: 5000,
       jitter: 0.25
     });
+    this.handlers = [];
 
     this.connect();
   }
@@ -30,7 +28,6 @@ export default class Socket extends EventEmitter2 {
     this.ws.onopen = () => {
       clearTimeout(this.timeoutConnect);
       this.backoff.reset();
-      this.emit('connect');
       this.setTimeoutPing();
     };
 
@@ -38,7 +35,6 @@ export default class Socket extends EventEmitter2 {
       clearTimeout(this.timeoutConnect);
       clearTimeout(this.timeoutPing);
       if (!this.closing) {
-        this.emit('disconnect');
         this.retry();
       }
       this.closing = false;
@@ -76,10 +72,19 @@ export default class Socket extends EventEmitter2 {
   setTimeoutPing() {
     clearTimeout(this.timeoutPing);
     this.timeoutPing = setTimeout(() => {
-      this.emit('disconnect');
       this.closing = true;
       this.ws.close();
       this.connect();
     }, this.pingTimeout);
+  }
+
+  onMessage(handler) {
+    this.handlers.push(handler);
+  }
+
+  emit(type, data) {
+    for (let i = 0; i < this.handlers.length; i++) {
+      this.handlers[i](type, data);
+    }
   }
 }
