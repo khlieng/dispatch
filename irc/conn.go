@@ -175,7 +175,6 @@ func (c *Client) recv() {
 		}
 
 		msg := parseMessage(line)
-		c.Messages <- msg
 
 		switch msg.Command {
 		case Ping:
@@ -186,14 +185,24 @@ func (c *Client) recv() {
 				c.addChannel(msg.Params[0])
 			}
 
+		case Nick:
+			if msg.Nick == c.GetNick() {
+				c.setNick(msg.LastParam())
+			}
+
 		case ReplyWelcome:
 			c.once.Do(c.ready.Done)
 
 		case ErrNicknameInUse:
 			if c.HandleNickInUse != nil {
-				c.nick = c.HandleNickInUse(c.nick)
-				c.writeNick(c.nick)
+				newNick := c.HandleNickInUse(msg.Params[1])
+				// Set the nick here aswell incase this happens during registration
+				// since there will be no NICK message to confirm it then
+				c.setNick(newNick)
+				go c.writeNick(newNick)
 			}
 		}
+
+		c.Messages <- msg
 	}
 }

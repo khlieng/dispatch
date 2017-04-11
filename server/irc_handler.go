@@ -63,6 +63,10 @@ func (i *ircHandler) nick(msg *irc.Message) {
 	})
 
 	channelStore.RenameUser(msg.Nick, msg.LastParam(), i.client.Host)
+
+	if msg.LastParam() == i.client.GetNick() {
+		go i.session.user.SetNick(msg.LastParam(), i.client.Host)
+	}
 }
 
 func (i *ircHandler) join(msg *irc.Message) {

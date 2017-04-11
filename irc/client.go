@@ -64,6 +64,12 @@ func (c *Client) GetNick() string {
 	return c.nick
 }
 
+func (c *Client) setNick(nick string) {
+	c.lock.Lock()
+	c.nick = nick
+	c.lock.Unlock()
+}
+
 func (c *Client) Connected() bool {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -73,10 +79,6 @@ func (c *Client) Connected() bool {
 
 func (c *Client) Nick(nick string) {
 	c.Write("NICK " + nick)
-
-	c.lock.Lock()
-	c.nick = nick
-	c.lock.Unlock()
 }
 
 func (c *Client) Oper(name, password string) {

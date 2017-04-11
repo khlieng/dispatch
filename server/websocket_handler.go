@@ -171,7 +171,6 @@ func (h *wsHandler) nick(b []byte) {
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Nick(data.New)
-		go h.session.user.SetNick(data.New, data.Server)
 	}
 }
 
