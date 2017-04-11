@@ -43,7 +43,6 @@ func TestPass(t *testing.T) {
 func TestNick(t *testing.T) {
 	c, out := testClientSend()
 	c.Nick("test2")
-	assert.Equal(t, "test2", c.GetNick())
 	assert.Equal(t, "NICK test2\r\n", <-out)
 
 	c.writeNick("nick")
