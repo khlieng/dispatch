@@ -7,15 +7,13 @@ module.exports = {
   ],
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'bundle.js',
-    publicPath: '/'
+    filename: 'bundle.js'
   },
   module: {
     rules: [
       { test: /\.js$/, loader: 'eslint-loader', exclude: /node_modules/, enforce: 'pre' },
       { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.css$/, loader: 'style-loader!css-loader' },
-      { test: /node_modules/, loader: 'ify-loader' }
+      { test: /\.css$/, loader: 'style-loader!css-loader' }
     ]
   },
   plugins: [

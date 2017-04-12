@@ -17,8 +17,7 @@ module.exports = {
     rules: [
       { test: /\.js$/, loader: 'eslint-loader', exclude: /node_modules/, enforce: 'pre' },
       { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.css$/, loader: 'style-loader!css-loader' },
-      { test: /node_modules/, loader: 'ify-loader' }
+      { test: /\.css$/, loader: 'style-loader!css-loader' }
     ]
   },
   plugins: [
