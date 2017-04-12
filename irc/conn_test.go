@@ -128,7 +128,7 @@ func TestRecv(t *testing.T) {
 	buf := &bytes.Buffer{}
 	buf.WriteString("CMD\r\n")
 	buf.WriteString("PING :test\r\n")
-	buf.WriteString("001\r\n")
+	buf.WriteString("001 foo\r\n")
 	c.reader = bufio.NewReader(buf)
 
 	c.ready.Add(1)

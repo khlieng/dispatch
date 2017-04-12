@@ -35,13 +35,17 @@ func TestMain(m *testing.M) {
 }
 
 func dispatchMessage(msg *irc.Message) WSResponse {
+	return <-dispatchMessageMulti(msg)
+}
+
+func dispatchMessageMulti(msg *irc.Message) chan WSResponse {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
 	s := NewSession(user)
 
 	newIRCHandler(c, s).dispatchMessage(msg)
 
-	return <-s.broadcast
+	return s.broadcast
 }
 
 func checkResponse(t *testing.T, expectedType string, expectedData interface{}, res WSResponse) {
@@ -161,17 +165,22 @@ func TestHandleIRCQuit(t *testing.T) {
 }
 
 func TestHandleIRCWelcome(t *testing.T) {
-	res := dispatchMessage(&irc.Message{
+	res := dispatchMessageMulti(&irc.Message{
 		Command: irc.ReplyWelcome,
 		Nick:    "nick",
-		Params:  []string{"target", "some", "text"},
+		Params:  []string{"nick", "some", "text"},
 	})
+
+	checkResponse(t, "nick", Nick{
+		Server: "host.com",
+		New:    "nick",
+	}, <-res)
 
 	checkResponse(t, "pm", Chat{
 		Server:  "host.com",
 		From:    "nick",
 		Message: "some text",
-	}, res)
+	}, <-res)
 }
 
 func TestHandleIRCWhois(t *testing.T) {
