@@ -191,15 +191,12 @@ func (c *Client) recv() {
 			}
 
 		case ReplyWelcome:
+			c.setNick(msg.Params[0])
 			c.once.Do(c.ready.Done)
 
 		case ErrNicknameInUse:
 			if c.HandleNickInUse != nil {
-				newNick := c.HandleNickInUse(msg.Params[1])
-				// Set the nick here aswell incase this happens during registration
-				// since there will be no NICK message to confirm it then
-				c.setNick(newNick)
-				go c.writeNick(newNick)
+				go c.writeNick(c.HandleNickInUse(msg.Params[1]))
 			}
 		}
 

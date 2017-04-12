@@ -150,6 +150,15 @@ func (i *ircHandler) quit(msg *irc.Message) {
 }
 
 func (i *ircHandler) info(msg *irc.Message) {
+	if msg.Command == irc.ReplyWelcome {
+		i.session.sendJSON("nick", Nick{
+			Server: i.client.Host,
+			New:    msg.Params[0],
+		})
+
+		go i.session.user.SetNick(msg.Params[0], i.client.Host)
+	}
+
 	i.session.sendJSON("pm", Chat{
 		Server:  i.client.Host,
 		From:    msg.Nick,

@@ -13,9 +13,7 @@ import (
 func createNickInUseHandler(i *irc.Client, session *Session) func(string) string {
 	return func(nick string) string {
 		newNick := nick + "_"
-
 		session.print(i.Host, "Nickname", nick, "is already in use, using", newNick, "instead")
-		go session.user.SetNick(newNick, i.Host)
 
 		return newNick
 	}

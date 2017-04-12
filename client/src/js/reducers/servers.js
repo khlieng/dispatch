@@ -27,9 +27,12 @@ export default createReducer(Map(), {
     return state.delete(action.server);
   },
 
-  [actions.SET_NICK](state, action) {
-    const { server, nick } = action;
-    return state.update(server, s => s.set('nick', nick));
+  [actions.SOCKET_NICK](state, action) {
+    const { server, old } = action;
+    if (!old || old === state.get(server).nick) {
+      return state.update(server, s => s.set('nick', action.new));
+    }
+    return state;
   },
 
   [actions.SOCKET_SERVERS](state, action) {
