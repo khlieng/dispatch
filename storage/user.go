@@ -165,11 +165,14 @@ func (u *User) SetNick(nick, address string) {
 		id := u.serverID(address)
 
 		server := Server{}
-		server.Unmarshal(b.Get(id))
-		server.Nick = nick
+		v := b.Get(id)
+		if v != nil {
+			server.Unmarshal(v)
+			server.Nick = nick
 
-		data, _ := server.Marshal(nil)
-		b.Put(id, data)
+			data, _ := server.Marshal(nil)
+			b.Put(id, data)
+		}
 
 		return nil
 	})
