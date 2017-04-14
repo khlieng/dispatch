@@ -157,11 +157,6 @@ func serveFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strings.HasSuffix(r.URL.Path, "favicon.ico") {
-		w.WriteHeader(404)
-		return
-	}
-
 	for _, file := range files {
 		if strings.HasSuffix(r.URL.Path, file.Path) {
 			serveFile(w, r, file)
