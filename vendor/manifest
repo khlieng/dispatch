@@ -58,6 +58,13 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/dsnet/compress/brotli",
+			"repository": "https://github.com/dsnet/compress",
+			"revision": "b9aab3c6a04eef14c56384b4ad065e7b73438862",
+			"branch": "master",
+			"path": "/brotli"
+		},
+		{
 			"importpath": "github.com/golang/protobuf/proto",
 			"repository": "https://github.com/golang/protobuf",
 			"revision": "552c7b9542c194800fd493123b3798ef0a832032",

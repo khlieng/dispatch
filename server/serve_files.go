@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"crypto/md5"
 	"encoding/base64"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,34 +15,39 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dsnet/compress/brotli"
 	"github.com/spf13/viper"
 
 	"github.com/khlieng/dispatch/assets"
 )
 
+const longCacheControl = "public, max-age=31536000"
+const disabledCacheControl = "no-cache, no-store, must-revalidate"
+
 type File struct {
 	Path         string
 	Asset        string
+	GzipAsset    []byte
 	ContentType  string
 	CacheControl string
-	Gzip         bool
+	Compressed   bool
 }
 
 var (
 	files = []*File{
 		&File{
 			Path:         "bundle.js",
-			Asset:        "bundle.js.gz",
+			Asset:        "bundle.js.br",
 			ContentType:  "text/javascript",
-			CacheControl: "max-age=31536000",
-			Gzip:         true,
+			CacheControl: longCacheControl,
+			Compressed:   true,
 		},
 		&File{
 			Path:         "bundle.css",
-			Asset:        "bundle.css.gz",
+			Asset:        "bundle.css.br",
 			ContentType:  "text/css",
-			CacheControl: "max-age=31536000",
-			Gzip:         true,
+			CacheControl: longCacheControl,
+			Compressed:   true,
 		},
 	}
 
@@ -65,6 +71,21 @@ func initFileServer() {
 		hash := md5.Sum(data)
 		files[0].Path = "bundle." + base64.RawURLEncoding.EncodeToString(hash[:]) + ".js"
 
+		br, err := brotli.NewReader(bytes.NewReader(data), nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		buf := &bytes.Buffer{}
+		gzw, err := gzip.NewWriterLevel(buf, gzip.BestCompression)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		io.Copy(gzw, br)
+		gzw.Close()
+		files[0].GzipAsset = buf.Bytes()
+
 		data, err = assets.Asset(files[1].Asset)
 		if err != nil {
 			log.Fatal(err)
@@ -73,21 +94,46 @@ func initFileServer() {
 		hash = md5.Sum(data)
 		files[1].Path = "bundle." + base64.RawURLEncoding.EncodeToString(hash[:]) + ".css"
 
+		br.Reset(bytes.NewReader(data))
+		buf = &bytes.Buffer{}
+		gzw.Reset(buf)
+
+		io.Copy(gzw, br)
+		gzw.Close()
+		files[1].GzipAsset = buf.Bytes()
+
 		fonts, err := assets.AssetDir("font")
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		for _, font := range fonts {
-			p := strings.TrimSuffix(font, ".gz")
+			p := strings.TrimSuffix(font, ".br")
 
-			files = append(files, &File{
+			file := &File{
 				Path:         path.Join("font", p),
 				Asset:        path.Join("font", font),
 				ContentType:  contentTypes[filepath.Ext(p)],
-				CacheControl: "max-age=31536000",
-				Gzip:         strings.HasSuffix(font, ".gz"),
-			})
+				CacheControl: longCacheControl,
+				Compressed:   strings.HasSuffix(font, ".br"),
+			}
+
+			if file.Compressed {
+				data, err = assets.Asset(file.Asset)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				br.Reset(bytes.NewReader(data))
+				buf = &bytes.Buffer{}
+				gzw.Reset(buf)
+
+				io.Copy(gzw, br)
+				gzw.Close()
+				file.GzipAsset = buf.Bytes()
+			}
+
+			files = append(files, file)
 		}
 
 		if viper.GetBool("https.hsts.enabled") && viper.GetBool("https.enabled") {
@@ -146,7 +192,7 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Cache-Control", disabledCacheControl)
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("X-Frame-Options", "deny")
 	w.Header().Set("X-XSS-Protection", "1; mode=block")
@@ -189,15 +235,21 @@ func serveFile(w http.ResponseWriter, r *http.Request, file *File) {
 
 	w.Header().Set("Content-Type", file.ContentType)
 
-	if file.Gzip && strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-		w.Header().Set("Content-Encoding", "gzip")
-		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-		w.Write(data)
-	} else if !file.Gzip {
+	if file.Compressed {
+		if strings.Contains(r.Header.Get("Accept-Encoding"), "br") {
+			w.Header().Set("Content-Encoding", "br")
+			w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+			w.Write(data)
+		} else if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			w.Header().Set("Content-Encoding", "gzip")
+			w.Header().Set("Content-Length", strconv.Itoa(len(file.GzipAsset)))
+			w.Write(file.GzipAsset)
+		}
+	} else if !file.Compressed {
 		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
 		w.Write(data)
 	} else {
-		gzr, err := gzip.NewReader(bytes.NewReader(data))
+		gzr, err := gzip.NewReader(bytes.NewReader(file.GzipAsset))
 		buf, err := ioutil.ReadAll(gzr)
 		if err != nil {
 			http.Error(w, "", http.StatusInternalServerError)
