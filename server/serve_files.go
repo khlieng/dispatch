@@ -28,6 +28,7 @@ type File struct {
 	Path         string
 	Asset        string
 	GzipAsset    []byte
+	Hash         string
 	ContentType  string
 	CacheControl string
 	Compressed   bool
@@ -69,7 +70,8 @@ func initFileServer() {
 		}
 
 		hash := md5.Sum(data)
-		files[0].Path = "bundle." + base64.RawURLEncoding.EncodeToString(hash[:]) + ".js"
+		files[0].Hash = base64.RawURLEncoding.EncodeToString(hash[:])
+		files[0].Path = "bundle." + files[0].Hash + ".js"
 
 		br, err := brotli.NewReader(bytes.NewReader(data), nil)
 		if err != nil {
@@ -92,7 +94,8 @@ func initFileServer() {
 		}
 
 		hash = md5.Sum(data)
-		files[1].Path = "bundle." + base64.RawURLEncoding.EncodeToString(hash[:]) + ".css"
+		files[1].Hash = base64.RawURLEncoding.EncodeToString(hash[:])
+		files[1].Path = "bundle." + files[1].Hash + ".css"
 
 		br.Reset(bytes.NewReader(data))
 		buf = &bytes.Buffer{}
@@ -196,6 +199,36 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Strict-Transport-Security", hstsHeader)
 	}
 
+	if pusher, ok := w.(http.Pusher); ok {
+		options := &http.PushOptions{
+			Header: http.Header{
+				"Accept-Encoding": r.Header["Accept-Encoding"],
+			},
+		}
+
+		cookie, err := r.Cookie("push")
+		if err != nil {
+			err = pusher.Push("/"+files[1].Path, options)
+			err = pusher.Push("/"+files[0].Path, options)
+			setPushCookie(w, r)
+		} else {
+			pushed := false
+
+			if files[1].Hash != cookie.Value[22:] {
+				pusher.Push("/"+files[1].Path, options)
+				pushed = true
+			}
+			if files[0].Hash != cookie.Value[:22] {
+				pusher.Push("/"+files[0].Path, options)
+				pushed = true
+			}
+
+			if pushed {
+				setPushCookie(w, r)
+			}
+		}
+	}
+
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w.Header().Set("Content-Encoding", "gzip")
 
@@ -205,6 +238,17 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 	} else {
 		IndexTemplate(w, getIndexData(r, session), files[1].Path, files[0].Path)
 	}
+}
+
+func setPushCookie(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "push",
+		Value:    files[0].Hash + files[1].Hash,
+		Path:     "/",
+		Expires:  time.Now().AddDate(1, 0, 0),
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+	})
 }
 
 func serveFile(w http.ResponseWriter, r *http.Request, file *File) {

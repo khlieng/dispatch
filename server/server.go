@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/tls"
 	"log"
 	"net"
 	"net/http"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
-	"golang.org/x/net/http2"
 
 	"github.com/khlieng/dispatch/letsencrypt"
 	"github.com/khlieng/dispatch/storage"
@@ -59,8 +59,6 @@ func startHTTP() {
 			Handler: http.HandlerFunc(serve),
 		}
 
-		http2.ConfigureServer(server, nil)
-
 		if certExists() {
 			log.Println("[HTTPS] Listening on port", portHTTPS)
 			server.ListenAndServeTLS(viper.GetString("https.cert"), viper.GetString("https.key"))
@@ -79,10 +77,12 @@ func startHTTP() {
 				log.Fatal(err)
 			}
 
-			server.TLSConfig.GetCertificate = letsEncrypt.GetCertificate
+			server.TLSConfig = &tls.Config{
+				GetCertificate: letsEncrypt.GetCertificate,
+			}
 
 			log.Println("[HTTPS] Listening on port", portHTTPS)
-			log.Fatal(listenAndServeTLS(server))
+			log.Fatal(server.ListenAndServeTLS("", ""))
 		} else {
 			log.Fatal("Could not locate SSL certificate or private key")
 		}

@@ -21,12 +21,7 @@ There is a few different ways of getting it:
 - [Other versions](https://github.com/khlieng/dispatch/releases)
 
 ### 2. Go
-This requires a [Go environment](http://golang.org/doc/install).
-
-If running go 1.5 this environment variable is needed, versions <1.5 are not supported:
-```bash
-export GO15VENDOREXPERIMENT=1
-```
+This requires a [Go environment](http://golang.org/doc/install), version 1.8 or greater.
 
 Fetch, compile and run dispatch:
 ```bash
