@@ -274,16 +274,14 @@ func serveFile(w http.ResponseWriter, r *http.Request, file *File) {
 
 	w.Header().Set("Content-Type", file.ContentType)
 
-	if file.Compressed {
-		if strings.Contains(r.Header.Get("Accept-Encoding"), "br") {
-			w.Header().Set("Content-Encoding", "br")
-			w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-			w.Write(data)
-		} else if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			w.Header().Set("Content-Encoding", "gzip")
-			w.Header().Set("Content-Length", strconv.Itoa(len(file.GzipAsset)))
-			w.Write(file.GzipAsset)
-		}
+	if file.Compressed && strings.Contains(r.Header.Get("Accept-Encoding"), "br") {
+		w.Header().Set("Content-Encoding", "br")
+		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+		w.Write(data)
+	} else if file.Compressed && strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Length", strconv.Itoa(len(file.GzipAsset)))
+		w.Write(file.GzipAsset)
 	} else if !file.Compressed {
 		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
 		w.Write(data)
