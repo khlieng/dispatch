@@ -248,13 +248,6 @@
 			"path": "/ssh/terminal"
 		},
 		{
-			"importpath": "golang.org/x/net/http2",
-			"repository": "https://go.googlesource.com/net",
-			"revision": "6acef71eb69611914f7a30939ea9f6e194c78172",
-			"branch": "master",
-			"path": "/http2"
-		},
-		{
 			"importpath": "golang.org/x/text/transform",
 			"repository": "https://go.googlesource.com/text",
 			"revision": "a71fd10341b064c10f4a81ceac72bcf70f26ea34",

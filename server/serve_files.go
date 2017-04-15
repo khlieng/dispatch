@@ -208,8 +208,8 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 
 		cookie, err := r.Cookie("push")
 		if err != nil {
-			err = pusher.Push("/"+files[1].Path, options)
-			err = pusher.Push("/"+files[0].Path, options)
+			pusher.Push("/"+files[1].Path, options)
+			pusher.Push("/"+files[0].Path, options)
 			setPushCookie(w, r)
 		} else {
 			pushed := false
