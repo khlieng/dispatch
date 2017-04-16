@@ -36,7 +36,7 @@
     "webpack-hot-middleware": "^2.17.0"
   },
   "dependencies": {
-    "autolinker": "git+https://github.com/robbie-c/Autolinker.js.git",
+    "autolinker": "^1.4.3",
     "backo": "^1.1.0",
     "base64-arraybuffer": "^0.1.5",
     "history": "^4.5.1",
