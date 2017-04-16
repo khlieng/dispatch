@@ -7,33 +7,52 @@ const autolinker = new Autolinker({
 });
 
 export default function linkify(text) {
-  const matches = autolinker.parseText(text);
+  let matches = autolinker.parseText(text);
+
+  if (matches.length === 0) {
+    return text;
+  }
+
   const result = [];
   let pos = 0;
+  matches = autolinker.compactMatches(matches);
 
   for (let i = 0; i < matches.length; i++) {
     const match = matches[i];
 
-    if (match.offset > pos) {
-      result.push(text.slice(pos, match.offset));
-      pos = match.offset;
-    }
-
     if (match.getType() === 'url') {
+      if (match.offset > pos) {
+        if (typeof result[result.length - 1] === 'string') {
+          result[result.length - 1] += text.slice(pos, match.offset);
+        } else {
+          result.push(text.slice(pos, match.offset));
+        }
+      }
+
       result.push(
         <a target="_blank" rel="noopener noreferrer" href={match.getAnchorHref()}>
           {match.matchedText}
         </a>
       );
+    } else if (typeof result[result.length - 1] === 'string') {
+      result[result.length - 1] += text.slice(pos, match.offset + match.matchedText.length);
     } else {
-      result.push(match.matchedText);
+      result.push(text.slice(pos, match.offset + match.matchedText.length));
     }
 
-    pos += match.matchedText.length;
+    pos = match.offset + match.matchedText.length;
   }
 
   if (pos < text.length) {
-    result.push(text.slice(pos));
+    if (typeof result[result.length - 1] === 'string') {
+      result[result.length - 1] += text.slice(pos);
+    } else {
+      result.push(text.slice(pos));
+    }
+  }
+
+  if (result.length === 1 && typeof result[0] === 'string') {
+    return text;
   }
 
   return result;
