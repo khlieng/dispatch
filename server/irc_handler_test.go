@@ -130,11 +130,11 @@ func TestHandleIRCMessage(t *testing.T) {
 		Params:  []string{"#chan", "the message"},
 	})
 
-	checkResponse(t, "message", Chat{
+	checkResponse(t, "message", Message{
 		Server:  "host.com",
 		From:    "nick",
 		To:      "#chan",
-		Message: "the message",
+		Content: "the message",
 	}, res)
 
 	res = dispatchMessage(&irc.Message{
@@ -143,10 +143,10 @@ func TestHandleIRCMessage(t *testing.T) {
 		Params:  []string{"nick", "the message"},
 	})
 
-	checkResponse(t, "pm", Chat{
+	checkResponse(t, "pm", Message{
 		Server:  "host.com",
 		From:    "someone",
-		Message: "the message",
+		Content: "the message",
 	}, res)
 }
 
@@ -176,10 +176,10 @@ func TestHandleIRCWelcome(t *testing.T) {
 		New:    "nick",
 	}, <-res)
 
-	checkResponse(t, "pm", Chat{
+	checkResponse(t, "pm", Message{
 		Server:  "host.com",
 		From:    "nick",
-		Message: "some text",
+		Content: "some text",
 	}, <-res)
 }
 

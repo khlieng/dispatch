@@ -8,7 +8,7 @@ const Message = Record({
   server: null,
   from: null,
   to: null,
-  message: '',
+  content: '',
   time: null,
   type: null,
   channel: false,

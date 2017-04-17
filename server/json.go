@@ -60,11 +60,11 @@ type Quit struct {
 	Reason string `json:"reason,omitempty"`
 }
 
-type Chat struct {
+type Message struct {
 	Server  string `json:"server"`
 	From    string `json:"from,omitempty"`
 	To      string `json:"to,omitempty"`
-	Message string `json:"message"`
+	Content string `json:"content"`
 }
 
 type Topic struct {

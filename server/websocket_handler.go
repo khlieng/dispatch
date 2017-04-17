@@ -156,12 +156,12 @@ func (h *wsHandler) quit(b []byte) {
 	}
 }
 
-func (h *wsHandler) chat(b []byte) {
-	var data Chat
+func (h *wsHandler) message(b []byte) {
+	var data Message
 	json.Unmarshal(b, &data)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
-		i.Privmsg(data.To, data.Message)
+		i.Privmsg(data.To, data.Content)
 	}
 }
 
@@ -257,7 +257,7 @@ func (h *wsHandler) initHandlers() {
 		"join":    h.join,
 		"part":    h.part,
 		"quit":    h.quit,
-		"chat":    h.chat,
+		"message": h.message,
 		"nick":    h.nick,
 		"invite":  h.invite,
 		"kick":    h.kick,

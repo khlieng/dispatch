@@ -128,9 +128,9 @@ func (s *Session) sendError(err error, server string) {
 }
 
 func (s *Session) print(server string, a ...interface{}) {
-	s.sendJSON("print", Chat{
+	s.sendJSON("print", Message{
 		Server:  server,
-		Message: fmt.Sprintln(a...),
+		Content: fmt.Sprintln(a...),
 	})
 }
 

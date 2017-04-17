@@ -60,7 +60,7 @@ export default createCommandMiddleware(COMMAND, {
       dispatch(addMessage({
         server,
         to: channel,
-        message: topic
+        content: topic
       }));
     } else {
       dispatch(inform('No topic set', server, channel));

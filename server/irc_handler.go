@@ -121,10 +121,10 @@ func (i *ircHandler) mode(msg *irc.Message) {
 }
 
 func (i *ircHandler) message(msg *irc.Message) {
-	message := Chat{
+	message := Message{
 		Server:  i.client.Host,
 		From:    msg.Nick,
-		Message: msg.LastParam(),
+		Content: msg.LastParam(),
 	}
 
 	if msg.Params[0] == i.client.GetNick() {
@@ -159,10 +159,10 @@ func (i *ircHandler) info(msg *irc.Message) {
 		go i.session.user.SetNick(msg.Params[0], i.client.Host)
 	}
 
-	i.session.sendJSON("pm", Chat{
+	i.session.sendJSON("pm", Message{
 		Server:  i.client.Host,
 		From:    msg.Nick,
-		Message: strings.Join(msg.Params[1:], " "),
+		Content: strings.Join(msg.Params[1:], " "),
 	})
 }
 

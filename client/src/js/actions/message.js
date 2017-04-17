@@ -12,22 +12,22 @@ function initMessage(message, state) {
   }
 
   // Collapse multiple adjacent spaces into a single one
-  message.message = message.message.replace(/\s\s+/g, ' ');
+  message.content = message.content.replace(/\s\s+/g, ' ');
 
-  if (message.message.indexOf('\x01ACTION') === 0) {
+  if (message.content.indexOf('\x01ACTION') === 0) {
     const from = message.from;
     message.from = null;
     message.type = 'action';
-    message.message = from + message.message.slice(7, -1);
+    message.content = from + message.content.slice(7, -1);
   }
 
   const charWidth = state.environment.get('charWidth');
   const wrapWidth = state.environment.get('wrapWidth');
 
-  message.length = message.message.length;
-  message.breakpoints = findBreakpoints(message.message);
+  message.length = message.content.length;
+  message.breakpoints = findBreakpoints(message.content);
   message.height = messageHeight(message, wrapWidth, charWidth, 6 * charWidth);
-  message.message = linkify(message.message);
+  message.content = linkify(message.content);
 
   return message;
 }
@@ -40,7 +40,7 @@ export function updateMessageHeight() {
   });
 }
 
-export function sendMessage(message, to, server) {
+export function sendMessage(content, to, server) {
   return (dispatch, getState) => {
     const state = getState();
 
@@ -48,14 +48,14 @@ export function sendMessage(message, to, server) {
       type: actions.SEND_MESSAGE,
       message: initMessage({
         from: state.servers.getIn([server, 'nick']),
-        message,
+        content,
         to,
         server,
         time: timestamp()
       }, state),
       socket: {
-        type: 'chat',
-        data: { message, to, server }
+        type: 'message',
+        data: { content, to, server }
       }
     });
   };
@@ -91,17 +91,17 @@ export function broadcast(message, server, channels) {
   return addMessages(channels.map(channel => ({
     server,
     to: channel,
-    message,
+    content: message,
     type: 'info'
   })));
 }
 
 export function inform(message, server, channel) {
   if (Array.isArray(message)) {
-    return addMessages(message.map(msg => ({
+    return addMessages(message.map(line => ({
       server,
       to: channel,
-      message: msg,
+      content: line,
       type: 'info'
     })));
   }
@@ -109,7 +109,7 @@ export function inform(message, server, channel) {
   return addMessage({
     server,
     to: channel,
-    message,
+    content: message,
     type: 'info'
   });
 }

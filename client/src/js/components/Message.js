@@ -24,7 +24,7 @@ export default class Message extends PureComponent {
           <span className="message-sender" onClick={this.handleSenderClick}>
             {' '}{message.from}
           </span>
-        }{' '}{message.message}
+        }{' '}{message.content}
       </p>
     );
   }

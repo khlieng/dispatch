@@ -70,7 +70,7 @@ export default function handleSocket(socket, { dispatch, getState }) {
       dispatch(addMessages(content.map(line => ({
         server,
         to: server,
-        message: line
+        content: line
       }))));
     },
 
