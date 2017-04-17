@@ -1,6 +1,6 @@
 import padStart from 'lodash/padStart';
 
-export messageHeight from './messageHeight';
+export { findBreakpoints, messageHeight } from './messageHeight';
 export linkify from './linkify';
 
 export function normalizeChannel(channel) {

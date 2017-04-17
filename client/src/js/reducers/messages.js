@@ -11,25 +11,20 @@ const Message = Record({
   message: '',
   time: null,
   type: null,
+  channel: false,
   height: 0,
-  channel: false
+  length: 0,
+  breakpoints: null
 });
 
 function addMessage(state, message) {
-  if (message.message.indexOf('\x01ACTION') === 0) {
-    const from = message.from;
-    message.from = null;
-    message.type = 'action';
-    message.message = from + message.message.slice(7, -1);
-  }
-
   return state.updateIn([message.server, message.dest], List(),
     list => list.push(new Message(message)));
 }
 
 export default createReducer(Map(), {
   [actions.SEND_MESSAGE](state, action) {
-    return addMessage(state, action);
+    return addMessage(state, action.message);
   },
 
   [actions.ADD_MESSAGE](state, action) {

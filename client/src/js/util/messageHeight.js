@@ -2,7 +2,23 @@ const lineHeight = 24;
 let prevWidth;
 let windowWidth;
 
-export default function messageHeight(message, width, charWidth, indent = 0) {
+export function findBreakpoints(text) {
+  const breakpoints = [];
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text.charAt(i);
+
+    if (char === ' ') {
+      breakpoints.push({ end: i, next: i + 1 });
+    } else if (char === '-' && i !== text.length - 1) {
+      breakpoints.push({ end: i + 1, next: i + 1 });
+    }
+  }
+
+  return breakpoints;
+}
+
+export function messageHeight(message, width, charWidth, indent = 0) {
   let pad = (6 + (message.from ? message.from.length + 1 : 0)) * charWidth;
   let height = lineHeight + 4;
 
@@ -17,31 +33,26 @@ export default function messageHeight(message, width, charWidth, indent = 0) {
     }
   }
 
-  if (pad + (message.message.length * charWidth) < width) {
+  if (pad + (message.length * charWidth) < width) {
     return height;
   }
 
+  const breaks = message.breakpoints;
   let prevBreak = 0;
   let prevPos = 0;
 
-  for (let i = 0, len = message.message.length; i < len; i++) {
-    const c = message.message.charAt(i);
-
-    if (c === ' ' || c === '-') {
-      const end = c === ' ' ? i : i + 1;
-
-      if (pad + ((end - prevBreak) * charWidth) >= width) {
-        prevBreak = prevPos;
-        pad = indent;
-        height += lineHeight;
-      }
-
-      prevPos = i + 1;
-    } else if (i === len - 1) {
-      if (pad + ((len - prevBreak) * charWidth) >= width) {
-        height += lineHeight;
-      }
+  for (let i = 0; i < breaks.length; i++) {
+    if (pad + ((breaks[i].end - prevBreak) * charWidth) >= width) {
+      prevBreak = prevPos;
+      pad = indent;
+      height += lineHeight;
     }
+
+    prevPos = breaks[i].next;
+  }
+
+  if (pad + ((message.length - prevBreak) * charWidth) >= width) {
+    height += lineHeight;
   }
 
   return height;

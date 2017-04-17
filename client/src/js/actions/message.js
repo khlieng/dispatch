@@ -1,5 +1,5 @@
 import * as actions from '../actions';
-import { messageHeight } from '../util';
+import { findBreakpoints, messageHeight, linkify, timestamp } from '../util';
 
 function initMessage(message, state) {
   message.dest = message.to || message.from || message.server;
@@ -11,13 +11,23 @@ function initMessage(message, state) {
     message.channel = true;
   }
 
-  // Combine multiple adjacent spaces into a single one
+  // Collapse multiple adjacent spaces into a single one
   message.message = message.message.replace(/\s\s+/g, ' ');
+
+  if (message.message.indexOf('\x01ACTION') === 0) {
+    const from = message.from;
+    message.from = null;
+    message.type = 'action';
+    message.message = from + message.message.slice(7, -1);
+  }
 
   const charWidth = state.environment.get('charWidth');
   const wrapWidth = state.environment.get('wrapWidth');
 
+  message.length = message.message.length;
+  message.breakpoints = findBreakpoints(message.message);
   message.height = messageHeight(message, wrapWidth, charWidth, 6 * charWidth);
+  message.message = linkify(message.message);
 
   return message;
 }
@@ -34,23 +44,25 @@ export function sendMessage(message, to, server) {
   return (dispatch, getState) => {
     const state = getState();
 
-    dispatch(initMessage({
+    dispatch({
       type: actions.SEND_MESSAGE,
-      from: state.servers.getIn([server, 'nick']),
-      message,
-      to,
-      server,
-      time: new Date(),
+      message: initMessage({
+        from: state.servers.getIn([server, 'nick']),
+        message,
+        to,
+        server,
+        time: timestamp()
+      }, state),
       socket: {
         type: 'chat',
         data: { message, to, server }
       }
-    }, state));
+    });
   };
 }
 
 export function addMessage(message) {
-  message.time = new Date();
+  message.time = timestamp();
 
   return (dispatch, getState) => dispatch({
     type: actions.ADD_MESSAGE,
@@ -59,7 +71,7 @@ export function addMessage(message) {
 }
 
 export function addMessages(messages) {
-  const now = new Date();
+  const now = timestamp();
 
   return (dispatch, getState) => {
     const state = getState();
