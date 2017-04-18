@@ -1,11 +1,16 @@
 //  Copyright (c) 2014 Couchbase, Inc.
-//  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
-//  except in compliance with the License. You may obtain a copy of the License at
-//    http://www.apache.org/licenses/LICENSE-2.0
-//  Unless required by applicable law or agreed to in writing, software distributed under the
-//  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-//  either express or implied. See the License for the specific language governing permissions
-//  and limitations under the License.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 		http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package registry
 
@@ -17,8 +22,7 @@ import (
 )
 
 var stores = make(KVStoreRegistry, 0)
-
-var byteArrayConverters = make(ByteArrayConverterRegistry, 0)
+var indexTypes = make(IndexTypeRegistry, 0)
 
 // highlight
 var fragmentFormatters = make(FragmentFormatterRegistry, 0)
@@ -34,37 +38,41 @@ var analyzers = make(AnalyzerRegistry, 0)
 var dateTimeParsers = make(DateTimeParserRegistry, 0)
 
 type Cache struct {
-	CharFilters        CharFilterCache
-	Tokenizers         TokenizerCache
-	TokenMaps          TokenMapCache
-	TokenFilters       TokenFilterCache
-	Analyzers          AnalyzerCache
-	DateTimeParsers    DateTimeParserCache
-	FragmentFormatters FragmentFormatterCache
-	Fragmenters        FragmenterCache
-	Highlighters       HighlighterCache
+	CharFilters        *CharFilterCache
+	Tokenizers         *TokenizerCache
+	TokenMaps          *TokenMapCache
+	TokenFilters       *TokenFilterCache
+	Analyzers          *AnalyzerCache
+	DateTimeParsers    *DateTimeParserCache
+	FragmentFormatters *FragmentFormatterCache
+	Fragmenters        *FragmenterCache
+	Highlighters       *HighlighterCache
 }
 
 func NewCache() *Cache {
 	return &Cache{
-		CharFilters:        make(CharFilterCache, 0),
-		Tokenizers:         make(TokenizerCache, 0),
-		TokenMaps:          make(TokenMapCache, 0),
-		TokenFilters:       make(TokenFilterCache, 0),
-		Analyzers:          make(AnalyzerCache, 0),
-		DateTimeParsers:    make(DateTimeParserCache, 0),
-		FragmentFormatters: make(FragmentFormatterCache, 0),
-		Fragmenters:        make(FragmenterCache, 0),
-		Highlighters:       make(HighlighterCache, 0),
+		CharFilters:        NewCharFilterCache(),
+		Tokenizers:         NewTokenizerCache(),
+		TokenMaps:          NewTokenMapCache(),
+		TokenFilters:       NewTokenFilterCache(),
+		Analyzers:          NewAnalyzerCache(),
+		DateTimeParsers:    NewDateTimeParserCache(),
+		FragmentFormatters: NewFragmentFormatterCache(),
+		Fragmenters:        NewFragmenterCache(),
+		Highlighters:       NewHighlighterCache(),
 	}
 }
 
 func typeFromConfig(config map[string]interface{}) (string, error) {
-	typ, ok := config["type"].(string)
-	if ok {
-		return typ, nil
+	prop, ok := config["type"]
+	if !ok {
+		return "", fmt.Errorf("'type' property is not defined")
 	}
-	return "", fmt.Errorf("unable to determine type")
+	typ, ok := prop.(string)
+	if !ok {
+		return "", fmt.Errorf("'type' property must be a string, not %T", prop)
+	}
+	return typ, nil
 }
 
 func (c *Cache) CharFilterNamed(name string) (analysis.CharFilter, error) {
@@ -86,7 +94,7 @@ func (c *Cache) TokenizerNamed(name string) (analysis.Tokenizer, error) {
 func (c *Cache) DefineTokenizer(name string, config map[string]interface{}) (analysis.Tokenizer, error) {
 	typ, err := typeFromConfig(config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot resolve '%s' tokenizer type: %s", name, err)
 	}
 	return c.Tokenizers.DefineTokenizer(name, typ, config, c)
 }

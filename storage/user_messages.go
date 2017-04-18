@@ -118,7 +118,8 @@ func (u *User) SearchMessages(server, channel, q string) ([]Message, error) {
 	contentQuery.SetField("content")
 	contentQuery.SetFuzziness(2)
 
-	query := bleve.NewBooleanQuery([]bleve.Query{serverQuery, channelQuery, contentQuery}, nil, nil)
+	query := bleve.NewBooleanQuery()
+	query.AddMust(serverQuery, channelQuery, contentQuery)
 
 	search := bleve.NewSearchRequest(query)
 	searchResults, err := u.messageIndex.Search(search)

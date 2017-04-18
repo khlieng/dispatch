@@ -1,11 +1,16 @@
 //  Copyright (c) 2014 Couchbase, Inc.
-//  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
-//  except in compliance with the License. You may obtain a copy of the License at
-//    http://www.apache.org/licenses/LICENSE-2.0
-//  Unless required by applicable law or agreed to in writing, software distributed under the
-//  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-//  either express or implied. See the License for the specific language governing permissions
-//  and limitations under the License.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 		http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package search
 
@@ -16,13 +21,18 @@ import (
 )
 
 type FacetBuilder interface {
-	Update(index.FieldTerms)
+	StartDoc()
+	UpdateVisitor(field string, term []byte)
+	EndDoc()
+
 	Result() *FacetResult
+	Field() string
 }
 
 type FacetsBuilder struct {
 	indexReader index.IndexReader
 	facets      map[string]FacetBuilder
+	fields      []string
 }
 
 func NewFacetsBuilder(indexReader index.IndexReader) *FacetsBuilder {
@@ -34,17 +44,29 @@ func NewFacetsBuilder(indexReader index.IndexReader) *FacetsBuilder {
 
 func (fb *FacetsBuilder) Add(name string, facetBuilder FacetBuilder) {
 	fb.facets[name] = facetBuilder
+	fb.fields = append(fb.fields, facetBuilder.Field())
 }
 
-func (fb *FacetsBuilder) Update(docMatch *DocumentMatch) error {
-	fieldTerms, err := fb.indexReader.DocumentFieldTerms(docMatch.ID)
-	if err != nil {
-		return err
-	}
+func (fb *FacetsBuilder) RequiredFields() []string {
+	return fb.fields
+}
+
+func (fb *FacetsBuilder) StartDoc() {
 	for _, facetBuilder := range fb.facets {
-		facetBuilder.Update(fieldTerms)
+		facetBuilder.StartDoc()
 	}
-	return nil
+}
+
+func (fb *FacetsBuilder) EndDoc() {
+	for _, facetBuilder := range fb.facets {
+		facetBuilder.EndDoc()
+	}
+}
+
+func (fb *FacetsBuilder) UpdateVisitor(field string, term []byte) {
+	for _, facetBuilder := range fb.facets {
+		facetBuilder.UpdateVisitor(field, term)
+	}
 }
 
 type TermFacet struct {
@@ -66,9 +88,14 @@ func (tf TermFacets) Add(termFacet *TermFacet) TermFacets {
 	return tf
 }
 
-func (tf TermFacets) Len() int           { return len(tf) }
-func (tf TermFacets) Swap(i, j int)      { tf[i], tf[j] = tf[j], tf[i] }
-func (tf TermFacets) Less(i, j int) bool { return tf[i].Count > tf[j].Count }
+func (tf TermFacets) Len() int      { return len(tf) }
+func (tf TermFacets) Swap(i, j int) { tf[i], tf[j] = tf[j], tf[i] }
+func (tf TermFacets) Less(i, j int) bool {
+	if tf[i].Count == tf[j].Count {
+		return tf[i].Term < tf[j].Term
+	}
+	return tf[i].Count > tf[j].Count
+}
 
 type NumericRangeFacet struct {
 	Name  string   `json:"name"`
@@ -77,11 +104,34 @@ type NumericRangeFacet struct {
 	Count int      `json:"count"`
 }
 
+func (nrf *NumericRangeFacet) Same(other *NumericRangeFacet) bool {
+	if nrf.Min == nil && other.Min != nil {
+		return false
+	}
+	if nrf.Min != nil && other.Min == nil {
+		return false
+	}
+	if nrf.Min != nil && other.Min != nil && *nrf.Min != *other.Min {
+		return false
+	}
+	if nrf.Max == nil && other.Max != nil {
+		return false
+	}
+	if nrf.Max != nil && other.Max == nil {
+		return false
+	}
+	if nrf.Max != nil && other.Max != nil && *nrf.Max != *other.Max {
+		return false
+	}
+
+	return true
+}
+
 type NumericRangeFacets []*NumericRangeFacet
 
 func (nrf NumericRangeFacets) Add(numericRangeFacet *NumericRangeFacet) NumericRangeFacets {
 	for _, existingNr := range nrf {
-		if numericRangeFacet.Min == existingNr.Min && numericRangeFacet.Max == existingNr.Max {
+		if numericRangeFacet.Same(existingNr) {
 			existingNr.Count += numericRangeFacet.Count
 			return nrf
 		}
@@ -91,9 +141,14 @@ func (nrf NumericRangeFacets) Add(numericRangeFacet *NumericRangeFacet) NumericR
 	return nrf
 }
 
-func (nrf NumericRangeFacets) Len() int           { return len(nrf) }
-func (nrf NumericRangeFacets) Swap(i, j int)      { nrf[i], nrf[j] = nrf[j], nrf[i] }
-func (nrf NumericRangeFacets) Less(i, j int) bool { return nrf[i].Count > nrf[j].Count }
+func (nrf NumericRangeFacets) Len() int      { return len(nrf) }
+func (nrf NumericRangeFacets) Swap(i, j int) { nrf[i], nrf[j] = nrf[j], nrf[i] }
+func (nrf NumericRangeFacets) Less(i, j int) bool {
+	if nrf[i].Count == nrf[j].Count {
+		return nrf[i].Name < nrf[j].Name
+	}
+	return nrf[i].Count > nrf[j].Count
+}
 
 type DateRangeFacet struct {
 	Name  string  `json:"name"`
@@ -102,11 +157,34 @@ type DateRangeFacet struct {
 	Count int     `json:"count"`
 }
 
+func (drf *DateRangeFacet) Same(other *DateRangeFacet) bool {
+	if drf.Start == nil && other.Start != nil {
+		return false
+	}
+	if drf.Start != nil && other.Start == nil {
+		return false
+	}
+	if drf.Start != nil && other.Start != nil && *drf.Start != *other.Start {
+		return false
+	}
+	if drf.End == nil && other.End != nil {
+		return false
+	}
+	if drf.End != nil && other.End == nil {
+		return false
+	}
+	if drf.End != nil && other.End != nil && *drf.End != *other.End {
+		return false
+	}
+
+	return true
+}
+
 type DateRangeFacets []*DateRangeFacet
 
 func (drf DateRangeFacets) Add(dateRangeFacet *DateRangeFacet) DateRangeFacets {
 	for _, existingDr := range drf {
-		if dateRangeFacet.Start == existingDr.Start && dateRangeFacet.End == existingDr.End {
+		if dateRangeFacet.Same(existingDr) {
 			existingDr.Count += dateRangeFacet.Count
 			return drf
 		}
@@ -116,9 +194,14 @@ func (drf DateRangeFacets) Add(dateRangeFacet *DateRangeFacet) DateRangeFacets {
 	return drf
 }
 
-func (drf DateRangeFacets) Len() int           { return len(drf) }
-func (drf DateRangeFacets) Swap(i, j int)      { drf[i], drf[j] = drf[j], drf[i] }
-func (drf DateRangeFacets) Less(i, j int) bool { return drf[i].Count > drf[j].Count }
+func (drf DateRangeFacets) Len() int      { return len(drf) }
+func (drf DateRangeFacets) Swap(i, j int) { drf[i], drf[j] = drf[j], drf[i] }
+func (drf DateRangeFacets) Less(i, j int) bool {
+	if drf[i].Count == drf[j].Count {
+		return drf[i].Name < drf[j].Name
+	}
+	return drf[i].Count > drf[j].Count
+}
 
 type FacetResult struct {
 	Field         string             `json:"field"`

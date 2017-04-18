@@ -1,11 +1,16 @@
 //  Copyright (c) 2014 Couchbase, Inc.
-//  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
-//  except in compliance with the License. You may obtain a copy of the License at
-//    http://www.apache.org/licenses/LICENSE-2.0
-//  Unless required by applicable law or agreed to in writing, software distributed under the
-//  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-//  either express or implied. See the License for the specific language governing permissions
-//  and limitations under the License.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 		http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package document
 
@@ -31,11 +36,12 @@ func NewCompositeField(name string, defaultInclude bool, include []string, exclu
 
 func NewCompositeFieldWithIndexingOptions(name string, defaultInclude bool, include []string, exclude []string, options IndexingOptions) *CompositeField {
 	rv := &CompositeField{
-		name:           name,
-		options:        options,
-		defaultInclude: defaultInclude,
-		includedFields: make(map[string]bool, len(include)),
-		excludedFields: make(map[string]bool, len(exclude)),
+		name:                 name,
+		options:              options,
+		defaultInclude:       defaultInclude,
+		includedFields:       make(map[string]bool, len(include)),
+		excludedFields:       make(map[string]bool, len(exclude)),
+		compositeFrequencies: make(analysis.TokenFrequencies),
 	}
 
 	for _, i := range include {
@@ -68,7 +74,11 @@ func (c *CompositeField) Value() []byte {
 	return []byte{}
 }
 
-func (c *CompositeField) Compose(field string, length int, freq analysis.TokenFrequencies) {
+func (c *CompositeField) NumPlainTextBytes() uint64 {
+	return 0
+}
+
+func (c *CompositeField) includesField(field string) bool {
 	shouldInclude := c.defaultInclude
 	_, fieldShouldBeIncluded := c.includedFields[field]
 	if fieldShouldBeIncluded {
@@ -78,9 +88,12 @@ func (c *CompositeField) Compose(field string, length int, freq analysis.TokenFr
 	if fieldShouldBeExcluded {
 		shouldInclude = false
 	}
+	return shouldInclude
+}
 
-	if shouldInclude {
+func (c *CompositeField) Compose(field string, length int, freq analysis.TokenFrequencies) {
+	if c.includesField(field) {
 		c.totalLength += length
-		c.compositeFrequencies = c.compositeFrequencies.MergeAll(field, freq)
+		c.compositeFrequencies.MergeAll(field, freq)
 	}
 }

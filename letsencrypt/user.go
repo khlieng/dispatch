@@ -1,6 +1,7 @@
 package letsencrypt
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -17,7 +18,7 @@ const defaultUser = "default"
 type User struct {
 	Email        string
 	Registration *acme.RegistrationResource
-	key          *rsa.PrivateKey
+	key          crypto.PrivateKey
 }
 
 func (u User) GetEmail() string {
@@ -28,7 +29,7 @@ func (u User) GetRegistration() *acme.RegistrationResource {
 	return u.Registration
 }
 
-func (u User) GetPrivateKey() *rsa.PrivateKey {
+func (u User) GetPrivateKey() crypto.PrivateKey {
 	return u.key
 }
 
@@ -86,7 +87,7 @@ func saveUser(user User) error {
 	return ioutil.WriteFile(directory.UserRegistration(user.Email), jsonBytes, 0600)
 }
 
-func loadRSAPrivateKey(file string) (*rsa.PrivateKey, error) {
+func loadRSAPrivateKey(file string) (crypto.PrivateKey, error) {
 	keyBytes, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, err
@@ -95,8 +96,10 @@ func loadRSAPrivateKey(file string) (*rsa.PrivateKey, error) {
 	return x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
 }
 
-func saveRSAPrivateKey(key *rsa.PrivateKey, file string) error {
-	pemKey := pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)}
+func saveRSAPrivateKey(key crypto.PrivateKey, file string) error {
+	pemKey := pem.Block{
+		Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key.(*rsa.PrivateKey)),
+	}
 	keyOut, err := os.Create(file)
 	if err != nil {
 		return err

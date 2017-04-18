@@ -1,11 +1,16 @@
 //  Copyright (c) 2014 Couchbase, Inc.
-//  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
-//  except in compliance with the License. You may obtain a copy of the License at
-//    http://www.apache.org/licenses/LICENSE-2.0
-//  Unless required by applicable law or agreed to in writing, software distributed under the
-//  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-//  either express or implied. See the License for the specific language governing permissions
-//  and limitations under the License.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 		http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package bleve
 
@@ -13,19 +18,23 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+
+	"github.com/blevesearch/bleve/index/upsidedown"
 )
 
 const metaFilename = "index_meta.json"
 
 type indexMeta struct {
-	Storage string                 `json:"storage"`
-	Config  map[string]interface{} `json:"config,omitempty"`
+	Storage   string                 `json:"storage"`
+	IndexType string                 `json:"index_type"`
+	Config    map[string]interface{} `json:"config,omitempty"`
 }
 
-func newIndexMeta(storage string, config map[string]interface{}) *indexMeta {
+func newIndexMeta(indexType string, storage string, config map[string]interface{}) *indexMeta {
 	return &indexMeta{
-		Storage: storage,
-		Config:  config,
+		IndexType: indexType,
+		Storage:   storage,
+		Config:    config,
 	}
 }
 
@@ -43,15 +52,21 @@ func openIndexMeta(path string) (*indexMeta, error) {
 	if err != nil {
 		return nil, ErrorIndexMetaCorrupt
 	}
+	if im.IndexType == "" {
+		im.IndexType = upsidedown.Name
+	}
 	return &im, nil
 }
 
 func (i *indexMeta) Save(path string) (err error) {
 	indexMetaPath := indexMetaPath(path)
 	// ensure any necessary parent directories exist
-	err = os.Mkdir(path, 0700)
+	err = os.MkdirAll(path, 0700)
 	if err != nil {
-		return ErrorIndexPathExists
+		if os.IsExist(err) {
+			return ErrorIndexPathExists
+		}
+		return err
 	}
 	metaBytes, err := json.Marshal(i)
 	if err != nil {

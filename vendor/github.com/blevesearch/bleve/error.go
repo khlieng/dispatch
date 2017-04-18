@@ -1,11 +1,16 @@
 //  Copyright (c) 2014 Couchbase, Inc.
-//  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
-//  except in compliance with the License. You may obtain a copy of the License at
-//    http://www.apache.org/licenses/LICENSE-2.0
-//  Unless required by applicable law or agreed to in writing, software distributed under the
-//  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-//  either express or implied. See the License for the specific language governing permissions
-//  and limitations under the License.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 		http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package bleve
 
@@ -15,15 +20,13 @@ const (
 	ErrorIndexPathDoesNotExist
 	ErrorIndexMetaMissing
 	ErrorIndexMetaCorrupt
-	ErrorDisjunctionFewerThanMinClauses
-	ErrorBooleanQueryNeedsMustOrShould
-	ErrorNumericQueryNoBounds
-	ErrorPhraseQueryNoTerms
-	ErrorUnknownQueryType
 	ErrorUnknownStorageType
 	ErrorIndexClosed
 	ErrorAliasMulti
 	ErrorAliasEmpty
+	ErrorUnknownIndexType
+	ErrorEmptyID
+	ErrorIndexReadInconsistency
 )
 
 // Error represents a more strongly typed bleve error for detecting
@@ -31,21 +34,19 @@ const (
 type Error int
 
 func (e Error) Error() string {
-	return errorMessages[int(e)]
+	return errorMessages[e]
 }
 
-var errorMessages = map[int]string{
-	int(ErrorIndexPathExists):                "cannot create new index, path already exists",
-	int(ErrorIndexPathDoesNotExist):          "cannot open index, path does not exist",
-	int(ErrorIndexMetaMissing):               "cannot open index, metadata missing",
-	int(ErrorIndexMetaCorrupt):               "cannot open index, metadata corrupt",
-	int(ErrorDisjunctionFewerThanMinClauses): "disjunction query has fewer than the minimum number of clauses to satisfy",
-	int(ErrorBooleanQueryNeedsMustOrShould):  "boolean query must contain at least one must or should clause",
-	int(ErrorNumericQueryNoBounds):           "numeric range query must specify min or max",
-	int(ErrorPhraseQueryNoTerms):             "phrase query must contain at least one term",
-	int(ErrorUnknownQueryType):               "unknown query type",
-	int(ErrorUnknownStorageType):             "unknown storage type",
-	int(ErrorIndexClosed):                    "index is closed",
-	int(ErrorAliasMulti):                     "cannot perform single index operation on multiple index alias",
-	int(ErrorAliasEmpty):                     "cannot perform operation on empty alias",
+var errorMessages = map[Error]string{
+	ErrorIndexPathExists:        "cannot create new index, path already exists",
+	ErrorIndexPathDoesNotExist:  "cannot open index, path does not exist",
+	ErrorIndexMetaMissing:       "cannot open index, metadata missing",
+	ErrorIndexMetaCorrupt:       "cannot open index, metadata corrupt",
+	ErrorUnknownStorageType:     "unknown storage type",
+	ErrorIndexClosed:            "index is closed",
+	ErrorAliasMulti:             "cannot perform single index operation on multiple index alias",
+	ErrorAliasEmpty:             "cannot perform operation on empty alias",
+	ErrorUnknownIndexType:       "unknown index type",
+	ErrorEmptyID:                "document ID cannot be empty",
+	ErrorIndexReadInconsistency: "index read inconsistency detected",
 }

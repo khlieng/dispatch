@@ -55,7 +55,8 @@ func handleAuth(w http.ResponseWriter, r *http.Request) *Session {
 		token, err := parseToken(cookie.Value)
 
 		if err == nil && token.Valid {
-			userID := uint64(token.Claims["UserID"].(float64))
+			claims := token.Claims.(jwt.MapClaims)
+			userID := uint64(claims["UserID"].(float64))
 
 			log.Println(r.RemoteAddr, "[Auth] GET", r.URL.Path, "| Valid token | User ID:", userID)
 
@@ -91,7 +92,8 @@ func newUser(w http.ResponseWriter, r *http.Request) *Session {
 	go session.run()
 
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims["UserID"] = user.ID
+	claims := token.Claims.(jwt.MapClaims)
+	claims["UserID"] = user.ID
 	tokenString, err := token.SignedString(hmacKey)
 	if err != nil {
 		return nil

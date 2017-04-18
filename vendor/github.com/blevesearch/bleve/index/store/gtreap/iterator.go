@@ -1,13 +1,16 @@
 //  Copyright (c) 2015 Couchbase, Inc.
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the
-//  License. You may obtain a copy of the License at
-//    http://www.apache.org/licenses/LICENSE-2.0
-//  Unless required by applicable law or agreed to in writing,
-//  software distributed under the License is distributed on an "AS
-//  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-//  express or implied. See the License for the specific language
-//  governing permissions and limitations under the License.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 		http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 // Package gtreap provides an in-memory implementation of the
 // KVStore interfaces using the gtreap balanced-binary treap,
@@ -15,6 +18,7 @@
 package gtreap
 
 import (
+	"bytes"
 	"sync"
 
 	"github.com/steveyen/gtreap"
@@ -28,22 +32,33 @@ type Iterator struct {
 	nextCh   chan *Item
 	curr     *Item
 	currOk   bool
-}
 
-func newIterator(t *gtreap.Treap) *Iterator {
-	return &Iterator{t: t}
-}
-
-func (w *Iterator) SeekFirst() {
-	min := w.t.Min()
-	if min != nil {
-		w.restart(min.(*Item))
-	} else {
-		w.restart(nil)
-	}
+	prefix []byte
+	start  []byte
+	end    []byte
 }
 
 func (w *Iterator) Seek(k []byte) {
+	if w.start != nil && bytes.Compare(k, w.start) < 0 {
+		k = w.start
+	}
+	if w.prefix != nil && !bytes.HasPrefix(k, w.prefix) {
+		if bytes.Compare(k, w.prefix) < 0 {
+			k = w.prefix
+		} else {
+			var end []byte
+			for i := len(w.prefix) - 1; i >= 0; i-- {
+				c := w.prefix[i]
+				if c < 0xff {
+					end = make([]byte, i+1)
+					copy(end, w.prefix)
+					end[i] = c + 1
+					break
+				}
+			}
+			k = end
+		}
+	}
 	w.restart(&Item{k: k})
 }
 
@@ -91,6 +106,11 @@ func (w *Iterator) Current() ([]byte, []byte, bool) {
 	w.m.Lock()
 	defer w.m.Unlock()
 	if !w.currOk || w.curr == nil {
+		return nil, nil, false
+	}
+	if w.prefix != nil && !bytes.HasPrefix(w.curr.k, w.prefix) {
+		return nil, nil, false
+	} else if w.end != nil && bytes.Compare(w.curr.k, w.end) >= 0 {
 		return nil, nil, false
 	}
 	return w.curr.k, w.curr.v, w.currOk

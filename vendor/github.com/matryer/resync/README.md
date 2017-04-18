@@ -4,11 +4,13 @@
 
   * See [sync.Once](http://golang.org/pkg/sync/#Once)
 
+Rather than adding this project as a dependency, consider [dropping](https://github.com/matryer/drop) this file into your project.
+
 ## Example
 
 The following example examines how `resync.Once` could be used in a HTTP server situation.
 
-```
+```go
 // use it just like sync.Once
 var once resync.Once
 

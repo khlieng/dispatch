@@ -1,11 +1,16 @@
 //  Copyright (c) 2014 Couchbase, Inc.
-//  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
-//  except in compliance with the License. You may obtain a copy of the License at
-//    http://www.apache.org/licenses/LICENSE-2.0
-//  Unless required by applicable law or agreed to in writing, software distributed under the
-//  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-//  either express or implied. See the License for the specific language governing permissions
-//  and limitations under the License.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 		http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package document
 
@@ -18,11 +23,12 @@ import (
 const DefaultTextIndexingOptions = IndexField
 
 type TextField struct {
-	name           string
-	arrayPositions []uint64
-	options        IndexingOptions
-	analyzer       *analysis.Analyzer
-	value          []byte
+	name              string
+	arrayPositions    []uint64
+	options           IndexingOptions
+	analyzer          *analysis.Analyzer
+	value             []byte
+	numPlainTextBytes uint64
 }
 
 func (t *TextField) Name() string {
@@ -60,7 +66,7 @@ func (t *TextField) Analyze() (int, analysis.TokenFrequencies) {
 		}
 	}
 	fieldLength := len(tokens) // number of tokens in this doc field
-	tokenFreqs := analysis.TokenFrequency(tokens)
+	tokenFreqs := analysis.TokenFrequency(tokens, t.arrayPositions, t.options.IncludeTermVectors())
 	return fieldLength, tokenFreqs
 }
 
@@ -69,7 +75,11 @@ func (t *TextField) Value() []byte {
 }
 
 func (t *TextField) GoString() string {
-	return fmt.Sprintf("&document.TextField{Name:%s, Options: %s, Analyzer: %s, Value: %s}", t.name, t.options, t.analyzer, t.value)
+	return fmt.Sprintf("&document.TextField{Name:%s, Options: %s, Analyzer: %v, Value: %s, ArrayPositions: %v}", t.name, t.options, t.analyzer, t.value, t.arrayPositions)
+}
+
+func (t *TextField) NumPlainTextBytes() uint64 {
+	return t.numPlainTextBytes
 }
 
 func NewTextField(name string, arrayPositions []uint64, value []byte) *TextField {
@@ -78,29 +88,32 @@ func NewTextField(name string, arrayPositions []uint64, value []byte) *TextField
 
 func NewTextFieldWithIndexingOptions(name string, arrayPositions []uint64, value []byte, options IndexingOptions) *TextField {
 	return &TextField{
-		name:           name,
-		arrayPositions: arrayPositions,
-		options:        options,
-		value:          value,
+		name:              name,
+		arrayPositions:    arrayPositions,
+		options:           options,
+		value:             value,
+		numPlainTextBytes: uint64(len(value)),
 	}
 }
 
 func NewTextFieldWithAnalyzer(name string, arrayPositions []uint64, value []byte, analyzer *analysis.Analyzer) *TextField {
 	return &TextField{
-		name:           name,
-		arrayPositions: arrayPositions,
-		options:        DefaultTextIndexingOptions,
-		analyzer:       analyzer,
-		value:          value,
+		name:              name,
+		arrayPositions:    arrayPositions,
+		options:           DefaultTextIndexingOptions,
+		analyzer:          analyzer,
+		value:             value,
+		numPlainTextBytes: uint64(len(value)),
 	}
 }
 
 func NewTextFieldCustom(name string, arrayPositions []uint64, value []byte, options IndexingOptions, analyzer *analysis.Analyzer) *TextField {
 	return &TextField{
-		name:           name,
-		arrayPositions: arrayPositions,
-		options:        options,
-		analyzer:       analyzer,
-		value:          value,
+		name:              name,
+		arrayPositions:    arrayPositions,
+		options:           options,
+		analyzer:          analyzer,
+		value:             value,
+		numPlainTextBytes: uint64(len(value)),
 	}
 }

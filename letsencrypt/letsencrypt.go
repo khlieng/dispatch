@@ -24,8 +24,8 @@ func Run(dir, domain, email, port string) (*state, error) {
 		return nil, err
 	}
 
-	client, err := acme.NewClient(URL, &user, KeySize)
-	client.ExcludeChallenges([]string{"tls-sni-01"})
+	client, err := acme.NewClient(URL, &user, acme.RSA2048)
+	client.ExcludeChallenges([]acme.Challenge{acme.TLSSNI01})
 	client.SetHTTPAddress(port)
 
 	if user.Registration == nil {
@@ -123,7 +123,7 @@ func (s *state) setOCSP(ocsp []byte) {
 }
 
 func (s *state) obtain() error {
-	cert, errors := s.client.ObtainCertificate([]string{s.domain}, true, nil)
+	cert, errors := s.client.ObtainCertificate([]string{s.domain}, true, nil, false)
 	if err := errors[s.domain]; err != nil {
 		if _, ok := err.(acme.TOSError); ok {
 			err := s.client.AgreeToTOS()
@@ -180,7 +180,7 @@ func (s *state) renew() bool {
 		meta.PrivateKey = key
 
 	Renew:
-		newMeta, err := s.client.RenewCertificate(meta, true)
+		newMeta, err := s.client.RenewCertificate(meta, true, false)
 		if err != nil {
 			if _, ok := err.(acme.TOSError); ok {
 				err := s.client.AgreeToTOS()
