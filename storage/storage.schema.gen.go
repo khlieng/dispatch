@@ -21,7 +21,7 @@ func (d *User) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -45,21 +45,7 @@ func (d *User) Marshal(buf []byte) ([]byte, error) {
 
 	{
 
-		buf[i+0+0] = byte(d.ID >> 0)
-
-		buf[i+1+0] = byte(d.ID >> 8)
-
-		buf[i+2+0] = byte(d.ID >> 16)
-
-		buf[i+3+0] = byte(d.ID >> 24)
-
-		buf[i+4+0] = byte(d.ID >> 32)
-
-		buf[i+5+0] = byte(d.ID >> 40)
-
-		buf[i+6+0] = byte(d.ID >> 48)
-
-		buf[i+7+0] = byte(d.ID >> 56)
+		*(*uint64)(unsafe.Pointer(&buf[0])) = d.ID
 
 	}
 	{
@@ -89,7 +75,7 @@ func (d *User) Unmarshal(buf []byte) (uint64, error) {
 
 	{
 
-		d.ID = 0 | (uint64(buf[i+0+0]) << 0) | (uint64(buf[i+1+0]) << 8) | (uint64(buf[i+2+0]) << 16) | (uint64(buf[i+3+0]) << 24) | (uint64(buf[i+4+0]) << 32) | (uint64(buf[i+5+0]) << 40) | (uint64(buf[i+6+0]) << 48) | (uint64(buf[i+7+0]) << 56)
+		d.ID = *(*uint64)(unsafe.Pointer(&buf[i+0]))
 
 	}
 	{
@@ -124,7 +110,7 @@ func (d *Server) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -139,7 +125,7 @@ func (d *Server) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -154,7 +140,7 @@ func (d *Server) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -169,7 +155,7 @@ func (d *Server) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -184,7 +170,7 @@ func (d *Server) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -199,7 +185,7 @@ func (d *Server) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -214,7 +200,7 @@ func (d *Server) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -537,7 +523,7 @@ func (d *Channel) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -552,7 +538,7 @@ func (d *Channel) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -567,7 +553,7 @@ func (d *Channel) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -723,7 +709,7 @@ func (d *Message) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -738,7 +724,7 @@ func (d *Message) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -753,7 +739,7 @@ func (d *Message) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -768,7 +754,7 @@ func (d *Message) Size() (s uint64) {
 
 			t := l
 			for t >= 0x80 {
-				t <<= 7
+				t >>= 7
 				s++
 			}
 			s++
@@ -792,21 +778,7 @@ func (d *Message) Marshal(buf []byte) ([]byte, error) {
 
 	{
 
-		buf[i+0+0] = byte(d.ID >> 0)
-
-		buf[i+1+0] = byte(d.ID >> 8)
-
-		buf[i+2+0] = byte(d.ID >> 16)
-
-		buf[i+3+0] = byte(d.ID >> 24)
-
-		buf[i+4+0] = byte(d.ID >> 32)
-
-		buf[i+5+0] = byte(d.ID >> 40)
-
-		buf[i+6+0] = byte(d.ID >> 48)
-
-		buf[i+7+0] = byte(d.ID >> 56)
+		*(*uint64)(unsafe.Pointer(&buf[0])) = d.ID
 
 	}
 	{
@@ -887,21 +859,7 @@ func (d *Message) Marshal(buf []byte) ([]byte, error) {
 	}
 	{
 
-		buf[i+0+8] = byte(d.Time >> 0)
-
-		buf[i+1+8] = byte(d.Time >> 8)
-
-		buf[i+2+8] = byte(d.Time >> 16)
-
-		buf[i+3+8] = byte(d.Time >> 24)
-
-		buf[i+4+8] = byte(d.Time >> 32)
-
-		buf[i+5+8] = byte(d.Time >> 40)
-
-		buf[i+6+8] = byte(d.Time >> 48)
-
-		buf[i+7+8] = byte(d.Time >> 56)
+		*(*int64)(unsafe.Pointer(&buf[i+8])) = d.Time
 
 	}
 	return buf[:i+16], nil
@@ -912,7 +870,7 @@ func (d *Message) Unmarshal(buf []byte) (uint64, error) {
 
 	{
 
-		d.ID = 0 | (uint64(buf[i+0+0]) << 0) | (uint64(buf[i+1+0]) << 8) | (uint64(buf[i+2+0]) << 16) | (uint64(buf[i+3+0]) << 24) | (uint64(buf[i+4+0]) << 32) | (uint64(buf[i+5+0]) << 40) | (uint64(buf[i+6+0]) << 48) | (uint64(buf[i+7+0]) << 56)
+		d.ID = *(*uint64)(unsafe.Pointer(&buf[i+0]))
 
 	}
 	{
@@ -997,7 +955,7 @@ func (d *Message) Unmarshal(buf []byte) (uint64, error) {
 	}
 	{
 
-		d.Time = 0 | (int64(buf[i+0+8]) << 0) | (int64(buf[i+1+8]) << 8) | (int64(buf[i+2+8]) << 16) | (int64(buf[i+3+8]) << 24) | (int64(buf[i+4+8]) << 32) | (int64(buf[i+5+8]) << 40) | (int64(buf[i+6+8]) << 48) | (int64(buf[i+7+8]) << 56)
+		d.Time = *(*int64)(unsafe.Pointer(&buf[i+8]))
 
 	}
 	return i + 16, nil
