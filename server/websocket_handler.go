@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"net"
+	"net/http"
+	"strings"
 
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
@@ -20,13 +22,13 @@ type wsHandler struct {
 	handlers map[string]func([]byte)
 }
 
-func newWSHandler(conn *websocket.Conn, session *Session) *wsHandler {
+func newWSHandler(conn *websocket.Conn, session *Session, r *http.Request) *wsHandler {
 	h := &wsHandler{
 		ws:      newWSConn(conn),
 		session: session,
 		addr:    conn.RemoteAddr().String(),
 	}
-	h.init()
+	h.init(r)
 	h.initHandlers()
 	return h
 }
@@ -55,7 +57,7 @@ func (h *wsHandler) dispatchRequest(req WSRequest) {
 	}
 }
 
-func (h *wsHandler) init() {
+func (h *wsHandler) init(r *http.Request) {
 	h.session.setWS(h.addr, h.ws)
 
 	log.Println(h.addr, "[Session] User ID:", h.session.user.ID, "|",
@@ -63,13 +65,27 @@ func (h *wsHandler) init() {
 		h.session.numWS(), "WebSocket connections")
 
 	channels := h.session.user.GetChannels()
+	params := strings.Split(strings.Trim(r.URL.Query().Get("path"), "/"), "/")
 
 	for _, channel := range channels {
+		if len(params) > 1 && channel.Server == params[0] && channel.Name == params[1] {
+			continue
+		}
+
 		h.session.sendJSON("users", Userlist{
 			Server:  channel.Server,
 			Channel: channel.Name,
 			Users:   channelStore.GetUsers(channel.Server, channel.Name),
 		})
+
+		messages, err := h.session.user.GetLastMessages(channel.Server, channel.Name, 25)
+		if err == nil && len(messages) > 0 {
+			h.session.sendJSON("messages", Messages{
+				Server:   channel.Server,
+				To:       channel.Name,
+				Messages: messages,
+			})
+		}
 	}
 }
 

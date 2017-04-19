@@ -5,9 +5,12 @@ import * as actions from '../actions';
 
 const Tab = Record({
   server: null,
-  channel: null,
-  user: null
+  name: null
 });
+
+Tab.prototype.isChannel = function isChannel() {
+  return this.name && this.name.charAt(0) === '#';
+};
 
 const State = Record({
   selected: new Tab(),
@@ -24,13 +27,13 @@ export default createReducer(new State(), {
 
   [actions.PART](state, action) {
     return state.set('history', state.history.filter(tab =>
-      !(tab.server === action.server && tab.channel === action.channels[0])
+      !(tab.server === action.server && tab.name === action.channels[0])
     ));
   },
 
   [actions.CLOSE_PRIVATE_CHAT](state, action) {
     return state.set('history', state.history.filter(tab =>
-      !(tab.server === action.server && tab.user === action.nick)
+      !(tab.server === action.server && tab.name === action.nick)
     ));
   },
 

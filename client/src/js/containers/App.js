@@ -26,7 +26,7 @@ function mapStateToProps(state) {
     channels: state.channels,
     privateChats: state.privateChats,
     showTabList: state.ui.showTabList,
-    selected: state.tab.selected
+    tab: state.tab.selected
   };
 }
 

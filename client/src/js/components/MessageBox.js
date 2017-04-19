@@ -31,11 +31,11 @@ export default class MessageBox extends PureComponent {
   listRef = el => { this.list = el; };
 
   updateWidth = (width) => {
-    const { isChannel, setWrapWidth, updateMessageHeight } = this.props;
+    const { tab, setWrapWidth, updateMessageHeight } = this.props;
     let wrapWidth = width || this.width;
 
     if (width) {
-      if (isChannel && window.innerWidth > 600) {
+      if (tab.isChannel() && window.innerWidth > 600) {
         wrapWidth += 200;
       }
 
@@ -64,15 +64,14 @@ export default class MessageBox extends PureComponent {
   };
 
   renderMessage = ({ index, style, key }) => {
-    const { messages, select, openPrivateChat } = this.props;
+    const { messages, onNickClick } = this.props;
 
     return (
       <Message
         key={key}
         message={messages.get(index)}
-        select={select}
-        openPrivateChat={openPrivateChat}
         style={style}
+        onNickClick={onNickClick}
       />
     );
   };

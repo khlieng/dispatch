@@ -67,6 +67,12 @@ type Message struct {
 	Content string `json:"content"`
 }
 
+type Messages struct {
+	Server   string            `json:"server"`
+	To       string            `json:"to"`
+	Messages []storage.Message `json:"messages"`
+}
+
 type Topic struct {
 	Server  string `json:"server"`
 	Channel string `json:"channel"`

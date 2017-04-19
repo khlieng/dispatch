@@ -22,9 +22,7 @@ struct Channel {
 
 struct Message {
   ID      uint64
-  Server  string
   From    string
-  To      string
   Content string
   Time    int64
 }

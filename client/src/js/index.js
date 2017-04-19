@@ -10,6 +10,7 @@ import createRoutes from './routes';
 import Socket from './util/Socket';
 import handleSocket from './socket';
 import Root from './containers/Root';
+import { addMessages } from './actions/message';
 
 const host = DEV ? `${window.location.hostname}:1337` : window.location.host;
 const socket = new Socket(host);
@@ -44,6 +45,11 @@ if (env.users) {
     type: 'SOCKET_USERS',
     ...env.users
   });
+}
+
+if (env.messages) {
+  const { messages, server, to } = env.messages;
+  store.dispatch(addMessages(messages, server, to));
 }
 
 handleSocket(socket, store);

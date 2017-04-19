@@ -3,7 +3,7 @@ import TabListItem from './TabListItem';
 
 export default class TabList extends PureComponent {
   handleTabClick = (server, target) => {
-    this.props.select(server, target, target && target.charAt(0) !== '#');
+    this.props.select(server, target);
     this.props.hideMenu();
   };
 
@@ -18,7 +18,7 @@ export default class TabList extends PureComponent {
   };
 
   render() {
-    const { channels, servers, privateChats, showTabList, selected } = this.props;
+    const { tab, channels, servers, privateChats, showTabList } = this.props;
     const className = showTabList ? 'tablist off-canvas' : 'tablist';
     const tabs = [];
 
@@ -28,11 +28,7 @@ export default class TabList extends PureComponent {
           key={address}
           server={address}
           content={servers.getIn([address, 'name'])}
-          selected={
-            selected.server === address &&
-            selected.channel === null &&
-            selected.user === null
-          }
+          selected={tab.server === address && tab.name === null}
           connected={servers.getIn([address, 'connected'])}
           onClick={this.handleTabClick}
         />
@@ -44,7 +40,7 @@ export default class TabList extends PureComponent {
           server={address}
           target={name}
           content={name}
-          selected={selected.server === address && selected.channel === name}
+          selected={tab.server === address && tab.name === name}
           onClick={this.handleTabClick}
         />
       ));
@@ -56,7 +52,7 @@ export default class TabList extends PureComponent {
             server={address}
             target={nick}
             content={nick}
-            selected={selected.server === address && selected.user === nick}
+            selected={tab.server === address && tab.name === nick}
             onClick={this.handleTabClick}
           />
         ));

@@ -7,10 +7,10 @@ export default class ChatTitle extends PureComponent {
   handleLeaveClick = () => {
     const { tab, disconnect, part, closePrivateChat } = this.props;
 
-    if (tab.channel) {
-      part([tab.channel], tab.server);
-    } else if (tab.user) {
-      closePrivateChat(tab.server, tab.user);
+    if (tab.isChannel()) {
+      part([tab.name], tab.server);
+    } else if (tab.name) {
+      closePrivateChat(tab.server, tab.name);
     } else {
       disconnect(tab.server);
     }
@@ -22,9 +22,9 @@ export default class ChatTitle extends PureComponent {
     topic = topic ? linkify(topic) : null;
 
     let leaveTitle;
-    if (tab.channel) {
+    if (tab.isChannel()) {
       leaveTitle = 'Leave';
-    } else if (tab.user) {
+    } else if (tab.name) {
       leaveTitle = 'Close';
     } else {
       leaveTitle = 'Disconnect';

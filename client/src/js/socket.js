@@ -22,11 +22,15 @@ function findChannels(state, server, user) {
 export default function handleSocket(socket, { dispatch, getState }) {
   const handlers = {
     message(message) {
-      dispatch(addMessage(message));
+      dispatch(addMessage(message, message.server, message.to));
     },
 
     pm(message) {
-      dispatch(addMessage(message));
+      dispatch(addMessage(message, message.server, message.from));
+    },
+
+    messages({ messages, server, to }) {
+      dispatch(addMessages(messages, server, to));
     },
 
     join(data) {
@@ -67,11 +71,7 @@ export default function handleSocket(socket, { dispatch, getState }) {
     },
 
     motd({ content, server }) {
-      dispatch(addMessages(content.map(line => ({
-        server,
-        to: server,
-        content: line
-      }))));
+      dispatch(addMessages(content.map(line => ({ content: line })), server));
     },
 
     whois(data) {
@@ -84,7 +84,7 @@ export default function handleSocket(socket, { dispatch, getState }) {
         `Host: ${data.host}`,
         `Server: ${data.server}`,
         `Channels: ${data.channels}`
-      ], tab.server, tab.channel));
+      ], tab.server, tab.name));
     },
 
     print({ server, message }) {

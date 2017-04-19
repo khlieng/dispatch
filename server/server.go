@@ -119,7 +119,7 @@ func upgradeWS(w http.ResponseWriter, r *http.Request, session *Session) {
 		return
 	}
 
-	newWSHandler(conn, session).run()
+	newWSHandler(conn, session, r).run()
 }
 
 func createHTTPSRedirect(portHTTPS string) http.HandlerFunc {

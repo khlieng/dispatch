@@ -11,7 +11,7 @@ import UserList from '../components/UserList';
 import { part } from '../actions/channel';
 import { openPrivateChat, closePrivateChat } from '../actions/privateChat';
 import { searchMessages, toggleSearch } from '../actions/search';
-import { select, setSelectedChannel, setSelectedUser } from '../actions/tab';
+import { select, setSelectedTab } from '../actions/tab';
 import { runCommand, sendMessage, updateMessageHeight } from '../actions/message';
 import { disconnect } from '../actions/server';
 import { setWrapWidth, setCharWidth } from '../actions/environment';
@@ -20,12 +20,8 @@ import { toggleUserList } from '../actions/ui';
 import * as inputHistoryActions from '../actions/inputHistory';
 
 function updateSelected({ params, dispatch }) {
-  if (params.channel) {
-    dispatch(setSelectedChannel(params.server, params.channel));
-  } else if (params.user) {
-    dispatch(setSelectedUser(params.server, params.user));
-  } else if (params.server) {
-    dispatch(setSelectedChannel(params.server));
+  if (params.server) {
+    dispatch(setSelectedTab(params.server, params.channel || params.user));
   }
 }
 
@@ -56,9 +52,16 @@ class Chat extends PureComponent {
 
   handleSearch = phrase => {
     const { dispatch, tab } = this.props;
-    if (tab.channel) {
-      dispatch(searchMessages(tab.server, tab.channel, phrase));
+    if (tab.isChannel()) {
+      dispatch(searchMessages(tab.server, tab.name, phrase));
     }
+  };
+
+  handleMessageNickClick = message => {
+    const { tab } = this.props;
+
+    this.props.openPrivateChat(tab.server, message.from);
+    this.props.select(tab.server, message.from);
   };
 
   render() {
@@ -66,9 +69,9 @@ class Chat extends PureComponent {
       messages, users, showUserList, inputActions } = this.props;
 
     let chatClass;
-    if (tab.channel) {
+    if (tab.isChannel()) {
       chatClass = 'chat-channel';
-    } else if (tab.user) {
+    } else if (tab.name) {
       chatClass = 'chat-private';
     } else {
       chatClass = 'chat-server';
@@ -92,12 +95,10 @@ class Chat extends PureComponent {
         />
         <MessageBox
           messages={messages}
-          isChannel={tab.channel !== null}
           tab={tab}
           setWrapWidth={this.props.setWrapWidth}
           updateMessageHeight={this.props.updateMessageHeight}
-          select={this.props.select}
-          openPrivateChat={this.props.openPrivateChat}
+          onNickClick={this.handleMessageNickClick}
         />
         <MessageInput
           tab={tab}
@@ -136,13 +137,13 @@ const historySelector = state => {
 const selectedMessagesSelector = createSelector(
   tabSelector,
   messageSelector,
-  (tab, messages) => messages.getIn([tab.server, tab.channel || tab.user || tab.server], List())
+  (tab, messages) => messages.getIn([tab.server, tab.name || tab.server], List())
 );
 
 const selectedChannelSelector = createSelector(
   tabSelector,
   channelSelector,
-  (tab, channels) => channels.getIn([tab.server, tab.channel], Map())
+  (tab, channels) => channels.getIn([tab.server, tab.name], Map())
 );
 
 const usersSelector = createSelector(
@@ -153,7 +154,7 @@ const usersSelector = createSelector(
 const titleSelector = createSelector(
   tabSelector,
   serverSelector,
-  (tab, servers) => tab.channel || tab.user || servers.getIn([tab.server, 'name'])
+  (tab, servers) => tab.name || servers.getIn([tab.server, 'name'])
 );
 
 const mapStateToProps = createStructuredSelector({

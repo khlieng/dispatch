@@ -7,16 +7,21 @@ import (
 	"time"
 
 	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/analysis/analyzer/keyword"
 	"github.com/boltdb/bolt"
 )
 
 type Message struct {
-	ID      uint64 `json:"id"`
-	Server  string `json:"server"`
-	From    string `json:"from"`
-	To      string `json:"to,omitempty"`
-	Content string `json:"content"`
-	Time    int64  `json:"time"`
+	ID      uint64 `json:"id" bleve:"-"`
+	Server  string `json:"-" bleve:"server"`
+	From    string `json:"from" bleve:"-"`
+	To      string `json:"-" bleve:"to"`
+	Content string `json:"content" bleve:"content"`
+	Time    int64  `json:"time" bleve:"-"`
+}
+
+func (m Message) Type() string {
+	return "message"
 }
 
 func (u *User) LogMessage(server, from, to, content string) error {
@@ -167,7 +172,27 @@ func (u *User) openMessageLog() error {
 	indexPath := Path.Index(u.Username)
 	u.messageIndex, err = bleve.Open(indexPath)
 	if err == bleve.ErrorIndexPathDoesNotExist {
+		keywordMapping := bleve.NewTextFieldMapping()
+		keywordMapping.Analyzer = keyword.Name
+		keywordMapping.Store = false
+		keywordMapping.IncludeTermVectors = false
+		keywordMapping.IncludeInAll = false
+
+		contentMapping := bleve.NewTextFieldMapping()
+		contentMapping.Analyzer = "en"
+		contentMapping.Store = false
+		contentMapping.IncludeTermVectors = false
+		contentMapping.IncludeInAll = false
+
+		messageMapping := bleve.NewDocumentMapping()
+		messageMapping.StructTagKey = "bleve"
+		messageMapping.AddFieldMappingsAt("server", keywordMapping)
+		messageMapping.AddFieldMappingsAt("to", keywordMapping)
+		messageMapping.AddFieldMappingsAt("content", contentMapping)
+
 		mapping := bleve.NewIndexMapping()
+		mapping.AddDocumentMapping("message", messageMapping)
+
 		u.messageIndex, err = bleve.New(indexPath, mapping)
 		if err != nil {
 			return err

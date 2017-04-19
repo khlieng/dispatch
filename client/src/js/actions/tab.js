@@ -1,11 +1,12 @@
 import { push, replace } from 'react-router-redux';
 import * as actions from '../actions';
 
-export function select(server, channel, pm) {
+export function select(server, name) {
+  const pm = name && name.charAt(0) !== '#';
   if (pm) {
-    return push(`/${server}/pm/${channel}`);
-  } else if (channel) {
-    return push(`/${server}/${encodeURIComponent(channel)}`);
+    return push(`/${server}/pm/${name}`);
+  } else if (name) {
+    return push(`/${server}/${encodeURIComponent(name)}`);
   }
 
   return push(`/${server}`);
@@ -22,7 +23,7 @@ export function updateSelection() {
       dispatch(replace('/connect'));
     } else if (history.size > 0) {
       const tab = history.last();
-      dispatch(select(tab.server, tab.channel || tab.user, tab.user));
+      dispatch(select(tab.server, tab.name));
     } else if (servers.has(server)) {
       dispatch(select(server));
     } else {
@@ -31,18 +32,10 @@ export function updateSelection() {
   };
 }
 
-export function setSelectedChannel(server, channel = null) {
+export function setSelectedTab(server, name = null) {
   return {
     type: actions.SELECT_TAB,
     server,
-    channel
-  };
-}
-
-export function setSelectedUser(server, user = null) {
-  return {
-    type: actions.SELECT_TAB,
-    server,
-    user
+    name
   };
 }

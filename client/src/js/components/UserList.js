@@ -34,7 +34,7 @@ export default class UserList extends PureComponent {
     const className = showUserList ? 'userlist off-canvas' : 'userlist';
     const style = {};
 
-    if (!tab.channel) {
+    if (!tab.isChannel()) {
       style.display = 'none';
     }
 

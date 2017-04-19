@@ -26,7 +26,7 @@ type indexData struct {
 	Users *Userlist `json:"users,omitempty"`
 
 	// Last messages in the selected channel
-	Messages []storage.Message `json:"messages,omitempty"`
+	Messages *Messages `json:"messages,omitempty"`
 }
 
 func getIndexData(r *http.Request, session *Session) *indexData {
@@ -66,6 +66,15 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 				Server:  params[0],
 				Channel: params[1],
 				Users:   users,
+			}
+		}
+
+		messages, err := session.user.GetLastMessages(params[0], params[1], 25)
+		if err == nil && len(messages) > 0 {
+			data.Messages = &Messages{
+				Server:   params[0],
+				To:       params[1],
+				Messages: messages,
 			}
 		}
 	}

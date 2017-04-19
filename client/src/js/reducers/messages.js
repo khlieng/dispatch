@@ -5,9 +5,7 @@ import * as actions from '../actions';
 
 const Message = Record({
   id: null,
-  server: null,
   from: null,
-  to: null,
   content: '',
   time: null,
   type: null,
@@ -17,46 +15,40 @@ const Message = Record({
   breakpoints: null
 });
 
-function addMessage(state, message) {
-  return state.updateIn([message.server, message.dest], List(),
-    list => list.push(new Message(message)));
+function addMessage(state, { server, tab, message }) {
+  return state.updateIn([server, tab], List(), list => list.push(new Message(message)));
 }
 
 export default createReducer(Map(), {
-  [actions.SEND_MESSAGE](state, action) {
-    return addMessage(state, action.message);
-  },
+  [actions.SEND_MESSAGE]: addMessage,
+  [actions.ADD_MESSAGE]: addMessage,
 
-  [actions.ADD_MESSAGE](state, action) {
-    return addMessage(state, action.message);
-  },
-
-  [actions.ADD_MESSAGES](state, action) {
+  [actions.ADD_MESSAGES](state, { server, tab, messages }) {
     return state.withMutations(s =>
-      action.messages.forEach(message =>
-        addMessage(s, message)
+      messages.forEach(message =>
+        s.updateIn([server, tab], List(), list => list.push(new Message(message)))
       )
     );
   },
 
-  [actions.DISCONNECT](state, action) {
-    return state.delete(action.server);
+  [actions.DISCONNECT](state, { server }) {
+    return state.delete(server);
   },
 
-  [actions.PART](state, action) {
+  [actions.PART](state, { server, channels }) {
     return state.withMutations(s =>
-      action.channels.forEach(channel =>
-        s.deleteIn([action.server, channel])
+      channels.forEach(channel =>
+        s.deleteIn([server, channel])
       )
     );
   },
 
-  [actions.UPDATE_MESSAGE_HEIGHT](state, action) {
+  [actions.UPDATE_MESSAGE_HEIGHT](state, { wrapWidth, charWidth }) {
     return state.withMutations(s =>
       s.forEach((server, serverKey) =>
         server.forEach((target, targetKey) =>
           target.forEach((message, index) => s.setIn([serverKey, targetKey, index, 'height'],
-            messageHeight(message, action.wrapWidth, action.charWidth, 6 * action.charWidth))
+            messageHeight(message, wrapWidth, charWidth, 6 * charWidth))
           )
         )
       )

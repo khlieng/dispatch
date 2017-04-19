@@ -703,37 +703,7 @@ func (d *Channel) Unmarshal(buf []byte) (uint64, error) {
 func (d *Message) Size() (s uint64) {
 
 	{
-		l := uint64(len(d.Server))
-
-		{
-
-			t := l
-			for t >= 0x80 {
-				t >>= 7
-				s++
-			}
-			s++
-
-		}
-		s += l
-	}
-	{
 		l := uint64(len(d.From))
-
-		{
-
-			t := l
-			for t >= 0x80 {
-				t >>= 7
-				s++
-			}
-			s++
-
-		}
-		s += l
-	}
-	{
-		l := uint64(len(d.To))
 
 		{
 
@@ -782,25 +752,6 @@ func (d *Message) Marshal(buf []byte) ([]byte, error) {
 
 	}
 	{
-		l := uint64(len(d.Server))
-
-		{
-
-			t := uint64(l)
-
-			for t >= 0x80 {
-				buf[i+8] = byte(t) | 0x80
-				t >>= 7
-				i++
-			}
-			buf[i+8] = byte(t)
-			i++
-
-		}
-		copy(buf[i+8:], d.Server)
-		i += l
-	}
-	{
 		l := uint64(len(d.From))
 
 		{
@@ -817,25 +768,6 @@ func (d *Message) Marshal(buf []byte) ([]byte, error) {
 
 		}
 		copy(buf[i+8:], d.From)
-		i += l
-	}
-	{
-		l := uint64(len(d.To))
-
-		{
-
-			t := uint64(l)
-
-			for t >= 0x80 {
-				buf[i+8] = byte(t) | 0x80
-				t >>= 7
-				i++
-			}
-			buf[i+8] = byte(t)
-			i++
-
-		}
-		copy(buf[i+8:], d.To)
 		i += l
 	}
 	{
@@ -890,47 +822,7 @@ func (d *Message) Unmarshal(buf []byte) (uint64, error) {
 			l = t
 
 		}
-		d.Server = string(buf[i+8 : i+8+l])
-		i += l
-	}
-	{
-		l := uint64(0)
-
-		{
-
-			bs := uint8(7)
-			t := uint64(buf[i+8] & 0x7F)
-			for buf[i+8]&0x80 == 0x80 {
-				i++
-				t |= uint64(buf[i+8]&0x7F) << bs
-				bs += 7
-			}
-			i++
-
-			l = t
-
-		}
 		d.From = string(buf[i+8 : i+8+l])
-		i += l
-	}
-	{
-		l := uint64(0)
-
-		{
-
-			bs := uint8(7)
-			t := uint64(buf[i+8] & 0x7F)
-			for buf[i+8]&0x80 == 0x80 {
-				i++
-				t |= uint64(buf[i+8]&0x7F) << bs
-				bs += 7
-			}
-			i++
-
-			l = t
-
-		}
-		d.To = string(buf[i+8 : i+8+l])
 		i += l
 	}
 	{

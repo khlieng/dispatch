@@ -11,11 +11,9 @@ export default class MessageInput extends PureComponent {
 
     if (e.which === 13 && e.target.value) {
       if (e.target.value[0] === '/') {
-        runCommand(e.target.value, tab.channel || tab.user, tab.server);
-      } else if (tab.channel) {
-        sendMessage(e.target.value, tab.channel, tab.server);
-      } else if (tab.user) {
-        sendMessage(e.target.value, tab.user, tab.server);
+        runCommand(e.target.value, tab.name, tab.server);
+      } else if (tab.name) {
+        sendMessage(e.target.value, tab.name, tab.server);
       }
 
       addInputHistory(e.target.value);

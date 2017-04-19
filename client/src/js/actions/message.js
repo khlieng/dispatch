@@ -1,13 +1,14 @@
 import * as actions from '../actions';
 import { findBreakpoints, messageHeight, linkify, timestamp } from '../util';
 
-function initMessage(message, state) {
-  message.dest = message.to || message.from || message.server;
-  if (message.from && message.from.indexOf('.') !== -1) {
-    message.dest = message.server;
+function initMessage(message, server, tab, state) {
+  if (message.time) {
+    message.time = timestamp(new Date(message.time * 1000));
+  } else {
+    message.time = timestamp();
   }
 
-  if (message.dest.charAt(0) === '#') {
+  if (tab.charAt(0) === '#') {
     message.channel = true;
   }
 
@@ -32,6 +33,13 @@ function initMessage(message, state) {
   return message;
 }
 
+function getMessageTab(server, to) {
+  if (!to || to.indexOf('.') !== -1) {
+    return server;
+  }
+  return to;
+}
+
 export function updateMessageHeight() {
   return (dispatch, getState) => dispatch({
     type: actions.UPDATE_MESSAGE_HEIGHT,
@@ -46,13 +54,12 @@ export function sendMessage(content, to, server) {
 
     dispatch({
       type: actions.SEND_MESSAGE,
+      server,
+      tab: to,
       message: initMessage({
         from: state.servers.getIn([server, 'nick']),
-        content,
-        to,
-        server,
-        time: timestamp()
-      }, state),
+        content
+      }, server, to, state),
       socket: {
         type: 'message',
         data: { content, to, server }
@@ -61,27 +68,29 @@ export function sendMessage(content, to, server) {
   };
 }
 
-export function addMessage(message) {
-  message.time = timestamp();
+export function addMessage(message, server, to) {
+  const tab = getMessageTab(server, to);
 
   return (dispatch, getState) => dispatch({
     type: actions.ADD_MESSAGE,
-    message: initMessage(message, getState())
+    server,
+    tab,
+    message: initMessage(message, server, tab, getState())
   });
 }
 
-export function addMessages(messages) {
-  const now = timestamp();
+export function addMessages(messages, server, to) {
+  const tab = getMessageTab(server, to);
 
   return (dispatch, getState) => {
     const state = getState();
 
-    messages.forEach(message => {
-      initMessage(message, state).time = now;
-    });
+    messages.forEach(message => initMessage(message, server, message.tab || tab, state));
 
     dispatch({
       type: actions.ADD_MESSAGES,
+      server,
+      tab,
       messages
     });
   };
@@ -89,29 +98,24 @@ export function addMessages(messages) {
 
 export function broadcast(message, server, channels) {
   return addMessages(channels.map(channel => ({
-    server,
-    to: channel,
+    tab: channel,
     content: message,
     type: 'info'
-  })));
+  })), server);
 }
 
 export function inform(message, server, channel) {
   if (Array.isArray(message)) {
     return addMessages(message.map(line => ({
-      server,
-      to: channel,
       content: line,
       type: 'info'
-    })));
+    })), server, channel);
   }
 
   return addMessage({
-    server,
-    to: channel,
     content: message,
     type: 'info'
-  });
+  }, server, channel);
 }
 
 export function runCommand(command, channel, server) {
