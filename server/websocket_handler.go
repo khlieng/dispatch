@@ -178,6 +178,7 @@ func (h *wsHandler) message(b []byte) {
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Privmsg(data.To, data.Content)
+		go h.session.user.LogMessage(data.Server, i.GetNick(), data.To, data.Content)
 	}
 }
 
