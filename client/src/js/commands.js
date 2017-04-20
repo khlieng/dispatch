@@ -1,4 +1,3 @@
-import _escape from 'lodash/escape';
 import createCommandMiddleware from './middleware/command';
 import { COMMAND } from './actions';
 import { setNick, disconnect, whois, away } from './actions/server';
@@ -20,7 +19,7 @@ const help = [
   '/whois <user> - Get information about user',
   '/away [message] - Set or clear away message',
   '/raw [message] - Send raw IRC message to the current server'
-].map(_escape);
+];
 
 export default createCommandMiddleware(COMMAND, {
   join({ dispatch, server }, channel) {
