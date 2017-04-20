@@ -21,7 +21,7 @@ struct Channel {
 }
 
 struct Message {
-  ID      uint64
+  ID      string
   From    string
   Content string
   Time    int64

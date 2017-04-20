@@ -4,6 +4,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/kjk/betterguid"
+
 	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
 )
@@ -122,6 +124,7 @@ func (i *ircHandler) mode(msg *irc.Message) {
 
 func (i *ircHandler) message(msg *irc.Message) {
 	message := Message{
+		ID:      betterguid.New(),
 		Server:  i.client.Host,
 		From:    msg.Nick,
 		Content: msg.LastParam(),
@@ -135,7 +138,8 @@ func (i *ircHandler) message(msg *irc.Message) {
 	}
 
 	if msg.Params[0] != "*" {
-		go i.session.user.LogMessage(i.client.Host, msg.Nick, msg.Params[0], msg.LastParam())
+		go i.session.user.LogMessage(message.ID,
+			i.client.Host, msg.Nick, msg.Params[0], msg.LastParam())
 	}
 }
 

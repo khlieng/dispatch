@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/kjk/betterguid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -87,7 +88,7 @@ func TestMessages(t *testing.T) {
 	user, err := NewUser()
 	assert.Nil(t, err)
 
-	messages, err := user.GetMessages("irc.freenode.net", "#go-nuts", 10, 6)
+	messages, err := user.GetMessages("irc.freenode.net", "#go-nuts", 10, "6")
 	assert.Nil(t, err)
 	assert.Len(t, messages, 0)
 
@@ -99,28 +100,31 @@ func TestMessages(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Len(t, messages, 0)
 
+	ids := []string{}
 	for i := 0; i < 5; i++ {
-		err = user.LogMessage("irc.freenode.net", "nick", "#go-nuts", "message"+strconv.Itoa(i))
+		id := betterguid.New()
+		ids = append(ids, id)
+		err = user.LogMessage(id, "irc.freenode.net", "nick", "#go-nuts", "message"+strconv.Itoa(i))
 		assert.Nil(t, err)
 	}
 
-	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, 6)
+	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, ids[4])
+	assert.Equal(t, "message0", messages[0].Content)
+	assert.Equal(t, "message3", messages[3].Content)
+	assert.Nil(t, err)
+	assert.Len(t, messages, 4)
+
+	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, betterguid.New())
 	assert.Equal(t, "message0", messages[0].Content)
 	assert.Equal(t, "message4", messages[4].Content)
 	assert.Nil(t, err)
 	assert.Len(t, messages, 5)
 
-	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, 100)
+	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, ids[2])
 	assert.Equal(t, "message0", messages[0].Content)
-	assert.Equal(t, "message4", messages[4].Content)
+	assert.Equal(t, "message1", messages[1].Content)
 	assert.Nil(t, err)
-	assert.Len(t, messages, 5)
-
-	messages, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, 4)
-	assert.Equal(t, "message0", messages[0].Content)
-	assert.Equal(t, "message2", messages[2].Content)
-	assert.Nil(t, err)
-	assert.Len(t, messages, 3)
+	assert.Len(t, messages, 2)
 
 	messages, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 10)
 	assert.Equal(t, "message0", messages[0].Content)

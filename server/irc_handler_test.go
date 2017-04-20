@@ -130,12 +130,12 @@ func TestHandleIRCMessage(t *testing.T) {
 		Params:  []string{"#chan", "the message"},
 	})
 
-	checkResponse(t, "message", Message{
-		Server:  "host.com",
-		From:    "nick",
-		To:      "#chan",
-		Content: "the message",
-	}, res)
+	assert.Equal(t, "message", res.Type)
+	msg, ok := res.Data.(Message)
+	assert.True(t, ok)
+	assert.Equal(t, "nick", msg.From)
+	assert.Equal(t, "#chan", msg.To)
+	assert.Equal(t, "the message", msg.Content)
 
 	res = dispatchMessage(&irc.Message{
 		Command: irc.Privmsg,
@@ -143,11 +143,12 @@ func TestHandleIRCMessage(t *testing.T) {
 		Params:  []string{"nick", "the message"},
 	})
 
-	checkResponse(t, "pm", Message{
-		Server:  "host.com",
-		From:    "someone",
-		Content: "the message",
-	}, res)
+	assert.Equal(t, "pm", res.Type)
+	msg, ok = res.Data.(Message)
+	assert.True(t, ok)
+	assert.Equal(t, "someone", msg.From)
+	assert.Empty(t, msg.To)
+	assert.Equal(t, "the message", msg.Content)
 }
 
 func TestHandleIRCQuit(t *testing.T) {

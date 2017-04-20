@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
+	"github.com/kjk/betterguid"
 	"github.com/spf13/viper"
 
 	"github.com/khlieng/dispatch/irc"
@@ -178,7 +179,9 @@ func (h *wsHandler) message(b []byte) {
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Privmsg(data.To, data.Content)
-		go h.session.user.LogMessage(data.Server, i.GetNick(), data.To, data.Content)
+
+		go h.session.user.LogMessage(betterguid.New(),
+			data.Server, i.GetNick(), data.To, data.Content)
 	}
 }
 

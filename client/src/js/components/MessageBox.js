@@ -63,13 +63,14 @@ export default class MessageBox extends PureComponent {
     this.bottom = scrollTop + clientHeight >= scrollHeight;
   };
 
-  renderMessage = ({ index, style, key }) => {
+  renderMessage = ({ index, style }) => {
     const { messages, onNickClick } = this.props;
+    const message = messages.get(index);
 
     return (
       <Message
-        key={key}
-        message={messages.get(index)}
+        key={message.id}
+        message={message}
         style={style}
         onNickClick={onNickClick}
       />

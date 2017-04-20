@@ -1,11 +1,18 @@
 import * as actions from '../actions';
 import { findBreakpoints, messageHeight, linkify, timestamp } from '../util';
 
+let nextID = 0;
+
 function initMessage(message, server, tab, state) {
   if (message.time) {
     message.time = timestamp(new Date(message.time * 1000));
   } else {
     message.time = timestamp();
+  }
+
+  if (!message.id) {
+    message.id = nextID;
+    nextID++;
   }
 
   if (tab.charAt(0) === '#') {
