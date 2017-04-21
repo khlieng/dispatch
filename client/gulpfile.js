@@ -107,7 +107,7 @@ gulp.task('dev', ['css', 'fonts', 'fonts:woff', 'config', 'compress:dev', 'binda
 
   app.use('*', proxy('localhost:1337', {
     forwardPath: function(req, res) {
-      return url.parse(req.url).path;
+      return req.originalUrl;
     }
   }));
 
