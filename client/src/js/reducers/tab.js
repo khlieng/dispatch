@@ -3,14 +3,16 @@ import { LOCATION_CHANGE } from 'react-router-redux';
 import createReducer from '../util/createReducer';
 import * as actions from '../actions';
 
-const Tab = Record({
+const TabRecord = Record({
   server: null,
   name: null
 });
 
-Tab.prototype.isChannel = function isChannel() {
-  return this.name && this.name.charAt(0) === '#';
-};
+class Tab extends TabRecord {
+  isChannel() {
+    return this.name && this.name.charAt(0) === '#';
+  }
+}
 
 const State = Record({
   selected: new Tab(),
