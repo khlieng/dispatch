@@ -107,12 +107,16 @@ export default createReducer(Map(), {
     const { server } = action;
     return state.withMutations(s => {
       s.get(server).forEach((v, channel) => {
-        s.updateIn([server, channel, 'users'], users =>
-          users.update(
-            users.findIndex(user => user.nick === action.old),
+        s.updateIn([server, channel, 'users'], users => {
+          const i = users.findIndex(user => user.nick === action.old);
+          if (i < 0) {
+            return users;
+          }
+
+          return users.update(i,
             user => updateRenderName(user.set('nick', action.new))
-          ).sort(compareUsers)
-        );
+          ).sort(compareUsers);
+        });
       });
     });
   },
@@ -131,9 +135,13 @@ export default createReducer(Map(), {
   [actions.SOCKET_MODE](state, action) {
     const { server, channel, user, remove, add } = action;
 
-    const i = state.getIn([server, channel, 'users']).findIndex(u => u.nick === user);
-    return state
-      .updateIn([server, channel, 'users', i], u => {
+    return state.updateIn([server, channel, 'users'], users => {
+      const i = users.findIndex(u => u.nick === user);
+      if (i < 0) {
+        return users;
+      }
+
+      return users.update(i, u => {
         let mode = u.mode;
         let j = remove.length;
         while (j--) {
@@ -141,8 +149,8 @@ export default createReducer(Map(), {
         }
 
         return updateRenderName(u.set('mode', mode + add));
-      })
-      .updateIn([server, channel, 'users'], users => users.sort(compareUsers));
+      }).sort(compareUsers);
+    });
   },
 
   [actions.SOCKET_CHANNELS](state, action) {
