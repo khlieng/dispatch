@@ -22,6 +22,7 @@ install:
   - yarn
 
 script:
+  - npm test
   - gulp build
   - cd ..
   - export GO15VENDOREXPERIMENT=1
