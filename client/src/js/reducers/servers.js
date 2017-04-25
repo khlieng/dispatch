@@ -1,5 +1,4 @@
 import { Map, Record } from 'immutable';
-import forEach from 'lodash/forEach';
 import createReducer from '../util/createReducer';
 import * as actions from '../actions';
 
@@ -48,10 +47,12 @@ export default createReducer(Map(), {
   },
 
   [actions.SOCKET_CONNECTION_UPDATE](state, action) {
-    return state.withMutations(s => forEach(action, (connected, server) => {
-      if (s.has(server)) {
-        s.setIn([server, 'connected'], connected);
-      }
-    }));
+    return state.withMutations(s =>
+      Object.keys(action).forEach(server => {
+        if (s.has(server)) {
+          s.setIn([server, 'connected'], action[server]);
+        }
+      })
+    );
   }
 });
