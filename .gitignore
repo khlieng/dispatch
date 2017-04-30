@@ -2,4 +2,5 @@ build
 release
 client/dist
 client/node_modules
+client/yarn-error.log
 ca-certificates.crt
