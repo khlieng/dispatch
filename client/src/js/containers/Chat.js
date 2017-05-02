@@ -12,12 +12,14 @@ import { part } from '../actions/channel';
 import { openPrivateChat, closePrivateChat } from '../actions/privateChat';
 import { searchMessages, toggleSearch } from '../actions/search';
 import { select, setSelectedTab } from '../actions/tab';
-import { runCommand, sendMessage, updateMessageHeight } from '../actions/message';
+import { runCommand, sendMessage, updateMessageHeight, fetchMessages } from '../actions/message';
 import { disconnect } from '../actions/server';
 import { setWrapWidth, setCharWidth } from '../actions/environment';
 import { stringWidth } from '../util';
 import { toggleUserList } from '../actions/ui';
 import * as inputHistoryActions from '../actions/inputHistory';
+import { getSelectedTab } from '../reducers/tab';
+import { getSelectedMessages } from '../reducers/messages';
 
 function updateSelected({ params, dispatch }) {
   if (params.server) {
@@ -64,9 +66,11 @@ class Chat extends PureComponent {
     this.props.select(tab.server, message.from);
   };
 
+  handleFetchMore = () => this.props.dispatch(fetchMessages());
+
   render() {
     const { title, tab, channel, search, history,
-      messages, users, showUserList, inputActions } = this.props;
+      messages, hasMoreMessages, users, showUserList, inputActions } = this.props;
 
     let chatClass;
     if (tab.isChannel()) {
@@ -95,10 +99,12 @@ class Chat extends PureComponent {
         />
         <MessageBox
           messages={messages}
+          hasMoreMessages={hasMoreMessages}
           tab={tab}
           setWrapWidth={this.props.setWrapWidth}
           updateMessageHeight={this.props.updateMessageHeight}
           onNickClick={this.handleMessageNickClick}
+          onFetchMore={this.handleFetchMore}
         />
         <MessageInput
           tab={tab}
@@ -120,8 +126,6 @@ class Chat extends PureComponent {
   }
 }
 
-const tabSelector = state => state.tab.selected;
-const messageSelector = state => state.messages;
 const serverSelector = state => state.servers;
 const channelSelector = state => state.channels;
 const searchSelector = state => state.search;
@@ -134,14 +138,8 @@ const historySelector = state => {
   return state.input.history.get(state.input.index);
 };
 
-const selectedMessagesSelector = createSelector(
-  tabSelector,
-  messageSelector,
-  (tab, messages) => messages.getIn([tab.server, tab.name || tab.server], List())
-);
-
 const selectedChannelSelector = createSelector(
-  tabSelector,
+  getSelectedTab,
   channelSelector,
   (tab, channels) => channels.getIn([tab.server, tab.name], Map())
 );
@@ -152,16 +150,22 @@ const usersSelector = createSelector(
 );
 
 const titleSelector = createSelector(
-  tabSelector,
+  getSelectedTab,
   serverSelector,
   (tab, servers) => tab.name || servers.getIn([tab.server, 'name'])
 );
 
+const getHasMoreMessages = createSelector(
+  getSelectedMessages,
+  messages => messages.get(0) && typeof messages.get(0).id === 'string'
+);
+
 const mapStateToProps = createStructuredSelector({
   title: titleSelector,
-  tab: tabSelector,
+  tab: getSelectedTab,
   channel: selectedChannelSelector,
-  messages: selectedMessagesSelector,
+  messages: getSelectedMessages,
+  hasMoreMessages: getHasMoreMessages,
   users: usersSelector,
   showUserList: showUserListSelector,
   search: searchSelector,

@@ -403,6 +403,13 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   right: 200px;
 }
 
+.messagebox-top-indicator {
+  color: #999;
+  height: 100px;
+  text-align: center;
+  padding-top: 40px;
+}
+
 .VirtualScroll {
   overflow-x: hidden !important;
 }

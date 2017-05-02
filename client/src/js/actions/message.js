@@ -1,5 +1,6 @@
 import * as actions from '../actions';
 import { findBreakpoints, messageHeight, linkify, timestamp } from '../util';
+import { getSelectedMessages } from '../reducers/messages';
 
 let nextID = 0;
 
@@ -47,6 +48,32 @@ function getMessageTab(server, to) {
   return to;
 }
 
+export function fetchMessages() {
+  return (dispatch, getState) => {
+    const state = getState();
+    const first = getSelectedMessages(state).get(0);
+
+    if (!first) {
+      return;
+    }
+
+    const tab = state.tab.selected;
+    if (tab.isChannel()) {
+      dispatch({
+        type: actions.FETCH_MESSAGES,
+        socket: {
+          type: 'fetch_messages',
+          data: {
+            server: tab.server,
+            channel: tab.name,
+            next: first.id
+          }
+        }
+      });
+    }
+  };
+}
+
 export function updateMessageHeight() {
   return (dispatch, getState) => dispatch({
     type: actions.UPDATE_MESSAGE_HEIGHT,
@@ -86,11 +113,15 @@ export function addMessage(message, server, to) {
   });
 }
 
-export function addMessages(messages, server, to) {
+export function addMessages(messages, server, to, prepend, next) {
   const tab = getMessageTab(server, to);
 
   return (dispatch, getState) => {
     const state = getState();
+
+    if (next) {
+      messages[0].id = next;
+    }
 
     messages.forEach(message => initMessage(message, server, message.tab || tab, state));
 
@@ -98,7 +129,8 @@ export function addMessages(messages, server, to) {
       type: actions.ADD_MESSAGES,
       server,
       tab,
-      messages
+      messages,
+      prepend
     });
   };
 }

@@ -69,13 +69,19 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 			}
 		}
 
-		messages, err := session.user.GetLastMessages(params[0], params[1], 25)
+		messages, hasMore, err := session.user.GetLastMessages(params[0], params[1], 50)
 		if err == nil && len(messages) > 0 {
-			data.Messages = &Messages{
+			m := Messages{
 				Server:   params[0],
 				To:       params[1],
 				Messages: messages,
 			}
+
+			if hasMore {
+				m.Next = messages[0].ID
+			}
+
+			data.Messages = &m
 		}
 	}
 

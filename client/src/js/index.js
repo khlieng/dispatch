@@ -48,8 +48,8 @@ if (env.users) {
 }
 
 if (env.messages) {
-  const { messages, server, to } = env.messages;
-  store.dispatch(addMessages(messages, server, to));
+  const { messages, server, to, next } = env.messages;
+  store.dispatch(addMessages(messages, server, to, false, next));
 }
 
 handleSocket(socket, store);

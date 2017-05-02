@@ -10,7 +10,7 @@ import (
 )
 
 type Message struct {
-	ID      string `json:"id" bleve:"-"`
+	ID      string `json:"-" bleve:"-"`
 	Server  string `json:"-" bleve:"server"`
 	From    string `json:"from" bleve:"-"`
 	To      string `json:"-" bleve:"to"`
@@ -53,36 +53,13 @@ func (u *User) LogMessage(id, server, from, to, content string) error {
 	return u.messageIndex.Index(id, message)
 }
 
-func (u *User) GetLastMessages(server, channel string, count int) ([]Message, error) {
-	messages := make([]Message, count)
-
-	u.messageLog.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketMessages).Bucket([]byte(server + ":" + channel))
-		if b == nil {
-			return nil
-		}
-
-		c := b.Cursor()
-
-		for _, v := c.Last(); count > 0 && v != nil; _, v = c.Prev() {
-			count--
-			messages[count].Unmarshal(v)
-		}
-
-		return nil
-	})
-
-	if count == 0 {
-		return messages, nil
-	} else if count < len(messages) {
-		return messages[count:], nil
-	}
-
-	return nil, nil
+func (u *User) GetLastMessages(server, channel string, count int) ([]Message, bool, error) {
+	return u.GetMessages(server, channel, count, "")
 }
 
-func (u *User) GetMessages(server, channel string, count int, fromID string) ([]Message, error) {
+func (u *User) GetMessages(server, channel string, count int, fromID string) ([]Message, bool, error) {
 	messages := make([]Message, count)
+	hasMore := false
 
 	u.messageLog.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketMessages).Bucket([]byte(server + ":" + channel))
@@ -91,23 +68,35 @@ func (u *User) GetMessages(server, channel string, count int, fromID string) ([]
 		}
 
 		c := b.Cursor()
-		c.Seek([]byte(fromID))
 
-		for k, v := c.Prev(); count > 0 && k != nil; k, v = c.Prev() {
-			count--
-			messages[count].Unmarshal(v)
+		if fromID != "" {
+			c.Seek([]byte(fromID))
+
+			for k, v := c.Prev(); count > 0 && k != nil; k, v = c.Prev() {
+				count--
+				messages[count].Unmarshal(v)
+			}
+		} else {
+			for k, v := c.Last(); count > 0 && k != nil; k, v = c.Prev() {
+				count--
+				messages[count].Unmarshal(v)
+			}
 		}
+
+		c.Next()
+		k, _ := c.Prev()
+		hasMore = k != nil
 
 		return nil
 	})
 
 	if count == 0 {
-		return messages, nil
+		return messages, hasMore, nil
 	} else if count < len(messages) {
-		return messages[count:], nil
+		return messages[count:], hasMore, nil
 	}
 
-	return nil, nil
+	return nil, false, nil
 }
 
 func (u *User) SearchMessages(server, channel, q string) ([]Message, error) {

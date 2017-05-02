@@ -72,6 +72,8 @@ type Messages struct {
 	Server   string            `json:"server"`
 	To       string            `json:"to"`
 	Messages []storage.Message `json:"messages"`
+	Prepend  bool              `json:"prepend,omitempty"`
+	Next     string            `json:"next,omitempty"`
 }
 
 type Topic struct {
@@ -143,6 +145,12 @@ type SearchResult struct {
 type ClientCert struct {
 	Cert []byte `json:"cert"`
 	Key  []byte `json:"key"`
+}
+
+type FetchMessages struct {
+	Server  string `json:"server"`
+	Channel string `json:"channel"`
+	Next    string `json:"next"`
 }
 
 type Error struct {

@@ -19,6 +19,8 @@ const State = Record({
   history: List()
 });
 
+export const getSelectedTab = state => state.tab.selected;
+
 export default createReducer(new State(), {
   [actions.SELECT_TAB](state, action) {
     const tab = new Tab(action);

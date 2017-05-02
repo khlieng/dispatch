@@ -79,13 +79,19 @@ func (h *wsHandler) init(r *http.Request) {
 			Users:   channelStore.GetUsers(channel.Server, channel.Name),
 		})
 
-		messages, err := h.session.user.GetLastMessages(channel.Server, channel.Name, 25)
+		messages, hasMore, err := h.session.user.GetLastMessages(channel.Server, channel.Name, 50)
 		if err == nil && len(messages) > 0 {
-			h.session.sendJSON("messages", Messages{
+			res := Messages{
 				Server:   channel.Server,
 				To:       channel.Name,
 				Messages: messages,
-			})
+			}
+
+			if hasMore {
+				res.Next = messages[0].ID
+			}
+
+			h.session.sendJSON("messages", res)
 		}
 	}
 }
@@ -271,20 +277,42 @@ func (h *wsHandler) cert(b []byte) {
 	h.session.sendJSON("cert_success", nil)
 }
 
+func (h *wsHandler) fetchMessages(b []byte) {
+	var data FetchMessages
+	json.Unmarshal(b, &data)
+
+	messages, hasMore, err := h.session.user.GetMessages(data.Server, data.Channel, 200, data.Next)
+	if err == nil && len(messages) > 0 {
+		res := Messages{
+			Server:   data.Server,
+			To:       data.Channel,
+			Messages: messages,
+			Prepend:  true,
+		}
+
+		if hasMore {
+			res.Next = messages[0].ID
+		}
+
+		h.session.sendJSON("messages", res)
+	}
+}
+
 func (h *wsHandler) initHandlers() {
 	h.handlers = map[string]func([]byte){
-		"connect": h.connect,
-		"join":    h.join,
-		"part":    h.part,
-		"quit":    h.quit,
-		"message": h.message,
-		"nick":    h.nick,
-		"invite":  h.invite,
-		"kick":    h.kick,
-		"whois":   h.whois,
-		"away":    h.away,
-		"raw":     h.raw,
-		"search":  h.search,
-		"cert":    h.cert,
+		"connect":        h.connect,
+		"join":           h.join,
+		"part":           h.part,
+		"quit":           h.quit,
+		"message":        h.message,
+		"nick":           h.nick,
+		"invite":         h.invite,
+		"kick":           h.kick,
+		"whois":          h.whois,
+		"away":           h.away,
+		"raw":            h.raw,
+		"search":         h.search,
+		"cert":           h.cert,
+		"fetch_messages": h.fetchMessages,
 	}
 }

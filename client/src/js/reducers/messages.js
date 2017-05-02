@@ -1,7 +1,9 @@
 import { List, Map, Record } from 'immutable';
+import { createSelector } from 'reselect';
 import createReducer from '../util/createReducer';
 import { messageHeight } from '../util';
 import * as actions from '../actions';
+import { getSelectedTab } from './tab';
 
 const Message = Record({
   id: null,
@@ -19,16 +21,30 @@ function addMessage(state, { server, tab, message }) {
   return state.updateIn([server, tab], List(), list => list.push(new Message(message)));
 }
 
+export const getMessages = state => state.messages;
+
+export const getSelectedMessages = createSelector(
+  getSelectedTab,
+  getMessages,
+  (tab, messages) => messages.getIn([tab.server, tab.name || tab.server], List())
+);
+
 export default createReducer(Map(), {
   [actions.SEND_MESSAGE]: addMessage,
   [actions.ADD_MESSAGE]: addMessage,
 
-  [actions.ADD_MESSAGES](state, { server, tab, messages }) {
-    return state.withMutations(s =>
-      messages.forEach(message =>
-        s.updateIn([server, tab], List(), list => list.push(new Message(message)))
-      )
-    );
+  [actions.ADD_MESSAGES](state, { server, tab, messages, prepend }) {
+    return state.withMutations(s => {
+      if (prepend) {
+        for (let i = messages.length - 1; i >= 0; i--) {
+          s.updateIn([server, tab], List(), list => list.unshift(new Message(messages[i])));
+        }
+      } else {
+        messages.forEach(message =>
+          s.updateIn([server, tab], List(), list => list.push(new Message(message)))
+        );
+      }
+    });
   },
 
   [actions.DISCONNECT](state, { server }) {

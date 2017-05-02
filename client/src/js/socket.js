@@ -29,25 +29,25 @@ export default function handleSocket(socket, { dispatch, getState }) {
       dispatch(addMessage(message, message.server, message.from));
     },
 
-    messages({ messages, server, to }) {
-      dispatch(addMessages(messages, server, to));
+    messages({ messages, server, to, prepend, next }) {
+      dispatch(addMessages(messages, server, to, prepend, next));
     },
 
-    join(data) {
+    join({ user, server, channels }) {
       const state = getState();
-      const { server, channel } = state.tab.selected;
-      if (server && channel) {
-        const { nick } = state.servers.get(server);
-        const [joinedChannel] = data.channels;
-        if (server === data.server &&
-          nick === data.user &&
-          channel !== joinedChannel &&
-          normalizeChannel(channel) === normalizeChannel(joinedChannel)) {
+      const tab = state.tab.selected;
+      const [joinedChannel] = channels;
+      if (tab.server && tab.name) {
+        const { nick } = state.servers.get(tab.server);
+        if (tab.server === server &&
+          nick === user &&
+          tab.name !== joinedChannel &&
+          normalizeChannel(tab.name) === normalizeChannel(joinedChannel)) {
           dispatch(select(server, joinedChannel));
         }
       }
 
-      dispatch(inform(`${data.user} joined the channel`, data.server, data.channels[0]));
+      dispatch(inform(`${user} joined the channel`, server, joinedChannel));
     },
 
     servers(data) {
