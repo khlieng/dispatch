@@ -28,7 +28,7 @@ function updateSelected({ params, dispatch }) {
 }
 
 function updateCharWidth() {
-  const charWidth = stringWidth(' ', '16px Roboto Mono');
+  const charWidth = stringWidth(' ', '16px Roboto Mono, monospace');
   window.messageIndent = 6 * charWidth;
   return setCharWidth(charWidth);
 }
@@ -38,9 +38,6 @@ class Chat extends PureComponent {
     const { dispatch } = this.props;
     dispatch(updateCharWidth());
     setTimeout(() => dispatch(updateCharWidth()), 1000);
-  }
-
-  componentDidMount() {
     updateSelected(this.props);
   }
 

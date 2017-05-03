@@ -4,19 +4,24 @@ import { AutoSizer } from 'react-virtualized/dist/commonjs/AutoSizer';
 import debounce from 'lodash/debounce';
 import Message from './Message';
 import { measureScrollBarWidth } from '../util';
+import { getScrollPos, saveScrollPos } from '../util/scrollPosition';
 
 const scrollBarWidth = measureScrollBarWidth();
 const listStyle = { padding: '7px 0', boxSizing: 'content-box' };
 const threshold = 100;
 
 export default class MessageBox extends PureComponent {
+  componentDidMount() {
+    this.loadScrollPos();
+  }
+
   componentWillUpdate(nextProps) {
     if (nextProps.messages !== this.props.messages) {
       this.list.recomputeRowHeights();
     }
 
     if (nextProps.tab !== this.props.tab) {
-      this.bottom = true;
+      this.saveScrollPos();
     }
 
     if (nextProps.messages.get(0) !== this.props.messages.get(0)) {
@@ -34,15 +39,23 @@ export default class MessageBox extends PureComponent {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    if (prevProps.tab !== this.props.tab) {
+      this.loadScrollPos();
+    }
+
     if (this.nextScrollTop > 0) {
       this.container.scrollTop = this.nextScrollTop;
       this.nextScrollTop = 0;
     } else if (this.bottom) {
-      this.container.scrollTop = this.container.scrollHeight;
+      this.list.scrollToRow(this.props.messages.size);
     }
 
     this.updateWidth();
+  }
+
+  componentWillUnmount() {
+    this.saveScrollPos();
   }
 
   getRowHeight = ({ index }) => {
@@ -57,8 +70,38 @@ export default class MessageBox extends PureComponent {
 
   listRef = el => {
     this.list = el;
-    // eslint-disable-next-line no-underscore-dangle
-    this.container = el.Grid._scrollingContainer;
+    if (el) {
+      // eslint-disable-next-line no-underscore-dangle
+      this.container = el.Grid._scrollingContainer;
+    }
+  };
+
+  updateScrollKey = () => {
+    const { tab } = this.props;
+    this.scrollKey = `msg:${tab.server}:${tab.name}`;
+    return this.scrollKey;
+  }
+
+  loadScrollPos = () => {
+    const pos = getScrollPos(this.updateScrollKey());
+    if (pos >= 0) {
+      this.bottom = false;
+      this.container.scrollTop = pos;
+    } else {
+      this.bottom = true;
+    }
+  };
+
+  saveScrollPos = () => {
+    if (this.bottom) {
+      saveScrollPos(this.scrollKey, -1);
+    } else {
+      saveScrollPos(this.scrollKey, this.container.scrollTop);
+    }
+  }
+
+  scrollDown = () => {
+    this.container.scrollTop = this.container.scrollHeight - this.container.clientHeight;
   };
 
   updateWidth = (width) => {
@@ -105,7 +148,7 @@ export default class MessageBox extends PureComponent {
       }
     }
 
-    this.bottom = scrollTop + clientHeight >= scrollHeight;
+    this.bottom = scrollTop + clientHeight >= scrollHeight - 10;
     this.prevScrollTop = scrollTop;
   };
 
