@@ -3,13 +3,11 @@ import { connect } from 'react-redux';
 import { toggleMenu } from '../actions/ui';
 
 class Navicon extends PureComponent {
-  handleClick = () => this.props.dispatch(toggleMenu());
-
   render() {
     return (
-      <i className="icon-menu navicon" onClick={this.handleClick} />
+      <i className="icon-menu navicon" onClick={this.props.toggleMenu} />
     );
   }
 }
 
-export default connect()(Navicon);
+export default connect(null, { toggleMenu })(Navicon);
