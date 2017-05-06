@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react';
 
 export default class Message extends PureComponent {
+  handleNickClick = () => this.props.onNickClick(this.props.message);
+
   render() {
     const { message } = this.props;
     const className = message.type ? `message message-${message.type}` : 'message';
