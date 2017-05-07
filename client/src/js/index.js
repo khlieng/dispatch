@@ -1,21 +1,23 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { browserHistory } from 'react-router';
-import { syncHistoryWithStore, replace } from 'react-router-redux';
 import { AppContainer } from 'react-hot-loader';
 import 'react-virtualized/styles.css';
 
 import configureStore from './store';
-import createRoutes from './routes';
+import initRouter, { replace } from './util/router';
+import routes from './routes';
 import Socket from './util/Socket';
 import handleSocket from './socket';
 import Root from './containers/Root';
 import { addMessages } from './actions/message';
+import { initWidthUpdates } from './util/messageHeight';
 
 const host = DEV ? `${window.location.hostname}:1337` : window.location.host;
 const socket = new Socket(host);
 
-const store = configureStore(socket, browserHistory);
+const store = configureStore(socket);
+initRouter(routes, store);
+handleSocket(socket, store);
 
 const env = JSON.parse(document.getElementById('env').innerHTML);
 
@@ -47,20 +49,17 @@ if (env.users) {
   });
 }
 
+initWidthUpdates(store);
+
 if (env.messages) {
   const { messages, server, to, next } = env.messages;
   store.dispatch(addMessages(messages, server, to, false, next));
 }
 
-handleSocket(socket, store);
-
-const routes = createRoutes();
-const history = syncHistoryWithStore(browserHistory, store);
-
 const renderRoot = () => {
   render(
     <AppContainer>
-      <Root store={store} routes={routes} history={history} />
+      <Root store={store} />
     </AppContainer>,
     document.getElementById('root')
   );
@@ -69,5 +68,5 @@ const renderRoot = () => {
 renderRoot();
 
 if (module.hot) {
-  module.hot.accept('./routes', () => renderRoot());
+  module.hot.accept('./containers/Root', () => renderRoot());
 }

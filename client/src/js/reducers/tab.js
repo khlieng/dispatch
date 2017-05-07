@@ -1,5 +1,5 @@
 import { Record, List } from 'immutable';
-import { LOCATION_CHANGE } from 'react-router-redux';
+import { LOCATION_CHANGED } from '../util/router';
 import createReducer from '../util/createReducer';
 import * as actions from '../actions';
 
@@ -19,15 +19,17 @@ const State = Record({
   history: List()
 });
 
+function selectTab(state, action) {
+  const tab = new Tab(action);
+  return state
+    .set('selected', tab)
+    .update('history', history => history.push(tab));
+}
+
 export const getSelectedTab = state => state.tab.selected;
 
 export default createReducer(new State(), {
-  [actions.SELECT_TAB](state, action) {
-    const tab = new Tab(action);
-    return state
-      .set('selected', tab)
-      .update('history', history => history.push(tab));
-  },
+  [actions.SELECT_TAB]: selectTab,
 
   [actions.PART](state, action) {
     return state.set('history', state.history.filter(tab =>
@@ -45,11 +47,12 @@ export default createReducer(new State(), {
     return state.set('history', state.history.filter(tab => tab.server !== action.server));
   },
 
-  [LOCATION_CHANGE](state, action) {
-    if (action.payload.pathname.indexOf('.') === -1 && state.selected.server) {
-      return state.set('selected', new Tab());
+  [LOCATION_CHANGED](state, action) {
+    const { route, params } = action;
+    if (route === 'chat') {
+      return selectTab(state, params);
     }
 
-    return state;
+    return state.set('selected', new Tab());
   }
 });

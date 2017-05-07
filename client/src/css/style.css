@@ -415,7 +415,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .message {
-  padding: 3px 15px;
+  padding: 4px 15px;
 }
 
 .message-info {
@@ -525,8 +525,18 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   text-overflow: ellipsis;
 }
 
-.ReactVirtualized__Grid {
+.ReactVirtualized__List {
+  box-sizing: content-box !important;
   outline: none;
+}
+
+.rvlist-messages {
+  padding: 7px 0;
+  overflow-y: scroll !important;
+}
+
+.rvlist-users {
+  padding: 10px 0;
 }
 
 @media (max-width: 600px) {

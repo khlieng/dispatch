@@ -3,16 +3,17 @@ import { List } from 'react-virtualized/dist/commonjs/List';
 import { AutoSizer } from 'react-virtualized/dist/commonjs/AutoSizer';
 import debounce from 'lodash/debounce';
 import Message from './Message';
-import { measureScrollBarWidth } from '../util';
 import { getScrollPos, saveScrollPos } from '../util/scrollPosition';
 
-const scrollBarWidth = measureScrollBarWidth();
-const listStyle = { padding: '7px 0', boxSizing: 'content-box' };
-const threshold = 100;
+const fetchThreshold = 100;
 
 export default class MessageBox extends PureComponent {
-  componentDidMount() {
+  componentWillMount() {
     this.loadScrollPos();
+  }
+
+  componentDidMount() {
+    this.scrollTop = -1;
   }
 
   componentWillUpdate(nextProps) {
@@ -22,6 +23,7 @@ export default class MessageBox extends PureComponent {
 
     if (nextProps.tab !== this.props.tab) {
       this.saveScrollPos();
+      this.bottom = false;
     }
 
     if (nextProps.messages.get(0) !== this.props.messages.get(0)) {
@@ -41,7 +43,7 @@ export default class MessageBox extends PureComponent {
 
   componentDidUpdate(prevProps) {
     if (prevProps.tab !== this.props.tab) {
-      this.loadScrollPos();
+      this.loadScrollPos(true);
     }
 
     if (this.nextScrollTop > 0) {
@@ -50,8 +52,6 @@ export default class MessageBox extends PureComponent {
     } else if (this.bottom) {
       this.list.scrollToRow(this.props.messages.size);
     }
-
-    this.updateWidth();
   }
 
   componentWillUnmount() {
@@ -66,7 +66,7 @@ export default class MessageBox extends PureComponent {
       return 0;
     }
     return this.props.messages.get(index - 1).height;
-  }
+  };
 
   listRef = el => {
     this.list = el;
@@ -80,15 +80,22 @@ export default class MessageBox extends PureComponent {
     const { tab } = this.props;
     this.scrollKey = `msg:${tab.server}:${tab.name}`;
     return this.scrollKey;
-  }
+  };
 
-  loadScrollPos = () => {
+  loadScrollPos = scroll => {
     const pos = getScrollPos(this.updateScrollKey());
     if (pos >= 0) {
       this.bottom = false;
-      this.container.scrollTop = pos;
+      if (scroll) {
+        this.list.scrollToPosition(pos);
+      } else {
+        this.scrollTop = pos;
+      }
     } else {
       this.bottom = true;
+      if (scroll) {
+        this.list.scrollToRow(this.props.messages.size);
+      }
     }
   };
 
@@ -98,37 +105,6 @@ export default class MessageBox extends PureComponent {
     } else {
       saveScrollPos(this.scrollKey, this.container.scrollTop);
     }
-  }
-
-  scrollDown = () => {
-    this.container.scrollTop = this.container.scrollHeight - this.container.clientHeight;
-  };
-
-  updateWidth = (width) => {
-    const { tab, setWrapWidth, updateMessageHeight } = this.props;
-    let wrapWidth = width || this.width;
-
-    if (width) {
-      if (tab.isChannel() && window.innerWidth > 600) {
-        wrapWidth += 200;
-      }
-
-      this.width = wrapWidth;
-    }
-
-    if (this.container.scrollHeight > this.container.clientHeight) {
-      wrapWidth -= scrollBarWidth;
-    }
-
-    if (this.wrapWidth !== wrapWidth) {
-      this.wrapWidth = wrapWidth;
-      setWrapWidth(wrapWidth);
-      updateMessageHeight();
-    }
-  };
-
-  handleResize = size => {
-    this.updateWidth(size.width - 30);
   };
 
   fetchMore = debounce(() => {
@@ -138,7 +114,7 @@ export default class MessageBox extends PureComponent {
 
   handleScroll = ({ scrollTop, clientHeight, scrollHeight }) => {
     if (this.props.hasMoreMessages &&
-      scrollTop <= threshold &&
+      scrollTop <= fetchThreshold &&
       scrollTop < this.prevScrollTop &&
       !this.loading) {
       if (this.mouseDown) {
@@ -196,13 +172,20 @@ export default class MessageBox extends PureComponent {
   };
 
   render() {
+    const props = {};
+    if (this.bottom) {
+      props.scrollToIndex = this.props.messages.size;
+    } else if (this.scrollTop >= 0) {
+      props.scrollTop = this.scrollTop;
+    }
+
     return (
       <div
         className="messagebox"
         onMouseDown={this.handleMouseDown}
         onMouseUp={this.handleMouseUp}
       >
-        <AutoSizer onResize={this.handleResize}>
+        <AutoSizer>
           {({ width, height }) => (
             <List
               ref={this.listRef}
@@ -212,7 +195,8 @@ export default class MessageBox extends PureComponent {
               rowHeight={this.getRowHeight}
               rowRenderer={this.renderMessage}
               onScroll={this.handleScroll}
-              style={listStyle}
+              className="rvlist-messages"
+              {...props}
             />
           )}
         </AutoSizer>

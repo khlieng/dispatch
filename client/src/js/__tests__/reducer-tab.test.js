@@ -1,10 +1,10 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
 import reducer from '../reducers/tab';
 import * as actions from '../actions';
 import { setSelectedTab } from '../actions/tab';
+import { locationChanged } from '../util/router';
 
 describe('reducers/tab', () => {
-  it('sets the tab and adds it to history', () => {
+  it('selects the tab and adds it to history', () => {
     let state = reducer(undefined, setSelectedTab('srv', '#chan'));
 
     expect(state.toJS()).toEqual({
@@ -90,15 +90,26 @@ describe('reducers/tab', () => {
   it('clears the tab when navigating to a non-tab page', () => {
     let state = reducer(undefined, setSelectedTab('srv', '#chan'));
 
-    state = reducer(state, {
-      type: LOCATION_CHANGE,
-      payload: {
-        pathname: '/settings'
-      }
-    });
+    state = reducer(state, locationChanged('settings'));
 
     expect(state.toJS()).toEqual({
       selected: { server: null, name: null },
+      history: [
+        { server: 'srv', name: '#chan' }
+      ]
+    });
+  });
+
+  it('selects the tab and adds it to history when navigating to a tab', () => {
+    const state = reducer(undefined,
+      locationChanged('chat', {
+        server: 'srv',
+        name: '#chan'
+      })
+    );
+
+    expect(state.toJS()).toEqual({
+      selected: { server: 'srv', name: '#chan' },
       history: [
         { server: 'srv', name: '#chan' }
       ]

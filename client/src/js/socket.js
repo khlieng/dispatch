@@ -1,6 +1,6 @@
-import { routeActions } from 'react-router-redux';
 import { broadcast, inform, addMessage, addMessages } from './actions/message';
 import { select } from './actions/tab';
+import { replace } from './util/router';
 import { normalizeChannel } from './util';
 
 function withReason(message, reason) {
@@ -52,7 +52,7 @@ export default function handleSocket(socket, { dispatch, getState }) {
 
     servers(data) {
       if (!data) {
-        dispatch(routeActions.replace('/connect'));
+        dispatch(replace('/connect'));
       }
     },
 

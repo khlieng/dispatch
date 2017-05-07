@@ -121,6 +121,7 @@ export function addMessages(messages, server, to, prepend, next) {
 
     if (next) {
       messages[0].id = next;
+      messages[0].next = true;
     }
 
     messages.forEach(message => initMessage(message, server, message.tab || tab, state));

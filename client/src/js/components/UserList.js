@@ -3,8 +3,6 @@ import { List } from 'react-virtualized/dist/commonjs/List';
 import { AutoSizer } from 'react-virtualized/dist/commonjs/AutoSizer';
 import UserListItem from './UserListItem';
 
-const listStyle = { padding: '10px 0', boxSizing: 'content-box' };
-
 export default class UserList extends PureComponent {
   componentWillUpdate(nextProps) {
     if (nextProps.users.size === this.props.users.size) {
@@ -49,7 +47,7 @@ export default class UserList extends PureComponent {
               rowCount={this.props.users.size}
               rowHeight={24}
               rowRenderer={this.renderUser}
-              style={listStyle}
+              className="rvlist-users"
             />
           )}
         </AutoSizer>

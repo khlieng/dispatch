@@ -1,20 +1,24 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
-import { routerMiddleware } from 'react-router-redux';
-import reducer from '../reducers';
+import createReducer from '../reducers';
+import { routeReducer, routeMiddleware } from '../util/router';
 import createSocketMiddleware from '../middleware/socket';
 import commands from '../commands';
 
-export default function configureStore(socket, history) {
+export default function configureStore(socket) {
   // eslint-disable-next-line no-underscore-dangle
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-  return createStore(reducer, composeEnhancers(
+  const reducer = createReducer(routeReducer);
+
+  const store = createStore(reducer, composeEnhancers(
     applyMiddleware(
-      routerMiddleware(history),
+      routeMiddleware,
       thunk,
       createSocketMiddleware(socket),
       commands
     )
   ));
+
+  return store;
 }

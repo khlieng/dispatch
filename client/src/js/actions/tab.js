@@ -1,14 +1,10 @@
-import { push, replace } from 'react-router-redux';
 import * as actions from '../actions';
+import { push, replace } from '../util/router';
 
 export function select(server, name) {
-  const pm = name && name.charAt(0) !== '#';
-  if (pm) {
-    return push(`/${server}/pm/${name}`);
-  } else if (name) {
+  if (name) {
     return push(`/${server}/${encodeURIComponent(name)}`);
   }
-
   return push(`/${server}`);
 }
 

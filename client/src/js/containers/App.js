@@ -1,19 +1,32 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { push } from 'react-router-redux';
+import { push } from '../util/router';
+import Route from './Route';
+import Chat from './Chat';
+import Connect from './Connect';
+import Settings from './Settings';
 import TabList from '../components/TabList';
 import { select } from '../actions/tab';
 import { hideMenu } from '../actions/ui';
 
 class App extends PureComponent {
+  handleClick = () => {
+    if (this.props.showTabList) {
+      this.props.hideMenu();
+    }
+  };
+
   render() {
-    const { showTabList, children } = this.props;
+    const { showTabList } = this.props;
     const mainClass = showTabList ? 'main-container off-canvas' : 'main-container';
+
     return (
-      <div>
+      <div onClick={this.handleClick}>
         <TabList {...this.props} />
         <div className={mainClass}>
-          {children}
+          <Route name="chat"><Chat /></Route>
+          <Route name="connect"><Connect /></Route>
+          <Route name="settings"><Settings /></Route>
         </div>
       </div>
     );

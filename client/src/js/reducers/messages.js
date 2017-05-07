@@ -12,6 +12,7 @@ const Message = Record({
   time: null,
   type: null,
   channel: false,
+  next: false,
   height: 0,
   length: 0,
   breakpoints: null

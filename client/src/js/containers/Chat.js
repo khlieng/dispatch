@@ -11,7 +11,7 @@ import UserList from '../components/UserList';
 import { part } from '../actions/channel';
 import { openPrivateChat, closePrivateChat } from '../actions/privateChat';
 import { searchMessages, toggleSearch } from '../actions/search';
-import { select, setSelectedTab } from '../actions/tab';
+import { select } from '../actions/tab';
 import { runCommand, sendMessage, updateMessageHeight, fetchMessages } from '../actions/message';
 import { disconnect } from '../actions/server';
 import { setWrapWidth, setCharWidth } from '../actions/environment';
@@ -20,12 +20,6 @@ import { toggleUserList } from '../actions/ui';
 import * as inputHistoryActions from '../actions/inputHistory';
 import { getSelectedTab } from '../reducers/tab';
 import { getSelectedMessages } from '../reducers/messages';
-
-function updateSelected({ params, dispatch }) {
-  if (params.server) {
-    dispatch(setSelectedTab(params.server, params.channel || params.user));
-  }
-}
 
 function updateCharWidth() {
   const charWidth = stringWidth(' ', '16px Roboto Mono, monospace');
@@ -36,17 +30,7 @@ function updateCharWidth() {
 class Chat extends PureComponent {
   componentWillMount() {
     const { dispatch } = this.props;
-    dispatch(updateCharWidth());
     setTimeout(() => dispatch(updateCharWidth()), 1000);
-    updateSelected(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.params.server !== this.props.params.server ||
-      nextProps.params.channel !== this.props.params.channel ||
-      nextProps.params.user !== this.props.params.user) {
-      updateSelected(nextProps);
-    }
   }
 
   handleSearch = phrase => {
@@ -154,7 +138,10 @@ const titleSelector = createSelector(
 
 const getHasMoreMessages = createSelector(
   getSelectedMessages,
-  messages => messages.get(0) && typeof messages.get(0).id === 'string'
+  messages => {
+    const first = messages.get(0);
+    return first && first.next;
+  }
 );
 
 const mapStateToProps = createStructuredSelector({

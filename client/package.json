@@ -41,19 +41,18 @@
     "autolinker": "^1.4.3",
     "backo": "^1.1.0",
     "base64-arraybuffer": "^0.1.5",
-    "history": "^4.5.1",
+    "history": "4.5.0",
     "immutable": "^3.8.1",
     "lodash": "^4.17.4",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-hot-loader": "next",
     "react-redux": "^5.0.2",
-    "react-router": "^3.0.2",
-    "react-router-redux": "^4.0.8",
     "react-virtualized": "^9.3.0",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",
-    "reselect": "^3.0.0"
+    "reselect": "^3.0.0",
+    "url-pattern": "^1.0.3"
   },
   "scripts": {
     "test": "jest",
