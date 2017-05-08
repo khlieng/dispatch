@@ -13,6 +13,7 @@ export default class MessageBox extends PureComponent {
   }
 
   componentDidMount() {
+    this.mounted = true;
     this.scrollTop = -1;
   }
 
@@ -113,19 +114,21 @@ export default class MessageBox extends PureComponent {
   }, 100);
 
   handleScroll = ({ scrollTop, clientHeight, scrollHeight }) => {
-    if (this.props.hasMoreMessages &&
-      scrollTop <= fetchThreshold &&
-      scrollTop < this.prevScrollTop &&
-      !this.loading) {
-      if (this.mouseDown) {
-        this.shouldFetch = true;
-      } else {
-        this.fetchMore();
+    if (this.mounted) {
+      if (this.props.hasMoreMessages &&
+        scrollTop <= fetchThreshold &&
+        scrollTop < this.prevScrollTop &&
+        !this.loading) {
+        if (this.mouseDown) {
+          this.shouldFetch = true;
+        } else {
+          this.fetchMore();
+        }
       }
-    }
 
-    this.bottom = scrollTop + clientHeight >= scrollHeight - 10;
-    this.prevScrollTop = scrollTop;
+      this.bottom = scrollTop + clientHeight >= scrollHeight - 10;
+      this.prevScrollTop = scrollTop;
+    }
   };
 
   handleMouseDown = () => {
