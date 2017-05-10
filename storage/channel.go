@@ -6,16 +6,69 @@ import (
 )
 
 type ChannelStore struct {
-	users    map[string]map[string][]string
+	users    map[string]map[string][]*ChannelStoreUser
 	userLock sync.Mutex
 
 	topic     map[string]map[string]string
 	topicLock sync.Mutex
 }
 
+const userModePrefixes = "~&@%+"
+const userModeChars = "qaohv"
+
+type ChannelStoreUser struct {
+	nick   string
+	modes  string
+	prefix string
+}
+
+func NewChannelStoreUser(nick string) *ChannelStoreUser {
+	user := &ChannelStoreUser{nick: nick}
+
+	if i := strings.IndexAny(nick, userModePrefixes); i == 0 {
+		i = strings.Index(userModePrefixes, string(nick[0]))
+		user.modes = string(userModeChars[i])
+		user.nick = nick[1:]
+		user.updatePrefix()
+	}
+
+	return user
+}
+
+func (c *ChannelStoreUser) String() string {
+	return c.prefix + c.nick
+}
+
+func (c *ChannelStoreUser) addModes(modes string) {
+	for _, mode := range modes {
+		if strings.Contains(c.modes, string(mode)) {
+			continue
+		}
+		c.modes += string(mode)
+	}
+	c.updatePrefix()
+}
+
+func (c *ChannelStoreUser) removeModes(modes string) {
+	for _, mode := range modes {
+		c.modes = strings.Replace(c.modes, string(mode), "", 1)
+	}
+	c.updatePrefix()
+}
+
+func (c *ChannelStoreUser) updatePrefix() {
+	for i, mode := range userModeChars {
+		if strings.Contains(c.modes, string(mode)) {
+			c.prefix = string(userModePrefixes[i])
+			return
+		}
+	}
+	c.prefix = ""
+}
+
 func NewChannelStore() *ChannelStore {
 	return &ChannelStore{
-		users: make(map[string]map[string][]string),
+		users: make(map[string]map[string][]*ChannelStoreUser),
 		topic: make(map[string]map[string]string),
 	}
 }
@@ -24,7 +77,9 @@ func (c *ChannelStore) GetUsers(server, channel string) []string {
 	c.userLock.Lock()
 
 	users := make([]string, len(c.users[server][channel]))
-	copy(users, c.users[server][channel])
+	for i, user := range c.users[server][channel] {
+		users[i] = user.String()
+	}
 
 	c.userLock.Unlock()
 
@@ -35,10 +90,13 @@ func (c *ChannelStore) SetUsers(users []string, server, channel string) {
 	c.userLock.Lock()
 
 	if _, ok := c.users[server]; !ok {
-		c.users[server] = make(map[string][]string)
+		c.users[server] = make(map[string][]*ChannelStoreUser)
 	}
 
-	c.users[server][channel] = users
+	for _, nick := range users {
+		c.users[server][channel] = append(c.users[server][channel], NewChannelStoreUser(nick))
+	}
+
 	c.userLock.Unlock()
 }
 
@@ -46,20 +104,20 @@ func (c *ChannelStore) AddUser(user, server, channel string) {
 	c.userLock.Lock()
 
 	if _, ok := c.users[server]; !ok {
-		c.users[server] = make(map[string][]string)
+		c.users[server] = make(map[string][]*ChannelStoreUser)
 	}
 
 	if users, ok := c.users[server][channel]; ok {
-		for _, nick := range users {
-			if nick == user {
+		for _, u := range users {
+			if u.nick == user {
 				c.userLock.Unlock()
 				return
 			}
 		}
 
-		c.users[server][channel] = append(users, user)
+		c.users[server][channel] = append(users, NewChannelStoreUser(user))
 	} else {
-		c.users[server][channel] = []string{user}
+		c.users[server][channel] = []*ChannelStoreUser{NewChannelStoreUser(user)}
 	}
 
 	c.userLock.Unlock()
@@ -90,12 +148,14 @@ func (c *ChannelStore) RenameUser(oldNick, newNick, server string) {
 func (c *ChannelStore) SetMode(server, channel, user, add, remove string) {
 	c.userLock.Lock()
 
-	if strings.Contains(add, "o") {
-		c.setPrefix(server, channel, user, "@")
-	} else if strings.Contains(add, "v") {
-		c.setPrefix(server, channel, user, "+")
-	} else if strings.IndexAny(remove, "ov") > -1 {
-		c.setPrefix(server, channel, user, "")
+	for _, u := range c.users[server][channel] {
+		if u.nick == user {
+			u.addModes(add)
+			u.removeModes(remove)
+
+			c.userLock.Unlock()
+			return
+		}
 	}
 
 	c.userLock.Unlock()
@@ -103,9 +163,9 @@ func (c *ChannelStore) SetMode(server, channel, user, add, remove string) {
 
 func (c *ChannelStore) GetTopic(server, channel string) string {
 	c.topicLock.Lock()
-	defer c.topicLock.Unlock()
-
-	return c.topic[server][channel]
+	topic := c.topic[server][channel]
+	c.topicLock.Unlock()
+	return topic
 }
 
 func (c *ChannelStore) SetTopic(topic, server, channel string) {
@@ -120,22 +180,9 @@ func (c *ChannelStore) SetTopic(topic, server, channel string) {
 }
 
 func (c *ChannelStore) rename(server, channel, oldNick, newNick string) {
-	for i, nick := range c.users[server][channel] {
-		if strings.TrimLeft(nick, "@+") == oldNick {
-			if nick[0] == '@' || nick[0] == '+' {
-				newNick = nick[:1] + newNick
-			}
-
-			c.users[server][channel][i] = newNick
-			return
-		}
-	}
-}
-
-func (c *ChannelStore) setPrefix(server, channel, user, prefix string) {
-	for i, nick := range c.users[server][channel] {
-		if strings.TrimLeft(nick, "@+") == user {
-			c.users[server][channel][i] = prefix + user
+	for _, user := range c.users[server][channel] {
+		if user.nick == oldNick {
+			user.nick = newNick
 			return
 		}
 	}
@@ -148,8 +195,8 @@ func (c *ChannelStore) renameAll(server, oldNick, newNick string) {
 }
 
 func (c *ChannelStore) removeUser(user, server, channel string) {
-	for i, nick := range c.users[server][channel] {
-		if strings.TrimLeft(nick, "@+") == user {
+	for i, u := range c.users[server][channel] {
+		if u.nick == user {
 			users := c.users[server][channel]
 			c.users[server][channel] = append(users[:i], users[i+1:]...)
 			return

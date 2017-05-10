@@ -8,9 +8,9 @@ import (
 
 func TestGetSetUsers(t *testing.T) {
 	channelStore := NewChannelStore()
-	users := []string{"a,b"}
+	users := []string{"a", "b"}
 	channelStore.SetUsers(users, "srv", "#chan")
-	assert.Equal(t, channelStore.GetUsers("srv", "#chan"), users)
+	assert.Equal(t, users, channelStore.GetUsers("srv", "#chan"))
 }
 
 func TestAddRemoveUser(t *testing.T) {
@@ -52,9 +52,11 @@ func TestMode(t *testing.T) {
 	channelStore.SetMode("srv", "#chan", "user", "o", "v")
 	assert.Equal(t, []string{"@user"}, channelStore.GetUsers("srv", "#chan"))
 	channelStore.SetMode("srv", "#chan", "user", "v", "")
+	assert.Equal(t, []string{"@user"}, channelStore.GetUsers("srv", "#chan"))
+	channelStore.SetMode("srv", "#chan", "user", "", "o")
 	assert.Equal(t, []string{"+user"}, channelStore.GetUsers("srv", "#chan"))
-	channelStore.SetMode("srv", "#chan", "user", "", "v")
-	assert.Equal(t, []string{"user"}, channelStore.GetUsers("srv", "#chan"))
+	channelStore.SetMode("srv", "#chan", "user", "q", "")
+	assert.Equal(t, []string{"~user"}, channelStore.GetUsers("srv", "#chan"))
 }
 
 func TestTopic(t *testing.T) {
@@ -62,4 +64,24 @@ func TestTopic(t *testing.T) {
 	assert.Equal(t, "", channelStore.GetTopic("srv", "#chan"))
 	channelStore.SetTopic("the topic", "srv", "#chan")
 	assert.Equal(t, "the topic", channelStore.GetTopic("srv", "#chan"))
+}
+
+func TestChannelUserMode(t *testing.T) {
+	user := NewChannelStoreUser("&test")
+	assert.Equal(t, "test", user.nick)
+	assert.Equal(t, "a", string(user.modes[0]))
+	assert.Equal(t, "&test", user.String())
+
+	user.removeModes("a")
+	assert.Equal(t, "test", user.String())
+	user.addModes("o")
+	assert.Equal(t, "@test", user.String())
+	user.addModes("q")
+	assert.Equal(t, "~test", user.String())
+	user.addModes("v")
+	assert.Equal(t, "~test", user.String())
+	user.removeModes("qo")
+	assert.Equal(t, "+test", user.String())
+	user.removeModes("v")
+	assert.Equal(t, "test", user.String())
 }
