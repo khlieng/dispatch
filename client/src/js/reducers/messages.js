@@ -42,7 +42,7 @@ export default createReducer(Map(), {
         }
       } else {
         messages.forEach(message =>
-          s.updateIn([server, tab], List(), list => list.push(new Message(message)))
+          s.updateIn([server, message.tab || tab], List(), list => list.push(new Message(message)))
         );
       }
     });
