@@ -8,16 +8,22 @@ const User = Record({
   mode: ''
 });
 
-function updateRenderName(user) {
-  let name = user.nick;
+const modePrefixes = [
+  { mode: 'q', prefix: '~' }, // Owner
+  { mode: 'a', prefix: '&' }, // Admin
+  { mode: 'o', prefix: '@' }, // Op
+  { mode: 'h', prefix: '%' }, // Halfop
+  { mode: 'v', prefix: '+' }  // Voice
+];
 
-  if (user.mode.indexOf('o') !== -1) {
-    name = `@${name}`;
-  } else if (user.mode.indexOf('v') !== -1) {
-    name = `+${name}`;
+function updateRenderName(user) {
+  for (let i = 0; i < modePrefixes.length; i++) {
+    if (user.mode.indexOf(modePrefixes[i].mode) !== -1) {
+      return user.set('renderName', `${modePrefixes[i].prefix}${user.nick}`);
+    }
   }
 
-  return user.set('renderName', name);
+  return user.set('renderName', user.nick);
 }
 
 function createUser(nick, mode) {
@@ -31,35 +37,34 @@ function createUser(nick, mode) {
 function loadUser(nick) {
   let mode;
 
-  if (nick[0] === '@') {
-    mode = 'o';
-  } else if (nick[0] === '+') {
-    mode = 'v';
+  for (let i = 0; i < modePrefixes.length; i++) {
+    if (nick[0] === modePrefixes[i].prefix) {
+      mode = modePrefixes[i].mode;
+    }
   }
 
   if (mode) {
     return createUser(nick.slice(1), mode);
   }
 
-  return createUser(nick, mode);
+  return createUser(nick);
 }
 
 function compareUsers(a, b) {
   a = a.renderName.toLowerCase();
   b = b.renderName.toLowerCase();
 
-  if (a[0] === '@' && b[0] !== '@') {
-    return -1;
+  for (let i = 0; i < modePrefixes.length; i++) {
+    const prefix = modePrefixes[i].prefix;
+
+    if (a[0] === prefix && b[0] !== prefix) {
+      return -1;
+    }
+    if (b[0] === prefix && a[0] !== prefix) {
+      return 1;
+    }
   }
-  if (b[0] === '@' && a[0] !== '@') {
-    return 1;
-  }
-  if (a[0] === '+' && b[0] !== '+') {
-    return -1;
-  }
-  if (b[0] === '+' && a[0] !== '+') {
-    return 1;
-  }
+
   if (a < b) {
     return -1;
   }
