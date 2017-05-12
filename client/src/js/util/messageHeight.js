@@ -1,6 +1,6 @@
+import FontFaceObserver from 'fontfaceobserver';
 import { stringWidth, measureScrollBarWidth } from './index';
 import { updateMessageHeight } from '../actions/message';
-import { setCharWidth, setWrapWidth } from '../actions/environment';
 
 const lineHeight = 24;
 const menuWidth = 200;
@@ -9,16 +9,12 @@ const messagePadding = 30;
 const smallScreen = 600;
 let windowWidth;
 
-export function initWidthUpdates(store) {
-  const scrollBarWidth = measureScrollBarWidth();
-
-  const charWidth = stringWidth(' ', '16px Roboto Mono, monospace');
+function init(store, charWidth, done) {
   window.messageIndent = 6 * charWidth;
-  store.dispatch(setCharWidth(charWidth));
-
+  const scrollBarWidth = measureScrollBarWidth();
   let prevWrapWidth;
 
-  function updateWidth(delta, first) {
+  function updateWidth() {
     windowWidth = window.innerWidth;
     let wrapWidth = windowWidth - scrollBarWidth - messagePadding;
     if (windowWidth > smallScreen) {
@@ -27,11 +23,7 @@ export function initWidthUpdates(store) {
 
     if (wrapWidth !== prevWrapWidth) {
       prevWrapWidth = wrapWidth;
-
-      store.dispatch(setWrapWidth(wrapWidth));
-      if (!first) {
-        store.dispatch(updateMessageHeight());
-      }
+      store.dispatch(updateMessageHeight(wrapWidth, charWidth));
     }
   }
 
@@ -44,8 +36,28 @@ export function initWidthUpdates(store) {
     resizeRAF = window.requestAnimationFrame(updateWidth);
   }
 
-  updateWidth(0, true);
+  updateWidth();
+  done();
   window.addEventListener('resize', resize);
+}
+
+export function initWidthUpdates(store, done) {
+  let charWidth = localStorage.charWidth;
+  if (charWidth) {
+    init(store, parseFloat(charWidth), done);
+  }
+
+  new FontFaceObserver('Roboto Mono').load().then(() => {
+    if (!charWidth) {
+      charWidth = stringWidth(' ', '16px Roboto Mono');
+      init(store, charWidth, done);
+      localStorage.charWidth = charWidth;
+    }
+  });
+
+  new FontFaceObserver('Montserrat').load();
+  new FontFaceObserver('Montserrat', { weight: 700 }).load();
+  new FontFaceObserver('Roboto Mono', { weight: 700 }).load();
 }
 
 export function findBreakpoints(text) {

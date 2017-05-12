@@ -12,27 +12,14 @@ import { part } from '../actions/channel';
 import { openPrivateChat, closePrivateChat } from '../actions/privateChat';
 import { searchMessages, toggleSearch } from '../actions/search';
 import { select } from '../actions/tab';
-import { runCommand, sendMessage, updateMessageHeight, fetchMessages } from '../actions/message';
+import { runCommand, sendMessage, fetchMessages } from '../actions/message';
 import { disconnect } from '../actions/server';
-import { setWrapWidth, setCharWidth } from '../actions/environment';
-import { stringWidth } from '../util';
 import { toggleUserList } from '../actions/ui';
 import * as inputHistoryActions from '../actions/inputHistory';
 import { getSelectedTab } from '../reducers/tab';
 import { getSelectedMessages } from '../reducers/messages';
 
-function updateCharWidth() {
-  const charWidth = stringWidth(' ', '16px Roboto Mono, monospace');
-  window.messageIndent = 6 * charWidth;
-  return setCharWidth(charWidth);
-}
-
 class Chat extends PureComponent {
-  componentWillMount() {
-    const { dispatch } = this.props;
-    setTimeout(() => dispatch(updateCharWidth()), 1000);
-  }
-
   handleSearch = phrase => {
     const { dispatch, tab } = this.props;
     if (tab.isChannel()) {
@@ -82,8 +69,6 @@ class Chat extends PureComponent {
           messages={messages}
           hasMoreMessages={hasMoreMessages}
           tab={tab}
-          setWrapWidth={this.props.setWrapWidth}
-          updateMessageHeight={this.props.updateMessageHeight}
           onNickClick={this.handleMessageNickClick}
           onFetchMore={this.handleFetchMore}
         />
@@ -169,9 +154,7 @@ function mapDispatchToProps(dispatch) {
       part,
       disconnect,
       openPrivateChat,
-      closePrivateChat,
-      setWrapWidth,
-      updateMessageHeight
+      closePrivateChat
     }, dispatch),
     inputActions: bindActionCreators(inputHistoryActions, dispatch)
   };

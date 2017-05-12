@@ -49,12 +49,12 @@ if (env.users) {
   });
 }
 
-initWidthUpdates(store);
-
-if (env.messages) {
-  const { messages, server, to, next } = env.messages;
-  store.dispatch(addMessages(messages, server, to, false, next));
-}
+initWidthUpdates(store, () => {
+  if (env.messages) {
+    const { messages, server, to, next } = env.messages;
+    store.dispatch(addMessages(messages, server, to, false, next));
+  }
+});
 
 const renderRoot = () => {
   render(

@@ -74,12 +74,12 @@ export function fetchMessages() {
   };
 }
 
-export function updateMessageHeight() {
-  return (dispatch, getState) => dispatch({
+export function updateMessageHeight(wrapWidth, charWidth) {
+  return {
     type: actions.UPDATE_MESSAGE_HEIGHT,
-    wrapWidth: getState().environment.get('wrapWidth'),
-    charWidth: getState().environment.get('charWidth')
-  });
+    wrapWidth,
+    charWidth
+  };
 }
 
 export function sendMessage(content, to, server) {
