@@ -93,8 +93,9 @@ func (c *ChannelStore) SetUsers(users []string, server, channel string) {
 		c.users[server] = make(map[string][]*ChannelStoreUser)
 	}
 
-	for _, nick := range users {
-		c.users[server][channel] = append(c.users[server][channel], NewChannelStoreUser(nick))
+	c.users[server][channel] = make([]*ChannelStoreUser, len(users))
+	for i, nick := range users {
+		c.users[server][channel][i] = NewChannelStoreUser(nick)
 	}
 
 	c.userLock.Unlock()

@@ -11,6 +11,8 @@ func TestGetSetUsers(t *testing.T) {
 	users := []string{"a", "b"}
 	channelStore.SetUsers(users, "srv", "#chan")
 	assert.Equal(t, users, channelStore.GetUsers("srv", "#chan"))
+	channelStore.SetUsers(users, "srv", "#chan")
+	assert.Equal(t, users, channelStore.GetUsers("srv", "#chan"))
 }
 
 func TestAddRemoveUser(t *testing.T) {
