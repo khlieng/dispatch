@@ -18,6 +18,7 @@ import { toggleUserList } from '../actions/ui';
 import * as inputHistoryActions from '../actions/inputHistory';
 import { getSelectedTab } from '../reducers/tab';
 import { getSelectedMessages } from '../reducers/messages';
+import { getCurrentNick } from '../reducers/servers';
 
 class Chat extends PureComponent {
   handleSearch = phrase => {
@@ -38,7 +39,7 @@ class Chat extends PureComponent {
 
   render() {
     const { title, tab, channel, search, history,
-      messages, hasMoreMessages, users, showUserList, inputActions } = this.props;
+      messages, hasMoreMessages, users, showUserList, nick, inputActions } = this.props;
 
     let chatClass;
     if (tab.isChannel()) {
@@ -76,6 +77,7 @@ class Chat extends PureComponent {
           tab={tab}
           channel={channel}
           history={history}
+          nick={nick}
           runCommand={this.props.runCommand}
           sendMessage={this.props.sendMessage}
           {...inputActions}
@@ -138,7 +140,8 @@ const mapStateToProps = createStructuredSelector({
   users: usersSelector,
   showUserList: showUserListSelector,
   search: searchSelector,
-  history: historySelector
+  history: historySelector,
+  nick: getCurrentNick
 });
 
 function mapDispatchToProps(dispatch) {

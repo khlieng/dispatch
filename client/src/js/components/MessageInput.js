@@ -37,8 +37,10 @@ export default class MessageInput extends PureComponent {
   };
 
   render() {
+    const { nick } = this.props;
     return (
       <div className="message-input-wrap">
+        <span className="message-input-nick">{nick}</span>
         <input
           className="message-input"
           type="text"

@@ -1,12 +1,22 @@
 import { Map, Record } from 'immutable';
+import { createSelector } from 'reselect';
 import createReducer from '../util/createReducer';
 import * as actions from '../actions';
+import { getSelectedTab } from './tab';
 
 const Server = Record({
   nick: null,
   name: null,
   connected: false
 });
+
+export const getServers = state => state.servers;
+
+export const getCurrentNick = createSelector(
+  getServers,
+  getSelectedTab,
+  (servers, tab) => servers.getIn([tab.server, 'nick'], '')
+);
 
 export default createReducer(Map(), {
   [actions.CONNECT](state, action) {
