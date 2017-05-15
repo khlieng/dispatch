@@ -9,6 +9,7 @@ import routes from './routes';
 import Socket from './util/Socket';
 import handleSocket from './socket';
 import Root from './containers/Root';
+import { setEnvironment } from './actions/environment';
 import { addMessages } from './actions/message';
 import { initWidthUpdates } from './util/messageHeight';
 
@@ -21,10 +22,7 @@ handleSocket(socket, store);
 
 const env = JSON.parse(document.getElementById('env').innerHTML);
 
-// TODO: Handle this properly
-window.ENV = {
-  defaults: env.defaults
-};
+store.dispatch(setEnvironment('connect_defaults', env.defaults));
 
 if (env.servers) {
   store.dispatch({

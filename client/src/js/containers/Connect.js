@@ -57,7 +57,7 @@ class Connect extends PureComponent {
   };
 
   render() {
-    const defaults = window.ENV.defaults;
+    const { defaults } = this.props;
     let optionals = null;
 
     if (this.state.showOptionals) {
@@ -102,4 +102,10 @@ class Connect extends PureComponent {
   }
 }
 
-export default connect()(Connect);
+function mapStateToProps(state) {
+  return {
+    defaults: state.environment.get('connect_defaults')
+  };
+}
+
+export default connect(mapStateToProps)(Connect);
