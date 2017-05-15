@@ -87,7 +87,7 @@ export function sendMessage(content, to, server) {
     const state = getState();
 
     dispatch({
-      type: actions.SEND_MESSAGE,
+      type: actions.ADD_MESSAGE,
       server,
       tab: to,
       message: initMessage({

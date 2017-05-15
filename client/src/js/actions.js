@@ -19,7 +19,6 @@ export const PART = 'PART';
 export const RAW = 'RAW';
 export const SEARCH_MESSAGES = 'SEARCH_MESSAGES';
 export const SELECT_TAB = 'SELECT_TAB';
-export const SEND_MESSAGE = 'SEND_MESSAGE';
 export const SET_CERT = 'SET_CERT';
 export const SET_CERT_ERROR = 'SET_CERT_ERROR';
 export const SET_ENVIRONMENT = 'SET_ENVIRONMENT';

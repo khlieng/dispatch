@@ -18,10 +18,6 @@ const Message = Record({
   breakpoints: null
 });
 
-function addMessage(state, { server, tab, message }) {
-  return state.updateIn([server, tab], List(), list => list.push(new Message(message)));
-}
-
 export const getMessages = state => state.messages;
 
 export const getSelectedMessages = createSelector(
@@ -31,8 +27,9 @@ export const getSelectedMessages = createSelector(
 );
 
 export default createReducer(Map(), {
-  [actions.SEND_MESSAGE]: addMessage,
-  [actions.ADD_MESSAGE]: addMessage,
+  [actions.ADD_MESSAGE](state, { server, tab, message }) {
+    return state.updateIn([server, tab], List(), list => list.push(new Message(message)));
+  },
 
   [actions.ADD_MESSAGES](state, { server, tab, messages, prepend }) {
     return state.withMutations(s => {
