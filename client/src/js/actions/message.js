@@ -42,7 +42,7 @@ function initMessage(message, server, tab, state) {
 }
 
 function getMessageTab(server, to) {
-  if (!to || to.indexOf('.') !== -1) {
+  if (!to || to.indexOf('.') !== -1 || to === '*') {
     return server;
   }
   return to;
