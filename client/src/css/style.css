@@ -436,6 +436,15 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   cursor: pointer;
 }
 
+.message a {
+  text-decoration: none;
+  color: #0066FF;
+}
+
+.message a:hover {
+  text-decoration: underline;
+}
+
 .message-input-wrap {
   position: absolute;
   left: 0;

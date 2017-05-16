@@ -40,7 +40,7 @@ export default class ChatTitle extends PureComponent {
           </div>
           <i className="icon-search" title="Search" onClick={toggleSearch} />
           <i
-            className="icon-logout button-leave"
+            className="icon-cancel button-leave"
             title={leaveTitle}
             onClick={this.handleLeaveClick}
           />
