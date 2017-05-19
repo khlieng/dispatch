@@ -1,15 +1,12 @@
-import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 
-class Route extends PureComponent {
-  render() {
-    if (this.props.route === this.props.name) {
-      return this.props.children;
-    }
-    return null;
+const Route = ({ route, name, children }) => {
+  if (route === name) {
+    return children;
   }
-}
+  return null;
+};
 
 const getRoute = state => state.router.route;
 
