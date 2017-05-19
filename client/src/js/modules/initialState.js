@@ -1,5 +1,7 @@
 import { setEnvironment } from '../actions/environment';
 import { addMessages } from '../actions/message';
+import { select, updateSelection } from '../actions/tab';
+import { find } from '../util';
 import { initWidthUpdates } from '../util/messageHeight';
 import { replace } from '../util/router';
 
@@ -13,6 +15,21 @@ export default function initialState({ store }) {
       type: 'SOCKET_SERVERS',
       data: env.servers
     });
+
+    if (!store.getState().router.route) {
+      let tab = localStorage.tab;
+      if (tab) {
+        tab = JSON.parse(tab);
+
+        if (find(env.servers, server => server.host === tab.server)) {
+          store.dispatch(select(tab.server, tab.name, true));
+        } else {
+          store.dispatch(updateSelection());
+        }
+      } else {
+        store.dispatch(updateSelection());
+      }
+    }
   } else {
     store.dispatch(replace('/connect'));
   }
