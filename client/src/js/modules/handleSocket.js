@@ -1,7 +1,7 @@
-import { broadcast, inform, addMessage, addMessages } from './actions/message';
-import { select } from './actions/tab';
-import { replace } from './util/router';
-import { normalizeChannel } from './util';
+import { broadcast, inform, addMessage, addMessages } from '../actions/message';
+import { select } from '../actions/tab';
+import { replace } from '../util/router';
+import { normalizeChannel } from '../util';
 
 function withReason(message, reason) {
   return message + (reason ? ` (${reason})` : '');
@@ -19,7 +19,7 @@ function findChannels(state, server, user) {
   return channels;
 }
 
-export default function handleSocket(socket, { dispatch, getState }) {
+export default function handleSocket({ socket, store: { dispatch, getState } }) {
   const handlers = {
     message(message) {
       dispatch(addMessage(message, message.server, message.to));

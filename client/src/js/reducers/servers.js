@@ -18,6 +18,12 @@ export const getCurrentNick = createSelector(
   (servers, tab) => servers.getIn([tab.server, 'nick'], '')
 );
 
+export const getCurrentServerName = createSelector(
+  getServers,
+  getSelectedTab,
+  (servers, tab) => servers.getIn([tab.server, 'name'], '')
+);
+
 export default createReducer(Map(), {
   [actions.CONNECT](state, action) {
     const { host, nick, options } = action;
