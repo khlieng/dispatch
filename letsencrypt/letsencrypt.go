@@ -25,6 +25,9 @@ func Run(dir, domain, email, port string) (*state, error) {
 	}
 
 	client, err := acme.NewClient(URL, &user, acme.RSA2048)
+	if err != nil {
+		return nil, err
+	}
 	client.ExcludeChallenges([]acme.Challenge{acme.TLSSNI01})
 	client.SetHTTPAddress(port)
 
