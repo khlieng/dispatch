@@ -127,6 +127,41 @@ func (s *Session) sendError(err error, server string) {
 	})
 }
 
+func (s *Session) sendLastMessages(server, channel string, count int) {
+	messages, hasMore, err := s.user.GetLastMessages(server, channel, count)
+	if err == nil && len(messages) > 0 {
+		res := Messages{
+			Server:   server,
+			To:       channel,
+			Messages: messages,
+		}
+
+		if hasMore {
+			res.Next = messages[0].ID
+		}
+
+		s.sendJSON("messages", res)
+	}
+}
+
+func (s *Session) sendMessages(server, channel string, count int, fromID string) {
+	messages, hasMore, err := s.user.GetMessages(server, channel, count, fromID)
+	if err == nil && len(messages) > 0 {
+		res := Messages{
+			Server:   server,
+			To:       channel,
+			Messages: messages,
+			Prepend:  true,
+		}
+
+		if hasMore {
+			res.Next = messages[0].ID
+		}
+
+		s.sendJSON("messages", res)
+	}
+}
+
 func (s *Session) print(server string, a ...interface{}) {
 	s.sendJSON("print", Message{
 		Server:  server,

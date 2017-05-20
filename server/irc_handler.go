@@ -81,6 +81,8 @@ func (i *ircHandler) join(msg *irc.Message) {
 	channelStore.AddUser(msg.Nick, i.client.Host, msg.Params[0])
 
 	if msg.Nick == i.client.GetNick() {
+		i.session.sendLastMessages(i.client.Host, msg.Params[0], 50)
+
 		go i.session.user.AddChannel(storage.Channel{
 			Server: i.client.Host,
 			Name:   msg.Params[0],

@@ -79,20 +79,7 @@ func (h *wsHandler) init(r *http.Request) {
 			Users:   channelStore.GetUsers(channel.Server, channel.Name),
 		})
 
-		messages, hasMore, err := h.session.user.GetLastMessages(channel.Server, channel.Name, 50)
-		if err == nil && len(messages) > 0 {
-			res := Messages{
-				Server:   channel.Server,
-				To:       channel.Name,
-				Messages: messages,
-			}
-
-			if hasMore {
-				res.Next = messages[0].ID
-			}
-
-			h.session.sendJSON("messages", res)
-		}
+		h.session.sendLastMessages(channel.Server, channel.Name, 50)
 	}
 }
 
@@ -281,21 +268,7 @@ func (h *wsHandler) fetchMessages(b []byte) {
 	var data FetchMessages
 	json.Unmarshal(b, &data)
 
-	messages, hasMore, err := h.session.user.GetMessages(data.Server, data.Channel, 200, data.Next)
-	if err == nil && len(messages) > 0 {
-		res := Messages{
-			Server:   data.Server,
-			To:       data.Channel,
-			Messages: messages,
-			Prepend:  true,
-		}
-
-		if hasMore {
-			res.Next = messages[0].ID
-		}
-
-		h.session.sendJSON("messages", res)
-	}
+	h.session.sendMessages(data.Server, data.Channel, 200, data.Next)
 }
 
 func (h *wsHandler) initHandlers() {
