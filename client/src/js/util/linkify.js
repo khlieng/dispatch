@@ -51,8 +51,8 @@ export default function linkify(text) {
     }
   }
 
-  if (result.length === 1 && typeof result[0] === 'string') {
-    return text;
+  if (result.length === 1) {
+    return result[0];
   }
 
   return result;
