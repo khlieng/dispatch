@@ -17,14 +17,12 @@ const store = configureStore(socket);
 initRouter(routes, store);
 runModules({ store, socket });
 
-const renderRoot = () => {
-  render(
-    <AppContainer>
-      <Root store={store} />
-    </AppContainer>,
-    document.getElementById('root')
-  );
-};
+const renderRoot = () => render(
+  <AppContainer>
+    <Root store={store} />
+  </AppContainer>,
+  document.getElementById('root')
+);
 
 renderRoot();
 

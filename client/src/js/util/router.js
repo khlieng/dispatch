@@ -81,7 +81,7 @@ function match(routes, location) {
 export default function initRouter(routes, store) {
   const patterns = [];
   const opts = {
-    segmentValueCharset: 'a-zA-Z0-9-.%'
+    segmentValueCharset: 'a-zA-Z0-9-_.%'
   };
 
   Object.keys(routes).forEach(name =>
