@@ -9,7 +9,7 @@ export default class MessageInput extends PureComponent {
     const { tab, runCommand, sendMessage, addInputHistory, incrementInputHistory,
       decrementInputHistory, resetInputHistory } = this.props;
 
-    if (e.which === 13 && e.target.value) {
+    if (e.key === 'Enter' && e.target.value) {
       if (e.target.value[0] === '/') {
         runCommand(e.target.value, tab.name, tab.server);
       } else if (tab.name) {
@@ -19,14 +19,12 @@ export default class MessageInput extends PureComponent {
       addInputHistory(e.target.value);
       resetInputHistory();
       this.setState({ value: '' });
-    } else if (e.which === 38) {
+    } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       incrementInputHistory();
-    } else if (e.which === 40) {
+    } else if (e.key === 'ArrowDown') {
       decrementInputHistory();
-    } else if (e.key === 'Backspace' || e.key === 'Delete') {
-      resetInputHistory();
-    } else if (e.key === 'Unidentified') {
+    } else {
       this.setState({ value: e.target.value });
       resetInputHistory();
     }
