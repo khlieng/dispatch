@@ -87,6 +87,9 @@ func startHTTP() {
 			log.Fatal("Could not locate SSL certificate or private key")
 		}
 	} else {
+		if viper.GetBool("dev") {
+			port = "1337"
+		}
 		log.Println("[HTTP] Listening on port", port)
 		log.Fatal(http.ListenAndServe(":"+port, http.HandlerFunc(serve)))
 	}
