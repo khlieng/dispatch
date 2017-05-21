@@ -58,26 +58,30 @@ export function routeMiddleware() {
   };
 }
 
-function match(routes, location) {
-  let params;
-  for (let i = 0; i < routes.length; i++) {
-    params = routes[i].pattern.match(location.pathname);
-    if (params !== null) {
-      return locationChanged(routes[i].name, params, location);
-    }
-  }
-  return null;
-}
-
 function decode(location) {
   location.pathname = decodeURIComponent(location.pathname);
   return location;
 }
 
+function match(routes, location) {
+  let params;
+  for (let i = 0; i < routes.length; i++) {
+    params = routes[i].pattern.match(location.pathname);
+    if (params !== null) {
+      const keys = Object.keys(params);
+      for (let j = 0; j < keys.length; j++) {
+        params[keys[j]] = decodeURIComponent(params[keys[j]]);
+      }
+      return locationChanged(routes[i].name, params, decode(location));
+    }
+  }
+  return null;
+}
+
 export default function initRouter(routes, store) {
   const patterns = [];
   const opts = {
-    segmentValueCharset: 'a-zA-Z0-9-_.~# %'
+    segmentValueCharset: 'a-zA-Z0-9-.%'
   };
 
   Object.keys(routes).forEach(name =>
@@ -87,7 +91,7 @@ export default function initRouter(routes, store) {
     })
   );
 
-  let matched = match(patterns, decode(history.location));
+  let matched = match(patterns, history.location);
   if (matched) {
     store.dispatch(matched);
   } else {
@@ -95,7 +99,7 @@ export default function initRouter(routes, store) {
   }
 
   history.listen(location => {
-    const nextMatch = match(patterns, decode(location));
+    const nextMatch = match(patterns, location);
     if (nextMatch && nextMatch.location.pathname !== matched.location.pathname) {
       matched = nextMatch;
       store.dispatch(matched);
