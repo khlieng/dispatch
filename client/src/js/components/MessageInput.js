@@ -7,7 +7,7 @@ export default class MessageInput extends PureComponent {
 
   handleKey = e => {
     const { tab, runCommand, sendMessage, addInputHistory, incrementInputHistory,
-      decrementInputHistory, resetInputHistory } = this.props;
+      decrementInputHistory, resetInputHistory, history } = this.props;
 
     if (e.key === 'Enter' && e.target.value) {
       if (e.target.value[0] === '/') {
@@ -24,7 +24,7 @@ export default class MessageInput extends PureComponent {
       incrementInputHistory();
     } else if (e.key === 'ArrowDown') {
       decrementInputHistory();
-    } else {
+    } else if (history) {
       this.setState({ value: e.target.value });
       resetInputHistory();
     }
