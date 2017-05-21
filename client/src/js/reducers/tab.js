@@ -12,6 +12,14 @@ class Tab extends TabRecord {
   isChannel() {
     return this.name && this.name.charAt(0) === '#';
   }
+
+  toString() {
+    let str = this.server;
+    if (this.name) {
+      str += `:${this.name}`;
+    }
+    return str;
+  }
 }
 
 const State = Record({

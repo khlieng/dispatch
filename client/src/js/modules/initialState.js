@@ -1,3 +1,4 @@
+import Cookie from 'js-cookie';
 import { setEnvironment } from '../actions/environment';
 import { addMessages } from '../actions/message';
 import { select, updateSelection } from '../actions/tab';
@@ -17,12 +18,12 @@ export default function initialState({ store }) {
     });
 
     if (!store.getState().router.route) {
-      let tab = localStorage.tab;
+      const tab = Cookie.get('tab');
       if (tab) {
-        tab = JSON.parse(tab);
+        const [server, name = null] = tab.split(':');
 
-        if (find(env.servers, server => server.host === tab.server)) {
-          store.dispatch(select(tab.server, tab.name, true));
+        if (find(env.servers, srv => srv.host === server)) {
+          store.dispatch(select(server, name, true));
         } else {
           store.dispatch(updateSelection());
         }

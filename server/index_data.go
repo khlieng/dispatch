@@ -29,6 +29,32 @@ type indexData struct {
 	Messages *Messages `json:"messages,omitempty"`
 }
 
+func (d *indexData) addUsersAndMessages(server, channel string, session *Session) {
+	users := channelStore.GetUsers(server, channel)
+	if len(users) > 0 {
+		d.Users = &Userlist{
+			Server:  server,
+			Channel: channel,
+			Users:   users,
+		}
+	}
+
+	messages, hasMore, err := session.user.GetLastMessages(server, channel, 50)
+	if err == nil && len(messages) > 0 {
+		m := Messages{
+			Server:   server,
+			To:       channel,
+			Messages: messages,
+		}
+
+		if hasMore {
+			m.Next = messages[0].ID
+		}
+
+		d.Messages = &m
+	}
+}
+
 func getIndexData(r *http.Request, session *Session) *indexData {
 	servers := session.user.GetServers()
 	connections := session.getConnectionStates()
@@ -60,30 +86,32 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 
 	params := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(params) == 2 && isChannel(params[1]) {
-		users := channelStore.GetUsers(params[0], params[1])
-		if len(users) > 0 {
-			data.Users = &Userlist{
-				Server:  params[0],
-				Channel: params[1],
-				Users:   users,
+		data.addUsersAndMessages(params[0], params[1], session)
+	} else {
+		server, channel := parseTabCookie(r, r.URL.Path)
+		if channel != "" {
+			for _, ch := range channels {
+				if server == ch.Server && channel == ch.Name {
+					data.addUsersAndMessages(server, channel, session)
+					break
+				}
 			}
-		}
-
-		messages, hasMore, err := session.user.GetLastMessages(params[0], params[1], 50)
-		if err == nil && len(messages) > 0 {
-			m := Messages{
-				Server:   params[0],
-				To:       params[1],
-				Messages: messages,
-			}
-
-			if hasMore {
-				m.Next = messages[0].ID
-			}
-
-			data.Messages = &m
 		}
 	}
 
 	return &data
+}
+
+func parseTabCookie(r *http.Request, path string) (string, string) {
+	if path == "/" {
+		cookie, err := r.Cookie("tab")
+		if err == nil {
+			tab := strings.Split(cookie.Value, ":")
+
+			if len(tab) == 2 && isChannel(tab[1]) {
+				return tab[0], tab[1]
+			}
+		}
+	}
+	return "", ""
 }
