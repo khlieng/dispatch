@@ -3,7 +3,7 @@ import { COMMAND } from './actions';
 import { setNick, disconnect, whois, away } from './actions/server';
 import { join, part, invite, kick } from './actions/channel';
 import { select } from './actions/tab';
-import { sendMessage, addMessage, inform, raw } from './actions/message';
+import { sendMessage, addMessage, raw } from './actions/message';
 
 const help = [
   '/join <channel> - Join a channel',
@@ -62,7 +62,7 @@ export default createCommandMiddleware(COMMAND, {
         content: topic
       }));
     } else {
-      dispatch(inform('No topic set', server, channel));
+      return 'No topic set';
     }
   },
 
@@ -104,11 +104,17 @@ export default createCommandMiddleware(COMMAND, {
 
   raw({ dispatch, server }, ...message) {
     if (message) {
-      dispatch(raw(message.join(' '), server));
+      const cmd = message.join(' ');
+      dispatch(raw(cmd, server));
+      return `=> ${cmd}`;
     }
   },
 
-  help({ dispatch, server, channel }) {
-    dispatch(inform(help, server, channel));
+  help() {
+    return help;
+  },
+
+  commandNotFound(_, command) {
+    return `The command /${command} was not found`;
   }
 });

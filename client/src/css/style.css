@@ -96,10 +96,12 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   margin-right: 5px;
 }
 
-.tab-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.tab-label {
+  margin-top: 10px;
+  margin-left: 15px;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #999;
 }
 
 .button-connect {

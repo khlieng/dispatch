@@ -7,6 +7,7 @@
   "rules": {
     "arrow-parens": 0,
     "comma-dangle": [2, "never"],
+    "consistent-return": 0,
     "jsx-a11y/no-static-element-interactions": 0,
     "new-cap": [2, { "capIsNewExceptions": ["Map", "List", "Record", "Set"] }],
     "no-console": 0,

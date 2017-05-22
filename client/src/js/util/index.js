@@ -52,5 +52,4 @@ export function find(arr, pred) {
       return arr[i];
     }
   }
-  return undefined;
 }

@@ -54,7 +54,6 @@ export function routeMiddleware() {
       default:
         return next(action);
     }
-    return undefined;
   };
 }
 

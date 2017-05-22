@@ -34,7 +34,9 @@ export default class TabList extends PureComponent {
         />
       ));
 
-      if (privateChats.has(address)) {
+      if (privateChats.has(address) && privateChats.get(address).size > 0) {
+        tabs.push(<div className="tab-label">Private messages</div>);
+
         privateChats.get(address).forEach(nick => tabs.push(
           <TabListItem
             key={address + nick}
