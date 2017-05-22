@@ -15,9 +15,9 @@
 There is a few different ways of getting it:
 
 ### 1. Binary
-- **[Windows (x64)](https://github.com/khlieng/dispatch/releases/download/v0.2/dispatch_windows_amd64.zip)**
-- **[OS X (x64)](https://github.com/khlieng/dispatch/releases/download/v0.2/dispatch_darwin_amd64.zip)**
-- **[Linux (x64)](https://github.com/khlieng/dispatch/releases/download/v0.2/dispatch_linux_amd64.tar.gz)**
+- **[Windows (x64)](https://github.com/khlieng/dispatch/releases/download/v0.3/dispatch_windows_amd64.zip)**
+- **[OS X (x64)](https://github.com/khlieng/dispatch/releases/download/v0.3/dispatch_darwin_amd64.zip)**
+- **[Linux (x64)](https://github.com/khlieng/dispatch/releases/download/v0.3/dispatch_linux_amd64.tar.gz)**
 - [Other versions](https://github.com/khlieng/dispatch/releases)
 
 ### 2. Go
@@ -86,7 +86,6 @@ The libraries this project is built with.
 ### Client
 - [React](https://github.com/facebook/react)
 - [Redux](https://github.com/reactjs/redux)
-- [React Router](https://github.com/ReactTraining/react-router)
-- [React Virtualized](https://github.com/bvaughn/react-virtualized)
 - [Immutable](https://github.com/facebook/immutable-js)
+- [React Virtualized](https://github.com/bvaughn/react-virtualized)
 - [Lodash](https://github.com/lodash/lodash)
