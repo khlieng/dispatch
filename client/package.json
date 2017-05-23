@@ -31,7 +31,7 @@
     "gulp-cssnano": "^2.1.2",
     "gulp-util": "^3.0.8",
     "jest": "^20.0.0",
-    "style-loader": "^0.17.0",
+    "style-loader": "^0.18.0",
     "through2": "^2.0.3",
     "webpack": "^2.4.1",
     "webpack-dev-middleware": "^1.10.0",
