@@ -1,9 +1,11 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
 import Navicon from '../components/Navicon';
-import * as serverActions from '../actions/server';
-import { join } from '../actions/channel';
-import { select } from '../actions/tab';
+import { join } from '../state/channels';
+import { getConnectDefaults } from '../state/environment';
+import { connect as connectServer } from '../state/servers';
+import { select } from '../state/tab';
 
 class Connect extends PureComponent {
   state = {
@@ -33,7 +35,7 @@ class Connect extends PureComponent {
     }
 
     if (address.indexOf('.') > 0 && nick) {
-      dispatch(serverActions.connect(address, nick, opts));
+      dispatch(connectServer(address, nick, opts));
 
       const i = address.indexOf(':');
       if (i > 0) {
@@ -102,10 +104,8 @@ class Connect extends PureComponent {
   }
 }
 
-function mapStateToProps(state) {
-  return {
-    defaults: state.environment.get('connect_defaults')
-  };
-}
+const mapState = createStructuredSelector({
+  defaults: getConnectDefaults
+});
 
-export default connect(mapStateToProps)(Connect);
+export default connect(mapState)(Connect);

@@ -1,7 +1,6 @@
-import reducer from '../reducers/tab';
+import reducer, { setSelectedTab } from '../tab';
 import * as actions from '../actions';
-import { setSelectedTab } from '../actions/tab';
-import { locationChanged } from '../util/router';
+import { locationChanged } from '../../util/router';
 
 describe('reducers/tab', () => {
   it('selects the tab and adds it to history', () => {

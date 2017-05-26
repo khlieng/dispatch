@@ -1,9 +1,9 @@
 import createCommandMiddleware from './middleware/command';
-import { COMMAND } from './actions';
-import { setNick, disconnect, whois, away } from './actions/server';
-import { join, part, invite, kick } from './actions/channel';
-import { select } from './actions/tab';
-import { sendMessage, addMessage, raw } from './actions/message';
+import { COMMAND } from './state/actions';
+import { join, part, invite, kick } from './state/channels';
+import { sendMessage, addMessage, raw } from './state/messages';
+import { setNick, disconnect, whois, away } from './state/servers';
+import { select } from './state/tab';
 
 const help = [
   '/join <channel> - Join a channel',

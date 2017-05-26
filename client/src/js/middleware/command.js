@@ -1,4 +1,4 @@
-import { inform } from '../actions/message';
+import { inform } from '../state/messages';
 
 const notFound = 'commandNotFound';
 

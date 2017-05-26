@@ -1,24 +1,23 @@
 import React, { PureComponent } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { createSelector, createStructuredSelector } from 'reselect';
-import { List, Map } from 'immutable';
+import { createStructuredSelector } from 'reselect';
 import ChatTitle from '../components/ChatTitle';
 import Search from '../components/Search';
 import MessageBox from '../components/MessageBox';
 import MessageInput from '../components/MessageInput';
 import UserList from '../components/UserList';
-import { part } from '../actions/channel';
-import { openPrivateChat, closePrivateChat } from '../actions/privateChat';
-import { searchMessages, toggleSearch } from '../actions/search';
-import { select } from '../actions/tab';
-import { runCommand, sendMessage, fetchMessages } from '../actions/message';
-import { disconnect } from '../actions/server';
-import { toggleUserList } from '../actions/ui';
-import * as inputHistoryActions from '../actions/inputHistory';
-import { getSelectedTab } from '../reducers/tab';
-import { getSelectedMessages } from '../reducers/messages';
-import { getCurrentNick } from '../reducers/servers';
+import { getSelectedTabTitle } from '../state';
+import { getSelectedChannel, getSelectedChannelUsers, part } from '../state/channels';
+import { getCurrentInputHistoryEntry, addInputHistory, resetInputHistory,
+  incrementInputHistory, decrementInputHistory } from '../state/input';
+import { getSelectedMessages, getHasMoreMessages,
+  runCommand, sendMessage, fetchMessages } from '../state/messages';
+import { openPrivateChat, closePrivateChat } from '../state/privateChats';
+import { getSearch, searchMessages, toggleSearch } from '../state/search';
+import { getCurrentNick, disconnect } from '../state/servers';
+import { getSelectedTab, select } from '../state/tab';
+import { getShowUserList, toggleUserList } from '../state/ui';
 
 class Chat extends PureComponent {
   handleSearch = phrase => {
@@ -38,7 +37,7 @@ class Chat extends PureComponent {
   handleFetchMore = () => this.props.dispatch(fetchMessages());
 
   render() {
-    const { title, tab, channel, search, history,
+    const { title, tab, channel, search, currentInputHistoryEntry,
       messages, hasMoreMessages, users, showUserList, nick, inputActions } = this.props;
 
     let chatClass;
@@ -76,7 +75,7 @@ class Chat extends PureComponent {
         <MessageInput
           tab={tab}
           channel={channel}
-          history={history}
+          currentHistoryEntry={currentInputHistoryEntry}
           nick={nick}
           runCommand={this.props.runCommand}
           sendMessage={this.props.sendMessage}
@@ -94,73 +93,41 @@ class Chat extends PureComponent {
   }
 }
 
-const serverSelector = state => state.servers;
-const channelSelector = state => state.channels;
-const searchSelector = state => state.search;
-const showUserListSelector = state => state.ui.showUserList;
-const historySelector = state => {
-  if (state.input.index === -1) {
-    return null;
-  }
-
-  return state.input.history.get(state.input.index);
-};
-
-const selectedChannelSelector = createSelector(
-  getSelectedTab,
-  channelSelector,
-  (tab, channels) => channels.getIn([tab.server, tab.name], Map())
-);
-
-const usersSelector = createSelector(
-  selectedChannelSelector,
-  channel => channel.get('users', List())
-);
-
-const titleSelector = createSelector(
-  getSelectedTab,
-  serverSelector,
-  (tab, servers) => tab.name || servers.getIn([tab.server, 'name'])
-);
-
-const getHasMoreMessages = createSelector(
-  getSelectedMessages,
-  messages => {
-    const first = messages.get(0);
-    return first && first.next;
-  }
-);
-
-const mapStateToProps = createStructuredSelector({
-  title: titleSelector,
-  tab: getSelectedTab,
-  channel: selectedChannelSelector,
-  messages: getSelectedMessages,
+const mapState = createStructuredSelector({
+  channel: getSelectedChannel,
+  currentInputHistoryEntry: getCurrentInputHistoryEntry,
   hasMoreMessages: getHasMoreMessages,
-  users: usersSelector,
-  showUserList: showUserListSelector,
-  search: searchSelector,
-  history: historySelector,
-  nick: getCurrentNick
+  messages: getSelectedMessages,
+  nick: getCurrentNick,
+  search: getSearch,
+  showUserList: getShowUserList,
+  tab: getSelectedTab,
+  title: getSelectedTabTitle,
+  users: getSelectedChannelUsers
 });
 
-function mapDispatchToProps(dispatch) {
+function mapDispatch(dispatch) {
   return {
     dispatch,
     ...bindActionCreators({
-      select,
-      toggleSearch,
-      toggleUserList,
-      searchMessages,
-      runCommand,
-      sendMessage,
-      part,
+      closePrivateChat,
       disconnect,
       openPrivateChat,
-      closePrivateChat
+      part,
+      runCommand,
+      searchMessages,
+      select,
+      sendMessage,
+      toggleSearch,
+      toggleUserList
     }, dispatch),
-    inputActions: bindActionCreators(inputHistoryActions, dispatch)
+    inputActions: bindActionCreators({
+      add: addInputHistory,
+      reset: resetInputHistory,
+      increment: incrementInputHistory,
+      decrement: decrementInputHistory
+    }, dispatch)
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Chat);
+export default connect(mapState, mapDispatch)(Chat);

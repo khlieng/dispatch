@@ -1,7 +1,7 @@
 import { Record, List } from 'immutable';
-import { LOCATION_CHANGED } from '../util/router';
+import { push, replace, LOCATION_CHANGED } from '../util/router';
 import createReducer from '../util/createReducer';
-import * as actions from '../actions';
+import * as actions from './actions';
 
 const TabRecord = Record({
   server: null,
@@ -64,3 +64,39 @@ export default createReducer(new State(), {
     return state.set('selected', new Tab());
   }
 });
+
+export function select(server, name, doReplace) {
+  const navigate = doReplace ? replace : push;
+  if (name) {
+    return navigate(`/${server}/${encodeURIComponent(name)}`);
+  }
+  return navigate(`/${server}`);
+}
+
+export function updateSelection() {
+  return (dispatch, getState) => {
+    const state = getState();
+    const history = state.tab.history;
+    const { servers } = state;
+    const { server } = state.tab.selected;
+
+    if (servers.size === 0) {
+      dispatch(replace('/connect'));
+    } else if (history.size > 0) {
+      const tab = history.last();
+      dispatch(select(tab.server, tab.name, true));
+    } else if (servers.has(server)) {
+      dispatch(select(server, null, true));
+    } else {
+      dispatch(select(servers.keySeq().first(), null, true));
+    }
+  };
+}
+
+export function setSelectedTab(server, name = null) {
+  return {
+    type: actions.SELECT_TAB,
+    server,
+    name
+  };
+}

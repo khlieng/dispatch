@@ -1,7 +1,8 @@
-import { broadcast, inform, addMessage, addMessages } from '../actions/message';
-import { select } from '../actions/tab';
-import { replace } from '../util/router';
+import { socketAction } from '../state/actions';
+import { broadcast, inform, addMessage, addMessages } from '../state/messages';
+import { select } from '../state/tab';
 import { normalizeChannel } from '../util';
+import { replace } from '../util/router';
 
 function withReason(message, reason) {
   return message + (reason ? ` (${reason})` : '');
@@ -97,7 +98,7 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
       handlers[type](data);
     }
 
-    type = `SOCKET_${type.toUpperCase()}`;
+    type = socketAction(type);
     if (Array.isArray(data)) {
       dispatch({ type, data });
     } else {

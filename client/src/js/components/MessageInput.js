@@ -6,8 +6,8 @@ export default class MessageInput extends PureComponent {
   };
 
   handleKey = e => {
-    const { tab, runCommand, sendMessage, addInputHistory, incrementInputHistory,
-      decrementInputHistory, resetInputHistory, history } = this.props;
+    const { tab, runCommand, sendMessage,
+      add, reset, increment, decrement, currentHistoryEntry } = this.props;
 
     if (e.key === 'Enter' && e.target.value) {
       if (e.target.value[0] === '/') {
@@ -16,17 +16,17 @@ export default class MessageInput extends PureComponent {
         sendMessage(e.target.value, tab.name, tab.server);
       }
 
-      addInputHistory(e.target.value);
-      resetInputHistory();
+      add(e.target.value);
+      reset();
       this.setState({ value: '' });
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      incrementInputHistory();
+      increment();
     } else if (e.key === 'ArrowDown') {
-      decrementInputHistory();
-    } else if (history) {
+      decrement();
+    } else if (currentHistoryEntry) {
       this.setState({ value: e.target.value });
-      resetInputHistory();
+      reset();
     }
   };
 
@@ -35,14 +35,14 @@ export default class MessageInput extends PureComponent {
   };
 
   render() {
-    const { nick } = this.props;
+    const { nick, currentHistoryEntry } = this.props;
     return (
       <div className="message-input-wrap">
         <span className="message-input-nick">{nick}</span>
         <input
           className="message-input"
           type="text"
-          value={this.props.history || this.state.value}
+          value={currentHistoryEntry || this.state.value}
           onKeyDown={this.handleKey}
           onChange={this.handleChange}
         />

@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { toggleMenu } from '../actions/ui';
+import { toggleMenu } from '../state/ui';
 
 class Navicon extends PureComponent {
   render() {

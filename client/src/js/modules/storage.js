@@ -1,7 +1,7 @@
 import Cookie from 'js-cookie';
 import debounce from 'lodash/debounce';
-import observe from '../util/observe';
-import { getSelectedTab } from '../reducers/tab';
+import { observe } from '../util/observe';
+import { getSelectedTab } from '../state/tab';
 
 const saveTab = debounce(tab =>
   Cookie.set('tab', tab.toString(), { expires: 30 })

@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
 import Navicon from '../components/Navicon';
 import FileInput from '../components/FileInput';
-import { setCert, setKey, uploadCert } from '../actions/settings';
+import { getSettings, setCert, setKey, uploadCert } from '../state/settings';
 
 class Settings extends PureComponent {
   handleCertChange = (name, data) => this.props.dispatch(setCert(name, data));
@@ -40,6 +41,8 @@ class Settings extends PureComponent {
   }
 }
 
-export default connect(state => ({
-  settings: state.settings
-}))(Settings);
+const mapState = createStructuredSelector({
+  settings: getSettings
+});
+
+export default connect(mapState)(Settings);

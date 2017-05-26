@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
-import reducer from '../reducers/channels';
+import reducer from '../channels';
+import { connect } from '../servers';
 import * as actions from '../actions';
-import { connect } from '../actions/server';
 
 describe('reducers/channels', () => {
   it('removes channels on PART', () => {
@@ -36,7 +36,7 @@ describe('reducers/channels', () => {
     state = reducer(state, socket_join('srv', 'chan2', 'nick2'));
 
     state = reducer(state, {
-      type: actions.SOCKET_PART,
+      type: actions.socket.PART,
       server: 'srv',
       channel: 'chan1',
       user: 'nick2'
@@ -78,7 +78,7 @@ describe('reducers/channels', () => {
     state = reducer(state, socket_join('srv', 'chan2', 'nick2'));
 
     state = reducer(state, {
-      type: actions.SOCKET_QUIT,
+      type: actions.socket.QUIT,
       server: 'srv',
       user: 'nick2'
     });
@@ -103,7 +103,7 @@ describe('reducers/channels', () => {
     state = reducer(state, socket_join('srv', 'chan2', 'nick2'));
 
     state = reducer(state, {
-      type: actions.SOCKET_NICK,
+      type: actions.socket.NICK,
       server: 'srv',
       old: 'nick1',
       new: 'nick3'
@@ -128,7 +128,7 @@ describe('reducers/channels', () => {
 
   it('handles SOCKET_USERS', () => {
     const state = reducer(undefined, {
-      type: actions.SOCKET_USERS,
+      type: actions.socket.USERS,
       server: 'srv',
       channel: 'chan1',
       users: [
@@ -157,7 +157,7 @@ describe('reducers/channels', () => {
 
   it('handles SOCKET_TOPIC', () => {
     const state = reducer(undefined, {
-      type: actions.SOCKET_TOPIC,
+      type: actions.socket.TOPIC,
       server: 'srv',
       channel: 'chan1',
       topic: 'the topic'
@@ -218,7 +218,7 @@ describe('reducers/channels', () => {
 
   it('handles SOCKET_CHANNELS', () => {
     const state = reducer(undefined, {
-      type: actions.SOCKET_CHANNELS,
+      type: actions.socket.CHANNELS,
       data: [
         { server: 'srv', name: 'chan1', topic: 'the topic' },
         { server: 'srv', name: 'chan2' },
@@ -239,7 +239,7 @@ describe('reducers/channels', () => {
 
   it('handles SOCKET_SERVERS', () => {
     const state = reducer(undefined, {
-      type: actions.SOCKET_SERVERS,
+      type: actions.socket.SERVERS,
       data: [
         { host: '127.0.0.1' },
         { host: 'thehost' }
@@ -279,7 +279,7 @@ describe('reducers/channels', () => {
 
 function socket_join(server, channel, user) {
   return {
-    type: 'SOCKET_JOIN',
+    type: actions.socket.JOIN,
     server, user,
     channels: [channel]
   };
@@ -287,7 +287,7 @@ function socket_join(server, channel, user) {
 
 function socket_mode(server, channel, user, add, remove) {
   return {
-    type: 'SOCKET_MODE',
+    type: actions.socket.MODE,
     server, channel, user, add, remove
   };
 }

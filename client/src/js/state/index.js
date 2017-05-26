@@ -10,6 +10,9 @@ import settings from './settings';
 import tab from './tab';
 import ui from './ui';
 
+export * from './selectors';
+export const getRouter = state => state.router;
+
 export default function createReducer(router) {
   return combineReducers({
     router,

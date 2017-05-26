@@ -1,9 +1,10 @@
 import Cookie from 'js-cookie';
-import { setEnvironment } from '../actions/environment';
-import { addMessages } from '../actions/message';
-import { select, updateSelection } from '../actions/tab';
+import { socket as socketActions } from '../state/actions';
+import { getWrapWidth, setEnvironment } from '../state/environment';
+import { addMessages } from '../state/messages';
+import { select, updateSelection } from '../state/tab';
 import { find } from '../util';
-import { initWidthUpdates } from '../util/messageHeight';
+import { when } from '../util/observe';
 import { replace } from '../util/router';
 
 export default function initialState({ store }) {
@@ -13,7 +14,7 @@ export default function initialState({ store }) {
 
   if (env.servers) {
     store.dispatch({
-      type: 'SOCKET_SERVERS',
+      type: socketActions.SERVERS,
       data: env.servers
     });
 
@@ -37,19 +38,21 @@ export default function initialState({ store }) {
 
   if (env.channels) {
     store.dispatch({
-      type: 'SOCKET_CHANNELS',
+      type: socketActions.CHANNELS,
       data: env.channels
     });
   }
 
   if (env.users) {
     store.dispatch({
-      type: 'SOCKET_USERS',
+      type: socketActions.USERS,
       ...env.users
     });
   }
 
-  initWidthUpdates(store, () => {
+  // Wait until wrapWidth gets initialized so that height calculations
+  // only happen once for these messages
+  when(store, getWrapWidth, () => {
     if (env.messages) {
       const { messages, server, to, next } = env.messages;
       store.dispatch(addMessages(messages, server, to, false, next));

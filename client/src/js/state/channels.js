@@ -1,6 +1,8 @@
 import { Map, List, Record } from 'immutable';
+import { createSelector } from 'reselect';
 import createReducer from '../util/createReducer';
-import * as actions from '../actions';
+import { getSelectedTab, updateSelection } from './tab';
+import * as actions from './actions';
 
 const User = Record({
   nick: null,
@@ -74,6 +76,19 @@ function compareUsers(a, b) {
   return 0;
 }
 
+export const getChannels = state => state.channels;
+
+export const getSelectedChannel = createSelector(
+  getSelectedTab,
+  getChannels,
+  (tab, channels) => channels.getIn([tab.server, tab.name], Map())
+);
+
+export const getSelectedChannelUsers = createSelector(
+  getSelectedChannel,
+  channel => channel.get('users', List())
+);
+
 export default createReducer(Map(), {
   [actions.PART](state, action) {
     const { channels, server } = action;
@@ -82,14 +97,14 @@ export default createReducer(Map(), {
     });
   },
 
-  [actions.SOCKET_JOIN](state, action) {
+  [actions.socket.JOIN](state, action) {
     const { server, channels, user } = action;
     return state.updateIn([server, channels[0], 'users'], List(), users =>
       users.push(createUser(user)).sort(compareUsers)
     );
   },
 
-  [actions.SOCKET_PART](state, action) {
+  [actions.socket.PART](state, action) {
     const { server, channel, user } = action;
     if (state.hasIn([server, channel])) {
       return state.updateIn([server, channel, 'users'], users =>
@@ -99,7 +114,7 @@ export default createReducer(Map(), {
     return state;
   },
 
-  [actions.SOCKET_QUIT](state, action) {
+  [actions.socket.QUIT](state, action) {
     const { server, user } = action;
     return state.withMutations(s => {
       s.get(server).forEach((v, channel) => {
@@ -108,7 +123,7 @@ export default createReducer(Map(), {
     });
   },
 
-  [actions.SOCKET_NICK](state, action) {
+  [actions.socket.NICK](state, action) {
     const { server } = action;
     return state.withMutations(s => {
       s.get(server).forEach((v, channel) => {
@@ -126,18 +141,18 @@ export default createReducer(Map(), {
     });
   },
 
-  [actions.SOCKET_USERS](state, action) {
+  [actions.socket.USERS](state, action) {
     const { server, channel, users } = action;
     return state.setIn([server, channel, 'users'],
       List(users.map(user => loadUser(user)).sort(compareUsers)));
   },
 
-  [actions.SOCKET_TOPIC](state, action) {
+  [actions.socket.TOPIC](state, action) {
     const { server, channel, topic } = action;
     return state.setIn([server, channel, 'topic'], topic);
   },
 
-  [actions.SOCKET_MODE](state, action) {
+  [actions.socket.MODE](state, action) {
     const { server, channel, user, remove, add } = action;
 
     return state.updateIn([server, channel, 'users'], users => {
@@ -158,7 +173,7 @@ export default createReducer(Map(), {
     });
   },
 
-  [actions.SOCKET_CHANNELS](state, action) {
+  [actions.socket.CHANNELS](state, action) {
     if (!action.data) {
       return state;
     }
@@ -173,7 +188,7 @@ export default createReducer(Map(), {
     });
   },
 
-  [actions.SOCKET_SERVERS](state, action) {
+  [actions.socket.SERVERS](state, action) {
     if (!action.data) {
       return state;
     }
@@ -201,3 +216,56 @@ export default createReducer(Map(), {
     return state.delete(action.server);
   }
 });
+
+export function join(channels, server) {
+  return {
+    type: actions.JOIN,
+    channels,
+    server,
+    socket: {
+      type: 'join',
+      data: { channels, server }
+    }
+  };
+}
+
+export function part(channels, server) {
+  return dispatch => {
+    dispatch({
+      type: actions.PART,
+      channels,
+      server,
+      socket: {
+        type: 'part',
+        data: { channels, server }
+      }
+    });
+    dispatch(updateSelection());
+  };
+}
+
+export function invite(user, channel, server) {
+  return {
+    type: actions.INVITE,
+    user,
+    channel,
+    server,
+    socket: {
+      type: 'invite',
+      data: { user, channel, server }
+    }
+  };
+}
+
+export function kick(user, channel, server) {
+  return {
+    type: actions.KICK,
+    user,
+    channel,
+    server,
+    socket: {
+      type: 'kick',
+      data: { user, channel, server }
+    }
+  };
+}

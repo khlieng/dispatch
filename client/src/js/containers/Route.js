@@ -10,8 +10,8 @@ const Route = ({ route, name, children }) => {
 
 const getRoute = state => state.router.route;
 
-const mapStateToProps = createStructuredSelector({
+const mapState = createStructuredSelector({
   route: getRoute
 });
 
-export default connect(mapStateToProps)(Route);
+export default connect(mapState)(Route);

@@ -1,7 +1,6 @@
 import Immutable from 'immutable';
-import reducer from '../reducers/servers';
+import reducer, { connect } from '../servers';
 import * as actions from '../actions';
-import { connect } from '../actions/server';
 
 describe('reducers/servers', () => {
   it('adds the server on CONNECT', () => {
@@ -62,7 +61,7 @@ describe('reducers/servers', () => {
   it('updates the nick on SOCKET_NICK', () => {
     let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
     state = reducer(state, {
-      type: actions.SOCKET_NICK,
+      type: actions.socket.NICK,
       server: '127.0.0.1',
       old: 'nick',
       new: 'nick2'
@@ -79,7 +78,7 @@ describe('reducers/servers', () => {
 
   it('adds the servers on SOCKET_SERVERS', () => {
     let state = reducer(undefined, {
-      type: 'SOCKET_SERVERS',
+      type: actions.socket.SERVERS,
       data: [
         {
           host: '127.0.0.1',
@@ -113,7 +112,7 @@ describe('reducers/servers', () => {
   it('updates connection status on SOCKET_CONNECTION_UPDATE', () => {
     let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
     state = reducer(state, {
-      type: actions.SOCKET_CONNECTION_UPDATE,
+      type: actions.socket.CONNECTION_UPDATE,
       '127.0.0.1': true
     });
 

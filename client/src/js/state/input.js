@@ -1,6 +1,6 @@
 import { List, Record } from 'immutable';
 import createReducer from '../util/createReducer';
-import * as actions from '../actions';
+import * as actions from './actions';
 
 const HISTORY_MAX_LENGTH = 128;
 
@@ -8,6 +8,14 @@ const State = Record({
   history: List(),
   index: 0
 });
+
+export const getCurrentInputHistoryEntry = state => {
+  if (state.input.index === -1) {
+    return null;
+  }
+
+  return state.input.history.get(state.input.index);
+};
 
 export default createReducer(new State(), {
   [actions.INPUT_HISTORY_ADD](state, action) {
@@ -43,3 +51,28 @@ export default createReducer(new State(), {
     return state;
   }
 });
+
+export function addInputHistory(line) {
+  return {
+    type: actions.INPUT_HISTORY_ADD,
+    line
+  };
+}
+
+export function resetInputHistory() {
+  return {
+    type: actions.INPUT_HISTORY_RESET
+  };
+}
+
+export function incrementInputHistory() {
+  return {
+    type: actions.INPUT_HISTORY_INCREMENT
+  };
+}
+
+export function decrementInputHistory() {
+  return {
+    type: actions.INPUT_HISTORY_DECREMENT
+  };
+}

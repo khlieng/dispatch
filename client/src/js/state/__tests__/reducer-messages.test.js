@@ -1,7 +1,6 @@
 import { Map, fromJS } from 'immutable';
-import reducer from '../reducers/messages';
+import reducer, { broadcast } from '../messages';
 import * as actions from '../actions';
-import { broadcast } from '../actions/message';
 
 describe('reducers/messages', () => {
   it('adds the message on ADD_MESSAGE', () => {

@@ -1,28 +1,23 @@
 import capitalize from 'lodash/capitalize';
-import observe from '../util/observe';
-import { getCurrentServerName } from '../reducers/servers';
-
-const getRouter = state => state.router;
+import { getRouter } from '../state';
+import { getCurrentServerName } from '../state/servers';
+import { observe } from '../util/observe';
 
 export default function documentTitle({ store }) {
-  observe(
-    store,
-    [getRouter, getCurrentServerName],
-    (router, serverName) => {
-      let title;
+  observe(store, [getRouter, getCurrentServerName], (router, serverName) => {
+    let title;
 
-      if (router.route === 'chat') {
-        const { name } = router.params;
-        if (name) {
-          title = `${name} @ ${serverName}`;
-        } else {
-          title = serverName;
-        }
+    if (router.route === 'chat') {
+      const { name } = router.params;
+      if (name) {
+        title = `${name} @ ${serverName}`;
       } else {
-        title = capitalize(router.route);
+        title = serverName;
       }
-
-      document.title = `${title} | Dispatch`;
+    } else {
+      title = capitalize(router.route);
     }
-  );
+
+    document.title = `${title} | Dispatch`;
+  });
 }
