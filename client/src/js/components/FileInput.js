@@ -10,7 +10,6 @@ export default class FileInput extends PureComponent {
       const reader = new FileReader();
 
       reader.onload = () => {
-        console.log(reader.result.byteLength);
         this.props.onChange(file.name, reader.result);
       };
 

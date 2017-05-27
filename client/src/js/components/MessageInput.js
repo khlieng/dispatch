@@ -6,14 +6,14 @@ export default class MessageInput extends PureComponent {
   };
 
   handleKey = e => {
-    const { tab, runCommand, sendMessage,
+    const { tab, onCommand, onMessage,
       add, reset, increment, decrement, currentHistoryEntry } = this.props;
 
     if (e.key === 'Enter' && e.target.value) {
       if (e.target.value[0] === '/') {
-        runCommand(e.target.value, tab.name, tab.server);
+        onCommand(e.target.value, tab.name, tab.server);
       } else if (tab.name) {
-        sendMessage(e.target.value, tab.name, tab.server);
+        onMessage(e.target.value, tab.name, tab.server);
       }
 
       add(e.target.value);

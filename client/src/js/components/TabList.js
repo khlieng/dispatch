@@ -3,8 +3,8 @@ import TabListItem from './TabListItem';
 
 export default class TabList extends PureComponent {
   handleTabClick = (server, target) => this.props.select(server, target);
-  handleConnectClick = () => this.props.pushPath('/connect');
-  handleSettingsClick = () => this.props.pushPath('/settings');
+  handleConnectClick = () => this.props.push('/connect');
+  handleSettingsClick = () => this.props.push('/settings');
 
   render() {
     const { tab, channels, servers, privateChats, showTabList } = this.props;

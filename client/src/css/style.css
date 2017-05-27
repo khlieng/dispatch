@@ -270,6 +270,10 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   display: none;
 }
 
+.chat-server .userlist, .chat-private .userlist {
+  display: none;
+}
+
 .chat-server .userlist-bar, .chat-private .userlist-bar {
   display: none;
 }

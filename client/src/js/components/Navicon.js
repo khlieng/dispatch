@@ -1,13 +1,7 @@
-import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
-import { toggleMenu } from '../state/ui';
+import React from 'react';
 
-class Navicon extends PureComponent {
-  render() {
-    return (
-      <i className="icon-menu navicon" onClick={this.props.toggleMenu} />
-    );
-  }
-}
+const Navicon = ({ toggleMenu }) => (
+  <i className="icon-menu navicon" onClick={toggleMenu} />
+);
 
-export default connect(null, { toggleMenu })(Navicon);
+export default Navicon;

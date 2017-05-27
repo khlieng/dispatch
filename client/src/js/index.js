@@ -7,7 +7,7 @@ import configureStore from './store';
 import initRouter from './util/router';
 import routes from './routes';
 import Socket from './util/Socket';
-import Root from './containers/Root';
+import Root from './components/Root';
 import runModules from './modules';
 
 const host = DEV ? `${window.location.hostname}:1337` : window.location.host;
@@ -27,5 +27,5 @@ const renderRoot = () => render(
 renderRoot();
 
 if (module.hot) {
-  module.hot.accept('./containers/Root', () => renderRoot());
+  module.hot.accept('./components/Root', () => renderRoot());
 }

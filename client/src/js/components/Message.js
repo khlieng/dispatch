@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 
 export default class Message extends PureComponent {
-  handleNickClick = () => this.props.onNickClick(this.props.message);
+  handleNickClick = () => this.props.onNickClick(this.props.message.from);
 
   render() {
     const { message } = this.props;
