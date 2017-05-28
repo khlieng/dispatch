@@ -162,10 +162,16 @@ func (s *Session) sendMessages(server, channel string, count int, fromID string)
 	}
 }
 
-func (s *Session) print(server string, a ...interface{}) {
+func (s *Session) print(a ...interface{}) {
 	s.sendJSON("print", Message{
-		Server:  server,
 		Content: fmt.Sprintln(a...),
+	})
+}
+
+func (s *Session) printError(a ...interface{}) {
+	s.sendJSON("print", Message{
+		Content: fmt.Sprintln(a...),
+		Type:    "error",
 	})
 }
 

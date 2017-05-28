@@ -225,6 +225,31 @@ func TestHandleIRCTopic(t *testing.T) {
 		Channel: "#chan",
 		Topic:   "the topic",
 	}, res)
+
+	res = dispatchMessage(&irc.Message{
+		Command: irc.Topic,
+		Params:  []string{"#chan", "the topic"},
+		Nick:    "bob",
+	})
+
+	checkResponse(t, "topic", Topic{
+		Server:  "host.com",
+		Channel: "#chan",
+		Topic:   "the topic",
+		Nick:    "bob",
+	}, res)
+}
+
+func TestHandleIRCNoTopic(t *testing.T) {
+	res := dispatchMessage(&irc.Message{
+		Command: irc.ReplyNoTopic,
+		Params:  []string{"target", "#chan", "No topic set."},
+	})
+
+	checkResponse(t, "topic", Topic{
+		Server:  "host.com",
+		Channel: "#chan",
+	}, res)
 }
 
 func TestHandleIRCNames(t *testing.T) {

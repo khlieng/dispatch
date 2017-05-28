@@ -2,6 +2,7 @@ export const INVITE = 'INVITE';
 export const JOIN = 'JOIN';
 export const KICK = 'KICK';
 export const PART = 'PART';
+export const SET_TOPIC = 'SET_TOPIC';
 
 export const SET_ENVIRONMENT = 'SET_ENVIRONMENT';
 

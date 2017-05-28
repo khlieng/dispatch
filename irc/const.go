@@ -26,6 +26,7 @@ const (
 	ReplyWhoisIdle     = "317"
 	ReplyEndOfWhois    = "318"
 	ReplyWhoisChannels = "319"
+	ReplyNoTopic       = "331"
 	ReplyTopic         = "332"
 	ReplyNamReply      = "353"
 	ReplyEndOfNames    = "366"

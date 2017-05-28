@@ -1,5 +1,5 @@
 import { socketAction } from '../state/actions';
-import { broadcast, inform, addMessage, addMessages } from '../state/messages';
+import { broadcast, inform, print, addMessage, addMessages } from '../state/messages';
 import { select } from '../state/tab';
 import { normalizeChannel } from '../util';
 import { replace } from '../util/router';
@@ -71,25 +71,39 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
       dispatch(broadcast(`${data.old} changed nick to ${data.new}`, data.server, channels));
     },
 
+    topic({ server, channel, topic, nick }) {
+      if (nick) {
+        if (topic) {
+          dispatch(inform(`${nick} changed the topic to:`, server, channel));
+          dispatch(print(topic, server, channel));
+        } else {
+          dispatch(inform(`${nick} cleared the topic`, server, channel));
+        }
+      }
+    },
+
     motd({ content, server }) {
       dispatch(addMessages(content.map(line => ({ content: line })), server));
     },
 
     whois(data) {
-      const tab = getState().tab.selected;
+      if (data.nick) {
+        const tab = getState().tab.selected;
 
-      dispatch(inform([
-        `Nick: ${data.nick}`,
-        `Username: ${data.username}`,
-        `Realname: ${data.realname}`,
-        `Host: ${data.host}`,
-        `Server: ${data.server}`,
-        `Channels: ${data.channels}`
-      ], tab.server, tab.name));
+        dispatch(print([
+          `Nick: ${data.nick}`,
+          `Username: ${data.username}`,
+          `Realname: ${data.realname}`,
+          `Host: ${data.host}`,
+          `Server: ${data.server}`,
+          `Channels: ${data.channels}`
+        ], tab.server, tab.name));
+      }
     },
 
-    print({ server, message }) {
-      dispatch(inform(message, server));
+    print(message) {
+      const tab = getState().tab.selected;
+      dispatch(addMessage(message, tab.server, tab.name));
     }
   };
 

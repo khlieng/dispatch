@@ -269,3 +269,16 @@ export function kick(user, channel, server) {
     }
   };
 }
+
+export function setTopic(topic, channel, server) {
+  return {
+    type: actions.SET_TOPIC,
+    topic,
+    channel,
+    server,
+    socket: {
+      type: 'topic',
+      data: { topic, channel, server }
+    }
+  };
+}

@@ -106,8 +106,12 @@ func (c *Client) Part(channels ...string) {
 	c.Write("PART " + strings.Join(channels, ","))
 }
 
-func (c *Client) Topic(channel string) {
-	c.Write("TOPIC " + channel)
+func (c *Client) Topic(channel string, topic ...string) {
+	msg := "TOPIC " + channel
+	if len(topic) > 0 {
+		msg += " :" + topic[0]
+	}
+	c.Write(msg)
 }
 
 func (c *Client) Invite(nick, channel string) {

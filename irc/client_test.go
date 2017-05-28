@@ -96,6 +96,10 @@ func TestTopic(t *testing.T) {
 	c, out := testClientSend()
 	c.Topic("#chan")
 	assert.Equal(t, "TOPIC #chan\r\n", <-out)
+	c.Topic("#chan", "apple pie")
+	assert.Equal(t, "TOPIC #chan :apple pie\r\n", <-out)
+	c.Topic("#chan", "")
+	assert.Equal(t, "TOPIC #chan :\r\n", <-out)
 }
 
 func TestInvite(t *testing.T) {

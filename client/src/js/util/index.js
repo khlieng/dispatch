@@ -11,6 +11,11 @@ export function normalizeChannel(channel) {
   return channel.split('#').join('').toLowerCase();
 }
 
+export function isChannel(name) {
+  // TODO: Handle other channel types
+  return typeof name === 'string' && name[0] === '#';
+}
+
 export function timestamp(date = new Date()) {
   const h = padStart(date.getHours(), 2, '0');
   const m = padStart(date.getMinutes(), 2, '0');

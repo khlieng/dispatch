@@ -190,6 +190,15 @@ func (h *wsHandler) nick(b []byte) {
 	}
 }
 
+func (h *wsHandler) topic(b []byte) {
+	var data Topic
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok {
+		i.Topic(data.Channel, data.Topic)
+	}
+}
+
 func (h *wsHandler) invite(b []byte) {
 	var data Invite
 	json.Unmarshal(b, &data)
@@ -282,6 +291,7 @@ func (h *wsHandler) initHandlers() {
 		"quit":           h.quit,
 		"message":        h.message,
 		"nick":           h.nick,
+		"topic":          h.topic,
 		"invite":         h.invite,
 		"kick":           h.kick,
 		"whois":          h.whois,

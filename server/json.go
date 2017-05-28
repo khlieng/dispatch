@@ -61,11 +61,12 @@ type Quit struct {
 }
 
 type Message struct {
-	ID      string `json:"id"`
-	Server  string `json:"server"`
+	ID      string `json:"id,omitempty"`
+	Server  string `json:"server,omitempty"`
 	From    string `json:"from,omitempty"`
 	To      string `json:"to,omitempty"`
 	Content string `json:"content"`
+	Type    string `json:"type,omitempty"`
 }
 
 type Messages struct {
@@ -79,7 +80,8 @@ type Messages struct {
 type Topic struct {
 	Server  string `json:"server"`
 	Channel string `json:"channel"`
-	Topic   string `json:"topic"`
+	Topic   string `json:"topic,omitempty"`
+	Nick    string `json:"nick,omitempty"`
 }
 
 type Userlist struct {

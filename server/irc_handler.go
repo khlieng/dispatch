@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"strings"
+	"unicode"
 
 	"github.com/kjk/betterguid"
 
@@ -52,6 +53,10 @@ func (i *ircHandler) run() {
 }
 
 func (i *ircHandler) dispatchMessage(msg *irc.Message) {
+	if msg.Command[0] == '4' {
+		i.session.printError(formatIRCError(msg))
+	}
+
 	if handler, ok := i.handlers[msg.Command]; ok {
 		handler(msg)
 	}
@@ -78,14 +83,18 @@ func (i *ircHandler) join(msg *irc.Message) {
 		Channels: msg.Params,
 	})
 
-	channelStore.AddUser(msg.Nick, i.client.Host, msg.Params[0])
+	channel := msg.Params[0]
+	channelStore.AddUser(msg.Nick, i.client.Host, channel)
 
 	if msg.Nick == i.client.GetNick() {
-		i.session.sendLastMessages(i.client.Host, msg.Params[0], 50)
+		// Incase no topic is set and theres a cached one that needs to be cleared
+		i.client.Topic(channel)
+
+		i.session.sendLastMessages(i.client.Host, channel, 50)
 
 		go i.session.user.AddChannel(storage.Channel{
 			Server: i.client.Host,
-			Name:   msg.Params[0],
+			Name:   channel,
 		})
 	}
 }
@@ -193,13 +202,35 @@ func (i *ircHandler) whoisEnd(msg *irc.Message) {
 }
 
 func (i *ircHandler) topic(msg *irc.Message) {
+	var channel string
+	var nick string
+
+	if msg.Command == irc.Topic {
+		channel = msg.Params[0]
+		nick = msg.Nick
+	} else {
+		channel = msg.Params[1]
+	}
+
 	i.session.sendJSON("topic", Topic{
 		Server:  i.client.Host,
-		Channel: msg.Params[1],
+		Channel: channel,
 		Topic:   msg.LastParam(),
+		Nick:    nick,
 	})
 
-	channelStore.SetTopic(msg.LastParam(), i.client.Host, msg.Params[1])
+	channelStore.SetTopic(msg.LastParam(), i.client.Host, channel)
+}
+
+func (i *ircHandler) noTopic(msg *irc.Message) {
+	channel := msg.Params[1]
+
+	i.session.sendJSON("topic", Topic{
+		Server:  i.client.Host,
+		Channel: channel,
+	})
+
+	channelStore.SetTopic("", i.client.Host, channel)
 }
 
 func (i *ircHandler) names(msg *irc.Message) {
@@ -245,6 +276,7 @@ func (i *ircHandler) initHandlers() {
 		irc.Privmsg:            i.message,
 		irc.Notice:             i.message,
 		irc.Quit:               i.quit,
+		irc.Topic:              i.topic,
 		irc.ReplyWelcome:       i.info,
 		irc.ReplyYourHost:      i.info,
 		irc.ReplyCreated:       i.info,
@@ -257,6 +289,7 @@ func (i *ircHandler) initHandlers() {
 		irc.ReplyWhoisServer:   i.whoisServer,
 		irc.ReplyWhoisChannels: i.whoisChannels,
 		irc.ReplyEndOfWhois:    i.whoisEnd,
+		irc.ReplyNoTopic:       i.noTopic,
 		irc.ReplyTopic:         i.topic,
 		irc.ReplyNamReply:      i.names,
 		irc.ReplyEndOfNames:    i.namesEnd,
@@ -287,6 +320,19 @@ func parseMode(mode string) *Mode {
 
 func isChannel(s string) bool {
 	return strings.IndexAny(s, "&#+!") == 0
+}
+
+func formatIRCError(msg *irc.Message) string {
+	errMsg := strings.TrimSuffix(msg.LastParam(), ".")
+	if len(msg.Params) > 2 {
+		for _, c := range msg.LastParam() {
+			if unicode.IsLower(c) {
+				return msg.Params[1] + " " + errMsg
+			}
+			return msg.Params[1] + ": " + errMsg
+		}
+	}
+	return errMsg
 }
 
 func printMessage(msg *irc.Message, i *irc.Client) {

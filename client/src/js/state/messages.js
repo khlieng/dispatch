@@ -223,18 +223,22 @@ export function broadcast(message, server, channels) {
   })), server);
 }
 
-export function inform(message, server, channel) {
+export function print(message, server, channel, type) {
   if (Array.isArray(message)) {
     return addMessages(message.map(line => ({
       content: line,
-      type: 'info'
+      type
     })), server, channel);
   }
 
   return addMessage({
     content: message,
-    type: 'info'
+    type
   }, server, channel);
+}
+
+export function inform(message, server, channel) {
+  return print(message, server, channel, 'info');
 }
 
 export function runCommand(command, channel, server) {
