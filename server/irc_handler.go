@@ -11,6 +11,10 @@ import (
 	"github.com/khlieng/dispatch/storage"
 )
 
+var excludedErrors = []string{
+	irc.ErrNicknameInUse,
+}
+
 type ircHandler struct {
 	client  *irc.Client
 	session *Session
@@ -53,7 +57,7 @@ func (i *ircHandler) run() {
 }
 
 func (i *ircHandler) dispatchMessage(msg *irc.Message) {
-	if msg.Command[0] == '4' {
+	if msg.Command[0] == '4' && !isExcludedError(msg.Command) {
 		i.session.printError(formatIRCError(msg))
 	}
 
@@ -320,6 +324,15 @@ func parseMode(mode string) *Mode {
 
 func isChannel(s string) bool {
 	return strings.IndexAny(s, "&#+!") == 0
+}
+
+func isExcludedError(cmd string) bool {
+	for _, err := range excludedErrors {
+		if cmd == err {
+			return true
+		}
+	}
+	return false
 }
 
 func formatIRCError(msg *irc.Message) string {
