@@ -87,18 +87,16 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
     },
 
     whois(data) {
-      if (data.nick) {
-        const tab = getState().tab.selected;
+      const tab = getState().tab.selected;
 
-        dispatch(print([
-          `Nick: ${data.nick}`,
-          `Username: ${data.username}`,
-          `Realname: ${data.realname}`,
-          `Host: ${data.host}`,
-          `Server: ${data.server}`,
-          `Channels: ${data.channels}`
-        ], tab.server, tab.name));
-      }
+      dispatch(print([
+        `Nick: ${data.nick}`,
+        `Username: ${data.username}`,
+        `Realname: ${data.realname}`,
+        `Host: ${data.host}`,
+        `Server: ${data.server}`,
+        `Channels: ${data.channels}`
+      ], tab.server, tab.name));
     },
 
     print(message) {

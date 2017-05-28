@@ -201,7 +201,9 @@ func (i *ircHandler) whoisChannels(msg *irc.Message) {
 }
 
 func (i *ircHandler) whoisEnd(msg *irc.Message) {
-	i.session.sendJSON("whois", i.whois)
+	if i.whois.Nick != "" {
+		i.session.sendJSON("whois", i.whois)
+	}
 	i.whois = WhoisReply{}
 }
 
