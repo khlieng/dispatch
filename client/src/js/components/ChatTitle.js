@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { List } from 'immutable';
-import Navicon from '../components/Navicon';
+import Navicon from '../containers/Navicon';
 import { linkify } from '../util';
 
 export default class ChatTitle extends PureComponent {

@@ -1,4 +1,3 @@
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import App from '../components/App';
@@ -17,13 +16,6 @@ const mapState = createStructuredSelector({
   tab: getSelectedTab
 });
 
-const mapDispatch = (dispatch, props) => ({
-  onClick: () => {
-    if (props.showTabList) {
-      dispatch(hideMenu());
-    }
-  },
-  ...bindActionCreators({ push, select }, dispatch)
-});
+const mapDispatch = { push, select, hideMenu };
 
 export default connect(mapState, mapDispatch)(App);
