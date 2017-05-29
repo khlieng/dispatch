@@ -10,7 +10,11 @@ export const getWindowWidth = state => state.environment.get('windowWidth');
 
 export const getConnectDefaults = state => state.environment.get('connect_defaults');
 
-export default createReducer(Map(), {
+const initialState = Map({
+  connected: true
+});
+
+export default createReducer(initialState, {
   [actions.SET_ENVIRONMENT](state, action) {
     return state.set(action.key, action.value);
   },

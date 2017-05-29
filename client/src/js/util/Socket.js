@@ -26,12 +26,14 @@ export default class Socket {
     }, this.connectTimeout);
 
     this.ws.onopen = () => {
+      this.emit('_connected', true);
       clearTimeout(this.timeoutConnect);
       this.backoff.reset();
       this.setTimeoutPing();
     };
 
     this.ws.onclose = () => {
+      this.emit('_connected', false);
       clearTimeout(this.timeoutConnect);
       clearTimeout(this.timeoutPing);
       if (!this.closing) {

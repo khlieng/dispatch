@@ -1,4 +1,5 @@
 import { socketAction } from '../state/actions';
+import { setEnvironment } from '../state/environment';
 import { broadcast, inform, print, addMessage, addMessages } from '../state/messages';
 import { select } from '../state/tab';
 import { normalizeChannel } from '../util';
@@ -102,6 +103,10 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
     print(message) {
       const tab = getState().tab.selected;
       dispatch(addMessage(message, tab.server, tab.name));
+    },
+
+    _connected(connected) {
+      dispatch(setEnvironment('connected', connected));
     }
   };
 

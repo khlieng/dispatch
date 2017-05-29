@@ -14,14 +14,29 @@ export default class App extends Component {
   };
 
   render() {
-    const mainClass = this.props.showTabList ? 'main-container off-canvas' : 'main-container';
+    const { connected, tab, channels, servers,
+      privateChats, showTabList, select, push } = this.props;
+    const mainClass = showTabList ? 'main-container off-canvas' : 'main-container';
     return (
-      <div onClick={this.handleClick}>
-        <TabList {...this.props} />
-        <div className={mainClass}>
-          <Route name="chat"><Chat /></Route>
-          <Route name="connect"><Connect /></Route>
-          <Route name="settings"><Settings /></Route>
+      <div className="wrap">
+        {!connected &&
+          <div className="app-info">Connection lost, attempting to reconnect...</div>
+        }
+        <div className="app-container" onClick={this.handleClick}>
+          <TabList
+            tab={tab}
+            channels={channels}
+            servers={servers}
+            privateChats={privateChats}
+            showTabList={showTabList}
+            select={select}
+            push={push}
+          />
+          <div className={mainClass}>
+            <Route name="chat"><Chat /></Route>
+            <Route name="connect"><Connect /></Route>
+            <Route name="settings"><Settings /></Route>
+          </div>
         </div>
       </div>
     );

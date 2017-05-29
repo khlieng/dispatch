@@ -39,8 +39,33 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   margin: 0;
 }
 
-.tablist {
+.wrap {
   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-info {
+  width: 100%;
+  font-family: Montserrat, sans-serif;
+  background: #F6546A;
+  color: #FFF;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+}
+
+.app-container {
+  position: relative;
+  flex: 1;
+}
+
+.tablist {
+  position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
@@ -120,7 +145,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .side-buttons {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   height: 50px;
   width: 200px;
@@ -147,7 +172,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .main-container {
-  position: fixed;
+  position: absolute;
   left: 200px;
   top: 0;
   bottom: 0;
@@ -166,7 +191,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .connect .navicon, .settings .navicon {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
 }
@@ -581,6 +606,10 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 @media (max-width: 600px) {
+  .app-info {
+    font-size: 12px;
+  }
+
   .tablist {
     width: 200px;
     transform: translateX(-200px);

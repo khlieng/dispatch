@@ -10,6 +10,7 @@ import { push } from '../util/router';
 
 const mapState = createStructuredSelector({
   channels: getChannels,
+  connected: state => state.environment.get('connected'),
   privateChats: getPrivateChats,
   servers: getServers,
   showTabList: getShowTabList,
