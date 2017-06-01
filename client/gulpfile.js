@@ -98,7 +98,10 @@ gulp.task('dev', ['css', 'fonts', 'fonts:woff', 'config', 'compress:dev', 'binda
 
   app.use(require('webpack-dev-middleware')(compiler, {
     noInfo: true,
-    publicPath: config.output.publicPath
+    publicPath: config.output.publicPath,
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    }
   }));
 
   app.use(require('webpack-hot-middleware')(compiler));
