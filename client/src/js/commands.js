@@ -183,7 +183,10 @@ export default createCommandMiddleware(COMMAND, {
     }
   },
 
-  [notFoundHandler](_, command) {
+  [notFoundHandler](ctx, command, ...params) {
+    if (command === command.toUpperCase()) {
+      return this.raw(ctx, command, ...params);
+    }
     return error(`=> /${command}: No such command`);
   }
 });

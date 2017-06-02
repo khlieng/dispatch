@@ -38,7 +38,7 @@ export default function createCommandMiddleware(type, handlers) {
         process(ctx, handlers[command](ctx, ...params));
       } else if (notFoundHandler in handlers) {
         const ctx = createContext(store, action);
-        process(ctx, handlers[notFoundHandler](ctx, command));
+        process(ctx, handlers[notFoundHandler](ctx, command, ...params));
       }
     }
 
