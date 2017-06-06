@@ -42,6 +42,9 @@ var rootCmd = &cobra.Command{
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
+		if viper.GetBool("dev") {
+			log.Println("Running in development mode, access client at http://localhost:3000")
+		}
 		log.Println("Storing data at", storage.Path.Root())
 
 		storage.Open()

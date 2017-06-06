@@ -88,6 +88,8 @@ func startHTTP() {
 		}
 	} else {
 		if viper.GetBool("dev") {
+			// The node dev server will proxy index page requests and
+			// websocket connections to this port
 			port = "1337"
 		}
 		log.Println("[HTTP] Listening on port", port)
