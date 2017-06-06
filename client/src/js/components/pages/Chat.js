@@ -44,6 +44,7 @@ export default class Chat extends Component {
       title,
       users,
 
+      addFetchedMessages,
       fetchMessages,
       inputActions,
       runCommand,
@@ -79,6 +80,7 @@ export default class Chat extends Component {
           hasMoreMessages={hasMoreMessages}
           messages={messages}
           tab={tab}
+          onAddMore={addFetchedMessages}
           onFetchMore={fetchMessages}
           onNickClick={this.handleNickClick}
         />

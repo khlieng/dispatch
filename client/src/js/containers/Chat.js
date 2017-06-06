@@ -7,7 +7,7 @@ import { getSelectedChannel, getSelectedChannelUsers, part } from '../state/chan
 import { getCurrentInputHistoryEntry, addInputHistory, resetInputHistory,
   incrementInputHistory, decrementInputHistory } from '../state/input';
 import { getSelectedMessages, getHasMoreMessages,
-  runCommand, sendMessage, fetchMessages } from '../state/messages';
+  runCommand, sendMessage, fetchMessages, addFetchedMessages } from '../state/messages';
 import { openPrivateChat, closePrivateChat } from '../state/privateChats';
 import { getSearch, searchMessages, toggleSearch } from '../state/search';
 import { getCurrentNick, disconnect } from '../state/servers';
@@ -29,6 +29,7 @@ const mapState = createStructuredSelector({
 
 const mapDispatch = dispatch => ({
   ...bindActionCreators({
+    addFetchedMessages,
     closePrivateChat,
     disconnect,
     fetchMessages,

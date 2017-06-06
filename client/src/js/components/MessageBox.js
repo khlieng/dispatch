@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import Message from './Message';
 import { getScrollPos, saveScrollPos } from '../util/scrollPosition';
 
-const fetchThreshold = 100;
+const fetchThreshold = 500;
 
 export default class MessageBox extends PureComponent {
   componentWillMount() {
@@ -39,6 +39,7 @@ export default class MessageBox extends PureComponent {
       }
 
       this.loading = false;
+      this.ready = false;
     }
   }
 
@@ -108,21 +109,32 @@ export default class MessageBox extends PureComponent {
     }
   };
 
-  fetchMore = debounce(() => {
+  fetchMore = () => {
     this.loading = true;
     this.props.onFetchMore();
+  };
+
+  addMore = debounce(() => {
+    const { tab, onAddMore } = this.props;
+    this.ready = true;
+    onAddMore(tab.server, tab.name);
   }, 100);
 
   handleScroll = ({ scrollTop, clientHeight, scrollHeight }) => {
     if (this.mounted) {
-      if (this.props.hasMoreMessages &&
+      if (!this.loading &&
+        this.props.hasMoreMessages &&
         scrollTop <= fetchThreshold &&
-        scrollTop < this.prevScrollTop &&
-        !this.loading) {
+        scrollTop < this.prevScrollTop) {
+        this.fetchMore();
+      }
+
+      if (this.loading && !this.ready) {
         if (this.mouseDown) {
-          this.shouldFetch = true;
+          this.ready = true;
+          this.shouldAdd = true;
         } else {
-          this.fetchMore();
+          this.addMore();
         }
       }
 
@@ -138,10 +150,10 @@ export default class MessageBox extends PureComponent {
   handleMouseUp = () => {
     this.mouseDown = false;
 
-    if (this.shouldFetch) {
-      this.shouldFetch = false;
-      this.loading = true;
-      this.props.onFetchMore();
+    if (this.shouldAdd) {
+      const { tab, onAddMore } = this.props;
+      this.shouldAdd = false;
+      onAddMore(tab.server, tab.name);
     }
   };
 

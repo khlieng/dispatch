@@ -152,6 +152,14 @@ export function fetchMessages() {
   };
 }
 
+export function addFetchedMessages(server, tab) {
+  return {
+    type: actions.ADD_FETCHED_MESSAGES,
+    server,
+    tab
+  };
+}
+
 export function updateMessageHeight(wrapWidth, charWidth, windowWidth) {
   return {
     type: actions.UPDATE_MESSAGE_HEIGHT,

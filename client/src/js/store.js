@@ -2,6 +2,7 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 import createReducer from './state';
 import { routeReducer, routeMiddleware } from './util/router';
+import message from './middleware/message';
 import createSocketMiddleware from './middleware/socket';
 import commands from './commands';
 
@@ -13,9 +14,10 @@ export default function configureStore(socket) {
 
   const store = createStore(reducer, composeEnhancers(
     applyMiddleware(
-      routeMiddleware,
       thunk,
+      routeMiddleware,
       createSocketMiddleware(socket),
+      message,
       commands
     )
   ));
