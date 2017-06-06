@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
+import app from './app';
 import channels from './channels';
-import environment from './environment';
 import input from './input';
 import messages from './messages';
 import privateChats from './privateChats';
@@ -16,8 +16,8 @@ export const getRouter = state => state.router;
 export default function createReducer(router) {
   return combineReducers({
     router,
+    app,
     channels,
-    environment,
     input,
     messages,
     privateChats,

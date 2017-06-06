@@ -1,5 +1,5 @@
 import FontFaceObserver from 'fontfaceobserver';
-import { setCharWidth } from '../state/environment';
+import { setCharWidth } from '../state/app';
 import { stringWidth } from '../util';
 
 export default function fonts({ store }) {

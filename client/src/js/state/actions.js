@@ -1,10 +1,10 @@
+export const APP_SET = 'APP_SET';
+
 export const INVITE = 'INVITE';
 export const JOIN = 'JOIN';
 export const KICK = 'KICK';
 export const PART = 'PART';
 export const SET_TOPIC = 'SET_TOPIC';
-
-export const SET_ENVIRONMENT = 'SET_ENVIRONMENT';
 
 export const INPUT_HISTORY_ADD = 'INPUT_HISTORY_ADD';
 export const INPUT_HISTORY_DECREMENT = 'INPUT_HISTORY_DECREMENT';

@@ -1,8 +1,8 @@
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import Connect from '../components/pages/Connect';
+import { getConnectDefaults } from '../state/app';
 import { join } from '../state/channels';
-import { getConnectDefaults } from '../state/environment';
 import { connect as connectServer } from '../state/servers';
 import { select } from '../state/tab';
 

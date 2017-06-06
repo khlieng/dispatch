@@ -1,6 +1,6 @@
 import { when } from '../util/observe';
 import { measureScrollBarWidth } from '../util';
-import { getCharWidth } from '../state/environment';
+import { getCharWidth } from '../state/app';
 import { updateMessageHeight } from '../state/messages';
 
 const menuWidth = 200;

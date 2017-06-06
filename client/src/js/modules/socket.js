@@ -1,5 +1,5 @@
 import { socketAction } from '../state/actions';
-import { setEnvironment } from '../state/environment';
+import { setConnected } from '../state/app';
 import { broadcast, inform, print, addMessage, addMessages } from '../state/messages';
 import { select } from '../state/tab';
 import { normalizeChannel } from '../util';
@@ -106,7 +106,7 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
     },
 
     _connected(connected) {
-      dispatch(setEnvironment('connected', connected));
+      dispatch(setConnected(connected));
     }
   };
 

@@ -1,7 +1,7 @@
 import { List, Map, Record } from 'immutable';
 import { createSelector } from 'reselect';
 import createReducer from '../util/createReducer';
-import { getWrapWidth, getCharWidth, getWindowWidth } from './environment';
+import { getApp } from './app';
 import { getSelectedTab } from './tab';
 import { findBreakpoints, messageHeight, linkify, timestamp } from '../util';
 import * as actions from './actions';
@@ -107,9 +107,7 @@ function initMessage(message, tab, state) {
     message.content = from + message.content.slice(7, -1);
   }
 
-  const wrapWidth = getWrapWidth(state);
-  const charWidth = getCharWidth(state);
-  const windowWidth = getWindowWidth(state);
+  const { wrapWidth, charWidth, windowWidth } = getApp(state);
 
   message.length = message.content.length;
   message.breakpoints = findBreakpoints(message.content);
