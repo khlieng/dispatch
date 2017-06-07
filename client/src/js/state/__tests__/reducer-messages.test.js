@@ -1,6 +1,7 @@
 import { Map, fromJS } from 'immutable';
 import reducer, { broadcast } from '../messages';
 import * as actions from '../actions';
+import appReducer from '../app';
 
 describe('reducers/messages', () => {
   it('adds the message on ADD_MESSAGE', () => {
@@ -87,10 +88,7 @@ describe('reducers/messages', () => {
 
   it('adds messages to the correct tabs when broadcasting', () => {
     let state = {
-      environment: Map({
-        charWidth: 0,
-        wrapWidth: 0
-      })
+      app: appReducer(undefined, { type: '' })
     };
 
     const thunk = broadcast('test', 'srv', ['#chan1', '#chan3']);
