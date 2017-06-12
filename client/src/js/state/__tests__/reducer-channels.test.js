@@ -3,7 +3,7 @@ import reducer from '../channels';
 import { connect } from '../servers';
 import * as actions from '../actions';
 
-describe('reducers/channels', () => {
+describe('channel reducer', () => {
   it('removes channels on PART', () => {
     let state = Immutable.fromJS({
       srv1: {

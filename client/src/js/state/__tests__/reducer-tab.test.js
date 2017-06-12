@@ -2,7 +2,7 @@ import reducer, { setSelectedTab } from '../tab';
 import * as actions from '../actions';
 import { locationChanged } from '../../util/router';
 
-describe('reducers/tab', () => {
+describe('tab reducer', () => {
   it('selects the tab and adds it to history', () => {
     let state = reducer(undefined, setSelectedTab('srv', '#chan'));
 

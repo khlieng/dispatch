@@ -3,7 +3,7 @@ import reducer, { broadcast } from '../messages';
 import * as actions from '../actions';
 import appReducer from '../app';
 
-describe('reducers/messages', () => {
+describe('message reducer', () => {
   it('adds the message on ADD_MESSAGE', () => {
     const state = reducer(undefined, {
       type: actions.ADD_MESSAGE,

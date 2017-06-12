@@ -58,6 +58,7 @@
   },
   "scripts": {
     "test": "jest",
-    "test:watch": "npm test -- --watch"
+    "test:verbose": "jest --verbose",
+    "test:watch": "jest --watch"
   }
 }

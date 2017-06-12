@@ -2,7 +2,7 @@ import Immutable from 'immutable';
 import reducer, { connect, setServerName } from '../servers';
 import * as actions from '../actions';
 
-describe('reducers/servers', () => {
+describe('server reducer', () => {
   it('adds the server on CONNECT', () => {
     let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
 
