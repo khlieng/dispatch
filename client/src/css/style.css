@@ -85,6 +85,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .tablist p {
+  height: 30px;
   padding: 3px 15px;
   padding-right: 10px;
   cursor: pointer;
@@ -322,7 +323,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .chat-title {
   margin-left: 15px;
-  font-size: 24px;
+  font-size: 24px !important;
   white-space: nowrap;
 }
 

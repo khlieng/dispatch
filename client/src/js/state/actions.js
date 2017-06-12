@@ -29,6 +29,7 @@ export const AWAY = 'AWAY';
 export const CONNECT = 'CONNECT';
 export const DISCONNECT = 'DISCONNECT';
 export const SET_NICK = 'SET_NICK';
+export const SET_SERVER_NAME = 'SET_SERVER_NAME';
 export const WHOIS = 'WHOIS';
 
 export const SET_CERT = 'SET_CERT';

@@ -1,11 +1,14 @@
 import React, { PureComponent } from 'react';
 import { List } from 'immutable';
 import Navicon from '../containers/Navicon';
+import Editable from './ui/Editable';
+import { isValidServerName } from '../state/servers';
 import { linkify } from '../util';
 
 export default class ChatTitle extends PureComponent {
   render() {
-    const { title, tab, channel, onToggleSearch, onToggleUserList, onCloseClick } = this.props;
+    const { title, tab, channel, onTitleChange,
+      onToggleSearch, onToggleUserList, onCloseClick } = this.props;
 
     let closeTitle;
     if (tab.isChannel()) {
@@ -20,7 +23,15 @@ export default class ChatTitle extends PureComponent {
       <div>
         <div className="chat-title-bar">
           <Navicon />
-          <span className="chat-title">{title}</span>
+          <Editable
+            className="chat-title"
+            editable={!tab.name}
+            value={title}
+            validate={isValidServerName}
+            onChange={onTitleChange}
+          >
+            <span className="chat-title">{title}</span>
+          </Editable>
           <div className="chat-topic-wrap">
             <span className="chat-topic">{linkify(channel.get('topic')) || null}</span>
           </div>

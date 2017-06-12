@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import reducer, { connect } from '../servers';
+import reducer, { connect, setServerName } from '../servers';
 import * as actions from '../actions';
 
 describe('reducers/servers', () => {
@@ -55,6 +55,22 @@ describe('reducers/servers', () => {
 
     expect(state.toJS()).toEqual({
       srv: {}
+    });
+  });
+
+  it('handles SET_SERVER_NAME', () => {
+    let state = Immutable.fromJS({
+      srv: {
+        name: 'cake'
+      }
+    });
+
+    state = reducer(state, setServerName('pie', 'srv'));
+
+    expect(state.toJS()).toEqual({
+      srv: {
+        name: 'pie'
+      }
     });
   });
 

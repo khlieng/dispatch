@@ -25,9 +25,7 @@ export const getCurrentServerName = createSelector(
 );
 
 export default createReducer(Map(), {
-  [actions.CONNECT](state, action) {
-    const { host, nick, options } = action;
-
+  [actions.CONNECT](state, { host, nick, options }) {
     if (!state.has(host)) {
       return state.set(host, new Server({
         nick,
@@ -38,8 +36,12 @@ export default createReducer(Map(), {
     return state;
   },
 
-  [actions.DISCONNECT](state, action) {
-    return state.delete(action.server);
+  [actions.DISCONNECT](state, { server }) {
+    return state.delete(server);
+  },
+
+  [actions.SET_SERVER_NAME](state, { server, name }) {
+    return state.setIn([server, 'name'], name);
   },
 
   [actions.socket.NICK](state, action) {
@@ -50,13 +52,13 @@ export default createReducer(Map(), {
     return state;
   },
 
-  [actions.socket.SERVERS](state, action) {
-    if (!action.data) {
+  [actions.socket.SERVERS](state, { data }) {
+    if (!data) {
       return state;
     }
 
     return state.withMutations(s => {
-      action.data.forEach(server => {
+      data.forEach(server => {
         s.set(server.host, new Server(server));
       });
     });
@@ -151,4 +153,32 @@ export function setNick(nick, server) {
       }
     }
   };
+}
+
+export function isValidServerName(name) {
+  return name.trim() !== '';
+}
+
+export function setServerName(name, server) {
+  const action = {
+    type: actions.SET_SERVER_NAME,
+    name,
+    server
+  };
+
+  if (isValidServerName(name)) {
+    action.socket = {
+      type: 'set_server_name',
+      data: {
+        name,
+        server
+      },
+      debounce: {
+        delay: 1000,
+        key: server
+      }
+    };
+  }
+
+  return action;
 }

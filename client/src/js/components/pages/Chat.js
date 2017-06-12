@@ -31,6 +31,11 @@ export default class Chat extends Component {
     select(tab.server, nick);
   };
 
+  handleTitleChange = title => {
+    const { setServerName, tab } = this.props;
+    setServerName(title, tab.server);
+  };
+
   render() {
     const {
       channel,
@@ -69,6 +74,7 @@ export default class Chat extends Component {
           tab={tab}
           title={title}
           onCloseClick={this.handleCloseClick}
+          onTitleChange={this.handleTitleChange}
           onToggleSearch={toggleSearch}
           onToggleUserList={toggleUserList}
         />

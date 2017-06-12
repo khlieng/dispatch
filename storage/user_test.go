@@ -63,6 +63,9 @@ func TestUser(t *testing.T) {
 	user.SetNick("bob", srv.Host)
 	assert.Equal(t, "bob", user.GetServers()[0].Nick)
 
+	user.SetServerName("cake", srv.Host)
+	assert.Equal(t, "cake", user.GetServers()[0].Name)
+
 	user.RemoveChannel(srv.Host, chan1.Name)
 	channels = user.GetChannels()
 	assert.Len(t, channels, 1)

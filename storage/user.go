@@ -178,6 +178,25 @@ func (u *User) SetNick(nick, address string) {
 	})
 }
 
+func (u *User) SetServerName(name, address string) {
+	db.Batch(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketServers)
+		id := u.serverID(address)
+
+		server := Server{}
+		v := b.Get(id)
+		if v != nil {
+			server.Unmarshal(v)
+			server.Name = name
+
+			data, _ := server.Marshal(nil)
+			b.Put(id, data)
+		}
+
+		return nil
+	})
+}
+
 func (u *User) RemoveServer(address string) {
 	db.Batch(func(tx *bolt.Tx) error {
 		serverID := u.serverID(address)

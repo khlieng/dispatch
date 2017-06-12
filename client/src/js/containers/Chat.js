@@ -10,7 +10,7 @@ import { getSelectedMessages, getHasMoreMessages,
   runCommand, sendMessage, fetchMessages, addFetchedMessages } from '../state/messages';
 import { openPrivateChat, closePrivateChat } from '../state/privateChats';
 import { getSearch, searchMessages, toggleSearch } from '../state/search';
-import { getCurrentNick, disconnect } from '../state/servers';
+import { getCurrentNick, disconnect, setServerName } from '../state/servers';
 import { getSelectedTab, select } from '../state/tab';
 import { getShowUserList, toggleUserList } from '../state/ui';
 
@@ -39,6 +39,7 @@ const mapDispatch = dispatch => ({
     searchMessages,
     select,
     sendMessage,
+    setServerName,
     toggleSearch,
     toggleUserList
   }, dispatch),

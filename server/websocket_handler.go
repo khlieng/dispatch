@@ -283,22 +283,36 @@ func (h *wsHandler) fetchMessages(b []byte) {
 	h.session.sendMessages(data.Server, data.Channel, 200, data.Next)
 }
 
+func (h *wsHandler) setServerName(b []byte) {
+	var data Connect
+	json.Unmarshal(b, &data)
+
+	if isValidServerName(data.Name) {
+		h.session.user.SetServerName(data.Name, data.Server)
+	}
+}
+
 func (h *wsHandler) initHandlers() {
 	h.handlers = map[string]func([]byte){
-		"connect":        h.connect,
-		"join":           h.join,
-		"part":           h.part,
-		"quit":           h.quit,
-		"message":        h.message,
-		"nick":           h.nick,
-		"topic":          h.topic,
-		"invite":         h.invite,
-		"kick":           h.kick,
-		"whois":          h.whois,
-		"away":           h.away,
-		"raw":            h.raw,
-		"search":         h.search,
-		"cert":           h.cert,
-		"fetch_messages": h.fetchMessages,
+		"connect":         h.connect,
+		"join":            h.join,
+		"part":            h.part,
+		"quit":            h.quit,
+		"message":         h.message,
+		"nick":            h.nick,
+		"topic":           h.topic,
+		"invite":          h.invite,
+		"kick":            h.kick,
+		"whois":           h.whois,
+		"away":            h.away,
+		"raw":             h.raw,
+		"search":          h.search,
+		"cert":            h.cert,
+		"fetch_messages":  h.fetchMessages,
+		"set_server_name": h.setServerName,
 	}
+}
+
+func isValidServerName(name string) bool {
+	return strings.TrimSpace(name) != ""
 }
