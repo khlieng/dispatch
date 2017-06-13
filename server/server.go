@@ -103,7 +103,7 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.URL.Path == "/ws" {
+	if strings.HasPrefix(r.URL.Path, "/ws") {
 		session := handleAuth(w, r)
 		if session == nil {
 			log.Println("[Auth] No session")

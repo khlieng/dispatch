@@ -3,7 +3,7 @@ import Backoff from 'backo';
 export default class Socket {
   constructor(host) {
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    this.url = `${protocol}://${host}/ws?path=${window.location.pathname}`;
+    this.url = `${protocol}://${host}/ws${window.location.pathname}`;
 
     this.connectTimeout = 20000;
     this.pingTimeout = 30000;

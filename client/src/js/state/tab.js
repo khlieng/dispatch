@@ -16,7 +16,7 @@ class Tab extends TabRecord {
   toString() {
     let str = this.server;
     if (this.name) {
-      str += `:${this.name}`;
+      str += `-${this.name}`;
     }
     return str;
   }

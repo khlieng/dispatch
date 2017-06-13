@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -84,17 +85,18 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 		Channels: channels,
 	}
 
-	params := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(params) == 2 && isChannel(params[1]) {
-		data.addUsersAndMessages(params[0], params[1], session)
-	} else {
-		server, channel := parseTabCookie(r, r.URL.Path)
-		if channel != "" {
-			for _, ch := range channels {
-				if server == ch.Server && channel == ch.Name {
-					data.addUsersAndMessages(server, channel, session)
-					break
-				}
+	server, channel := getTabFromPath(r.URL.EscapedPath())
+	if channel != "" {
+		data.addUsersAndMessages(server, channel, session)
+		return &data
+	}
+
+	server, channel = parseTabCookie(r, r.URL.Path)
+	if channel != "" {
+		for _, ch := range channels {
+			if server == ch.Server && channel == ch.Name {
+				data.addUsersAndMessages(server, channel, session)
+				break
 			}
 		}
 	}
@@ -102,11 +104,22 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 	return &data
 }
 
+func getTabFromPath(rawPath string) (string, string) {
+	path := strings.Split(strings.Trim(rawPath, "/"), "/")
+	if len(path) == 2 {
+		name, err := url.PathUnescape(path[1])
+		if err == nil && isChannel(name) {
+			return path[0], name
+		}
+	}
+	return "", ""
+}
+
 func parseTabCookie(r *http.Request, path string) (string, string) {
 	if path == "/" {
 		cookie, err := r.Cookie("tab")
 		if err == nil {
-			tab := strings.Split(cookie.Value, ":")
+			tab := strings.Split(cookie.Value, "-")
 
 			if len(tab) == 2 && isChannel(tab[1]) {
 				return tab[0], tab[1]

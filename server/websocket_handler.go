@@ -66,13 +66,13 @@ func (h *wsHandler) init(r *http.Request) {
 		h.session.numWS(), "WebSocket connections")
 
 	channels := h.session.user.GetChannels()
-	path := r.URL.Query().Get("path")
-	params := strings.Split(strings.Trim(path, "/"), "/")
-	tabServer, tabChannel := parseTabCookie(r, path)
+	path := r.URL.EscapedPath()[3:]
+	pathServer, pathChannel := getTabFromPath(path)
+	cookieServer, cookieChannel := parseTabCookie(r, path)
 
 	for _, channel := range channels {
-		if (len(params) == 2 && channel.Server == params[0] && channel.Name == params[1]) ||
-			(channel.Server == tabServer && channel.Name == tabChannel) {
+		if (channel.Server == pathServer && channel.Name == pathChannel) ||
+			(channel.Server == cookieServer && channel.Name == cookieChannel) {
 			continue
 		}
 
