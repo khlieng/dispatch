@@ -33,7 +33,7 @@
     "jest": "^20.0.0",
     "style-loader": "^0.18.0",
     "through2": "^2.0.3",
-    "webpack": "^2.4.1",
+    "webpack": "^3.0.0",
     "webpack-dev-middleware": "^1.10.0",
     "webpack-hot-middleware": "^2.17.0"
   },
