@@ -4,6 +4,17 @@
     "react",
     "stage-0"
   ],
+  "plugins": [
+    ["module-resolver", {
+      "root": ["./src/js"],
+      "alias": {
+        "components": "./components",
+        "containers": "./containers",
+        "state": "./state",
+        "util": "./util"
+      }
+    }]
+  ],
   "env": {
     "development": {
       "plugins": ["react-hot-loader/babel"]
