@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Navicon from '../../containers/Navicon';
+import Navicon from 'containers/Navicon';
 
 export default class Connect extends Component {
   state = {

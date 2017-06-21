@@ -2,8 +2,8 @@ import React, { PureComponent } from 'react';
 import { List } from 'react-virtualized/dist/commonjs/List';
 import { AutoSizer } from 'react-virtualized/dist/commonjs/AutoSizer';
 import debounce from 'lodash/debounce';
+import { getScrollPos, saveScrollPos } from 'util/scrollPosition';
 import Message from './Message';
-import { getScrollPos, saveScrollPos } from '../util/scrollPosition';
 
 const fetchThreshold = 500;
 

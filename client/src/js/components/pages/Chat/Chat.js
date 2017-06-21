@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import ChatTitle from '../ChatTitle';
-import Search from '../Search';
-import MessageBox from '../MessageBox';
-import MessageInput from '../MessageInput';
-import UserList from '../UserList';
+import ChatTitle from './ChatTitle';
+import Search from './Search';
+import MessageBox from './MessageBox';
+import MessageInput from './MessageInput';
+import UserList from './UserList';
 
 export default class Chat extends Component {
   handleCloseClick = () => {

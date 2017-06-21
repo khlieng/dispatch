@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import Route from '../containers/Route';
-import Chat from '../containers/Chat';
-import Connect from '../containers/Connect';
-import Settings from '../containers/Settings';
-import TabList from '../components/TabList';
+import Route from 'containers/Route';
+import Chat from 'containers/Chat';
+import Connect from 'containers/Connect';
+import Settings from 'containers/Settings';
+import TabList from 'components/TabList';
 
 export default class App extends Component {
   handleClick = () => {

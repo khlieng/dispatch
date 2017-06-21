@@ -1,7 +1,9 @@
 import { connect } from 'react-redux';
-import Navicon from '../components/Navicon';
-import { toggleMenu } from '../state/ui';
+import Navicon from 'components/ui/Navicon';
+import { toggleMenu } from 'state/ui';
 
-const mapDispatch = { toggleMenu };
+const mapDispatch = {
+  onClick: toggleMenu
+};
 
 export default connect(null, mapDispatch)(Navicon);

@@ -1,6 +1,6 @@
 import { Record, List } from 'immutable';
-import { push, replace, LOCATION_CHANGED } from '../util/router';
-import createReducer from '../util/createReducer';
+import createReducer from 'util/createReducer';
+import { push, replace, LOCATION_CHANGED } from 'util/router';
 import * as actions from './actions';
 
 const TabRecord = Record({

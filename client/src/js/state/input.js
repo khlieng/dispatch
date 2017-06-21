@@ -1,5 +1,5 @@
 import { List, Record } from 'immutable';
-import createReducer from '../util/createReducer';
+import createReducer from 'util/createReducer';
 import * as actions from './actions';
 
 const HISTORY_MAX_LENGTH = 128;

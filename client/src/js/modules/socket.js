@@ -1,9 +1,9 @@
-import { socketAction } from '../state/actions';
-import { setConnected } from '../state/app';
-import { broadcast, inform, print, addMessage, addMessages } from '../state/messages';
-import { select } from '../state/tab';
-import { normalizeChannel } from '../util';
-import { replace } from '../util/router';
+import { socketAction } from 'state/actions';
+import { setConnected } from 'state/app';
+import { broadcast, inform, print, addMessage, addMessages } from 'state/messages';
+import { select } from 'state/tab';
+import { normalizeChannel } from 'util';
+import { replace } from 'util/router';
 
 function withReason(message, reason) {
   return message + (reason ? ` (${reason})` : '');

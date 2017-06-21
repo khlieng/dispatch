@@ -1,5 +1,5 @@
 import { Record } from 'immutable';
-import createReducer from '../util/createReducer';
+import createReducer from 'util/createReducer';
 import * as actions from './actions';
 
 export const getApp = state => state.app;

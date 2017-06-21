@@ -3,11 +3,11 @@ import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import 'react-virtualized/styles.css';
 
+import Root from 'components/Root';
+import initRouter from 'util/router';
+import Socket from 'util/Socket';
 import configureStore from './store';
-import initRouter from './util/router';
 import routes from './routes';
-import Socket from './util/Socket';
-import Root from './components/Root';
 import runModules from './modules';
 
 const host = DEV ? `${window.location.hostname}:1337` : window.location.host;

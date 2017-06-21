@@ -1,7 +1,7 @@
-import { when } from '../util/observe';
-import { measureScrollBarWidth } from '../util';
-import { getCharWidth } from '../state/app';
-import { updateMessageHeight } from '../state/messages';
+import { getCharWidth } from 'state/app';
+import { updateMessageHeight } from 'state/messages';
+import { when } from 'util/observe';
+import { measureScrollBarWidth } from 'util';
 
 const menuWidth = 200;
 const messagePadding = 30;

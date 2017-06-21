@@ -1,8 +1,8 @@
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import Settings from '../components/pages/Settings';
-import { getSettings, setCert, setKey, uploadCert } from '../state/settings';
+import Settings from 'components/pages/Settings';
+import { getSettings, setCert, setKey, uploadCert } from 'state/settings';
 
 const mapState = createStructuredSelector({
   settings: getSettings

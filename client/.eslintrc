@@ -20,5 +20,12 @@
   },
   "globals": {
     "DEV": true
+  },
+  "settings": {
+    "import/resolver": {
+      "webpack": {
+        "config": "webpack.config.dev.js"
+      }
+    }
   }
 }

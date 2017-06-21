@@ -1,13 +1,29 @@
 var path = require('path');
 var webpack = require('webpack');
 
+function dir(p) {
+  return path.resolve(__dirname, p);
+}
+
+function jsDir(p) {
+  return path.resolve(__dirname, 'src/js', p);
+}
+
 module.exports = {
   entry: [
     './src/js/index'
   ],
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: dir('dist'),
     filename: 'bundle.js'
+  },
+  resolve: {
+    alias: {
+      components: jsDir('components'),
+      containers: jsDir('containers'),
+      state: jsDir('state'),
+      util: jsDir('util')
+    }
   },
   module: {
     rules: [

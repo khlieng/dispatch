@@ -1,7 +1,7 @@
 import capitalize from 'lodash/capitalize';
-import { getRouter } from '../state';
-import { getCurrentServerName } from '../state/servers';
-import { observe } from '../util/observe';
+import { getRouter } from 'state';
+import { getCurrentServerName } from 'state/servers';
+import { observe } from 'util/observe';
 
 export default function documentTitle({ store }) {
   observe(store, [getRouter, getCurrentServerName], (router, serverName) => {

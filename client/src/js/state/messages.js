@@ -1,9 +1,9 @@
 import { List, Map, Record } from 'immutable';
 import { createSelector } from 'reselect';
-import createReducer from '../util/createReducer';
+import { findBreakpoints, messageHeight, linkify, timestamp } from 'util';
+import createReducer from 'util/createReducer';
 import { getApp } from './app';
 import { getSelectedTab } from './tab';
-import { findBreakpoints, messageHeight, linkify, timestamp } from '../util';
 import * as actions from './actions';
 
 const Message = Record({

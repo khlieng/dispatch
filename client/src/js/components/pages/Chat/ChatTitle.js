@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react';
 import { List } from 'immutable';
-import Navicon from '../containers/Navicon';
-import Editable from './ui/Editable';
-import { isValidServerName } from '../state/servers';
-import { linkify } from '../util';
+import Navicon from 'containers/Navicon';
+import Editable from 'components/ui/Editable';
+import { isValidServerName } from 'state/servers';
+import { linkify } from 'util';
 
 export default class ChatTitle extends PureComponent {
   render() {

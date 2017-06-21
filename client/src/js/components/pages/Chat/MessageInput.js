@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import Editable from './ui/Editable';
+import Editable from 'components/ui/Editable';
 
 export default class MessageInput extends PureComponent {
   state = {

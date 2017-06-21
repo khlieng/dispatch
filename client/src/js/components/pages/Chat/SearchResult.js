@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { timestamp, linkify } from '../util';
+import { timestamp, linkify } from 'util';
 
 export default class SearchResult extends PureComponent {
   render() {

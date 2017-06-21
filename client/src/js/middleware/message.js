@@ -1,4 +1,4 @@
-import * as actions from '../state/actions';
+import { ADD_MESSAGES, ADD_FETCHED_MESSAGES } from 'state/actions';
 
 //
 // This middleware handles waiting until MessageBox
@@ -9,7 +9,7 @@ const message = store => next => {
   const cache = {};
 
   return action => {
-    if (action.type === actions.ADD_MESSAGES && action.prepend) {
+    if (action.type === ADD_MESSAGES && action.prepend) {
       const key = `${action.server} ${action.channel}`;
 
       if (ready[key]) {
@@ -18,7 +18,7 @@ const message = store => next => {
       }
 
       cache[key] = action;
-    } else if (action.type === actions.ADD_FETCHED_MESSAGES) {
+    } else if (action.type === ADD_FETCHED_MESSAGES) {
       const key = `${action.server} ${action.channel}`;
       ready[key] = true;
 

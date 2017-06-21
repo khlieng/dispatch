@@ -1,6 +1,6 @@
 import React from 'react';
-import Navicon from '../../containers/Navicon';
-import FileInput from '../FileInput';
+import Navicon from 'containers/Navicon';
+import FileInput from 'components/ui/FileInput';
 
 const Settings = ({ settings, onCertChange, onKeyChange, uploadCert }) => {
   const status = settings.get('uploadingCert') ? 'Uploading...' : 'Upload';

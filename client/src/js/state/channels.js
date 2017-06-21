@@ -1,6 +1,6 @@
 import { Map, List, Record } from 'immutable';
 import { createSelector } from 'reselect';
-import createReducer from '../util/createReducer';
+import createReducer from 'util/createReducer';
 import { getSelectedTab, updateSelection } from './tab';
 import * as actions from './actions';
 

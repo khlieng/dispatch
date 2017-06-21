@@ -1,5 +1,5 @@
 import { Set, Map } from 'immutable';
-import createReducer from '../util/createReducer';
+import createReducer from 'util/createReducer';
 import { updateSelection } from './tab';
 import * as actions from './actions';
 
