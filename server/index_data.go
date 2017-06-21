@@ -119,10 +119,13 @@ func parseTabCookie(r *http.Request, path string) (string, string) {
 	if path == "/" {
 		cookie, err := r.Cookie("tab")
 		if err == nil {
-			tab := strings.Split(cookie.Value, "-")
+			v, err := url.PathUnescape(cookie.Value)
+			if err == nil {
+				tab := strings.SplitN(v, ";", 2)
 
-			if len(tab) == 2 && isChannel(tab[1]) {
-				return tab[0], tab[1]
+				if len(tab) == 2 && isChannel(tab[1]) {
+					return tab[0], tab[1]
+				}
 			}
 		}
 	}

@@ -21,7 +21,7 @@ export default function initialState({ store }) {
     if (!store.getState().router.route) {
       const tab = Cookie.get('tab');
       if (tab) {
-        const [server, name = null] = tab.split('-');
+        const [server, name = null] = tab.split(/;(.+)/);
 
         if (find(env.servers, srv => srv.host === server)) {
           store.dispatch(select(server, name, true));
