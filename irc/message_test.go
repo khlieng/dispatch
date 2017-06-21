@@ -74,6 +74,7 @@ func TestParseMessage(t *testing.T) {
 
 func TestLastParam(t *testing.T) {
 	assert.Equal(t, "some message", parseMessage(":user CMD #chan :some message\r\n").LastParam())
+	assert.Equal(t, "", parseMessage("NO_PARAMS").LastParam())
 }
 
 func TestBadMessagePanic(t *testing.T) {

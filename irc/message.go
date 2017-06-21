@@ -12,7 +12,10 @@ type Message struct {
 }
 
 func (m *Message) LastParam() string {
-	return m.Params[len(m.Params)-1]
+	if len(m.Params) > 0 {
+		return m.Params[len(m.Params)-1]
+	}
+	return ""
 }
 
 func parseMessage(line string) *Message {
