@@ -10,7 +10,8 @@ describe('server reducer', () => {
       '127.0.0.1': {
         connected: false,
         name: '127.0.0.1',
-        nick: 'nick'
+        nick: 'nick',
+        editedNick: null
       }
     });
 
@@ -20,7 +21,8 @@ describe('server reducer', () => {
       '127.0.0.1': {
         connected: false,
         name: '127.0.0.1',
-        nick: 'nick'
+        nick: 'nick',
+        editedNick: null
       }
     });
 
@@ -32,12 +34,14 @@ describe('server reducer', () => {
       '127.0.0.1': {
         connected: false,
         name: '127.0.0.1',
-        nick: 'nick'
+        nick: 'nick',
+        editedNick: null
       },
       '127.0.0.2': {
         connected: false,
         name: 'srv',
-        nick: 'nick'
+        nick: 'nick',
+        editedNick: null
       }
     });
   });
@@ -74,20 +78,87 @@ describe('server reducer', () => {
     });
   });
 
-  it('updates the nick on SOCKET_NICK', () => {
+  it('sets editedNick when editing the nick', () => {
     let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
     state = reducer(state, {
-      type: actions.socket.NICK,
+      type: actions.SET_NICK,
       server: '127.0.0.1',
-      old: 'nick',
-      new: 'nick2'
+      nick: 'nick2',
+      editing: true
     });
 
     expect(state.toJS()).toEqual({
       '127.0.0.1': {
         connected: false,
         name: '127.0.0.1',
-        nick: 'nick2'
+        nick: 'nick',
+        editedNick: 'nick2'
+      }
+    });
+  });
+
+  it('clears editedNick when receiving an empty nick after editing finishes', () => {
+    let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    state = reducer(state, {
+      type: actions.SET_NICK,
+      server: '127.0.0.1',
+      nick: 'nick2',
+      editing: true
+    });
+    state = reducer(state, {
+      type: actions.SET_NICK,
+      server: '127.0.0.1',
+      nick: ''
+    });
+
+    expect(state.toJS()).toEqual({
+      '127.0.0.1': {
+        connected: false,
+        name: '127.0.0.1',
+        nick: 'nick',
+        editedNick: null
+      }
+    });
+  });
+
+  it('updates the nick on SOCKET_NICK', () => {
+    let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    state = reducer(state, {
+      type: actions.socket.NICK,
+      server: '127.0.0.1',
+      oldNick: 'nick',
+      newNick: 'nick2'
+    });
+
+    expect(state.toJS()).toEqual({
+      '127.0.0.1': {
+        connected: false,
+        name: '127.0.0.1',
+        nick: 'nick2',
+        editedNick: null
+      }
+    });
+  });
+
+  it('clears editedNick on SOCKET_NICK_FAIL', () => {
+    let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    state = reducer(state, {
+      type: actions.SET_NICK,
+      server: '127.0.0.1',
+      nick: 'nick2',
+      editing: true
+    });
+    state = reducer(state, {
+      type: actions.socket.NICK_FAIL,
+      server: '127.0.0.1'
+    });
+
+    expect(state.toJS()).toEqual({
+      '127.0.0.1': {
+        connected: false,
+        name: '127.0.0.1',
+        nick: 'nick',
+        editedNick: null
       }
     });
   });
@@ -115,11 +186,13 @@ describe('server reducer', () => {
       '127.0.0.1': {
         name: 'stuff',
         nick: 'nick',
+        editedNick: null,
         connected: true
       },
       '127.0.0.2': {
         name: 'stuffz',
         nick: 'nick2',
+        editedNick: null,
         connected: false
       }
     });
@@ -136,6 +209,7 @@ describe('server reducer', () => {
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick',
+        editedNick: null,
         connected: true
       }
     });

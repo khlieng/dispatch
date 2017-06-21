@@ -273,35 +273,42 @@ func (i *ircHandler) motdEnd(msg *irc.Message) {
 	i.motdBuffer = MOTD{}
 }
 
+func (i *ircHandler) badNick(msg *irc.Message) {
+	i.session.sendJSON("nick_fail", NickFail{
+		Server: i.client.Host,
+	})
+}
+
 func (i *ircHandler) initHandlers() {
 	i.handlers = map[string]func(*irc.Message){
-		irc.Nick:               i.nick,
-		irc.Join:               i.join,
-		irc.Part:               i.part,
-		irc.Mode:               i.mode,
-		irc.Privmsg:            i.message,
-		irc.Notice:             i.message,
-		irc.Quit:               i.quit,
-		irc.Topic:              i.topic,
-		irc.ReplyWelcome:       i.info,
-		irc.ReplyYourHost:      i.info,
-		irc.ReplyCreated:       i.info,
-		irc.ReplyLUserClient:   i.info,
-		irc.ReplyLUserOp:       i.info,
-		irc.ReplyLUserUnknown:  i.info,
-		irc.ReplyLUserChannels: i.info,
-		irc.ReplyLUserMe:       i.info,
-		irc.ReplyWhoisUser:     i.whoisUser,
-		irc.ReplyWhoisServer:   i.whoisServer,
-		irc.ReplyWhoisChannels: i.whoisChannels,
-		irc.ReplyEndOfWhois:    i.whoisEnd,
-		irc.ReplyNoTopic:       i.noTopic,
-		irc.ReplyTopic:         i.topic,
-		irc.ReplyNamReply:      i.names,
-		irc.ReplyEndOfNames:    i.namesEnd,
-		irc.ReplyMotdStart:     i.motdStart,
-		irc.ReplyMotd:          i.motd,
-		irc.ReplyEndOfMotd:     i.motdEnd,
+		irc.Nick:                 i.nick,
+		irc.Join:                 i.join,
+		irc.Part:                 i.part,
+		irc.Mode:                 i.mode,
+		irc.Privmsg:              i.message,
+		irc.Notice:               i.message,
+		irc.Quit:                 i.quit,
+		irc.Topic:                i.topic,
+		irc.ReplyWelcome:         i.info,
+		irc.ReplyYourHost:        i.info,
+		irc.ReplyCreated:         i.info,
+		irc.ReplyLUserClient:     i.info,
+		irc.ReplyLUserOp:         i.info,
+		irc.ReplyLUserUnknown:    i.info,
+		irc.ReplyLUserChannels:   i.info,
+		irc.ReplyLUserMe:         i.info,
+		irc.ReplyWhoisUser:       i.whoisUser,
+		irc.ReplyWhoisServer:     i.whoisServer,
+		irc.ReplyWhoisChannels:   i.whoisChannels,
+		irc.ReplyEndOfWhois:      i.whoisEnd,
+		irc.ReplyNoTopic:         i.noTopic,
+		irc.ReplyTopic:           i.topic,
+		irc.ReplyNamReply:        i.names,
+		irc.ReplyEndOfNames:      i.namesEnd,
+		irc.ReplyMotdStart:       i.motdStart,
+		irc.ReplyMotd:            i.motd,
+		irc.ReplyEndOfMotd:       i.motdEnd,
+		irc.ErrErroneousNickname: i.badNick,
 	}
 }
 

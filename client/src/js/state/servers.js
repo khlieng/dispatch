@@ -5,8 +5,9 @@ import { getSelectedTab, updateSelection } from './tab';
 import * as actions from './actions';
 
 const Server = Record({
-  nick: null,
-  name: null,
+  nick: '',
+  editedNick: null,
+  name: '',
   connected: false
 });
 
@@ -15,13 +16,19 @@ export const getServers = state => state.servers;
 export const getCurrentNick = createSelector(
   getServers,
   getSelectedTab,
-  (servers, tab) => servers.getIn([tab.server, 'nick'], '')
+  (servers, tab) => {
+    const editedNick = servers.getIn([tab.server, 'editedNick']);
+    if (editedNick === null) {
+      return servers.getIn([tab.server, 'nick']);
+    }
+    return editedNick;
+  }
 );
 
 export const getCurrentServerName = createSelector(
   getServers,
   getSelectedTab,
-  (servers, tab) => servers.getIn([tab.server, 'name'], '')
+  (servers, tab) => servers.getIn([tab.server, 'name'])
 );
 
 export default createReducer(Map(), {
@@ -44,12 +51,27 @@ export default createReducer(Map(), {
     return state.setIn([server, 'name'], name);
   },
 
-  [actions.socket.NICK](state, action) {
-    const { server, old } = action;
-    if (!old || old === state.get(server).nick) {
-      return state.update(server, s => s.set('nick', action.new));
+  [actions.SET_NICK](state, { server, nick, editing }) {
+    if (editing) {
+      return state.setIn([server, 'editedNick'], nick);
+    } else if (nick === '') {
+      return state.setIn([server, 'editedNick'], null);
     }
     return state;
+  },
+
+  [actions.socket.NICK](state, { server, oldNick, newNick }) {
+    if (!oldNick || oldNick === state.get(server).nick) {
+      return state.update(server, s => s
+        .set('nick', newNick)
+        .set('editedNick', null)
+      );
+    }
+    return state;
+  },
+
+  [actions.socket.NICK_FAIL](state, { server }) {
+    return state.setIn([server, 'editedNick'], null);
   },
 
   [actions.socket.SERVERS](state, { data }) {
@@ -140,19 +162,27 @@ export function away(message, server) {
   };
 }
 
-export function setNick(nick, server) {
-  return {
+export function setNick(nick, server, editing) {
+  nick = nick.trim().replace(' ', '');
+
+  const action = {
     type: actions.SET_NICK,
     nick,
     server,
-    socket: {
+    editing
+  };
+
+  if (!editing && nick !== '') {
+    action.socket = {
       type: 'nick',
       data: {
-        new: nick,
+        newNick: nick,
         server
       }
-    }
-  };
+    };
+  }
+
+  return action;
 }
 
 export function isValidServerName(name) {

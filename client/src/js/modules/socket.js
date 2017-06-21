@@ -67,9 +67,9 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
       dispatch(broadcast(withReason(`${user} quit`, reason), server, channels));
     },
 
-    nick(data) {
-      const channels = findChannels(getState(), data.server, data.old);
-      dispatch(broadcast(`${data.old} changed nick to ${data.new}`, data.server, channels));
+    nick({ server, oldNick, newNick }) {
+      const channels = findChannels(getState(), server, oldNick);
+      dispatch(broadcast(`${oldNick} changed nick to ${newNick}`, server, channels));
     },
 
     topic({ server, channel, topic, nick }) {

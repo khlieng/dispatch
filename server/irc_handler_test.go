@@ -304,3 +304,21 @@ func TestHandleIRCMotd(t *testing.T) {
 		Content: []string{"line 1", "line 2"},
 	}, <-s.broadcast)
 }
+
+func TestHandleIRCBadNick(t *testing.T) {
+	c := irc.NewClient("nick", "user")
+	c.Host = "host.com"
+	s := NewSession(nil)
+	i := newIRCHandler(c, s)
+
+	i.dispatchMessage(&irc.Message{
+		Command: irc.ErrErroneousNickname,
+	})
+
+	// It should print the error message first
+	<-s.broadcast
+
+	checkResponse(t, "nick_fail", NickFail{
+		Server: "host.com",
+	}, <-s.broadcast)
+}

@@ -63,6 +63,7 @@ export const socket = createSocketActions([
   'join',
   'message',
   'mode',
+  'nick_fail',
   'nick',
   'part',
   'pm',

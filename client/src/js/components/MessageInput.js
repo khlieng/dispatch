@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import Editable from './ui/Editable';
 
 export default class MessageInput extends PureComponent {
   state = {
@@ -35,10 +36,17 @@ export default class MessageInput extends PureComponent {
   };
 
   render() {
-    const { nick, currentHistoryEntry } = this.props;
+    const { nick, currentHistoryEntry, onNickChange, onNickEditDone } = this.props;
     return (
       <div className="message-input-wrap">
-        <span className="message-input-nick">{nick}</span>
+        <Editable
+          className="message-input-nick"
+          value={nick}
+          onBlur={onNickEditDone}
+          onChange={onNickChange}
+        >
+          <span className="message-input-nick">{nick}</span>
+        </Editable>
         <input
           className="message-input"
           type="text"

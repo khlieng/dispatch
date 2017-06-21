@@ -105,8 +105,8 @@ describe('channel reducer', () => {
     state = reducer(state, {
       type: actions.socket.NICK,
       server: 'srv',
-      old: 'nick1',
-      new: 'nick3'
+      oldNick: 'nick1',
+      newNick: 'nick3'
     });
 
     expect(state.toJS()).toEqual({

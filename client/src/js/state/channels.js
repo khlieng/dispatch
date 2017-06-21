@@ -123,18 +123,17 @@ export default createReducer(Map(), {
     });
   },
 
-  [actions.socket.NICK](state, action) {
-    const { server } = action;
+  [actions.socket.NICK](state, { server, oldNick, newNick }) {
     return state.withMutations(s => {
       s.get(server).forEach((v, channel) => {
         s.updateIn([server, channel, 'users'], users => {
-          const i = users.findIndex(user => user.nick === action.old);
+          const i = users.findIndex(user => user.nick === oldNick);
           if (i < 0) {
             return users;
           }
 
           return users.update(i,
-            user => updateRenderName(user.set('nick', action.new))
+            user => updateRenderName(user.set('nick', newNick))
           ).sort(compareUsers);
         });
       });

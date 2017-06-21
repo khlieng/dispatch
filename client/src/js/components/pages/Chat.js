@@ -36,6 +36,16 @@ export default class Chat extends Component {
     setServerName(title, tab.server);
   };
 
+  handleNickChange = nick => {
+    const { setNick, tab } = this.props;
+    setNick(nick, tab.server, true);
+  };
+
+  handleNickEditDone = nick => {
+    const { setNick, tab } = this.props;
+    setNick(nick, tab.server);
+  };
+
   render() {
     const {
       channel,
@@ -96,6 +106,8 @@ export default class Chat extends Component {
           tab={tab}
           onCommand={runCommand}
           onMessage={sendMessage}
+          onNickChange={this.handleNickChange}
+          onNickEditDone={this.handleNickEditDone}
           {...inputActions}
         />
         <UserList

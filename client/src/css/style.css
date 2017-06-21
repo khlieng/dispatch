@@ -323,8 +323,10 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .chat-title {
   margin-left: 15px;
-  font-size: 24px !important;
+  font: 24px Montserrat, sans-serif;
   white-space: nowrap;
+  background: none;
+  line-height: 50px;
 }
 
 .chat-topic-wrap {
@@ -502,13 +504,14 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .message-input-nick {
+  display: block;
   margin: 10px;
   line-height: 30px;
   height: 30px;
   padding: 0 10px;
-  background: #6BB758;
+  background: #6BB758 !important;
   color: #FFF;
-  font-family: Montserrat, sans-serif;
+  font-family: Montserrat, sans-serif !important;
   margin-right: 0;
 }
 

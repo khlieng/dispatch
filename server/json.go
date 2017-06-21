@@ -28,8 +28,12 @@ type Connect struct {
 
 type Nick struct {
 	Server string `json:"server"`
-	Old    string `json:"old"`
-	New    string `json:"new"`
+	Old    string `json:"oldNick"`
+	New    string `json:"newNick"`
+}
+
+type NickFail struct {
+	Server string `json:"server"`
 }
 
 type Join struct {

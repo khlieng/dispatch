@@ -1,12 +1,41 @@
 import React, { PureComponent } from 'react';
-
-const style = {
-  background: 'none',
-  font: 'inherit'
-};
+import { stringWidth } from '../../util';
 
 export default class Editable extends PureComponent {
-  state = { editing: false };
+  static defaultProps = {
+    editable: true
+  };
+
+  state = {
+    editing: false
+  };
+
+  componentWillReceiveProps(nextProps) {
+    if (this.state.editing && nextProps.value !== this.props.value) {
+      this.setState({
+        width: this.getInputWidth(nextProps.value)
+      });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (!prevState.editing && this.state.editing) {
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({
+        width: this.getInputWidth(this.props.value)
+      });
+    }
+  }
+
+  getInputWidth(value) {
+    if (this.input) {
+      const style = window.getComputedStyle(this.input);
+      const padding = parseInt(style.paddingLeft, 10) + parseInt(style.paddingRight, 10);
+      // Make sure the width is atleast 1px so the caret always shows
+      const width = stringWidth(value, style.font) || 1;
+      return padding + width;
+    }
+  }
 
   startEditing = () => {
     if (this.props.editable) {
@@ -23,32 +52,46 @@ export default class Editable extends PureComponent {
     this.setState({ editing: false });
   };
 
-  handleKey = e => {
-    if (e.key === 'Enter') {
-      this.stopEditing();
+  handleBlur = e => {
+    const { onBlur } = this.props;
+    this.stopEditing();
+    if (onBlur) {
+      onBlur(e.target.value);
     }
   };
 
   handleChange = e => this.props.onChange(e.target.value);
 
+  handleKey = e => {
+    if (e.key === 'Enter') {
+      this.handleBlur(e);
+    }
+  };
+
+  inputRef = el => { this.input = el; }
+
   render() {
     const { children, className, value } = this.props;
+
+    const style = {
+      width: this.state.width
+    };
+
     return (
-      <div onClick={this.startEditing}>
-        {this.state.editing ?
-          <input
-            autoFocus
-            className={className}
-            style={style}
-            type="text"
-            value={value}
-            onBlur={this.stopEditing}
-            onChange={this.handleChange}
-            onKeyDown={this.handleKey}
-          /> :
-          children
-        }
-      </div>
+      this.state.editing ?
+        <input
+          autoFocus
+          ref={this.inputRef}
+          className={className}
+          type="text"
+          value={value}
+          onBlur={this.handleBlur}
+          onChange={this.handleChange}
+          onKeyDown={this.handleKey}
+          style={style}
+          spellCheck={false}
+        /> :
+        <div onClick={this.startEditing}>{children}</div>
     );
   }
 }
