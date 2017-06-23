@@ -1,5 +1,5 @@
 import { Map, fromJS } from 'immutable';
-import reducer, { broadcast } from '../messages';
+import reducer, { broadcast, getMessageTab } from '../messages';
 import * as actions from '../actions';
 import appReducer from '../app';
 
@@ -174,5 +174,23 @@ describe('message reducer', () => {
         ]
       }
     });
+  });
+});
+
+describe('getMessageTab()', () => {
+  it('returns the correct tab', () => {
+    const srv = 'chat.freenode.net';
+    [
+      ['#cake', '#cake'],
+      ['#apple.pie', '#apple.pie'],
+      ['bob', 'bob'],
+      [undefined, srv],
+      [null, srv],
+      ['*', srv],
+      [srv, srv],
+      ['beans.freenode.net', srv]
+    ].forEach(([target, expected]) =>
+      expect(getMessageTab(srv, target)).toBe(expected)
+    );
   });
 });
