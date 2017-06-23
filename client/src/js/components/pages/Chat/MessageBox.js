@@ -5,7 +5,11 @@ import debounce from 'lodash/debounce';
 import { getScrollPos, saveScrollPos } from 'util/scrollPosition';
 import Message from './Message';
 
-const fetchThreshold = 500;
+const fetchThreshold = 600;
+// The amount of time in ms that needs to pass without any
+// scroll events happening before adding messages to the top,
+// this is done to prevent the scroll from jumping all over the place
+const scrollbackDebounce = 100;
 
 export default class MessageBox extends PureComponent {
   componentWillMount() {
@@ -118,7 +122,7 @@ export default class MessageBox extends PureComponent {
     const { tab, onAddMore } = this.props;
     this.ready = true;
     onAddMore(tab.server, tab.name);
-  }, 100);
+  }, scrollbackDebounce);
 
   handleScroll = ({ scrollTop, clientHeight, scrollHeight }) => {
     if (this.mounted) {
