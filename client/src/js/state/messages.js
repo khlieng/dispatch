@@ -1,6 +1,6 @@
 import { List, Map, Record } from 'immutable';
 import { createSelector } from 'reselect';
-import { findBreakpoints, messageHeight, linkify, timestamp } from 'util';
+import { findBreakpoints, messageHeight, linkify, timestamp, isChannel } from 'util';
 import createReducer from 'util/createReducer';
 import { getApp } from './app';
 import { getSelectedTab } from './tab';
@@ -118,7 +118,7 @@ function initMessage(message, tab, state) {
 }
 
 function getMessageTab(server, to) {
-  if (!to || to.indexOf('.') !== -1 || to === '*') {
+  if (!to || to === '*' || (!isChannel(to) && to.indexOf('.') !== -1)) {
     return server;
   }
   return to;
