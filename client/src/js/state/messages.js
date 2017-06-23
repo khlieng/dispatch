@@ -117,7 +117,7 @@ function initMessage(message, tab, state) {
   return message;
 }
 
-export function getMessageTab(server, to) {
+function getMessageTab(server, to) {
   if (!to || to === '*' || (!isChannel(to) && to.indexOf('.') !== -1)) {
     return server;
   }
