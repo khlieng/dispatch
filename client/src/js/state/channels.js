@@ -78,6 +78,17 @@ function compareUsers(a, b) {
 
 export const getChannels = state => state.channels;
 
+const key = (v, k) => k.toLowerCase();
+
+export const getSortedChannels = createSelector(
+  getChannels,
+  channels => channels.withMutations(c =>
+    c.forEach((server, address) =>
+      c.update(address, chans => chans.sortBy(key))
+    )
+  ).sortBy(key)
+);
+
 export const getSelectedChannel = createSelector(
   getSelectedTab,
   getChannels,

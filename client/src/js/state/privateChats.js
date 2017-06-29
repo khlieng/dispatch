@@ -1,9 +1,21 @@
 import { Set, Map } from 'immutable';
+import { createSelector } from 'reselect';
 import createReducer from 'util/createReducer';
 import { updateSelection } from './tab';
 import * as actions from './actions';
 
 export const getPrivateChats = state => state.privateChats;
+
+const lowerCaseValue = v => v.toLowerCase();
+
+export const getSortedPrivateChats = createSelector(
+  getPrivateChats,
+  privateChats => privateChats.withMutations(p =>
+    p.forEach((server, address) =>
+      p.update(address, chats => chats.sortBy(lowerCaseValue))
+    )
+  )
+);
 
 function open(state, server, nick) {
   return state.update(server, Set(), chats => chats.add(nick));
