@@ -5,11 +5,11 @@ import { observe } from 'util/observe';
 
 const saveTab = debounce(tab =>
   Cookie.set('tab', tab.toString(), { expires: 30 })
-, 3000);
+, 1000);
 
 export default function storage({ store }) {
   observe(store, getSelectedTab, tab => {
-    if (tab.server) {
+    if (tab.isChannel() || (tab.server && !tab.name)) {
       saveTab(tab);
     }
   });
