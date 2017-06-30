@@ -4,10 +4,9 @@ import (
 	"crypto/tls"
 	"net"
 
-	"github.com/spf13/viper"
-
 	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
+	"github.com/spf13/viper"
 )
 
 func createNickInUseHandler(i *irc.Client, session *Session) func(string) string {
@@ -34,10 +33,13 @@ func reconnectIRC() {
 			i.Realname = server.Realname
 			i.HandleNickInUse = createNickInUseHandler(i, session)
 
-			if cert := user.GetCertificate(); cert != nil {
+			if i.TLS {
 				i.TLSConfig = &tls.Config{
-					Certificates:       []tls.Certificate{*cert},
-					InsecureSkipVerify: !viper.GetBool("verify_client_certificates"),
+					InsecureSkipVerify: !viper.GetBool("verify_certificates"),
+				}
+
+				if cert := user.GetCertificate(); cert != nil {
+					i.TLSConfig.Certificates = []tls.Certificate{*cert}
 				}
 			}
 

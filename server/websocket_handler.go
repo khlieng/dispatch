@@ -111,10 +111,13 @@ func (h *wsHandler) connect(b []byte) {
 			i.Password = data.Password
 		}
 
-		if cert := h.session.user.GetCertificate(); cert != nil {
+		if i.TLS {
 			i.TLSConfig = &tls.Config{
-				Certificates:       []tls.Certificate{*cert},
-				InsecureSkipVerify: !viper.GetBool("verify_client_certificates"),
+				InsecureSkipVerify: !viper.GetBool("verify_certificates"),
+			}
+
+			if cert := h.session.user.GetCertificate(); cert != nil {
+				i.TLSConfig.Certificates = []tls.Certificate{*cert}
 			}
 		}
 
