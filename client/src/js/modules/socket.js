@@ -3,7 +3,6 @@ import { setConnected } from 'state/app';
 import { broadcast, inform, print, addMessage, addMessages } from 'state/messages';
 import { select } from 'state/tab';
 import { normalizeChannel } from 'util';
-import { replace } from 'util/router';
 
 function withReason(message, reason) {
   return message + (reason ? ` (${reason})` : '');
@@ -50,12 +49,6 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
       }
 
       dispatch(inform(`${user} joined the channel`, server, joinedChannel));
-    },
-
-    servers(data) {
-      if (!data) {
-        dispatch(replace('/connect'));
-      }
     },
 
     part({ user, server, channel, reason }) {
@@ -111,15 +104,17 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
   };
 
   socket.onMessage((type, data) => {
+    let action;
+    if (Array.isArray(data)) {
+      action = { type: socketAction(type), data: [...data] };
+    } else {
+      action = { ...data, type: socketAction(type) };
+    }
+
     if (type in handlers) {
       handlers[type](data);
     }
 
-    type = socketAction(type);
-    if (Array.isArray(data)) {
-      dispatch({ type, data });
-    } else {
-      dispatch({ type, ...data });
-    }
+    dispatch(action);
   });
 }
