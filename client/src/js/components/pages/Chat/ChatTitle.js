@@ -21,7 +21,7 @@ export default class ChatTitle extends PureComponent {
 
     let serverError = null;
     if (!tab.name && status.error) {
-      serverError = <span className="error">Error! {status.error}</span>;
+      serverError = <span className="chat-topic error">Error: {status.error}</span>;
     }
 
     return (
