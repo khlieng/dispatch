@@ -39,6 +39,14 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   margin: 0;
 }
 
+.success {
+  color: #6BB758 !important;
+}
+
+.error {
+  color: #F6546A !important;
+}
+
 .wrap {
   position: fixed;
   top: 0;

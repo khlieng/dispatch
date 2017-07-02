@@ -16,7 +16,7 @@ const (
 
 type Session struct {
 	irc             map[string]*irc.Client
-	connectionState map[string]bool
+	connectionState map[string]irc.ConnectionState
 	ircLock         sync.Mutex
 
 	ws        map[string]*wsConn
@@ -31,7 +31,7 @@ type Session struct {
 func NewSession(user *storage.User) *Session {
 	return &Session{
 		irc:             make(map[string]*irc.Client),
-		connectionState: make(map[string]bool),
+		connectionState: make(map[string]irc.ConnectionState),
 		ws:              make(map[string]*wsConn),
 		broadcast:       make(chan WSResponse, 32),
 		user:            user,
@@ -51,7 +51,9 @@ func (s *Session) getIRC(server string) (*irc.Client, bool) {
 func (s *Session) setIRC(server string, i *irc.Client) {
 	s.ircLock.Lock()
 	s.irc[server] = i
-	s.connectionState[server] = false
+	s.connectionState[server] = irc.ConnectionState{
+		Connected: false,
+	}
 	s.ircLock.Unlock()
 
 	s.reset <- 0
@@ -74,9 +76,9 @@ func (s *Session) numIRC() int {
 	return n
 }
 
-func (s *Session) getConnectionStates() map[string]bool {
+func (s *Session) getConnectionStates() map[string]irc.ConnectionState {
 	s.ircLock.Lock()
-	state := make(map[string]bool, len(s.connectionState))
+	state := make(map[string]irc.ConnectionState, len(s.connectionState))
 
 	for k, v := range s.connectionState {
 		state[k] = v
@@ -86,9 +88,9 @@ func (s *Session) getConnectionStates() map[string]bool {
 	return state
 }
 
-func (s *Session) setConnectionState(server string, connected bool) {
+func (s *Session) setConnectionState(server string, state irc.ConnectionState) {
 	s.ircLock.Lock()
-	s.connectionState[server] = connected
+	s.connectionState[server] = state
 	s.ircLock.Unlock()
 }
 

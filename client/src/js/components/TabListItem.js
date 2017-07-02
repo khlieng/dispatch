@@ -15,9 +15,9 @@ export default class TabListItem extends PureComponent {
       classes.push('tab-server');
 
       if (connected) {
-        style.color = '#6BB758';
+        classes.push('success');
       } else {
-        style.color = '#F6546A';
+        classes.push('error');
       }
     }
 

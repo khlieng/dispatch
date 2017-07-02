@@ -12,13 +12,14 @@ export default class TabList extends PureComponent {
     const tabs = [];
 
     channels.forEach((server, address) => {
+      const srv = servers.get(address);
       tabs.push(
         <TabListItem
           key={address}
           server={address}
-          content={servers.getIn([address, 'name'])}
+          content={srv.name}
           selected={tab.server === address && tab.name === null}
-          connected={servers.getIn([address, 'connected'])}
+          connected={srv.status.connected}
           onClick={this.handleTabClick}
         />
       );

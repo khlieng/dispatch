@@ -55,6 +55,7 @@ export default class Chat extends Component {
       nick,
       search,
       showUserList,
+      status,
       tab,
       title,
       users,
@@ -81,6 +82,7 @@ export default class Chat extends Component {
       <div className={chatClass}>
         <ChatTitle
           channel={channel}
+          status={status}
           tab={tab}
           title={title}
           onCloseClick={this.handleCloseClick}

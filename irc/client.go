@@ -20,7 +20,7 @@ type Client struct {
 	Username          string
 	Realname          string
 	Messages          chan *Message
-	ConnectionChanged chan bool
+	ConnectionChanged chan ConnectionState
 	HandleNickInUse   func(string) string
 
 	nick     string
@@ -47,7 +47,7 @@ func NewClient(nick, username string) *Client {
 		Username:          username,
 		Realname:          nick,
 		Messages:          make(chan *Message, 32),
-		ConnectionChanged: make(chan bool, 16),
+		ConnectionChanged: make(chan ConnectionState, 16),
 		out:               make(chan string, 32),
 		quit:              make(chan struct{}),
 		reconnect:         make(chan struct{}),

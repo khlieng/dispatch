@@ -4,11 +4,16 @@ import createReducer from 'util/createReducer';
 import { getSelectedTab, updateSelection } from './tab';
 import * as actions from './actions';
 
+const Status = Record({
+  connected: false,
+  error: null
+});
+
 const Server = Record({
   nick: '',
   editedNick: null,
   name: '',
-  connected: false
+  status: new Status()
 });
 
 export const getServers = state => state.servers;
@@ -29,6 +34,12 @@ export const getCurrentServerName = createSelector(
   getServers,
   getSelectedTab,
   (servers, tab) => servers.getIn([tab.server, 'name'])
+);
+
+export const getCurrentServerStatus = createSelector(
+  getServers,
+  getSelectedTab,
+  (servers, tab) => servers.getIn([tab.server, 'status'])
 );
 
 export default createReducer(Map(), {
@@ -81,27 +92,27 @@ export default createReducer(Map(), {
 
     return state.withMutations(s => {
       data.forEach(server => {
+        server.status = new Status(server.status);
         s.set(server.host, new Server(server));
       });
     });
   },
 
   [actions.socket.CONNECTION_UPDATE](state, action) {
-    return state.withMutations(s =>
-      Object.keys(action).forEach(server => {
-        if (s.has(server)) {
-          s.setIn([server, 'connected'], action[server]);
-        }
-      })
-    );
+    if (state.has(action.server)) {
+      return state.setIn([action.server, 'status'], new Status(action));
+    }
+    return state;
   }
 });
 
 export function connect(server, nick, options) {
   let host = server;
+  let port;
   const i = server.indexOf(':');
   if (i > 0) {
     host = server.slice(0, i);
+    port = server.slice(i + 1);
   }
 
   return {
@@ -112,7 +123,8 @@ export function connect(server, nick, options) {
     socket: {
       type: 'connect',
       data: {
-        server,
+        host,
+        port,
         nick,
         username: options.username || nick,
         password: options.password,

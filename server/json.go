@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 
+	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
 )
 
@@ -16,14 +17,31 @@ type WSResponse struct {
 	Data interface{} `json:"data"`
 }
 
-type Connect struct {
-	Name     string `json:"name"`
-	Server   string `json:"server"`
-	TLS      bool   `json:"tls"`
-	Password string `json:"password"`
-	Nick     string `json:"nick"`
-	Username string `json:"username"`
-	Realname string `json:"realname"`
+type Server struct {
+	storage.Server
+	Status ConnectionUpdate `json:"status"`
+}
+
+type ServerName struct {
+	Server string `json:"server"`
+	Name   string `json:"name"`
+}
+
+type ConnectionUpdate struct {
+	Server    string `json:"server"`
+	Connected bool   `json:"connected"`
+	Error     string `json:"error,omitempty"`
+}
+
+func newConnectionUpdate(server string, state irc.ConnectionState) ConnectionUpdate {
+	status := ConnectionUpdate{
+		Server:    server,
+		Connected: state.Connected,
+	}
+	if state.Error != nil {
+		status.Error = state.Error.Error()
+	}
+	return status
 }
 
 type Nick struct {

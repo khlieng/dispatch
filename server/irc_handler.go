@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"unicode"
@@ -37,6 +38,7 @@ func newIRCHandler(client *irc.Client, session *Session) *ircHandler {
 }
 
 func (i *ircHandler) run() {
+	var lastConnErr error
 	for {
 		select {
 		case msg, ok := <-i.client.Messages:
@@ -47,11 +49,17 @@ func (i *ircHandler) run() {
 
 			i.dispatchMessage(msg)
 
-		case connected := <-i.client.ConnectionChanged:
-			i.session.sendJSON("connection_update", map[string]bool{
-				i.client.Host: connected,
-			})
-			i.session.setConnectionState(i.client.Host, connected)
+		case state := <-i.client.ConnectionChanged:
+			i.session.sendJSON("connection_update", newConnectionUpdate(i.client.Host, state))
+			i.session.setConnectionState(i.client.Host, state)
+
+			if state.Error != nil && (lastConnErr == nil ||
+				state.Error.Error() != lastConnErr.Error()) {
+				lastConnErr = state.Error
+				i.log("Connection error:", state.Error)
+			} else if state.Connected {
+				i.log("Connected")
+			}
 		}
 	}
 }
@@ -310,6 +318,11 @@ func (i *ircHandler) initHandlers() {
 		irc.ReplyEndOfMotd:       i.motdEnd,
 		irc.ErrErroneousNickname: i.badNick,
 	}
+}
+
+func (i *ircHandler) log(v ...interface{}) {
+	s := fmt.Sprintln(v...)
+	log.Println("[IRC]", i.session.user.ID, i.client.Host, s[:len(s)-1])
 }
 
 func parseMode(mode string) *Mode {

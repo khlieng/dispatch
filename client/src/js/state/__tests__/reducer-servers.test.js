@@ -8,10 +8,13 @@ describe('server reducer', () => {
 
     expect(state.toJS()).toEqual({
       '127.0.0.1': {
-        connected: false,
         name: '127.0.0.1',
         nick: 'nick',
-        editedNick: null
+        editedNick: null,
+        status: {
+          connected: false,
+          error: null
+        }
       }
     });
 
@@ -19,10 +22,13 @@ describe('server reducer', () => {
 
     expect(state.toJS()).toEqual({
       '127.0.0.1': {
-        connected: false,
         name: '127.0.0.1',
         nick: 'nick',
-        editedNick: null
+        editedNick: null,
+        status: {
+          connected: false,
+          error: null
+        }
       }
     });
 
@@ -32,16 +38,22 @@ describe('server reducer', () => {
 
     expect(state.toJS()).toEqual({
       '127.0.0.1': {
-        connected: false,
         name: '127.0.0.1',
         nick: 'nick',
-        editedNick: null
+        editedNick: null,
+        status: {
+          connected: false,
+          error: null
+        }
       },
       '127.0.0.2': {
-        connected: false,
         name: 'srv',
         nick: 'nick',
-        editedNick: null
+        editedNick: null,
+        status: {
+          connected: false,
+          error: null
+        }
       }
     });
   });
@@ -87,9 +99,8 @@ describe('server reducer', () => {
       editing: true
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state.toJS()).toMatchObject({
       '127.0.0.1': {
-        connected: false,
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: 'nick2'
@@ -111,9 +122,8 @@ describe('server reducer', () => {
       nick: ''
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state.toJS()).toMatchObject({
       '127.0.0.1': {
-        connected: false,
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: null
@@ -130,9 +140,8 @@ describe('server reducer', () => {
       newNick: 'nick2'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state.toJS()).toMatchObject({
       '127.0.0.1': {
-        connected: false,
         name: '127.0.0.1',
         nick: 'nick2',
         editedNick: null
@@ -153,9 +162,8 @@ describe('server reducer', () => {
       server: '127.0.0.1'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state.toJS()).toMatchObject({
       '127.0.0.1': {
-        connected: false,
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: null
@@ -171,13 +179,17 @@ describe('server reducer', () => {
           host: '127.0.0.1',
           name: 'stuff',
           nick: 'nick',
-          connected: true
+          status: {
+            connected: true
+          }
         },
         {
           host: '127.0.0.2',
           name: 'stuffz',
           nick: 'nick2',
-          connected: false
+          status: {
+            connected: false
+          }
         },
       ]
     });
@@ -187,13 +199,19 @@ describe('server reducer', () => {
         name: 'stuff',
         nick: 'nick',
         editedNick: null,
-        connected: true
+        status: {
+          connected: true,
+          error: null
+        }
       },
       '127.0.0.2': {
         name: 'stuffz',
         nick: 'nick2',
         editedNick: null,
-        connected: false
+        status: {
+          connected: false,
+          error: null
+        }
       }
     });
   });
@@ -202,7 +220,8 @@ describe('server reducer', () => {
     let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
     state = reducer(state, {
       type: actions.socket.CONNECTION_UPDATE,
-      '127.0.0.1': true
+      server: '127.0.0.1',
+      connected: true
     });
 
     expect(state.toJS()).toEqual({
@@ -210,7 +229,29 @@ describe('server reducer', () => {
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: null,
-        connected: true
+        status: {
+          connected: true,
+          error: null
+        }
+      }
+    });
+
+    state = reducer(state, {
+      type: actions.socket.CONNECTION_UPDATE,
+      server: '127.0.0.1',
+      connected: false,
+      error: 'Bad stuff happened'
+    });
+
+    expect(state.toJS()).toEqual({
+      '127.0.0.1': {
+        name: '127.0.0.1',
+        nick: 'nick',
+        editedNick: null,
+        status: {
+          connected: false,
+          error: 'Bad stuff happened'
+        }
       }
     });
   });

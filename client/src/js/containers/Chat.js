@@ -10,7 +10,7 @@ import { getSelectedMessages, getHasMoreMessages,
   runCommand, sendMessage, fetchMessages, addFetchedMessages } from 'state/messages';
 import { openPrivateChat, closePrivateChat } from 'state/privateChats';
 import { getSearch, searchMessages, toggleSearch } from 'state/search';
-import { getCurrentNick, disconnect, setNick, setServerName } from 'state/servers';
+import { getCurrentNick, getCurrentServerStatus, disconnect, setNick, setServerName } from 'state/servers';
 import { getSelectedTab, select } from 'state/tab';
 import { getShowUserList, toggleUserList } from 'state/ui';
 
@@ -22,6 +22,7 @@ const mapState = createStructuredSelector({
   nick: getCurrentNick,
   search: getSearch,
   showUserList: getShowUserList,
+  status: getCurrentServerStatus,
   tab: getSelectedTab,
   title: getSelectedTabTitle,
   users: getSelectedChannelUsers

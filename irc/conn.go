@@ -10,8 +10,6 @@ import (
 )
 
 func (c *Client) Connect(address string) {
-	c.ConnectionChanged <- false
-
 	if idx := strings.Index(address, ":"); idx < 0 {
 		c.Host = address
 
@@ -26,6 +24,7 @@ func (c *Client) Connect(address string) {
 	c.Server = address
 	c.dialer = &net.Dialer{Timeout: 10 * time.Second}
 
+	c.connChange(false, nil)
 	go c.run()
 }
 
@@ -71,8 +70,20 @@ func (c *Client) run() {
 	}
 }
 
+type ConnectionState struct {
+	Connected bool
+	Error     error
+}
+
+func (c *Client) connChange(connected bool, err error) {
+	c.ConnectionChanged <- ConnectionState{
+		Connected: connected,
+		Error:     err,
+	}
+}
+
 func (c *Client) disconnect() {
-	c.ConnectionChanged <- false
+	c.connChange(false, nil)
 	c.lock.Lock()
 	c.connected = false
 	c.lock.Unlock()
@@ -91,7 +102,9 @@ func (c *Client) tryConnect() {
 		}
 
 		err := c.connect()
-		if err == nil {
+		if err != nil {
+			c.connChange(false, err)
+		} else {
 			c.backoff.Reset()
 
 			c.flushChannels()
@@ -123,7 +136,7 @@ func (c *Client) connect() error {
 	}
 
 	c.connected = true
-	c.ConnectionChanged <- true
+	c.connChange(true, nil)
 	c.reader = bufio.NewReader(c.conn)
 
 	c.register()

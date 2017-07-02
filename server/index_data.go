@@ -20,7 +20,7 @@ type connectDefaults struct {
 
 type indexData struct {
 	Defaults connectDefaults   `json:"defaults"`
-	Servers  []storage.Server  `json:"servers,omitempty"`
+	Servers  []Server          `json:"servers,omitempty"`
 	Channels []storage.Channel `json:"channels,omitempty"`
 
 	// Users in the selected channel
@@ -57,32 +57,32 @@ func (d *indexData) addUsersAndMessages(server, channel string, session *Session
 }
 
 func getIndexData(r *http.Request, session *Session) *indexData {
+	data := indexData{}
 	servers := session.user.GetServers()
 	connections := session.getConnectionStates()
-	for i, server := range servers {
-		servers[i].Connected = connections[server.Host]
-		servers[i].Port = ""
-		servers[i].TLS = false
-		servers[i].Password = ""
-		servers[i].Username = ""
-		servers[i].Realname = ""
+	for _, server := range servers {
+		server.Password = ""
+		server.Username = ""
+		server.Realname = ""
+
+		data.Servers = append(data.Servers, Server{
+			Server: server,
+			Status: newConnectionUpdate(server.Host, connections[server.Host]),
+		})
 	}
 
 	channels := session.user.GetChannels()
 	for i, channel := range channels {
 		channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
 	}
+	data.Channels = channels
 
-	data := indexData{
-		Defaults: connectDefaults{
-			Name:     viper.GetString("defaults.name"),
-			Address:  viper.GetString("defaults.address"),
-			Channels: viper.GetStringSlice("defaults.channels"),
-			Password: viper.GetString("defaults.password") != "",
-			SSL:      viper.GetBool("defaults.ssl"),
-		},
-		Servers:  servers,
-		Channels: channels,
+	data.Defaults = connectDefaults{
+		Name:     viper.GetString("defaults.name"),
+		Address:  viper.GetString("defaults.address"),
+		Channels: viper.GetStringSlice("defaults.channels"),
+		Password: viper.GetString("defaults.password") != "",
+		SSL:      viper.GetBool("defaults.ssl"),
 	}
 
 	server, channel := getTabFromPath(r.URL.EscapedPath())

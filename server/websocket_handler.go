@@ -1,19 +1,13 @@
 package server
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"log"
-	"net"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/websocket"
 	"github.com/kjk/betterguid"
-	"github.com/spf13/viper"
-
-	"github.com/khlieng/dispatch/irc"
-	"github.com/khlieng/dispatch/storage"
 )
 
 type wsHandler struct {
@@ -87,56 +81,17 @@ func (h *wsHandler) init(r *http.Request) {
 }
 
 func (h *wsHandler) connect(b []byte) {
-	var data Connect
+	var data Server
 	json.Unmarshal(b, &data)
 
-	host, port, err := net.SplitHostPort(data.Server)
-	if err != nil {
-		host = data.Server
-	}
-
-	if _, ok := h.session.getIRC(host); !ok {
+	if _, ok := h.session.getIRC(data.Host); !ok {
 		log.Println(h.addr, "[IRC] Add server", data.Server)
 
-		i := irc.NewClient(data.Nick, data.Username)
-		i.TLS = data.TLS
-		i.Realname = data.Realname
-		i.HandleNickInUse = createNickInUseHandler(i, h.session)
+		connectIRC(data.Server, h.session)
 
-		if data.Password == "" &&
-			viper.GetString("defaults.password") != "" &&
-			data.Server == viper.GetString("defaults.address") {
-			i.Password = viper.GetString("defaults.password")
-		} else {
-			i.Password = data.Password
-		}
-
-		if i.TLS {
-			i.TLSConfig = &tls.Config{
-				InsecureSkipVerify: !viper.GetBool("verify_certificates"),
-			}
-
-			if cert := h.session.user.GetCertificate(); cert != nil {
-				i.TLSConfig.Certificates = []tls.Certificate{*cert}
-			}
-		}
-
-		h.session.setIRC(host, i)
-		i.Connect(data.Server)
-		go newIRCHandler(i, h.session).run()
-
-		go h.session.user.AddServer(storage.Server{
-			Name:     data.Name,
-			Host:     host,
-			Port:     port,
-			TLS:      data.TLS,
-			Password: data.Password,
-			Nick:     data.Nick,
-			Username: data.Username,
-			Realname: data.Realname,
-		})
+		go h.session.user.AddServer(data.Server)
 	} else {
-		log.Println(h.addr, "[IRC]", data.Server, "already added")
+		log.Println(h.addr, "[IRC]", data.Host, "already added")
 	}
 }
 
@@ -287,7 +242,7 @@ func (h *wsHandler) fetchMessages(b []byte) {
 }
 
 func (h *wsHandler) setServerName(b []byte) {
-	var data Connect
+	var data ServerName
 	json.Unmarshal(b, &data)
 
 	if isValidServerName(data.Name) {

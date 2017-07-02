@@ -27,31 +27,7 @@ func reconnectIRC() {
 		channels := user.GetChannels()
 
 		for _, server := range user.GetServers() {
-			i := irc.NewClient(server.Nick, server.Username)
-			i.TLS = server.TLS
-			i.Password = server.Password
-			i.Realname = server.Realname
-			i.HandleNickInUse = createNickInUseHandler(i, session)
-
-			if i.TLS {
-				i.TLSConfig = &tls.Config{
-					InsecureSkipVerify: !viper.GetBool("verify_certificates"),
-				}
-
-				if cert := user.GetCertificate(); cert != nil {
-					i.TLSConfig.Certificates = []tls.Certificate{*cert}
-				}
-			}
-
-			session.setIRC(server.Host, i)
-
-			if server.Port != "" {
-				i.Connect(net.JoinHostPort(server.Host, server.Port))
-			} else {
-				i.Connect(server.Host)
-			}
-
-			go newIRCHandler(i, session).run()
+			i := connectIRC(server, session)
 
 			var joining []string
 			for _, channel := range channels {
@@ -62,4 +38,40 @@ func reconnectIRC() {
 			i.Join(joining...)
 		}
 	}
+}
+
+func connectIRC(server storage.Server, session *Session) *irc.Client {
+	i := irc.NewClient(server.Nick, server.Username)
+	i.TLS = server.TLS
+	i.Realname = server.Realname
+	i.HandleNickInUse = createNickInUseHandler(i, session)
+
+	address := server.Host
+	if server.Port != "" {
+		address = net.JoinHostPort(server.Host, server.Port)
+	}
+
+	if server.Password == "" &&
+		viper.GetString("defaults.password") != "" &&
+		address == viper.GetString("defaults.address") {
+		i.Password = viper.GetString("defaults.password")
+	} else {
+		i.Password = server.Password
+	}
+
+	if i.TLS {
+		i.TLSConfig = &tls.Config{
+			InsecureSkipVerify: !viper.GetBool("verify_certificates"),
+		}
+
+		if cert := session.user.GetCertificate(); cert != nil {
+			i.TLSConfig.Certificates = []tls.Certificate{*cert}
+		}
+	}
+
+	session.setIRC(server.Host, i)
+	i.Connect(address)
+	go newIRCHandler(i, session).run()
+
+	return i
 }
