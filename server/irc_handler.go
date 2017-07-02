@@ -371,5 +371,5 @@ func formatIRCError(msg *irc.Message) string {
 }
 
 func printMessage(msg *irc.Message, i *irc.Client) {
-	log.Println(i.GetNick()+":", msg.Prefix, msg.Command, msg.Params, msg.LastParam())
+	log.Println(i.GetNick()+":", msg.Prefix, msg.Command, msg.Params)
 }

@@ -12,6 +12,13 @@ import (
 func createNickInUseHandler(i *irc.Client, session *Session) func(string) string {
 	return func(nick string) string {
 		newNick := nick + "_"
+
+		if newNick == i.GetNick() {
+			session.sendJSON("nick_fail", NickFail{
+				Server: i.Host,
+			})
+		}
+
 		session.printError("Nickname", nick, "is already in use, using", newNick, "instead")
 
 		return newNick
