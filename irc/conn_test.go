@@ -131,9 +131,7 @@ func TestRecv(t *testing.T) {
 	buf.WriteString("001 foo\r\n")
 	c.reader = bufio.NewReader(buf)
 
-	c.ready.Add(1)
 	c.sendRecv.Add(2)
-	go c.send()
 	go c.recv()
 
 	assert.Equal(t, "PONG :test\r\n", <-conn.hook)
@@ -143,7 +141,6 @@ func TestRecv(t *testing.T) {
 func TestRecvTriggersReconnect(t *testing.T) {
 	c := testClient()
 	c.conn = &mockConn{}
-	c.ready.Add(1)
 	c.reader = bufio.NewReader(&bytes.Buffer{})
 	done := make(chan struct{})
 	ok := false

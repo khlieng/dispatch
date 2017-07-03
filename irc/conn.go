@@ -3,10 +3,15 @@ package irc
 import (
 	"bufio"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"strings"
 	"time"
+)
+
+var (
+	ErrBadProtocol = errors.New("This server does not speak IRC")
 )
 
 func (c *Client) Connect(address string) {
@@ -60,10 +65,10 @@ func (c *Client) run() {
 
 		case <-c.reconnect:
 			c.disconnect()
+			c.connChange(false, nil)
 
 			c.sendRecv.Wait()
 			c.reconnect = make(chan struct{})
-			c.once.Reset()
 
 			c.tryConnect()
 		}
@@ -83,12 +88,10 @@ func (c *Client) connChange(connected bool, err error) {
 }
 
 func (c *Client) disconnect() {
-	c.connChange(false, nil)
 	c.lock.Lock()
 	c.connected = false
 	c.lock.Unlock()
 
-	c.once.Do(c.ready.Done)
 	c.conn.Close()
 }
 
@@ -141,9 +144,7 @@ func (c *Client) connect() error {
 
 	c.register()
 
-	c.ready.Add(1)
-	c.sendRecv.Add(2)
-	go c.send()
+	c.sendRecv.Add(1)
 	go c.recv()
 
 	return nil
@@ -151,8 +152,6 @@ func (c *Client) connect() error {
 
 func (c *Client) send() {
 	defer c.sendRecv.Done()
-
-	c.ready.Wait()
 
 	for {
 		select {
@@ -188,6 +187,11 @@ func (c *Client) recv() {
 		}
 
 		msg := parseMessage(line)
+		if msg == nil {
+			close(c.quit)
+			c.connChange(false, ErrBadProtocol)
+			return
+		}
 
 		switch msg.Command {
 		case Ping:
@@ -205,7 +209,8 @@ func (c *Client) recv() {
 
 		case ReplyWelcome:
 			c.setNick(msg.Params[0])
-			c.once.Do(c.ready.Done)
+			c.sendRecv.Add(1)
+			go c.send()
 
 		case ErrNicknameInUse:
 			if c.HandleNickInUse != nil {

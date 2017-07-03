@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/jpillora/backoff"
-	"github.com/matryer/resync"
 )
 
 type Client struct {
@@ -35,9 +34,7 @@ type Client struct {
 
 	quit      chan struct{}
 	reconnect chan struct{}
-	ready     sync.WaitGroup
 	sendRecv  sync.WaitGroup
-	once      resync.Once
 	lock      sync.Mutex
 }
 

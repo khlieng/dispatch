@@ -30,8 +30,7 @@ func parseMessage(line string) *Message {
 		if cmdStart > 0 {
 			msg.Prefix = line[1 : cmdStart-1]
 		} else {
-			// Invalid message
-			return &msg
+			return nil
 		}
 
 		if i := strings.Index(msg.Prefix, "!"); i > 0 {
@@ -43,22 +42,24 @@ func parseMessage(line string) *Message {
 		}
 	}
 
-	var usesTrailing bool
 	var trailing string
 
 	if i := strings.Index(line, " :"); i > 0 {
 		cmdEnd = i
 		trailing = line[i+2:]
-		usesTrailing = true
 	}
 
 	cmd := strings.Split(line[cmdStart:cmdEnd], " ")
 	msg.Command = cmd[0]
+	if msg.Command == "" {
+		return nil
+	}
+
 	if len(cmd) > 1 {
 		msg.Params = cmd[1:]
 	}
 
-	if usesTrailing {
+	if cmdEnd != len(line) {
 		msg.Params = append(msg.Params, trailing)
 	}
 

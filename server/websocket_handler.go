@@ -117,14 +117,13 @@ func (h *wsHandler) quit(b []byte) {
 	var data Quit
 	json.Unmarshal(b, &data)
 
+	log.Println(h.addr, "[IRC] Remove server", data.Server)
 	if i, ok := h.session.getIRC(data.Server); ok {
-		log.Println(h.addr, "[IRC] Remove server", data.Server)
-
-		i.Quit()
 		h.session.deleteIRC(data.Server)
-		channelStore.RemoveUserAll(i.GetNick(), data.Server)
-		go h.session.user.RemoveServer(data.Server)
+		i.Quit()
 	}
+
+	go h.session.user.RemoveServer(data.Server)
 }
 
 func (h *wsHandler) message(b []byte) {
