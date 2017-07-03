@@ -64,6 +64,18 @@ func TestParseMessage(t *testing.T) {
 				Nick:    "ni@ck",
 				Command: "CMD",
 			},
+		}, {
+			"CMD #cake pie  \r\n",
+			&Message{
+				Command: "CMD",
+				Params:  []string{"#cake", "pie"},
+			},
+		}, {
+			" CMD #cake pie\r\n",
+			&Message{
+				Command: "CMD",
+				Params:  []string{"#cake", "pie"},
+			},
 		},
 	}
 

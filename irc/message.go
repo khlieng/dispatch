@@ -19,7 +19,7 @@ func (m *Message) LastParam() string {
 }
 
 func parseMessage(line string) *Message {
-	line = strings.Trim(line, "\r\n")
+	line = strings.Trim(line, "\r\n ")
 	msg := Message{}
 	cmdStart := 0
 	cmdEnd := len(line)

@@ -131,7 +131,7 @@ func TestRecv(t *testing.T) {
 	buf.WriteString("001 foo\r\n")
 	c.reader = bufio.NewReader(buf)
 
-	c.sendRecv.Add(2)
+	c.sendRecv.Add(1)
 	go c.recv()
 
 	assert.Equal(t, "PONG :test\r\n", <-conn.hook)
