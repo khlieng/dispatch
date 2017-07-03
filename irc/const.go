@@ -1,15 +1,16 @@
 package irc
 
 const (
-	Ping    = "PING"
-	Nick    = "NICK"
+	Error   = "ERROR"
 	Join    = "JOIN"
-	Part    = "PART"
 	Mode    = "MODE"
-	Privmsg = "PRIVMSG"
+	Nick    = "NICK"
 	Notice  = "NOTICE"
-	Topic   = "TOPIC"
+	Part    = "PART"
+	Ping    = "PING"
+	Privmsg = "PRIVMSG"
 	Quit    = "QUIT"
+	Topic   = "TOPIC"
 
 	ReplyWelcome         = "001"
 	ReplyYourHost        = "002"

@@ -287,6 +287,10 @@ func (i *ircHandler) badNick(msg *irc.Message) {
 	})
 }
 
+func (i *ircHandler) error(msg *irc.Message) {
+	i.session.printError(msg.LastParam())
+}
+
 func (i *ircHandler) initHandlers() {
 	i.handlers = map[string]func(*irc.Message){
 		irc.Nick:                 i.nick,
@@ -297,6 +301,7 @@ func (i *ircHandler) initHandlers() {
 		irc.Notice:               i.message,
 		irc.Quit:                 i.quit,
 		irc.Topic:                i.topic,
+		irc.Error:                i.error,
 		irc.ReplyWelcome:         i.info,
 		irc.ReplyYourHost:        i.info,
 		irc.ReplyCreated:         i.info,
