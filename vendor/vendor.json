@@ -333,12 +333,6 @@
 			"revisionTime": "2017-03-21T09:30:39Z"
 		},
 		{
-			"checksumSHA1": "C4o27pZpCxioJpXbAL7NFYS9mrI=",
-			"path": "github.com/matryer/resync",
-			"revision": "d39c09a11215c84aab0b65e323fc47dd6e276af1",
-			"revisionTime": "2016-12-11T20:24:28Z"
-		},
-		{
 			"checksumSHA1": "V8CycX4FOqp+fAMzZeQY6TKv4AU=",
 			"path": "github.com/miekg/dns",
 			"revision": "6ebcb714d36901126ee2807031543b38c56de963",
