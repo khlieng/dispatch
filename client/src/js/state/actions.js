@@ -28,6 +28,7 @@ export const TOGGLE_SEARCH = 'TOGGLE_SEARCH';
 export const AWAY = 'AWAY';
 export const CONNECT = 'CONNECT';
 export const DISCONNECT = 'DISCONNECT';
+export const RECONNECT = 'RECONNECT';
 export const SET_NICK = 'SET_NICK';
 export const SET_SERVER_NAME = 'SET_SERVER_NAME';
 export const WHOIS = 'WHOIS';

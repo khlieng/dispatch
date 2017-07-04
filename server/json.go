@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/x509"
 	"encoding/json"
 
 	"github.com/khlieng/dispatch/irc"
@@ -27,10 +28,16 @@ type ServerName struct {
 	Name   string `json:"name"`
 }
 
+type ReconnectSettings struct {
+	Server     string `json:"server"`
+	SkipVerify bool   `json:"skipVerify"`
+}
+
 type ConnectionUpdate struct {
 	Server    string `json:"server"`
 	Connected bool   `json:"connected"`
 	Error     string `json:"error,omitempty"`
+	ErrorType string `json:"errorType,omitempty"`
 }
 
 func newConnectionUpdate(server string, state irc.ConnectionState) ConnectionUpdate {
@@ -40,6 +47,9 @@ func newConnectionUpdate(server string, state irc.ConnectionState) ConnectionUpd
 	}
 	if state.Error != nil {
 		status.Error = state.Error.Error()
+		if _, ok := state.Error.(x509.UnknownAuthorityError); ok {
+			status.ErrorType = "verify"
+		}
 	}
 	return status
 }

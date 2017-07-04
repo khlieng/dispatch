@@ -3,6 +3,7 @@ package irc
 import (
 	"bufio"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"net"
@@ -31,6 +32,10 @@ func (c *Client) Connect(address string) {
 
 	c.connChange(false, nil)
 	go c.run()
+}
+
+func (c *Client) Reconnect() {
+	close(c.reconnect)
 }
 
 func (c *Client) Write(data string) {
@@ -64,8 +69,9 @@ func (c *Client) run() {
 			return
 
 		case <-c.reconnect:
-			c.disconnect()
-			c.connChange(false, nil)
+			if c.Connected() {
+				c.disconnect()
+			}
 
 			c.sendRecv.Wait()
 			c.reconnect = make(chan struct{})
@@ -107,6 +113,9 @@ func (c *Client) tryConnect() {
 		err := c.connect()
 		if err != nil {
 			c.connChange(false, err)
+			if _, ok := err.(x509.UnknownAuthorityError); ok {
+				return
+			}
 		} else {
 			c.backoff.Reset()
 
@@ -181,7 +190,8 @@ func (c *Client) recv() {
 				return
 
 			default:
-				close(c.reconnect)
+				c.connChange(false, nil)
+				c.Reconnect()
 				return
 			}
 		}

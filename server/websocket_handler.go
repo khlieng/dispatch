@@ -95,6 +95,18 @@ func (h *wsHandler) connect(b []byte) {
 	}
 }
 
+func (h *wsHandler) reconnect(b []byte) {
+	var data ReconnectSettings
+	json.Unmarshal(b, &data)
+
+	if i, ok := h.session.getIRC(data.Server); ok && !i.Connected() {
+		if i.TLS {
+			i.TLSConfig.InsecureSkipVerify = data.SkipVerify
+		}
+		i.Reconnect()
+	}
+}
+
 func (h *wsHandler) join(b []byte) {
 	var data Join
 	json.Unmarshal(b, &data)
@@ -252,6 +264,7 @@ func (h *wsHandler) setServerName(b []byte) {
 func (h *wsHandler) initHandlers() {
 	h.handlers = map[string]func([]byte){
 		"connect":         h.connect,
+		"reconnect":       h.reconnect,
 		"join":            h.join,
 		"part":            h.part,
 		"quit":            h.quit,

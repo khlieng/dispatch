@@ -150,6 +150,21 @@ export function disconnect(server) {
   };
 }
 
+export function reconnect(server, settings) {
+  return {
+    type: actions.RECONNECT,
+    server,
+    settings,
+    socket: {
+      type: 'reconnect',
+      data: {
+        ...settings,
+        server
+      }
+    }
+  };
+}
+
 export function whois(user, server) {
   return {
     type: actions.WHOIS,
