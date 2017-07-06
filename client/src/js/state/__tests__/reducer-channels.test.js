@@ -291,3 +291,28 @@ function socket_mode(server, channel, user, add, remove) {
     server, channel, user, add, remove
   };
 }
+
+describe('compareUsers()', () => {
+  it('compares users correctly', () => {
+    const compareUsers = reducer.__get__('compareUsers');
+    expect([
+      { renderName: 'user5' },
+      { renderName: '@user2' },
+      { renderName: 'user3' },
+      { renderName: 'user2' },
+      { renderName: '+user1' },
+      { renderName: '~bob' },
+      { renderName: '%apples' },
+      { renderName: '&cake' }
+    ].sort(compareUsers)).toEqual([
+      { renderName: '~bob' },
+      { renderName: '&cake' },
+      { renderName: '@user2' },
+      { renderName: '%apples' },
+      { renderName: '+user1' },
+      { renderName: 'user2' },
+      { renderName: 'user3' },
+      { renderName: 'user5' }
+    ]);
+  });
+});
