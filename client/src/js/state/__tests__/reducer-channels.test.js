@@ -113,8 +113,8 @@ describe('channel reducer', () => {
       srv: {
         chan1: {
           users: [
-            { mode: '', nick: 'nick2', renderName: 'nick2' },
-            { mode: '', nick: 'nick3', renderName: 'nick3' }
+            { mode: '', nick: 'nick3', renderName: 'nick3' },
+            { mode: '', nick: 'nick2', renderName: 'nick2' }
           ]
         },
         chan2: {
@@ -144,11 +144,11 @@ describe('channel reducer', () => {
       srv: {
         chan1: {
           users: [
-            { mode: 'o', nick: 'user4', renderName: '@user4' },
-            { mode: 'v', nick: 'user5', renderName: '+user5' },
-            { mode: '', nick: 'user1', renderName: 'user1' },
+            { mode: '', nick: 'user3', renderName: 'user3' },
             { mode: '', nick: 'user2', renderName: 'user2' },
-            { mode: '', nick: 'user3', renderName: 'user3' }
+            { mode: 'o', nick: 'user4', renderName: '@user4' },
+            { mode: '', nick: 'user1', renderName: 'user1' },
+            { mode: 'v', nick: 'user5', renderName: '+user5' }
           ]
         }
       }
@@ -203,8 +203,8 @@ describe('channel reducer', () => {
       srv: {
         chan1: {
           users: [
-            { mode: 'o', nick: 'nick2', renderName: '@nick2' },
-            { mode: 'v', nick: 'nick1', renderName: '+nick1' }
+            { mode: 'v', nick: 'nick1', renderName: '+nick1' },
+            { mode: 'o', nick: 'nick2', renderName: '@nick2' }
           ]
         },
         chan2: {

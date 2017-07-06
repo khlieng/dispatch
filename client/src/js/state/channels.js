@@ -97,26 +97,23 @@ export const getSelectedChannel = createSelector(
 
 export const getSelectedChannelUsers = createSelector(
   getSelectedChannel,
-  channel => channel.get('users', List())
+  channel => channel.get('users', List()).sort(compareUsers)
 );
 
 export default createReducer(Map(), {
-  [actions.PART](state, action) {
-    const { channels, server } = action;
+  [actions.PART](state, { server, channels }) {
     return state.withMutations(s => {
       channels.forEach(channel => s.deleteIn([server, channel]));
     });
   },
 
-  [actions.socket.JOIN](state, action) {
-    const { server, channels, user } = action;
+  [actions.socket.JOIN](state, { server, channels, user }) {
     return state.updateIn([server, channels[0], 'users'], List(), users =>
-      users.push(createUser(user)).sort(compareUsers)
+      users.push(createUser(user))
     );
   },
 
-  [actions.socket.PART](state, action) {
-    const { server, channel, user } = action;
+  [actions.socket.PART](state, { server, channel, user }) {
     if (state.hasIn([server, channel])) {
       return state.updateIn([server, channel, 'users'], users =>
         users.filter(u => u.nick !== user)
@@ -125,8 +122,7 @@ export default createReducer(Map(), {
     return state;
   },
 
-  [actions.socket.QUIT](state, action) {
-    const { server, user } = action;
+  [actions.socket.QUIT](state, { server, user }) {
     return state.withMutations(s => {
       s.get(server).forEach((v, channel) => {
         s.updateIn([server, channel, 'users'], users => users.filter(u => u.nick !== user));
@@ -145,26 +141,23 @@ export default createReducer(Map(), {
 
           return users.update(i,
             user => updateRenderName(user.set('nick', newNick))
-          ).sort(compareUsers);
+          );
         });
       });
     });
   },
 
-  [actions.socket.USERS](state, action) {
-    const { server, channel, users } = action;
+  [actions.socket.USERS](state, { server, channel, users }) {
     return state.setIn([server, channel, 'users'],
-      List(users.map(user => loadUser(user)).sort(compareUsers)));
+      List(users.map(user => loadUser(user)))
+    );
   },
 
-  [actions.socket.TOPIC](state, action) {
-    const { server, channel, topic } = action;
+  [actions.socket.TOPIC](state, { server, channel, topic }) {
     return state.setIn([server, channel, 'topic'], topic);
   },
 
-  [actions.socket.MODE](state, action) {
-    const { server, channel, user, remove, add } = action;
-
+  [actions.socket.MODE](state, { server, channel, user, remove, add }) {
     return state.updateIn([server, channel, 'users'], users => {
       const i = users.findIndex(u => u.nick === user);
       if (i < 0) {
@@ -179,17 +172,17 @@ export default createReducer(Map(), {
         }
 
         return updateRenderName(u.set('mode', mode + add));
-      }).sort(compareUsers);
+      });
     });
   },
 
-  [actions.socket.CHANNELS](state, action) {
-    if (!action.data) {
+  [actions.socket.CHANNELS](state, { data }) {
+    if (!data) {
       return state;
     }
 
     return state.withMutations(s => {
-      action.data.forEach(channel => {
+      data.forEach(channel => {
         s.setIn([channel.server, channel.name], Map({
           users: List(),
           topic: channel.topic
@@ -198,23 +191,21 @@ export default createReducer(Map(), {
     });
   },
 
-  [actions.socket.SERVERS](state, action) {
-    if (!action.data) {
+  [actions.socket.SERVERS](state, { data }) {
+    if (!data) {
       return state;
     }
 
     return state.withMutations(s => {
-      action.data.forEach(server => {
-        if (!state.has(server.host)) {
+      data.forEach(server => {
+        if (!s.has(server.host)) {
           s.set(server.host, Map());
         }
       });
     });
   },
 
-  [actions.CONNECT](state, action) {
-    const { host } = action;
-
+  [actions.CONNECT](state, { host }) {
     if (!state.has(host)) {
       return state.set(host, Map());
     }
@@ -222,8 +213,8 @@ export default createReducer(Map(), {
     return state;
   },
 
-  [actions.DISCONNECT](state, action) {
-    return state.delete(action.server);
+  [actions.DISCONNECT](state, { server }) {
+    return state.delete(server);
   }
 });
 
