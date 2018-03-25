@@ -17,8 +17,8 @@ matrix:
 install:
   - go get github.com/jteeuwen/go-bindata/...
   - cd client
-  - nvm install 7.10.0
-  - nvm use 7.10.0
+  - nvm install 8.10.0
+  - nvm use 8.10.0
   - npm install -g yarn
   - yarn global add gulp
   - yarn
