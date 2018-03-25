@@ -15,7 +15,7 @@ const modePrefixes = [
   { mode: 'a', prefix: '&' }, // Admin
   { mode: 'o', prefix: '@' }, // Op
   { mode: 'h', prefix: '%' }, // Halfop
-  { mode: 'v', prefix: '+' }  // Voice
+  { mode: 'v', prefix: '+' } // Voice
 ];
 
 function updateRenderName(user) {
@@ -41,7 +41,7 @@ function loadUser(nick) {
 
   for (let i = 0; i < modePrefixes.length; i++) {
     if (nick[0] === modePrefixes[i].prefix) {
-      mode = modePrefixes[i].mode;
+      ({ mode } = modePrefixes[i]);
     }
   }
 
@@ -57,7 +57,7 @@ function compareUsers(a, b) {
   b = b.renderName.toLowerCase();
 
   for (let i = 0; i < modePrefixes.length; i++) {
-    const prefix = modePrefixes[i].prefix;
+    const { prefix } = modePrefixes[i];
 
     if (a[0] === prefix && b[0] !== prefix) {
       return -1;
@@ -165,7 +165,7 @@ export default createReducer(Map(), {
       }
 
       return users.update(i, u => {
-        let mode = u.mode;
+        let { mode } = u;
         let j = remove.length;
         while (j--) {
           mode = mode.replace(remove[j], '');

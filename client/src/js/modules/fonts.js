@@ -3,7 +3,7 @@ import { setCharWidth } from 'state/app';
 import { stringWidth } from 'util';
 
 export default function fonts({ store }) {
-  let charWidth = localStorage.charWidth;
+  let { charWidth } = localStorage;
   if (charWidth) {
     store.dispatch(setCharWidth(parseFloat(charWidth)));
   }

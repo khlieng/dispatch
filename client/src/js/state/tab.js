@@ -76,7 +76,7 @@ export function select(server, name, doReplace) {
 export function updateSelection() {
   return (dispatch, getState) => {
     const state = getState();
-    const history = state.tab.history;
+    const { history } = state.tab;
     const { servers } = state;
     const { server } = state.tab.selected;
 

@@ -3,9 +3,10 @@ import debounce from 'lodash/debounce';
 import { getSelectedTab } from 'state/tab';
 import { observe } from 'util/observe';
 
-const saveTab = debounce(tab =>
-  Cookie.set('tab', tab.toString(), { expires: 30 })
-, 1000);
+const saveTab = debounce(
+  tab => Cookie.set('tab', tab.toString(), { expires: 30 }),
+  1000
+);
 
 export default function storage({ store }) {
   observe(store, getSelectedTab, tab => {

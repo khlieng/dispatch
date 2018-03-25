@@ -1,15 +1,13 @@
-var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-  devtool: 'eval',
+  mode: 'development',
   entry: [
     'react-hot-loader/patch',
     'webpack-hot-middleware/client',
     './src/js/index'
   ],
   output: {
-    path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
     publicPath: '/'
   },
@@ -22,9 +20,8 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      DEV: true,
+      DEV: true
     }),
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.HotModuleReplacementPlugin()
   ]
 };

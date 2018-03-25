@@ -101,7 +101,7 @@ function initMessage(message, tab, state) {
   message.content = message.content.replace(/\s\s+/g, ' ');
 
   if (message.content.indexOf('\x01ACTION') === 0) {
-    const from = message.from;
+    const { from } = message;
     message.from = null;
     message.type = 'action';
     message.content = from + message.content.slice(7, -1);

@@ -1,7 +1,7 @@
 import debounce from 'lodash/debounce';
 
 const debounceKey = action => {
-  const key = action.socket.debounce.key;
+  const { key } = action.socket.debounce;
   if (key) {
     return `${action.type} ${key}`;
   }

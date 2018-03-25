@@ -1,12 +1,11 @@
-var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
+  mode: 'production',
   entry: [
     './src/js/index'
   ],
   output: {
-    path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js'
   },
   module: {
@@ -18,18 +17,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      DEV: false,
-      'process.env': {
-        NODE_ENV: JSON.stringify('production')
-      }
-    }),
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
+      DEV: false
     })
   ]
 };
-
-

@@ -8,10 +8,10 @@
     ["module-resolver", {
       "root": ["./src/js"],
       "alias": {
-        "components": "./components",
-        "containers": "./containers",
-        "state": "./state",
-        "util": "./util"
+        "components": "./src/js/components",
+        "containers": "./src/js/containers",
+        "state": "./src/js/state",
+        "util": "./src/js/util"
       }
     }]
   ],
