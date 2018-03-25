@@ -1,9 +1,9 @@
 language: go
 
 go:
-  - 1.8.x
-  - 1.9.x
-  - "1.10"
+  - "1.8.x"
+  - "1.9.x"
+  - "1.10.x"
   - tip
 
 os:
@@ -20,11 +20,11 @@ install:
   - nvm install 7.10.0
   - nvm use 7.10.0
   - npm install -g yarn
-  - npm install -g gulp
+  - yarn global add gulp
   - yarn
 
 script:
-  - npm run test:verbose
+  - yarn test:verbose
   - gulp build
   - cd ..
   - go vet $(go list ./... | grep -v '/vendor/')
