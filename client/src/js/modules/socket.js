@@ -1,6 +1,12 @@
 import { socketAction } from 'state/actions';
 import { setConnected } from 'state/app';
-import { broadcast, inform, print, addMessage, addMessages } from 'state/messages';
+import {
+  broadcast,
+  inform,
+  print,
+  addMessage,
+  addMessages
+} from 'state/messages';
 import { reconnect } from 'state/servers';
 import { select } from 'state/tab';
 import { normalizeChannel } from 'utils';
@@ -21,7 +27,10 @@ function findChannels(state, server, user) {
   return channels;
 }
 
-export default function handleSocket({ socket, store: { dispatch, getState } }) {
+export default function handleSocket({
+  socket,
+  store: { dispatch, getState }
+}) {
   const handlers = {
     message(message) {
       dispatch(addMessage(message, message.server, message.to));
@@ -41,10 +50,12 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
       const [joinedChannel] = channels;
       if (tab.server && tab.name) {
         const { nick } = state.servers.get(tab.server);
-        if (tab.server === server &&
+        if (
+          tab.server === server &&
           nick === user &&
           tab.name !== joinedChannel &&
-          normalizeChannel(tab.name) === normalizeChannel(joinedChannel)) {
+          normalizeChannel(tab.name) === normalizeChannel(joinedChannel)
+        ) {
           dispatch(select(server, joinedChannel));
         }
       }
@@ -53,7 +64,9 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
     },
 
     part({ user, server, channel, reason }) {
-      dispatch(inform(withReason(`${user} left the channel`, reason), server, channel));
+      dispatch(
+        inform(withReason(`${user} left the channel`, reason), server, channel)
+      );
     },
 
     quit({ user, server, reason }) {
@@ -63,7 +76,9 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
 
     nick({ server, oldNick, newNick }) {
       const channels = findChannels(getState(), server, oldNick);
-      dispatch(broadcast(`${oldNick} changed nick to ${newNick}`, server, channels));
+      dispatch(
+        broadcast(`${oldNick} changed nick to ${newNick}`, server, channels)
+      );
     },
 
     topic({ server, channel, topic, nick }) {
@@ -84,14 +99,20 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
     whois(data) {
       const tab = getState().tab.selected;
 
-      dispatch(print([
-        `Nick: ${data.nick}`,
-        `Username: ${data.username}`,
-        `Realname: ${data.realname}`,
-        `Host: ${data.host}`,
-        `Server: ${data.server}`,
-        `Channels: ${data.channels}`
-      ], tab.server, tab.name));
+      dispatch(
+        print(
+          [
+            `Nick: ${data.nick}`,
+            `Username: ${data.username}`,
+            `Realname: ${data.realname}`,
+            `Host: ${data.host}`,
+            `Server: ${data.server}`,
+            `Channels: ${data.channels}`
+          ],
+          tab.server,
+          tab.name
+        )
+      );
     },
 
     print(message) {
@@ -100,11 +121,17 @@ export default function handleSocket({ socket, store: { dispatch, getState } }) 
     },
 
     connection_update({ server, errorType }) {
-      if (errorType === 'verify' &&
-        confirm('The server is using a self-signed certificate, continue anyway?')) {
-        dispatch(reconnect(server, {
-          skipVerify: true
-        }));
+      if (
+        errorType === 'verify' &&
+        confirm(
+          'The server is using a self-signed certificate, continue anyway?'
+        )
+      ) {
+        dispatch(
+          reconnect(server, {
+            skipVerify: true
+          })
+        );
       }
     },
 

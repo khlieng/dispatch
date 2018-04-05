@@ -99,7 +99,10 @@ export default function initRouter(routes, store) {
 
   history.listen(location => {
     const nextMatch = match(patterns, location);
-    if (nextMatch && nextMatch.location.pathname !== matched.location.pathname) {
+    if (
+      nextMatch &&
+      nextMatch.location.pathname !== matched.location.pathname
+    ) {
       matched = nextMatch;
       store.dispatch(matched);
     }

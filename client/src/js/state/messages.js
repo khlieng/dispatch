@@ -1,6 +1,12 @@
 import { List, Map, Record } from 'immutable';
 import { createSelector } from 'reselect';
-import { findBreakpoints, messageHeight, linkify, timestamp, isChannel } from 'utils';
+import {
+  findBreakpoints,
+  messageHeight,
+  linkify,
+  timestamp,
+  isChannel
+} from 'utils';
 import createReducer from 'utils/createReducer';
 import { getApp } from './app';
 import { getSelectedTab } from './tab';
@@ -24,7 +30,8 @@ export const getMessages = state => state.messages;
 export const getSelectedMessages = createSelector(
   getSelectedTab,
   getMessages,
-  (tab, messages) => messages.getIn([tab.server, tab.name || tab.server], List())
+  (tab, messages) =>
+    messages.getIn([tab.server, tab.name || tab.server], List())
 );
 
 export const getHasMoreMessages = createSelector(
@@ -37,18 +44,24 @@ export const getHasMoreMessages = createSelector(
 
 export default createReducer(Map(), {
   [actions.ADD_MESSAGE](state, { server, tab, message }) {
-    return state.updateIn([server, tab], List(), list => list.push(new Message(message)));
+    return state.updateIn([server, tab], List(), list =>
+      list.push(new Message(message))
+    );
   },
 
   [actions.ADD_MESSAGES](state, { server, tab, messages, prepend }) {
     return state.withMutations(s => {
       if (prepend) {
         for (let i = messages.length - 1; i >= 0; i--) {
-          s.updateIn([server, tab], List(), list => list.unshift(new Message(messages[i])));
+          s.updateIn([server, tab], List(), list =>
+            list.unshift(new Message(messages[i]))
+          );
         }
       } else {
         messages.forEach(message =>
-          s.updateIn([server, message.tab || tab], List(), list => list.push(new Message(message)))
+          s.updateIn([server, message.tab || tab], List(), list =>
+            list.push(new Message(message))
+          )
         );
       }
     });
@@ -60,18 +73,28 @@ export default createReducer(Map(), {
 
   [actions.PART](state, { server, channels }) {
     return state.withMutations(s =>
-      channels.forEach(channel =>
-        s.deleteIn([server, channel])
-      )
+      channels.forEach(channel => s.deleteIn([server, channel]))
     );
   },
 
-  [actions.UPDATE_MESSAGE_HEIGHT](state, { wrapWidth, charWidth, windowWidth }) {
+  [actions.UPDATE_MESSAGE_HEIGHT](
+    state,
+    { wrapWidth, charWidth, windowWidth }
+  ) {
     return state.withMutations(s =>
       s.forEach((server, serverKey) =>
         server.forEach((target, targetKey) =>
-          target.forEach((message, index) => s.setIn([serverKey, targetKey, index, 'height'],
-            messageHeight(message, wrapWidth, charWidth, 6 * charWidth, windowWidth))
+          target.forEach((message, index) =>
+            s.setIn(
+              [serverKey, targetKey, index, 'height'],
+              messageHeight(
+                message,
+                wrapWidth,
+                charWidth,
+                6 * charWidth,
+                windowWidth
+              )
+            )
           )
         )
       )
@@ -111,7 +134,13 @@ function initMessage(message, tab, state) {
 
   message.length = message.content.length;
   message.breakpoints = findBreakpoints(message.content);
-  message.height = messageHeight(message, wrapWidth, charWidth, 6 * charWidth, windowWidth);
+  message.height = messageHeight(
+    message,
+    wrapWidth,
+    charWidth,
+    6 * charWidth,
+    windowWidth
+  );
   message.content = linkify(message.content);
 
   return message;
@@ -175,10 +204,14 @@ export function sendMessage(content, to, server) {
       type: actions.ADD_MESSAGE,
       server,
       tab: to,
-      message: initMessage({
-        from: state.servers.getIn([server, 'nick']),
-        content
-      }, to, state),
+      message: initMessage(
+        {
+          from: state.servers.getIn([server, 'nick']),
+          content
+        },
+        to,
+        state
+      ),
       socket: {
         type: 'message',
         data: { content, to, server }
@@ -190,12 +223,13 @@ export function sendMessage(content, to, server) {
 export function addMessage(message, server, to) {
   const tab = getMessageTab(server, to);
 
-  return (dispatch, getState) => dispatch({
-    type: actions.ADD_MESSAGE,
-    server,
-    tab,
-    message: initMessage(message, tab, getState())
-  });
+  return (dispatch, getState) =>
+    dispatch({
+      type: actions.ADD_MESSAGE,
+      server,
+      tab,
+      message: initMessage(message, tab, getState())
+    });
 }
 
 export function addMessages(messages, server, to, prepend, next) {
@@ -209,7 +243,9 @@ export function addMessages(messages, server, to, prepend, next) {
       messages[0].next = true;
     }
 
-    messages.forEach(message => initMessage(message, message.tab || tab, state));
+    messages.forEach(message =>
+      initMessage(message, message.tab || tab, state)
+    );
 
     dispatch({
       type: actions.ADD_MESSAGES,
@@ -222,25 +258,36 @@ export function addMessages(messages, server, to, prepend, next) {
 }
 
 export function broadcast(message, server, channels) {
-  return addMessages(channels.map(channel => ({
-    tab: channel,
-    content: message,
-    type: 'info'
-  })), server);
+  return addMessages(
+    channels.map(channel => ({
+      tab: channel,
+      content: message,
+      type: 'info'
+    })),
+    server
+  );
 }
 
 export function print(message, server, channel, type) {
   if (Array.isArray(message)) {
-    return addMessages(message.map(line => ({
-      content: line,
-      type
-    })), server, channel);
+    return addMessages(
+      message.map(line => ({
+        content: line,
+        type
+      })),
+      server,
+      channel
+    );
   }
 
-  return addMessage({
-    content: message,
-    type
-  }, server, channel);
+  return addMessage(
+    {
+      content: message,
+      type
+    },
+    server,
+    channel
+  );
 }
 
 export function inform(message, server, channel) {

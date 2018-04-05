@@ -7,8 +7,16 @@ import { linkify } from 'utils';
 
 export default class ChatTitle extends PureComponent {
   render() {
-    const { status, title, tab, channel, onTitleChange,
-      onToggleSearch, onToggleUserList, onCloseClick } = this.props;
+    const {
+      status,
+      title,
+      tab,
+      channel,
+      onTitleChange,
+      onToggleSearch,
+      onToggleUserList,
+      onCloseClick
+    } = this.props;
 
     let closeTitle;
     if (tab.isChannel()) {
@@ -21,7 +29,9 @@ export default class ChatTitle extends PureComponent {
 
     let serverError = null;
     if (!tab.name && status.error) {
-      serverError = <span className="chat-topic error">Error: {status.error}</span>;
+      serverError = (
+        <span className="chat-topic error">Error: {status.error}</span>
+      );
     }
 
     return (
@@ -38,7 +48,9 @@ export default class ChatTitle extends PureComponent {
             <span className="chat-title">{title}</span>
           </Editable>
           <div className="chat-topic-wrap">
-            <span className="chat-topic">{linkify(channel.get('topic')) || null}</span>
+            <span className="chat-topic">
+              {linkify(channel.get('topic')) || null}
+            </span>
             {serverError}
           </div>
           <i className="icon-search" title="Search" onClick={onToggleSearch} />
@@ -51,7 +63,9 @@ export default class ChatTitle extends PureComponent {
         </div>
         <div className="userlist-bar">
           <i className="icon-user" />
-          <span className="chat-usercount">{channel.get('users', List()).size}</span>
+          <span className="chat-usercount">
+            {channel.get('users', List()).size}
+          </span>
         </div>
       </div>
     );

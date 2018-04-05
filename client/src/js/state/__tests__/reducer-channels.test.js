@@ -1,13 +1,15 @@
 import Immutable from 'immutable';
 import reducer, { compareUsers } from '../channels';
-import { connect } from '../servers';
+import { connect } from '../servers';
 import * as actions from '../actions';
 
 describe('channel reducer', () => {
   it('removes channels on PART', () => {
     let state = Immutable.fromJS({
       srv1: {
-        chan1: {}, chan2: {}, chan3: {}
+        chan1: {},
+        chan2: {},
+        chan3: {}
       },
       srv2: {
         chan1: {}
@@ -45,14 +47,10 @@ describe('channel reducer', () => {
     expect(state.toJS()).toEqual({
       srv: {
         chan1: {
-          users: [
-            { mode: '', nick: 'nick1', renderName: 'nick1' },
-          ]
+          users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
         },
         chan2: {
-          users: [
-            { mode: '', nick: 'nick2', renderName: 'nick2' }
-          ]
+          users: [{ mode: '', nick: 'nick2', renderName: 'nick2' }]
         }
       }
     });
@@ -64,9 +62,7 @@ describe('channel reducer', () => {
     expect(state.toJS()).toEqual({
       srv: {
         chan1: {
-          users: [
-            { mode: '', nick: 'nick1', renderName: 'nick1' }
-          ]
+          users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
         }
       }
     });
@@ -86,9 +82,7 @@ describe('channel reducer', () => {
     expect(state.toJS()).toEqual({
       srv: {
         chan1: {
-          users: [
-            { mode: '', nick: 'nick1', renderName: 'nick1' }
-          ]
+          users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
         },
         chan2: {
           users: []
@@ -118,9 +112,7 @@ describe('channel reducer', () => {
           ]
         },
         chan2: {
-          users: [
-            { mode: '', nick: 'nick2', renderName: 'nick2' }
-          ]
+          users: [{ mode: '', nick: 'nick2', renderName: 'nick2' }]
         }
       }
     });
@@ -131,13 +123,7 @@ describe('channel reducer', () => {
       type: actions.socket.USERS,
       server: 'srv',
       channel: 'chan1',
-      users: [
-        'user3',
-        'user2',
-        '@user4',
-        'user1',
-        '+user5'
-      ]
+      users: ['user3', 'user2', '@user4', 'user1', '+user5']
     });
 
     expect(state.toJS()).toEqual({
@@ -152,7 +138,7 @@ describe('channel reducer', () => {
           ]
         }
       }
-    })
+    });
   });
 
   it('handles SOCKET_TOPIC', () => {
@@ -188,14 +174,12 @@ describe('channel reducer', () => {
           ]
         },
         chan2: {
-          users: [
-            { mode: '', nick: 'nick2', renderName: 'nick2' }
-          ]
+          users: [{ mode: '', nick: 'nick2', renderName: 'nick2' }]
         }
       }
     });
 
-    state = reducer(state, socket_mode('srv', 'chan1', 'nick1' ,'v', 'o'));
+    state = reducer(state, socket_mode('srv', 'chan1', 'nick1', 'v', 'o'));
     state = reducer(state, socket_mode('srv', 'chan1', 'nick2', 'o', ''));
     state = reducer(state, socket_mode('srv', 'chan2', 'not_there', 'x', ''));
 
@@ -208,9 +192,7 @@ describe('channel reducer', () => {
           ]
         },
         chan2: {
-          users: [
-            { mode: '', nick: 'nick2', renderName: 'nick2' }
-          ]
+          users: [{ mode: '', nick: 'nick2', renderName: 'nick2' }]
         }
       }
     });
@@ -240,10 +222,7 @@ describe('channel reducer', () => {
   it('handles SOCKET_SERVERS', () => {
     const state = reducer(undefined, {
       type: actions.socket.SERVERS,
-      data: [
-        { host: '127.0.0.1' },
-        { host: 'thehost' }
-      ]
+      data: [{ host: '127.0.0.1' }, { host: 'thehost' }]
     });
 
     expect(state.toJS()).toEqual({
@@ -280,7 +259,8 @@ describe('channel reducer', () => {
 function socket_join(server, channel, user) {
   return {
     type: actions.socket.JOIN,
-    server, user,
+    server,
+    user,
     channels: [channel]
   };
 }
@@ -288,29 +268,35 @@ function socket_join(server, channel, user) {
 function socket_mode(server, channel, user, add, remove) {
   return {
     type: actions.socket.MODE,
-    server, channel, user, add, remove
+    server,
+    channel,
+    user,
+    add,
+    remove
   };
 }
 
 describe('compareUsers()', () => {
   it('compares users correctly', () => {
-    expect([
-      { renderName: 'user5' },
-      { renderName: '@user2' },
-      { renderName: 'user3' },
-      { renderName: 'user2' },
-      { renderName: '+user1' },
-      { renderName: '~bob' },
-      { renderName: '%apples' },
-      { renderName: '&cake' }
-    ].sort(compareUsers)).toEqual([
+    expect(
+      [
+        { renderName: 'user5' },
+        { renderName: '@user2' },
+        { renderName: 'user3' },
+        { renderName: 'user2' },
+        { renderName: '+user1' },
+        { renderName: '~bob' },
+        { renderName: '%apples' },
+        { renderName: '&cake' }
+      ].sort(compareUsers)
+    ).toEqual([
       { renderName: '~bob' },
       { renderName: '&cake' },
       { renderName: '@user2' },
       { renderName: '%apples' },
-      { renderName: '+user1' },
+      { renderName: '+user1' },
       { renderName: 'user2' },
-      { renderName: 'user3' },
+      { renderName: 'user3' },
       { renderName: 'user5' }
     ]);
   });

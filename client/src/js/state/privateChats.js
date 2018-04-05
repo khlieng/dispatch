@@ -10,11 +10,12 @@ const lowerCaseValue = v => v.toLowerCase();
 
 export const getSortedPrivateChats = createSelector(
   getPrivateChats,
-  privateChats => privateChats.withMutations(p =>
-    p.forEach((server, address) =>
-      p.update(address, chats => chats.sortBy(lowerCaseValue))
+  privateChats =>
+    privateChats.withMutations(p =>
+      p.forEach((server, address) =>
+        p.update(address, chats => chats.sortBy(lowerCaseValue))
+      )
     )
-  )
 );
 
 function open(state, server, nick) {

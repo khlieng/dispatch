@@ -8,7 +8,10 @@ export function normalizeChannel(channel) {
     return channel;
   }
 
-  return channel.split('#').join('').toLowerCase();
+  return channel
+    .split('#')
+    .join('')
+    .toLowerCase();
 }
 
 export function isChannel(name) {

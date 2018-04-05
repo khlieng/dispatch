@@ -1,4 +1,4 @@
-import { connect, setServerName } from '../servers';
+import { connect, setServerName } from '../servers';
 
 describe('connect()', () => {
   it('sets host and port correctly', () => {

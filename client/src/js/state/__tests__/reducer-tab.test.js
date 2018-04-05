@@ -8,9 +8,7 @@ describe('tab reducer', () => {
 
     expect(state.toJS()).toEqual({
       selected: { server: 'srv', name: '#chan' },
-      history: [
-        { server: 'srv', name: '#chan' }
-      ]
+      history: [{ server: 'srv', name: '#chan' }]
     });
 
     state = reducer(state, setSelectedTab('srv', 'user1'));
@@ -62,7 +60,7 @@ describe('tab reducer', () => {
       history: [
         { server: 'srv', name: '#chan' },
         { server: 'srv', name: '#chan' },
-        { server: 'srv', name: '#chan3' }
+        { server: 'srv', name: '#chan3' }
       ]
     });
   });
@@ -75,14 +73,12 @@ describe('tab reducer', () => {
 
     state = reducer(state, {
       type: actions.DISCONNECT,
-      server: 'srv',
+      server: 'srv'
     });
 
     expect(state.toJS()).toEqual({
       selected: { server: 'srv', name: '#chan3' },
-      history: [
-        { server: 'srv1', name: 'bob' },
-      ]
+      history: [{ server: 'srv1', name: 'bob' }]
     });
   });
 
@@ -93,14 +89,13 @@ describe('tab reducer', () => {
 
     expect(state.toJS()).toEqual({
       selected: { server: null, name: null },
-      history: [
-        { server: 'srv', name: '#chan' }
-      ]
+      history: [{ server: 'srv', name: '#chan' }]
     });
   });
 
   it('selects the tab and adds it to history when navigating to a tab', () => {
-    const state = reducer(undefined,
+    const state = reducer(
+      undefined,
       locationChanged('chat', {
         server: 'srv',
         name: '#chan'
@@ -109,9 +104,7 @@ describe('tab reducer', () => {
 
     expect(state.toJS()).toEqual({
       selected: { server: 'srv', name: '#chan' },
-      history: [
-        { server: 'srv', name: '#chan' }
-      ]
+      history: [{ server: 'srv', name: '#chan' }]
     });
   });
 });

@@ -32,9 +32,12 @@ describe('server reducer', () => {
       }
     });
 
-    state = reducer(state, connect('127.0.0.2:1337', 'nick', {
-      name: 'srv'
-    }));
+    state = reducer(
+      state,
+      connect('127.0.0.2:1337', 'nick', {
+        name: 'srv'
+      })
+    );
 
     expect(state.toJS()).toEqual({
       '127.0.0.1': {
@@ -190,7 +193,7 @@ describe('server reducer', () => {
           status: {
             connected: false
           }
-        },
+        }
       ]
     });
 

@@ -21,7 +21,9 @@ export default class FileInput extends PureComponent {
 
   render() {
     return (
-      <button className="input-file" onClick={this.handleClick}>{this.props.name}</button>
+      <button className="input-file" onClick={this.handleClick}>
+        {this.props.name}
+      </button>
     );
   }
 }

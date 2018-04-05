@@ -29,11 +29,13 @@ function updateRenderName(user) {
 }
 
 function createUser(nick, mode) {
-  return updateRenderName(new User({
-    nick,
-    renderName: nick,
-    mode: mode || ''
-  }));
+  return updateRenderName(
+    new User({
+      nick,
+      renderName: nick,
+      mode: mode || ''
+    })
+  );
 }
 
 function loadUser(nick) {
@@ -80,13 +82,14 @@ export const getChannels = state => state.channels;
 
 const key = (v, k) => k.toLowerCase();
 
-export const getSortedChannels = createSelector(
-  getChannels,
-  channels => channels.withMutations(c =>
-    c.forEach((server, address) =>
-      c.update(address, chans => chans.sortBy(key))
+export const getSortedChannels = createSelector(getChannels, channels =>
+  channels
+    .withMutations(c =>
+      c.forEach((server, address) =>
+        c.update(address, chans => chans.sortBy(key))
+      )
     )
-  ).sortBy(key)
+    .sortBy(key)
 );
 
 export const getSelectedChannel = createSelector(
@@ -125,7 +128,9 @@ export default createReducer(Map(), {
   [actions.socket.QUIT](state, { server, user }) {
     return state.withMutations(s => {
       s.get(server).forEach((v, channel) => {
-        s.updateIn([server, channel, 'users'], users => users.filter(u => u.nick !== user));
+        s.updateIn([server, channel, 'users'], users =>
+          users.filter(u => u.nick !== user)
+        );
       });
     });
   },
@@ -139,8 +144,8 @@ export default createReducer(Map(), {
             return users;
           }
 
-          return users.update(i,
-            user => updateRenderName(user.set('nick', newNick))
+          return users.update(i, user =>
+            updateRenderName(user.set('nick', newNick))
           );
         });
       });
@@ -148,7 +153,8 @@ export default createReducer(Map(), {
   },
 
   [actions.socket.USERS](state, { server, channel, users }) {
-    return state.setIn([server, channel, 'users'],
+    return state.setIn(
+      [server, channel, 'users'],
       List(users.map(user => loadUser(user)))
     );
   },
@@ -183,10 +189,13 @@ export default createReducer(Map(), {
 
     return state.withMutations(s => {
       data.forEach(channel => {
-        s.setIn([channel.server, channel.name], Map({
-          users: List(),
-          topic: channel.topic
-        }));
+        s.setIn(
+          [channel.server, channel.name],
+          Map({
+            users: List(),
+            topic: channel.topic
+          })
+        );
       });
     });
   },

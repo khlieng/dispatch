@@ -33,7 +33,8 @@ export default class MessageBox extends PureComponent {
 
     if (nextProps.messages.get(0) !== this.props.messages.get(0)) {
       if (nextProps.tab === this.props.tab) {
-        const addedMessages = nextProps.messages.size - this.props.messages.size;
+        const addedMessages =
+          nextProps.messages.size - this.props.messages.size;
         let addedHeight = 0;
         for (let i = 0; i < addedMessages; i++) {
           addedHeight += nextProps.messages.get(i).height;
@@ -126,10 +127,12 @@ export default class MessageBox extends PureComponent {
 
   handleScroll = ({ scrollTop, clientHeight, scrollHeight }) => {
     if (this.mounted) {
-      if (!this.loading &&
+      if (
+        !this.loading &&
         this.props.hasMoreMessages &&
         scrollTop <= fetchThreshold &&
-        scrollTop < this.prevScrollTop) {
+        scrollTop < this.prevScrollTop
+      ) {
         this.fetchMore();
       }
 
@@ -165,11 +168,7 @@ export default class MessageBox extends PureComponent {
     if (index === 0) {
       if (this.props.hasMoreMessages) {
         return (
-          <div
-            key="top"
-            className="messagebox-top-indicator"
-            style={style}
-          >
+          <div key="top" className="messagebox-top-indicator" style={style}>
             Loading messages...
           </div>
         );

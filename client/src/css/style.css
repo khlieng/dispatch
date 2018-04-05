@@ -9,7 +9,12 @@ body {
   background: #f0f0f0;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: Montserrat, sans-serif;
   font-weight: 400;
 }
@@ -35,16 +40,17 @@ p {
   line-height: 1.5;
 }
 
-i[class^="icon-"]:before, i[class*=" icon-"]:before {
+i[class^='icon-']:before,
+i[class*=' icon-']:before {
   margin: 0;
 }
 
 .success {
-  color: #6BB758 !important;
+  color: #6bb758 !important;
 }
 
 .error {
-  color: #F6546A !important;
+  color: #f6546a !important;
 }
 
 .wrap {
@@ -60,8 +66,8 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 .app-info {
   width: 100%;
   font-family: Montserrat, sans-serif;
-  background: #F6546A;
-  color: #FFF;
+  background: #f6546a;
+  color: #fff;
   height: 50px;
   line-height: 50px;
   text-align: center;
@@ -79,9 +85,9 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   bottom: 0;
   width: 200px;
   background: #222;
-  color: #FFF;
+  color: #fff;
   font-family: Montserrat, sans-serif;
-  transition: transform .2s;
+  transition: transform 0.2s;
 }
 
 .tab-container {
@@ -109,7 +115,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .tablist p.selected {
   padding-left: 10px;
-  border-left: 5px solid #6BB758;
+  border-left: 5px solid #6bb758;
 }
 
 .tab-content {
@@ -141,16 +147,16 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 .button-connect {
   width: 100%;
   height: 50px;
-  background: #6BB758;
-  color: #FFF;
+  background: #6bb758;
+  color: #fff;
 }
 
 .button-connect:hover {
-  background: #7BBF6A;
+  background: #7bbf6a;
 }
 
 .button-connect:active {
-  background: #6BB758;
+  background: #6bb758;
 }
 
 .side-buttons {
@@ -168,16 +174,16 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   line-height: 50px;
   cursor: pointer;
   font-size: 20px;
-  border-top: 1px solid #1D1D1D;
+  border-top: 1px solid #1d1d1d;
 }
 
 .side-buttons i:not(:first-child) {
-  border-left: 1px solid #1D1D1D;
+  border-left: 1px solid #1d1d1d;
 }
 
 .side-buttons i:hover {
-  color: #CCC;
-  background: #1D1D1D;
+  color: #ccc;
+  background: #1d1d1d;
 }
 
 .main-container {
@@ -186,7 +192,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   top: 0;
   bottom: 0;
   right: 0;
-  transition: left .2s, transform .2s;
+  transition: left 0.2s, transform 0.2s;
 }
 
 .connect {
@@ -199,7 +205,8 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   overflow: auto;
 }
 
-.connect .navicon, .settings .navicon {
+.connect .navicon,
+.settings .navicon {
   position: fixed;
   top: 0;
   left: 0;
@@ -223,30 +230,30 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   border: none;
 }
 
-.connect-form input[type="submit"],
-.connect-form input[type="text"],
-.connect-form input[type="password"] {
+.connect-form input[type='submit'],
+.connect-form input[type='text'],
+.connect-form input[type='password'] {
   width: 100%;
 }
 
-.connect-form input[type="submit"] {
+.connect-form input[type='submit'] {
   height: 50px;
   margin-bottom: 20px;
   font-family: Montserrat, sans-serif;
-  background: #6BB758;
-  color: #FFF;
+  background: #6bb758;
+  color: #fff;
   cursor: pointer;
 }
 
-.connect-form input[type="submit"]:hover {
-  background: #7BBF6A;
+.connect-form input[type='submit']:hover {
+  background: #7bbf6a;
 }
 
-.connect-form input[type="submit"]:active {
-  background: #6BB758;
+.connect-form input[type='submit']:active {
+  background: #6bb758;
 }
 
-.connect-form input[type="checkbox"] {
+.connect-form input[type='checkbox'] {
   display: inline-block;
   margin-right: 5px;
   vertical-align: middle;
@@ -278,7 +285,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   right: 0;
   height: 50px;
   line-height: 50px;
-  border-bottom: 1px solid #DDD;
+  border-bottom: 1px solid #ddd;
   display: flex;
   font-size: 20px;
 }
@@ -304,28 +311,31 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   display: none;
 }
 
-.chat-server .userlist, .chat-private .userlist {
+.chat-server .userlist,
+.chat-private .userlist {
   display: none;
 }
 
-.chat-server .userlist-bar, .chat-private .userlist-bar {
+.chat-server .userlist-bar,
+.chat-private .userlist-bar {
   display: none;
 }
 
 .button-leave {
-  border-left: 1px solid #DDD;
+  border-left: 1px solid #ddd;
 }
 
 .button-leave:hover {
-  background: #DDD;
+  background: #ddd;
 }
 
 .button-userlist {
   display: none;
-  border-left: 1px solid #DDD;
+  border-left: 1px solid #ddd;
 }
 
-.chat-server .button-userlist, .chat-private .button-userlist {
+.chat-server .button-userlist,
+.chat-private .button-userlist {
   display: none;
 }
 
@@ -369,8 +379,8 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   right: 0;
   width: 200px;
   height: 50px;
-  border-left: 1px solid #DDD;
-  border-bottom: 1px solid #DDD;
+  border-left: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
   line-height: 50px;
   text-align: center;
   padding: 0 15px;
@@ -403,13 +413,13 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 .search-input-wrap {
   display: flex;
   width: 100%;
-  background: #FFF;
-  border-bottom: 1px solid #DDD;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
 }
 
 .search i {
   padding: 15px;
-  color: #DDD;
+  color: #ddd;
 }
 
 .search-input {
@@ -465,17 +475,17 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .message-error {
-  color: #F6546A;
+  color: #f6546a;
 }
 
 .message-prompt {
   font-weight: 700;
   font-style: italic;
-  color: #6BB758;
+  color: #6bb758;
 }
 
 .message-action {
-  color: #FF6698;
+  color: #ff6698;
 }
 
 .message-time {
@@ -486,13 +496,13 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .message-sender {
   font-weight: 700;
-  color: #6BB758;
+  color: #6bb758;
   cursor: pointer;
 }
 
 .message a {
   text-decoration: none;
-  color: #0066FF;
+  color: #0066ff;
 }
 
 .message a:hover {
@@ -507,8 +517,8 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   height: 50px;
   z-index: 1;
   display: flex;
-  border-top: 1px solid #DDD;
-  background: #FFF;
+  border-top: 1px solid #ddd;
+  background: #fff;
 }
 
 .message-input-nick {
@@ -517,8 +527,8 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   line-height: 30px;
   height: 30px;
   padding: 0 10px;
-  background: #6BB758 !important;
-  color: #FFF;
+  background: #6bb758 !important;
+  color: #fff;
   font-family: Montserrat, sans-serif !important;
   margin-right: 0;
 }
@@ -536,10 +546,10 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
   bottom: 50px;
   right: 0;
   width: 200px;
-  border-left: 1px solid #DDD;
+  border-left: 1px solid #ddd;
   background: #f0f0f0;
   z-index: 2;
-  transition: transform .2s;
+  transition: transform 0.2s;
 }
 
 .userlist p {
@@ -548,7 +558,7 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 }
 
 .userlist p:hover {
-  background: #DDD;
+  background: #ddd;
 }
 
 .settings {
@@ -569,18 +579,18 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .settings button {
   margin: 5px;
-  color: #FFF;
-  background: #6BB758;
+  color: #fff;
+  background: #6bb758;
   padding: 10px 20px;
   width: 200px;
 }
 
 .settings button:hover {
-  background: #7BBF6A;
+  background: #7bbf6a;
 }
 
 .settings button:active {
-  background: #6BB758;
+  background: #6bb758;
 }
 
 .settings div {
@@ -589,11 +599,11 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
 
 .settings .error {
   margin: 10px;
-  color: #F6546A;
+  color: #f6546a;
 }
 
 .input-file {
-  color: #FFF;
+  color: #fff;
   background: #222 !important;
   padding: 10px;
   margin: 5px;
@@ -664,7 +674,8 @@ i[class^="icon-"]:before, i[class*=" icon-"]:before {
     transform: translateX(0);
   }
 
-  .chat-channel .chat-title-bar, .chat-channel .messagebox {
+  .chat-channel .chat-title-bar,
+  .chat-channel .messagebox {
     right: 0;
   }
 

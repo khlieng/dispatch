@@ -50,7 +50,7 @@ export default class Socket {
       this.retry();
     };
 
-    this.ws.onmessage = (e) => {
+    this.ws.onmessage = e => {
       this.setTimeoutPing();
 
       const msg = JSON.parse(e.data);

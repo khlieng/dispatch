@@ -14,7 +14,10 @@ export default class Connect extends Component {
 
     let address = e.target.address.value.trim();
     const nick = e.target.nick.value.trim();
-    const channels = e.target.channels.value.split(',').map(s => s.trim()).filter(s => s);
+    const channels = e.target.channels.value
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s);
     const opts = {
       name: e.target.name.value.trim(),
       tls: e.target.ssl.checked
@@ -78,18 +81,32 @@ export default class Connect extends Component {
         <Navicon />
         <form className="connect-form" onSubmit={this.handleSubmit}>
           <h1>Connect</h1>
-          <input name="name" type="text" placeholder="Name" defaultValue={defaults.name} />
-          <input name="address" type="text" placeholder="Address" defaultValue={defaults.address} />
+          <input
+            name="name"
+            type="text"
+            placeholder="Name"
+            defaultValue={defaults.name}
+          />
+          <input
+            name="address"
+            type="text"
+            placeholder="Address"
+            defaultValue={defaults.address}
+          />
           <input name="nick" type="text" placeholder="Nick" />
           <input
             name="channels"
             type="text"
             placeholder="Channels"
-            defaultValue={defaults.channels ? defaults.channels.join(',') : null}
+            defaultValue={
+              defaults.channels ? defaults.channels.join(',') : null
+            }
           />
           {optionals}
           <p>
-            <label htmlFor="ssl"><input name="ssl" type="checkbox" defaultChecked={defaults.ssl} />SSL</label>
+            <label htmlFor="ssl">
+              <input name="ssl" type="checkbox" defaultChecked={defaults.ssl} />SSL
+            </label>
             <i className="icon-ellipsis" onClick={this.handleShowClick} />
           </p>
           <input type="submit" value="Connect" />

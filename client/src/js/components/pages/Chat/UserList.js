@@ -10,7 +10,9 @@ export default class UserList extends PureComponent {
     }
   }
 
-  listRef = el => { this.list = el; };
+  listRef = el => {
+    this.list = el;
+  };
 
   renderUser = ({ index, style, key }) => {
     const { users, onNickClick } = this.props;

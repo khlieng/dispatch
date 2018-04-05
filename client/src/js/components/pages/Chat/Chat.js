@@ -90,10 +90,7 @@ export default class Chat extends Component {
           onToggleSearch={toggleSearch}
           onToggleUserList={toggleUserList}
         />
-        <Search
-          search={search}
-          onSearch={this.handleSearch}
-        />
+        <Search search={search} onSearch={this.handleSearch} />
         <MessageBox
           hasMoreMessages={hasMoreMessages}
           messages={messages}

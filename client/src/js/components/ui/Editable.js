@@ -30,7 +30,8 @@ export default class Editable extends PureComponent {
   getInputWidth(value) {
     if (this.input) {
       const style = window.getComputedStyle(this.input);
-      const padding = parseInt(style.paddingLeft, 10) + parseInt(style.paddingRight, 10);
+      const padding =
+        parseInt(style.paddingLeft, 10) + parseInt(style.paddingRight, 10);
       // Make sure the width is atleast 1px so the caret always shows
       const width = stringWidth(value, style.font) || 1;
       return padding + width;
@@ -68,7 +69,9 @@ export default class Editable extends PureComponent {
     }
   };
 
-  inputRef = el => { this.input = el; }
+  inputRef = el => {
+    this.input = el;
+  };
 
   render() {
     const { children, className, value } = this.props;
@@ -77,21 +80,21 @@ export default class Editable extends PureComponent {
       width: this.state.width
     };
 
-    return (
-      this.state.editing ?
-        <input
-          autoFocus
-          ref={this.inputRef}
-          className={className}
-          type="text"
-          value={value}
-          onBlur={this.handleBlur}
-          onChange={this.handleChange}
-          onKeyDown={this.handleKey}
-          style={style}
-          spellCheck={false}
-        /> :
-        <div onClick={this.startEditing}>{children}</div>
+    return this.state.editing ? (
+      <input
+        autoFocus
+        ref={this.inputRef}
+        className={className}
+        type="text"
+        value={value}
+        onBlur={this.handleBlur}
+        onChange={this.handleChange}
+        onKeyDown={this.handleKey}
+        style={style}
+        spellCheck={false}
+      />
+    ) : (
+      <div onClick={this.startEditing}>{children}</div>
     );
   }
 }

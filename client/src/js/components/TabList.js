@@ -24,36 +24,48 @@ export default class TabList extends PureComponent {
         />
       );
 
-      server.forEach((channel, name) => tabs.push(
-        <TabListItem
-          key={address + name}
-          server={address}
-          target={name}
-          content={name}
-          selected={tab.server === address && tab.name === name}
-          onClick={this.handleTabClick}
-        />
-      ));
-
-      if (privateChats.has(address) && privateChats.get(address).size > 0) {
-        tabs.push(<div key={`${address}-pm}`} className="tab-label">Private messages</div>);
-
-        privateChats.get(address).forEach(nick => tabs.push(
+      server.forEach((channel, name) =>
+        tabs.push(
           <TabListItem
-            key={address + nick}
+            key={address + name}
             server={address}
-            target={nick}
-            content={nick}
-            selected={tab.server === address && tab.name === nick}
+            target={name}
+            content={name}
+            selected={tab.server === address && tab.name === name}
             onClick={this.handleTabClick}
           />
-        ));
+        )
+      );
+
+      if (privateChats.has(address) && privateChats.get(address).size > 0) {
+        tabs.push(
+          <div key={`${address}-pm}`} className="tab-label">
+            Private messages
+          </div>
+        );
+
+        privateChats
+          .get(address)
+          .forEach(nick =>
+            tabs.push(
+              <TabListItem
+                key={address + nick}
+                server={address}
+                target={nick}
+                content={nick}
+                selected={tab.server === address && tab.name === nick}
+                onClick={this.handleTabClick}
+              />
+            )
+          );
       }
     });
 
     return (
       <div className={className}>
-        <button className="button-connect" onClick={this.handleConnectClick}>Connect</button>
+        <button className="button-connect" onClick={this.handleConnectClick}>
+          Connect
+        </button>
         <div className="tab-container">{tabs}</div>
         <div className="side-buttons">
           <i className="icon-user" />

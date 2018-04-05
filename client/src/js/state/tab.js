@@ -40,19 +40,29 @@ export default createReducer(new State(), {
   [actions.SELECT_TAB]: selectTab,
 
   [actions.PART](state, action) {
-    return state.set('history', state.history.filter(tab =>
-      !(tab.server === action.server && tab.name === action.channels[0])
-    ));
+    return state.set(
+      'history',
+      state.history.filter(
+        tab =>
+          !(tab.server === action.server && tab.name === action.channels[0])
+      )
+    );
   },
 
   [actions.CLOSE_PRIVATE_CHAT](state, action) {
-    return state.set('history', state.history.filter(tab =>
-      !(tab.server === action.server && tab.name === action.nick)
-    ));
+    return state.set(
+      'history',
+      state.history.filter(
+        tab => !(tab.server === action.server && tab.name === action.nick)
+      )
+    );
   },
 
   [actions.DISCONNECT](state, action) {
-    return state.set('history', state.history.filter(tab => tab.server !== action.server));
+    return state.set(
+      'history',
+      state.history.filter(tab => tab.server !== action.server)
+    );
   },
 
   [LOCATION_CHANGED](state, action) {

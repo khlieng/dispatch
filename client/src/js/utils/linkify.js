@@ -30,12 +30,19 @@ export default function linkify(text) {
       }
 
       result.push(
-        <a target="_blank" rel="noopener noreferrer" href={match.getAnchorHref()}>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href={match.getAnchorHref()}
+        >
           {match.matchedText}
         </a>
       );
     } else if (typeof result[result.length - 1] === 'string') {
-      result[result.length - 1] += text.slice(pos, match.offset + match.matchedText.length);
+      result[result.length - 1] += text.slice(
+        pos,
+        match.offset + match.matchedText.length
+      );
     } else {
       result.push(text.slice(pos, match.offset + match.matchedText.length));
     }

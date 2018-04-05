@@ -26,7 +26,7 @@ const Settings = ({ settings, onCertChange, onKeyChange, uploadCert }) => {
         />
       </div>
       <button onClick={uploadCert}>{status}</button>
-      { error ? <p className="error">{error}</p> : null }
+      {error ? <p className="error">{error}</p> : null}
     </div>
   );
 };

@@ -10,7 +10,9 @@ import routes from './routes';
 import runModules from './modules';
 
 const production = process.env.NODE_ENV === 'production';
-const host = production ? window.location.host : `${window.location.hostname}:1337`;
+const host = production
+  ? window.location.host
+  : `${window.location.hostname}:1337`;
 const socket = new Socket(host);
 const store = configureStore(socket);
 

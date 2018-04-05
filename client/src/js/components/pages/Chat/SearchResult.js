@@ -11,12 +11,14 @@ export default class SearchResult extends PureComponent {
 
     return (
       <p className="search-result" style={style}>
-        <span className="message-time">{timestamp(new Date(result.time * 1000))}</span>
+        <span className="message-time">
+          {timestamp(new Date(result.time * 1000))}
+        </span>
         <span>
           {' '}
           <span className="message-sender">{result.from}</span>
         </span>
-        <span>{' '}{linkify(result.content)}</span>
+        <span> {linkify(result.content)}</span>
       </p>
     );
   }

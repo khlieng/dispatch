@@ -8,7 +8,9 @@ export default class Search extends PureComponent {
     }
   }
 
-  inputRef = el => { this.input = el; };
+  inputRef = el => {
+    this.input = el;
+  };
 
   handleSearch = e => this.props.onSearch(e.target.value);
 

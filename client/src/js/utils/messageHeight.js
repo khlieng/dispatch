@@ -18,7 +18,13 @@ export function findBreakpoints(text) {
   return breakpoints;
 }
 
-export function messageHeight(message, wrapWidth, charWidth, indent = 0, windowWidth) {
+export function messageHeight(
+  message,
+  wrapWidth,
+  charWidth,
+  indent = 0,
+  windowWidth
+) {
   let pad = (6 + (message.from ? message.from.length + 1 : 0)) * charWidth;
   let height = lineHeight + 8;
 
@@ -26,7 +32,7 @@ export function messageHeight(message, wrapWidth, charWidth, indent = 0, windowW
     wrapWidth -= userListWidth;
   }
 
-  if (pad + (message.length * charWidth) < wrapWidth) {
+  if (pad + message.length * charWidth < wrapWidth) {
     return height;
   }
 
@@ -35,7 +41,7 @@ export function messageHeight(message, wrapWidth, charWidth, indent = 0, windowW
   let prevPos = 0;
 
   for (let i = 0; i < breaks.length; i++) {
-    if (pad + ((breaks[i].end - prevBreak) * charWidth) >= wrapWidth) {
+    if (pad + (breaks[i].end - prevBreak) * charWidth >= wrapWidth) {
       prevBreak = prevPos;
       pad = indent;
       height += lineHeight;
@@ -44,7 +50,7 @@ export function messageHeight(message, wrapWidth, charWidth, indent = 0, windowW
     prevPos = breaks[i].next;
   }
 
-  if (pad + ((message.length - prevBreak) * charWidth) >= wrapWidth) {
+  if (pad + (message.length - prevBreak) * charWidth >= wrapWidth) {
     height += lineHeight;
   }
 

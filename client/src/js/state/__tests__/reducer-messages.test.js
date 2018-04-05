@@ -17,10 +17,12 @@ describe('message reducer', () => {
 
     expect(state.toJS()).toMatchObject({
       srv: {
-        '#chan1': [{
-          from: 'foo',
-          content: 'msg'
-        }]
+        '#chan1': [
+          {
+            from: 'foo',
+            content: 'msg'
+          }
+        ]
       }
     });
   });
@@ -34,10 +36,12 @@ describe('message reducer', () => {
         {
           from: 'foo',
           content: 'msg'
-        }, {
+        },
+        {
           from: 'bar',
           content: 'msg'
-        }, {
+        },
+        {
           tab: '#chan2',
           from: 'foo',
           content: 'msg'
@@ -51,15 +55,18 @@ describe('message reducer', () => {
           {
             from: 'foo',
             content: 'msg'
-          }, {
+          },
+          {
             from: 'bar',
             content: 'msg'
           }
         ],
-        '#chan2': [{
-          from: 'foo',
-          content: 'msg'
-        }]
+        '#chan2': [
+          {
+            from: 'foo',
+            content: 'msg'
+          }
+        ]
       }
     });
   });
@@ -92,10 +99,9 @@ describe('message reducer', () => {
     };
 
     const thunk = broadcast('test', 'srv', ['#chan1', '#chan3']);
-    thunk(
-      action => { state.messages = reducer(undefined, action); },
-      () => state
-    );
+    thunk(action => {
+      state.messages = reducer(undefined, action);
+    }, () => state);
 
     const messages = state.messages.toJS();
 
@@ -109,18 +115,11 @@ describe('message reducer', () => {
   it('deletes all messages related to server when disconnecting', () => {
     let state = fromJS({
       srv: {
-        '#chan1': [
-          { content: 'msg1' },
-          { content: 'msg2' }
-        ],
-        '#chan2': [
-          { content: 'msg' }
-        ]
+        '#chan1': [{ content: 'msg1' }, { content: 'msg2' }],
+        '#chan2': [{ content: 'msg' }]
       },
       srv2: {
-        '#chan1': [
-          { content: 'msg' }
-        ]
+        '#chan1': [{ content: 'msg' }]
       }
     });
 
@@ -131,9 +130,7 @@ describe('message reducer', () => {
 
     expect(state.toJS()).toEqual({
       srv2: {
-        '#chan1': [
-          { content: 'msg' }
-        ]
+        '#chan1': [{ content: 'msg' }]
       }
     });
   });
@@ -141,18 +138,11 @@ describe('message reducer', () => {
   it('deletes all messages related to channel when parting', () => {
     let state = fromJS({
       srv: {
-        '#chan1': [
-          { content: 'msg1' },
-          { content: 'msg2' }
-        ],
-        '#chan2': [
-          { content: 'msg' }
-        ]
+        '#chan1': [{ content: 'msg1' }, { content: 'msg2' }],
+        '#chan2': [{ content: 'msg' }]
       },
       srv2: {
-        '#chan1': [
-          { content: 'msg' }
-        ]
+        '#chan1': [{ content: 'msg' }]
       }
     });
 
@@ -164,14 +154,10 @@ describe('message reducer', () => {
 
     expect(state.toJS()).toEqual({
       srv: {
-        '#chan2': [
-          { content: 'msg' }
-        ]
+        '#chan2': [{ content: 'msg' }]
       },
       srv2: {
-        '#chan1': [
-          { content: 'msg' }
-        ]
+        '#chan1': [{ content: 'msg' }]
       }
     });
   });

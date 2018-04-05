@@ -4,7 +4,10 @@ import { sendMessage, raw } from 'state/messages';
 import { setNick, disconnect, whois, away } from 'state/servers';
 import { select } from 'state/tab';
 import { find } from 'utils';
-import createCommandMiddleware, { beforeHandler, notFoundHandler } from './middleware/command';
+import createCommandMiddleware, {
+  beforeHandler,
+  notFoundHandler
+} from './middleware/command';
 
 const help = [
   '/join <channel> - Join a channel',
@@ -26,7 +29,8 @@ const help = [
 const text = content => ({ content });
 const error = content => ({ content, type: 'error' });
 const prompt = content => ({ content, type: 'prompt' });
-const findHelp = cmd => find(help, line => line.slice(1, line.indexOf(' ')) === cmd);
+const findHelp = cmd =>
+  find(help, line => line.slice(1, line.indexOf(' ')) === cmd);
 
 export default createCommandMiddleware(COMMAND, {
   join({ dispatch, server }, channel) {
@@ -160,10 +164,7 @@ export default createCommandMiddleware(COMMAND, {
       dispatch(raw(cmd, server));
       return prompt(`=> ${cmd}`);
     }
-    return [
-      prompt('=> /raw'),
-      error('Missing message')
-    ];
+    return [prompt('=> /raw'), error('Missing message')];
   },
 
   help(_, ...commands) {

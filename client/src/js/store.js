@@ -7,20 +7,24 @@ import createSocketMiddleware from './middleware/socket';
 import commands from './commands';
 
 export default function configureStore(socket) {
-  // eslint-disable-next-line no-underscore-dangle
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  /* eslint-disable no-underscore-dangle */
+  const composeEnhancers =
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   const reducer = createReducer(routeReducer);
 
-  const store = createStore(reducer, composeEnhancers(
-    applyMiddleware(
-      thunk,
-      routeMiddleware,
-      createSocketMiddleware(socket),
-      message,
-      commands
+  const store = createStore(
+    reducer,
+    composeEnhancers(
+      applyMiddleware(
+        thunk,
+        routeMiddleware,
+        createSocketMiddleware(socket),
+        message,
+        commands
+      )
     )
-  ));
+  );
 
   return store;
 }

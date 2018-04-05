@@ -14,14 +14,26 @@ export default class App extends Component {
   };
 
   render() {
-    const { connected, tab, channels, servers,
-      privateChats, showTabList, select, push } = this.props;
-    const mainClass = showTabList ? 'main-container off-canvas' : 'main-container';
+    const {
+      connected,
+      tab,
+      channels,
+      servers,
+      privateChats,
+      showTabList,
+      select,
+      push
+    } = this.props;
+    const mainClass = showTabList
+      ? 'main-container off-canvas'
+      : 'main-container';
     return (
       <div className="wrap">
-        {!connected &&
-          <div className="app-info">Connection lost, attempting to reconnect...</div>
-        }
+        {!connected && (
+          <div className="app-info">
+            Connection lost, attempting to reconnect...
+          </div>
+        )}
         <div className="app-container" onClick={this.handleClick}>
           <TabList
             tab={tab}
@@ -33,9 +45,15 @@ export default class App extends Component {
             push={push}
           />
           <div className={mainClass}>
-            <Route name="chat"><Chat /></Route>
-            <Route name="connect"><Connect /></Route>
-            <Route name="settings"><Settings /></Route>
+            <Route name="chat">
+              <Chat />
+            </Route>
+            <Route name="connect">
+              <Connect />
+            </Route>
+            <Route name="settings">
+              <Settings />
+            </Route>
           </div>
         </div>
       </div>

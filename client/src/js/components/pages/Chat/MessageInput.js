@@ -7,8 +7,16 @@ export default class MessageInput extends PureComponent {
   };
 
   handleKey = e => {
-    const { tab, onCommand, onMessage,
-      add, reset, increment, decrement, currentHistoryEntry } = this.props;
+    const {
+      tab,
+      onCommand,
+      onMessage,
+      add,
+      reset,
+      increment,
+      decrement,
+      currentHistoryEntry
+    } = this.props;
 
     if (e.key === 'Enter' && e.target.value) {
       if (e.target.value[0] === '/') {
@@ -36,7 +44,12 @@ export default class MessageInput extends PureComponent {
   };
 
   render() {
-    const { nick, currentHistoryEntry, onNickChange, onNickEditDone } = this.props;
+    const {
+      nick,
+      currentHistoryEntry,
+      onNickChange,
+      onNickEditDone
+    } = this.props;
     return (
       <div className="message-input-wrap">
         <Editable

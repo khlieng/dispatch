@@ -45,10 +45,13 @@ export const getCurrentServerStatus = createSelector(
 export default createReducer(Map(), {
   [actions.CONNECT](state, { host, nick, options }) {
     if (!state.has(host)) {
-      return state.set(host, new Server({
-        nick,
-        name: options.name || host
-      }));
+      return state.set(
+        host,
+        new Server({
+          nick,
+          name: options.name || host
+        })
+      );
     }
 
     return state;
@@ -73,9 +76,8 @@ export default createReducer(Map(), {
 
   [actions.socket.NICK](state, { server, oldNick, newNick }) {
     if (!oldNick || oldNick === state.get(server).nick) {
-      return state.update(server, s => s
-        .set('nick', newNick)
-        .set('editedNick', null)
+      return state.update(server, s =>
+        s.set('nick', newNick).set('editedNick', null)
       );
     }
     return state;

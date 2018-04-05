@@ -3,10 +3,7 @@ var webpack = require('webpack');
 
 module.exports = {
   mode: 'development',
-  entry: [
-    'webpack-hot-middleware/client',
-    './src/js/index'
-  ],
+  entry: ['webpack-hot-middleware/client', './src/js/index'],
   output: {
     filename: 'bundle.js',
     publicPath: '/'
@@ -21,12 +18,18 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.js$/, loader: 'eslint-loader', exclude: /node_modules/, enforce: 'pre' },
+      {
+        test: /\.js$/,
+        loader: 'eslint-loader',
+        exclude: /node_modules/,
+        enforce: 'pre',
+        options: {
+          fix: true
+        }
+      },
       { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
       { test: /\.css$/, loader: 'style-loader!css-loader' }
     ]
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
-  ]
+  plugins: [new webpack.HotModuleReplacementPlugin()]
 };
