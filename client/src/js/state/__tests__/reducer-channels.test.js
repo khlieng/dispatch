@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import reducer from '../channels';
+import reducer, { compareUsers } from '../channels';
 import { connect } from '../servers';
 import * as actions from '../actions';
 
@@ -294,7 +294,6 @@ function socket_mode(server, channel, user, add, remove) {
 
 describe('compareUsers()', () => {
   it('compares users correctly', () => {
-    const compareUsers = reducer.__get__('compareUsers');
     expect([
       { renderName: 'user5' },
       { renderName: '@user2' },

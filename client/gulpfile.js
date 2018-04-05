@@ -7,7 +7,6 @@ var gutil = require('gulp-util');
 var nano = require('gulp-cssnano');
 var autoprefixer = require('gulp-autoprefixer');
 var concat = require('gulp-concat');
-var cache = require('gulp-cached');
 var express = require('express');
 var proxy = require('express-http-proxy');
 var webpack = require('webpack');
@@ -33,7 +32,9 @@ function brotli(opts) {
 gulp.task('css', function() {
   return gulp.src(['src/css/fonts.css', 'src/css/fontello.css', 'src/css/style.css'])
     .pipe(concat('bundle.css'))
-    .pipe(autoprefixer())
+    .pipe(autoprefixer({
+      browsers: ['ie 11']
+    }))
     .pipe(nano())
     .pipe(gulp.dest('dist'));
 });

@@ -24,12 +24,11 @@
     "react/prefer-stateless-function": 0,
     "react/prop-types": 0
   },
-  "globals": {
-    "DEV": true
-  },
   "settings": {
     "import/resolver": {
-      "babel-module": {}
+      "webpack": {
+        "config": "webpack.config.prod.js"
+      }
     }
   }
 }

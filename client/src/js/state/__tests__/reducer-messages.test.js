@@ -1,5 +1,5 @@
 import { Map, fromJS } from 'immutable';
-import reducer, { broadcast } from '../messages';
+import reducer, { broadcast, getMessageTab } from '../messages';
 import * as actions from '../actions';
 import appReducer from '../app';
 
@@ -178,8 +178,6 @@ describe('message reducer', () => {
 });
 
 describe('getMessageTab()', () => {
-  const getMessageTab = reducer.__get__('getMessageTab');
-
   it('returns the correct tab', () => {
     const srv = 'chat.freenode.net';
     [

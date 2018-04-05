@@ -1,6 +1,6 @@
 import FontFaceObserver from 'fontfaceobserver';
 import { setCharWidth } from 'state/app';
-import { stringWidth } from 'util';
+import { stringWidth } from 'utils';
 
 export default function fonts({ store }) {
   let { charWidth } = localStorage;

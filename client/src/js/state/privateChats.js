@@ -1,6 +1,6 @@
 import { Set, Map } from 'immutable';
 import { createSelector } from 'reselect';
-import createReducer from 'util/createReducer';
+import createReducer from 'utils/createReducer';
 import { updateSelection } from './tab';
 import * as actions from './actions';
 

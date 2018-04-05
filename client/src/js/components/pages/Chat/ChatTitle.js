@@ -3,7 +3,7 @@ import { List } from 'immutable';
 import Navicon from 'containers/Navicon';
 import Editable from 'components/ui/Editable';
 import { isValidServerName } from 'state/servers';
-import { linkify } from 'util';
+import { linkify } from 'utils';
 
 export default class ChatTitle extends PureComponent {
   render() {

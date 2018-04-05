@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { stringWidth } from 'util';
+import { stringWidth } from 'utils';
 
 export default class Editable extends PureComponent {
   static defaultProps = {

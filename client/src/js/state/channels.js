@@ -1,6 +1,6 @@
 import { Map, List, Record } from 'immutable';
 import { createSelector } from 'reselect';
-import createReducer from 'util/createReducer';
+import createReducer from 'utils/createReducer';
 import { getSelectedTab, updateSelection } from './tab';
 import * as actions from './actions';
 
@@ -52,7 +52,7 @@ function loadUser(nick) {
   return createUser(nick);
 }
 
-function compareUsers(a, b) {
+export function compareUsers(a, b) {
   a = a.renderName.toLowerCase();
   b = b.renderName.toLowerCase();
 

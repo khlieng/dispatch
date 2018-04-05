@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 import createReducer from 'state';
-import { routeReducer, routeMiddleware } from 'util/router';
+import { routeReducer, routeMiddleware } from 'utils/router';
 import message from './middleware/message';
 import createSocketMiddleware from './middleware/socket';
 import commands from './commands';

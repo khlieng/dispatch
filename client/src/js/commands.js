@@ -3,7 +3,7 @@ import { join, part, invite, kick, setTopic } from 'state/channels';
 import { sendMessage, raw } from 'state/messages';
 import { setNick, disconnect, whois, away } from 'state/servers';
 import { select } from 'state/tab';
-import { find } from 'util';
+import { find } from 'utils';
 import createCommandMiddleware, { beforeHandler, notFoundHandler } from './middleware/command';
 
 const help = [

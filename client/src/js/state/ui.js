@@ -1,6 +1,6 @@
 import { Record } from 'immutable';
-import createReducer from 'util/createReducer';
-import { LOCATION_CHANGED } from 'util/router';
+import createReducer from 'utils/createReducer';
+import { LOCATION_CHANGED } from 'utils/router';
 import * as actions from './actions';
 
 const State = Record({

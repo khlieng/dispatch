@@ -3,7 +3,7 @@ import { setConnected } from 'state/app';
 import { broadcast, inform, print, addMessage, addMessages } from 'state/messages';
 import { reconnect } from 'state/servers';
 import { select } from 'state/tab';
-import { normalizeChannel } from 'util';
+import { normalizeChannel } from 'utils';
 
 function withReason(message, reason) {
   return message + (reason ? ` (${reason})` : '');

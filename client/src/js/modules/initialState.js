@@ -3,9 +3,9 @@ import { socket as socketActions } from 'state/actions';
 import { getWrapWidth, setConnectDefaults } from 'state/app';
 import { addMessages } from 'state/messages';
 import { select, updateSelection } from 'state/tab';
-import { find } from 'util';
-import { when } from 'util/observe';
-import { replace } from 'util/router';
+import { find } from 'utils';
+import { when } from 'utils/observe';
+import { replace } from 'utils/router';
 
 export default function initialState({ store }) {
   const env = JSON.parse(document.getElementById('env').innerHTML);

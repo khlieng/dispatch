@@ -1,6 +1,6 @@
 import { Map } from 'immutable';
 import base64 from 'base64-arraybuffer';
-import createReducer from 'util/createReducer';
+import createReducer from 'utils/createReducer';
 import * as actions from './actions';
 
 export const getSettings = state => state.settings;

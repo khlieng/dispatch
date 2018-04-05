@@ -1,5 +1,5 @@
 import { addMessages, inform, print } from 'state/messages';
-import { isChannel } from 'util';
+import { isChannel } from 'utils';
 
 export const beforeHandler = '_before';
 export const notFoundHandler = 'commandNotFound';

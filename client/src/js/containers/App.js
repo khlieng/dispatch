@@ -7,7 +7,7 @@ import { getSortedPrivateChats } from 'state/privateChats';
 import { getServers } from 'state/servers';
 import { getSelectedTab, select } from 'state/tab';
 import { getShowTabList, hideMenu } from 'state/ui';
-import { push } from 'util/router';
+import { push } from 'utils/router';
 
 const mapState = createStructuredSelector({
   channels: getSortedChannels,

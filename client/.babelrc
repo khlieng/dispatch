@@ -1,34 +1,26 @@
 {
   "presets": [
-    ["es2015", { "modules": false, "loose": true }],
-    "react",
-    "stage-0"
-  ],
-  "plugins": [
-    ["module-resolver", {
-      "root": ["./src/js"],
-      "alias": {
-        "components": "./src/js/components",
-        "containers": "./src/js/containers",
-        "state": "./src/js/state",
-        "util": "./src/js/util"
+    ["@babel/preset-env", {
+      "modules": false,
+      "loose": true,
+      "targets": {
+        "browsers": ["ie 11"]
       }
-    }]
+    }],
+    "@babel/preset-react",
+    "@babel/preset-stage-0"
   ],
   "env": {
     "development": {
       "plugins": ["react-hot-loader/babel"]
     },
     "test": {
-      "plugins": [
-        "rewire",
-        "transform-es2015-modules-commonjs"
-      ]
+      "plugins": ["@babel/plugin-transform-modules-commonjs"]
     },
     "production": {
       "plugins": [
-        "transform-react-inline-elements",
-        "transform-react-constant-elements"
+        "@babel/plugin-transform-react-inline-elements",
+        "@babel/plugin-transform-react-constant-elements"
       ]
     }
   }

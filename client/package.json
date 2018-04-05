@@ -5,22 +5,21 @@
   "license": "MIT",
   "main": "index.js",
   "devDependencies": {
-    "babel-core": "^6.23.1",
+    "@babel/core": "^7.0.0-beta.44",
+    "@babel/plugin-transform-react-constant-elements": "^7.0.0-beta.44",
+    "@babel/plugin-transform-react-inline-elements": "^7.0.0-beta.44",
+    "@babel/preset-env": "^7.0.0-beta.44",
+    "@babel/preset-react": "^7.0.0-beta.44",
+    "@babel/preset-stage-0": "^7.0.0-beta.44",
+    "babel-core": "^7.0.0-0",
     "babel-eslint": "^8.2.2",
     "babel-jest": "^22.4.3",
-    "babel-loader": "^7.0.0",
-    "babel-plugin-module-resolver": "^3.1.1",
-    "babel-plugin-rewire": "^1.1.0",
-    "babel-plugin-transform-react-constant-elements": "^6.23.0",
-    "babel-plugin-transform-react-inline-elements": "^6.22.0",
-    "babel-preset-es2015": "^6.22.0",
-    "babel-preset-react": "^6.23.0",
-    "babel-preset-stage-0": "^6.22.0",
+    "babel-loader": "^8.0.0-beta",
     "brotli": "^1.3.1",
     "css-loader": "^0.28.0",
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",
-    "eslint-import-resolver-babel-module": "^4.0.0",
+    "eslint-import-resolver-webpack": "^0.9.0",
     "eslint-loader": "^2.0.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
@@ -29,7 +28,6 @@
     "express-http-proxy": "^1.0.1",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^5.0.0",
-    "gulp-cached": "^1.1.1",
     "gulp-concat": "^2.6.1",
     "gulp-cssnano": "^2.1.2",
     "gulp-util": "^3.0.8",
@@ -63,5 +61,13 @@
     "test": "jest",
     "test:verbose": "jest --verbose",
     "test:watch": "jest --watch"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^components(.*)$": "<rootDir>/src/js/components$1",
+      "^containers(.*)$": "<rootDir>/src/js/containers$1",
+      "^state(.*)$": "<rootDir>/src/js/state$1",
+      "^utils(.*)$": "<rootDir>/src/js/utils$1"
+    }
   }
 }
