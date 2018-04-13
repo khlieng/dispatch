@@ -1,5 +1,8 @@
 var path = require('path');
 var webpack = require('webpack');
+var MiniCssExtractPlugin = require('mini-css-extract-plugin');
+var autoprefixer = require('autoprefixer');
+var cssnano = require('cssnano');
 
 module.exports = {
   mode: 'production',
@@ -27,7 +30,47 @@ module.exports = {
         }
       },
       { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.css$/, loader: 'style-loader!css-loader' }
+      {
+        test: /\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+            options: {
+              modules: false
+            }
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: [
+                autoprefixer,
+                cssnano({
+                  discardUnused: {
+                    fontFace: false
+                  }
+                })
+              ]
+            }
+          }
+        ]
+      }
     ]
+  },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css'
+    })
+  ],
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        styles: {
+          name: 'bundle',
+          test: /\.css$/,
+          chunks: 'all'
+        }
+      }
+    }
   }
 };

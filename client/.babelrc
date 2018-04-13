@@ -4,10 +4,7 @@
       "@babel/preset-env",
       {
         "modules": false,
-        "loose": true,
-        "targets": {
-          "browsers": ["ie 11"]
-        }
+        "loose": true
       }
     ],
     "@babel/preset-react",

@@ -4,9 +4,6 @@ var url = require('url');
 
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var nano = require('gulp-cssnano');
-var autoprefixer = require('gulp-autoprefixer');
-var concat = require('gulp-concat');
 var express = require('express');
 var proxy = require('express-http-proxy');
 var webpack = require('webpack');
@@ -31,19 +28,6 @@ function brotli(opts) {
     }
   });
 }
-
-gulp.task('css', function() {
-  return gulp
-    .src(['src/css/fonts.css', 'src/css/fontello.css', 'src/css/style.css'])
-    .pipe(concat('bundle.css'))
-    .pipe(
-      autoprefixer({
-        browsers: ['ie 11']
-      })
-    )
-    .pipe(nano())
-    .pipe(gulp.dest('dist'));
-});
 
 gulp.task('js', function(cb) {
   var config = require('./webpack.config.prod.js');
@@ -81,80 +65,57 @@ gulp.task('config', function() {
 
 function compress() {
   return gulp
-    .src(['dist/**/!(*.br|*.woff|*.woff2)', '!dist/{br,br/**}'])
+    .src(['dist/**/!(*.br|*.woff|*.woff2|0.bundle.js)', '!dist/{br,br/**}'])
     .pipe(brotli({ quality: 11 }))
     .pipe(gulp.dest('dist/br'));
 }
 
-gulp.task('compress', ['css', 'js', 'fonts'], compress);
-gulp.task('compress:dev', ['css', 'fonts'], compress);
+gulp.task('compress', ['js', 'fonts'], compress);
 
-gulp.task('bindata', ['compress', 'config'], function(cb) {
+gulp.task('bindata', ['compress', 'fonts:woff', 'config'], function(cb) {
   exec(
     'go-bindata -nomemcopy -nocompress -pkg assets -o ../assets/bindata.go -prefix "dist/br" dist/br/...',
     cb
   );
 });
 
-gulp.task('bindata:dev', ['compress:dev', 'config'], function(cb) {
-  exec(
-    'go-bindata -debug -pkg assets -o ../assets/bindata.go -prefix "dist/br" dist/br/...',
-    cb
+gulp.task('dev', ['fonts'], function() {
+  var config = require('./webpack.config.dev.js');
+  var compiler = webpack(config);
+  var app = express();
+
+  app.use(
+    require('webpack-dev-middleware')(compiler, {
+      noInfo: true,
+      publicPath: config.output.publicPath,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
   );
+
+  app.use(require('webpack-hot-middleware')(compiler));
+
+  app.use('/', express.static('dist'));
+
+  app.use(
+    '*',
+    proxy('localhost:1337', {
+      proxyReqPathResolver: function(req) {
+        return req.originalUrl;
+      }
+    })
+  );
+
+  app.listen(3000, function(err) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    console.log('Listening at http://localhost:3000');
+  });
 });
 
-gulp.task(
-  'dev',
-  ['css', 'fonts', 'fonts:woff', 'config', 'compress:dev', 'bindata:dev'],
-  function() {
-    gulp.watch('src/css/*.css', ['css']);
-
-    var config = require('./webpack.config.dev.js');
-    var compiler = webpack(config);
-    var app = express();
-
-    app.use(
-      require('webpack-dev-middleware')(compiler, {
-        noInfo: true,
-        publicPath: config.output.publicPath,
-        headers: {
-          'Access-Control-Allow-Origin': '*'
-        }
-      })
-    );
-
-    app.use(require('webpack-hot-middleware')(compiler));
-
-    app.use('/', express.static('dist'));
-
-    app.use(
-      '*',
-      proxy('localhost:1337', {
-        proxyReqPathResolver: function(req) {
-          return req.originalUrl;
-        }
-      })
-    );
-
-    app.listen(3000, function(err) {
-      if (err) {
-        console.log(err);
-        return;
-      }
-
-      console.log('Listening at http://localhost:3000');
-    });
-  }
-);
-
-gulp.task('build', [
-  'css',
-  'js',
-  'fonts',
-  'fonts:woff',
-  'config',
-  'compress',
-  'bindata'
-]);
-
+gulp.task('build', ['bindata']);
 gulp.task('default', ['dev']);
