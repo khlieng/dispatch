@@ -65,7 +65,7 @@ gulp.task('config', function() {
 
 function compress() {
   return gulp
-    .src(['dist/**/!(*.br|*.woff|*.woff2|0.bundle.js)', '!dist/{br,br/**}'])
+    .src(['dist/**/!(*.br|*.woff|*.woff2)', '!dist/{br,br/**}'])
     .pipe(brotli({ quality: 11 }))
     .pipe(gulp.dest('dist/br'));
 }
