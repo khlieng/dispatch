@@ -59,14 +59,13 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: '[name].css'
+      filename: 'bundle.css'
     })
   ],
   optimization: {
     splitChunks: {
       cacheGroups: {
         styles: {
-          name: 'bundle',
           test: /\.css$/,
           chunks: 'all'
         }
