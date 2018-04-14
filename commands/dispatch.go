@@ -5,7 +5,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -39,6 +41,18 @@ var rootCmd = &cobra.Command{
 		viper.SetConfigName("config")
 		viper.AddConfigPath(storage.Path.Root())
 		viper.ReadInConfig()
+
+		viper.WatchConfig()
+
+		prev := time.Now()
+		viper.OnConfigChange(func(e fsnotify.Event) {
+			now := time.Now()
+			// fsnotify sometimes fires twice
+			if now.Sub(prev) > time.Second {
+				log.Println("New config loaded")
+				prev = now
+			}
+		})
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
