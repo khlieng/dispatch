@@ -36,7 +36,7 @@ var rootCmd = &cobra.Command{
 
 		storage.Initialize(viper.GetString("dir"))
 
-		initConfig(storage.Path.Config())
+		initConfig(storage.Path.Config(), viper.GetBool("reset_config"))
 
 		viper.SetConfigName("config")
 		viper.AddConfigPath(storage.Path.Root())
@@ -77,18 +77,20 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 
 	rootCmd.PersistentFlags().String("dir", storage.DefaultDirectory(), "directory to store config and data in")
+	rootCmd.PersistentFlags().Bool("reset-config", false, "reset to the default configuration, overwriting the current one")
 	rootCmd.Flags().IntP("port", "p", 80, "port to listen on")
 	rootCmd.Flags().Bool("dev", false, "development mode")
 
 	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
+	viper.BindPFlag("reset_config", rootCmd.PersistentFlags().Lookup("reset-config"))
 	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
 	viper.BindPFlag("dev", rootCmd.Flags().Lookup("dev"))
 
 	viper.SetDefault("verify_client_certificates", true)
 }
 
-func initConfig(configPath string) {
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+func initConfig(configPath string, overwrite bool) {
+	if _, err := os.Stat(configPath); overwrite || os.IsNotExist(err) {
 		config, err := assets.Asset("config.default.toml")
 		if err != nil {
 			log.Println(err)
