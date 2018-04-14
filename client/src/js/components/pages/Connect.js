@@ -8,27 +8,32 @@ export default class Connect extends Component {
   };
 
   handleSubmit = e => {
-    const { connect, select, join } = this.props;
+    const { connect, select, join, defaults } = this.props;
 
     e.preventDefault();
 
-    let address = e.target.address.value.trim();
     const nick = e.target.nick.value.trim();
-    const channels = e.target.channels.value
-      .split(',')
-      .map(s => s.trim())
-      .filter(s => s);
+    let { address, channels } = defaults;
     const opts = {
-      name: e.target.name.value.trim(),
-      tls: e.target.ssl.checked
+      name: defaults.name
     };
 
-    if (this.state.showOptionals) {
-      opts.realname = e.target.realname.value.trim();
-      opts.username = e.target.username.value.trim();
+    if (!defaults.readonly) {
+      address = e.target.address.value.trim();
+      channels = e.target.channels.value
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s);
+      opts.name = e.target.name.value.trim();
+      opts.tls = e.target.ssl.checked;
 
-      if (this.state.passwordTouched) {
-        opts.password = e.target.password.value.trim();
+      if (this.state.showOptionals) {
+        opts.realname = e.target.realname.value.trim();
+        opts.username = e.target.username.value.trim();
+
+        if (this.state.passwordTouched) {
+          opts.password = e.target.password.value.trim();
+        }
       }
     }
 
@@ -76,9 +81,24 @@ export default class Connect extends Component {
       );
     }
 
-    return (
-      <div className="connect">
-        <Navicon />
+    let form;
+
+    if (defaults.readonly) {
+      form = (
+        <form className="connect-form" onSubmit={this.handleSubmit}>
+          <h1>Connect</h1>
+          {defaults.showDetails && (
+            <div className="connect-details">
+              <h2>{defaults.address}</h2>
+              {defaults.channels.sort().map(channel => <p>{channel}</p>)}
+            </div>
+          )}
+          <input name="nick" type="text" placeholder="Nick" />
+          <input type="submit" value="Connect" />
+        </form>
+      );
+    } else {
+      form = (
         <form className="connect-form" onSubmit={this.handleSubmit}>
           <h1>Connect</h1>
           <input
@@ -111,6 +131,13 @@ export default class Connect extends Component {
           </p>
           <input type="submit" value="Connect" />
         </form>
+      );
+    }
+
+    return (
+      <div className="connect">
+        <Navicon />
+        {form}
       </div>
     );
   }

@@ -11,11 +11,13 @@ import (
 )
 
 type connectDefaults struct {
-	Name     string   `json:"name"`
-	Address  string   `json:"address"`
-	Channels []string `json:"channels"`
-	Password bool     `json:"password"`
-	SSL      bool     `json:"ssl"`
+	Name        string   `json:"name"`
+	Address     string   `json:"address"`
+	Channels    []string `json:"channels"`
+	Password    bool     `json:"password,omitempty"`
+	SSL         bool     `json:"ssl,omitempty"`
+	ReadOnly    bool     `json:"readonly,omitempty"`
+	ShowDetails bool     `json:"showDetails,omitempty"`
 }
 
 type indexData struct {
@@ -78,11 +80,13 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 	data.Channels = channels
 
 	data.Defaults = connectDefaults{
-		Name:     viper.GetString("defaults.name"),
-		Address:  viper.GetString("defaults.address"),
-		Channels: viper.GetStringSlice("defaults.channels"),
-		Password: viper.GetString("defaults.password") != "",
-		SSL:      viper.GetBool("defaults.ssl"),
+		Name:        viper.GetString("defaults.name"),
+		Address:     viper.GetString("defaults.address"),
+		Channels:    viper.GetStringSlice("defaults.channels"),
+		Password:    viper.GetString("defaults.password") != "",
+		SSL:         viper.GetBool("defaults.ssl"),
+		ReadOnly:    viper.GetBool("defaults.readonly"),
+		ShowDetails: viper.GetBool("defaults.show_details"),
 	}
 
 	server, channel := getTabFromPath(r.URL.EscapedPath())

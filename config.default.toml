@@ -11,6 +11,10 @@ channels = [
 ]
 password = ""
 ssl = true
+# Only allow a nick to be filled in
+readonly = false
+# Show server and channel info when readonly is enabled
+show_details = false
 
 [https]
 enabled = false

@@ -219,8 +219,18 @@ i[class*=' icon-']:before {
 }
 
 .connect-form h1 {
-  margin-bottom: 15px;
   text-align: center;
+  margin-bottom: 15px;
+}
+
+.connect-details {
+  color: #999;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.connect-details h2 {
+  color: #6bb758;
 }
 
 .connect-form input {

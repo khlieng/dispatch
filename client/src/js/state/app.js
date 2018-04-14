@@ -14,7 +14,9 @@ const ConnectDefaults = Record({
   address: '',
   channels: [],
   ssl: false,
-  password: false
+  password: false,
+  readonly: false,
+  showDetails: false
 });
 
 const App = Record({
