@@ -90,22 +90,28 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 	}
 
 	server, channel := getTabFromPath(r.URL.EscapedPath())
-	if channel != "" {
+	if isInChannel(channels, server, channel) {
 		data.addUsersAndMessages(server, channel, session)
 		return &data
 	}
 
 	server, channel = parseTabCookie(r, r.URL.Path)
-	if channel != "" {
-		for _, ch := range channels {
-			if server == ch.Server && channel == ch.Name {
-				data.addUsersAndMessages(server, channel, session)
-				break
-			}
-		}
+	if isInChannel(channels, server, channel) {
+		data.addUsersAndMessages(server, channel, session)
 	}
 
 	return &data
+}
+
+func isInChannel(channels []storage.Channel, server, channel string) bool {
+	if channel != "" {
+		for _, ch := range channels {
+			if server == ch.Server && channel == ch.Name {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func getTabFromPath(rawPath string) (string, string) {
