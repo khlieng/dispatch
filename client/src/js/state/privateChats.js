@@ -1,48 +1,46 @@
-import { Set, Map } from 'immutable';
-import { createSelector } from 'reselect';
+import sortBy from 'lodash/sortBy';
+import { findIndex } from 'utils';
 import createReducer from 'utils/createReducer';
 import { updateSelection } from './tab';
 import * as actions from './actions';
 
 export const getPrivateChats = state => state.privateChats;
 
-const lowerCaseValue = v => v.toLowerCase();
-
-export const getSortedPrivateChats = createSelector(
-  getPrivateChats,
-  privateChats =>
-    privateChats.withMutations(p =>
-      p.forEach((server, address) =>
-        p.update(address, chats => chats.sortBy(lowerCaseValue))
-      )
-    )
-);
-
 function open(state, server, nick) {
-  return state.update(server, Set(), chats => chats.add(nick));
+  if (!state[server]) {
+    state[server] = [];
+  }
+  if (findIndex(state[server], n => n === nick) === -1) {
+    state[server].push(nick);
+    state[server] = sortBy(state[server], v => v.toLowerCase());
+  }
 }
 
-export default createReducer(Map(), {
-  [actions.OPEN_PRIVATE_CHAT](state, action) {
-    return open(state, action.server, action.nick);
-  },
+export default createReducer(
+  {},
+  {
+    [actions.OPEN_PRIVATE_CHAT](state, action) {
+      open(state, action.server, action.nick);
+    },
 
-  [actions.CLOSE_PRIVATE_CHAT](state, action) {
-    return state.update(action.server, chats => chats.delete(action.nick));
-  },
+    [actions.CLOSE_PRIVATE_CHAT](state, { server, nick }) {
+      const i = findIndex(state[server], n => n === nick);
+      if (i !== -1) {
+        state[server].splice(i, 1);
+      }
+    },
 
-  [actions.socket.PM](state, action) {
-    if (action.from.indexOf('.') === -1) {
-      return open(state, action.server, action.from);
+    [actions.socket.PM](state, action) {
+      if (action.from.indexOf('.') === -1) {
+        open(state, action.server, action.from);
+      }
+    },
+
+    [actions.DISCONNECT](state, { server }) {
+      delete state[server];
     }
-
-    return state;
-  },
-
-  [actions.DISCONNECT](state, action) {
-    return state.delete(action.server);
   }
-});
+);
 
 export function openPrivateChat(server, nick) {
   return {

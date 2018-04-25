@@ -31,13 +31,13 @@ export default class MessageBox extends PureComponent {
       this.bottom = false;
     }
 
-    if (nextProps.messages.get(0) !== this.props.messages.get(0)) {
+    if (nextProps.messages[0] !== this.props.messages[0]) {
       if (nextProps.tab === this.props.tab) {
         const addedMessages =
-          nextProps.messages.size - this.props.messages.size;
+          nextProps.messages.length - this.props.messages.length;
         let addedHeight = 0;
         for (let i = 0; i < addedMessages; i++) {
-          addedHeight += nextProps.messages.get(i).height;
+          addedHeight += nextProps.messages[i].height;
         }
 
         this.nextScrollTop = addedHeight + this.container.scrollTop;
@@ -57,7 +57,7 @@ export default class MessageBox extends PureComponent {
       this.container.scrollTop = this.nextScrollTop;
       this.nextScrollTop = 0;
     } else if (this.bottom) {
-      this.list.scrollToRow(this.props.messages.size);
+      this.list.scrollToRow(this.props.messages.length);
     }
   }
 
@@ -72,7 +72,7 @@ export default class MessageBox extends PureComponent {
       }
       return 0;
     }
-    return this.props.messages.get(index - 1).height;
+    return this.props.messages[index - 1].height;
   };
 
   listRef = el => {
@@ -101,7 +101,7 @@ export default class MessageBox extends PureComponent {
     } else {
       this.bottom = true;
       if (scroll) {
-        this.list.scrollToRow(this.props.messages.size);
+        this.list.scrollToRow(this.props.messages.length);
       }
     }
   };
@@ -177,7 +177,7 @@ export default class MessageBox extends PureComponent {
     }
 
     const { messages, onNickClick } = this.props;
-    const message = messages.get(index - 1);
+    const message = messages[index - 1];
 
     return (
       <Message
@@ -192,7 +192,7 @@ export default class MessageBox extends PureComponent {
   render() {
     const props = {};
     if (this.bottom) {
-      props.scrollToIndex = this.props.messages.size;
+      props.scrollToIndex = this.props.messages.length;
     } else if (this.scrollTop >= 0) {
       props.scrollTop = this.scrollTop;
     }
@@ -209,7 +209,7 @@ export default class MessageBox extends PureComponent {
               ref={this.listRef}
               width={width}
               height={height - 14}
-              rowCount={this.props.messages.size + 1}
+              rowCount={this.props.messages.length + 1}
               rowHeight={this.getRowHeight}
               rowRenderer={this.renderMessage}
               onScroll={this.handleScroll}

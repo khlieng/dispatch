@@ -1,47 +1,45 @@
-import { Map } from 'immutable';
 import base64 from 'base64-arraybuffer';
 import createReducer from 'utils/createReducer';
 import * as actions from './actions';
 
 export const getSettings = state => state.settings;
 
-export default createReducer(Map(), {
-  [actions.UPLOAD_CERT](state) {
-    return state.set('uploadingCert', true);
-  },
+export default createReducer(
+  {},
+  {
+    [actions.UPLOAD_CERT](state) {
+      state.uploadingCert = true;
+    },
 
-  [actions.socket.CERT_SUCCESS]() {
-    return Map({ uploadingCert: false });
-  },
+    [actions.socket.CERT_SUCCESS](state) {
+      state.uploadingCert = false;
+      delete state.certFile;
+      delete state.cert;
+      delete state.keyFile;
+      delete state.key;
+    },
 
-  [actions.socket.CERT_FAIL](state, action) {
-    return state.merge({
-      uploadingCert: false,
-      certError: action.message
-    });
-  },
+    [actions.socket.CERT_FAIL](state, action) {
+      state.uploadingCert = false;
+      state.certError = action.message;
+    },
 
-  [actions.SET_CERT_ERROR](state, action) {
-    return state.merge({
-      uploadingCert: false,
-      certError: action.message
-    });
-  },
+    [actions.SET_CERT_ERROR](state, action) {
+      state.uploadingCert = false;
+      state.certError = action.message;
+    },
 
-  [actions.SET_CERT](state, action) {
-    return state.merge({
-      certFile: action.fileName,
-      cert: action.cert
-    });
-  },
+    [actions.SET_CERT](state, action) {
+      state.certFile = action.fileName;
+      state.cert = action.cert;
+    },
 
-  [actions.SET_KEY](state, action) {
-    return state.merge({
-      keyFile: action.fileName,
-      key: action.key
-    });
+    [actions.SET_KEY](state, action) {
+      state.keyFile = action.fileName;
+      state.key = action.key;
+    }
   }
-});
+);
 
 export function setCertError(message) {
   return {
@@ -53,14 +51,14 @@ export function setCertError(message) {
 export function uploadCert() {
   return (dispatch, getState) => {
     const { settings } = getState();
-    if (settings.has('cert') && settings.has('key')) {
+    if (settings.cert && settings.key) {
       dispatch({
         type: actions.UPLOAD_CERT,
         socket: {
           type: 'cert',
           data: {
-            cert: settings.get('cert'),
-            key: settings.get('key')
+            cert: settings.cert,
+            key: settings.key
           }
         }
       });

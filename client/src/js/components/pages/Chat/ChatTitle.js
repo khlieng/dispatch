@@ -1,9 +1,8 @@
 import React, { PureComponent } from 'react';
-import { List } from 'immutable';
 import Navicon from 'containers/Navicon';
 import Editable from 'components/ui/Editable';
 import { isValidServerName } from 'state/servers';
-import { linkify } from 'utils';
+import { isChannel, linkify } from 'utils';
 
 export default class ChatTitle extends PureComponent {
   render() {
@@ -19,7 +18,7 @@ export default class ChatTitle extends PureComponent {
     } = this.props;
 
     let closeTitle;
-    if (tab.isChannel()) {
+    if (isChannel(tab)) {
       closeTitle = 'Leave';
     } else if (tab.name) {
       closeTitle = 'Close';
@@ -49,7 +48,7 @@ export default class ChatTitle extends PureComponent {
           </Editable>
           <div className="chat-topic-wrap">
             <span className="chat-topic">
-              {linkify(channel.get('topic')) || null}
+              {channel && linkify(channel.topic)}
             </span>
             {serverError}
           </div>
@@ -64,7 +63,7 @@ export default class ChatTitle extends PureComponent {
         <div className="userlist-bar">
           <i className="icon-user" />
           <span className="chat-usercount">
-            {channel.get('users', List()).size}
+            {channel && channel.users.length}
           </span>
         </div>
       </div>

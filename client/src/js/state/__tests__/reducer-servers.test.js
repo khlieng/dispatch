@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import reducer, { connect, setServerName } from '../servers';
 import * as actions from '../actions';
 
@@ -6,7 +5,7 @@ describe('server reducer', () => {
   it('adds the server on CONNECT', () => {
     let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick',
@@ -20,7 +19,7 @@ describe('server reducer', () => {
 
     state = reducer(state, connect('127.0.0.1:1337', 'nick', {}));
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick',
@@ -39,7 +38,7 @@ describe('server reducer', () => {
       })
     );
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick',
@@ -62,31 +61,31 @@ describe('server reducer', () => {
   });
 
   it('removes the server on DISCONNECT', () => {
-    let state = Immutable.fromJS({
+    let state = {
       srv: {},
       srv2: {}
-    });
+    };
 
     state = reducer(state, {
       type: actions.DISCONNECT,
       server: 'srv2'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {}
     });
   });
 
   it('handles SET_SERVER_NAME', () => {
-    let state = Immutable.fromJS({
+    let state = {
       srv: {
         name: 'cake'
       }
-    });
+    };
 
     state = reducer(state, setServerName('pie', 'srv'));
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         name: 'pie'
       }
@@ -102,7 +101,7 @@ describe('server reducer', () => {
       editing: true
     });
 
-    expect(state.toJS()).toMatchObject({
+    expect(state).toMatchObject({
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick',
@@ -125,7 +124,7 @@ describe('server reducer', () => {
       nick: ''
     });
 
-    expect(state.toJS()).toMatchObject({
+    expect(state).toMatchObject({
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick',
@@ -143,7 +142,7 @@ describe('server reducer', () => {
       newNick: 'nick2'
     });
 
-    expect(state.toJS()).toMatchObject({
+    expect(state).toMatchObject({
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick2',
@@ -165,7 +164,7 @@ describe('server reducer', () => {
       server: '127.0.0.1'
     });
 
-    expect(state.toJS()).toMatchObject({
+    expect(state).toMatchObject({
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick',
@@ -197,23 +196,19 @@ describe('server reducer', () => {
       ]
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       '127.0.0.1': {
         name: 'stuff',
         nick: 'nick',
-        editedNick: null,
         status: {
-          connected: true,
-          error: null
+          connected: true
         }
       },
       '127.0.0.2': {
         name: 'stuffz',
         nick: 'nick2',
-        editedNick: null,
         status: {
-          connected: false,
-          error: null
+          connected: false
         }
       }
     });
@@ -227,14 +222,13 @@ describe('server reducer', () => {
       connected: true
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: null,
         status: {
-          connected: true,
-          error: null
+          connected: true
         }
       }
     });
@@ -246,7 +240,7 @@ describe('server reducer', () => {
       error: 'Bad stuff happened'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       '127.0.0.1': {
         name: '127.0.0.1',
         nick: 'nick',

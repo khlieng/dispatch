@@ -6,14 +6,14 @@ describe('tab reducer', () => {
   it('selects the tab and adds it to history', () => {
     let state = reducer(undefined, setSelectedTab('srv', '#chan'));
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       selected: { server: 'srv', name: '#chan' },
       history: [{ server: 'srv', name: '#chan' }]
     });
 
     state = reducer(state, setSelectedTab('srv', 'user1'));
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       selected: { server: 'srv', name: 'user1' },
       history: [
         { server: 'srv', name: '#chan' },
@@ -34,7 +34,7 @@ describe('tab reducer', () => {
       channels: ['#chan']
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       selected: { server: 'srv', name: '#chan3' },
       history: [
         { server: 'srv1', name: 'bob' },
@@ -55,7 +55,7 @@ describe('tab reducer', () => {
       nick: 'bob'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       selected: { server: 'srv', name: '#chan3' },
       history: [
         { server: 'srv', name: '#chan' },
@@ -76,7 +76,7 @@ describe('tab reducer', () => {
       server: 'srv'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       selected: { server: 'srv', name: '#chan3' },
       history: [{ server: 'srv1', name: 'bob' }]
     });
@@ -87,8 +87,8 @@ describe('tab reducer', () => {
 
     state = reducer(state, locationChanged('settings'));
 
-    expect(state.toJS()).toEqual({
-      selected: { server: null, name: null },
+    expect(state).toEqual({
+      selected: {},
       history: [{ server: 'srv', name: '#chan' }]
     });
   });
@@ -102,7 +102,7 @@ describe('tab reducer', () => {
       })
     );
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       selected: { server: 'srv', name: '#chan' },
       history: [{ server: 'srv', name: '#chan' }]
     });

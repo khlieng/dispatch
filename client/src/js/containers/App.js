@@ -3,7 +3,7 @@ import { createStructuredSelector } from 'reselect';
 import App from 'components/App';
 import { getConnected } from 'state/app';
 import { getSortedChannels } from 'state/channels';
-import { getSortedPrivateChats } from 'state/privateChats';
+import { getPrivateChats } from 'state/privateChats';
 import { getServers } from 'state/servers';
 import { getSelectedTab, select } from 'state/tab';
 import { getShowTabList, hideMenu } from 'state/ui';
@@ -12,7 +12,7 @@ import { push } from 'utils/router';
 const mapState = createStructuredSelector({
   channels: getSortedChannels,
   connected: getConnected,
-  privateChats: getSortedPrivateChats,
+  privateChats: getPrivateChats,
   servers: getServers,
   showTabList: getShowTabList,
   tab: getSelectedTab

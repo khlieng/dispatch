@@ -1,21 +1,20 @@
-import { List, Record } from 'immutable';
 import createReducer from 'utils/createReducer';
 import * as actions from './actions';
 
-const State = Record({
+const initialState = {
   show: false,
-  results: List()
-});
+  results: []
+};
 
 export const getSearch = state => state.search;
 
-export default createReducer(new State(), {
-  [actions.socket.SEARCH](state, action) {
-    return state.set('results', List(action.results));
+export default createReducer(initialState, {
+  [actions.socket.SEARCH](state, { results }) {
+    state.results = results;
   },
 
   [actions.TOGGLE_SEARCH](state) {
-    return state.set('show', !state.show);
+    state.show = !state.show;
   }
 });
 

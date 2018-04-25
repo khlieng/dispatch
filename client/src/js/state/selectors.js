@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import get from 'lodash/get';
 import { getServers } from './servers';
 import { getSelectedTab } from './tab';
 
@@ -6,5 +7,5 @@ import { getSelectedTab } from './tab';
 export const getSelectedTabTitle = createSelector(
   getSelectedTab,
   getServers,
-  (tab, servers) => tab.name || servers.getIn([tab.server, 'name'])
+  (tab, servers) => tab.name || get(servers, [tab.server, 'name'])
 );

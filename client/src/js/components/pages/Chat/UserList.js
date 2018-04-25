@@ -20,7 +20,7 @@ export default class UserList extends PureComponent {
     return (
       <UserListItem
         key={key}
-        user={users.get(index)}
+        user={users[index]}
         style={style}
         onClick={onNickClick}
       />
@@ -39,7 +39,7 @@ export default class UserList extends PureComponent {
               ref={this.listRef}
               width={200}
               height={height - 20}
-              rowCount={users.size}
+              rowCount={users.length}
               rowHeight={24}
               rowRenderer={this.renderUser}
               className="rvlist-users"

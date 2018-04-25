@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { isChannel } from 'utils';
 import ChatTitle from './ChatTitle';
 import Search from './Search';
 import MessageBox from './MessageBox';
@@ -9,7 +10,7 @@ export default class Chat extends Component {
   handleCloseClick = () => {
     const { tab, part, closePrivateChat, disconnect } = this.props;
 
-    if (tab.isChannel()) {
+    if (isChannel(tab)) {
       part([tab.name], tab.server);
     } else if (tab.name) {
       closePrivateChat(tab.server, tab.name);
@@ -20,7 +21,7 @@ export default class Chat extends Component {
 
   handleSearch = phrase => {
     const { tab, searchMessages } = this.props;
-    if (tab.isChannel()) {
+    if (isChannel(tab)) {
       searchMessages(tab.server, tab.name, phrase);
     }
   };
@@ -70,7 +71,7 @@ export default class Chat extends Component {
     } = this.props;
 
     let chatClass;
-    if (tab.isChannel()) {
+    if (isChannel(tab)) {
       chatClass = 'chat-channel';
     } else if (tab.name) {
       chatClass = 'chat-private';

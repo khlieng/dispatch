@@ -1,5 +1,5 @@
-import { List, Map, Record } from 'immutable';
 import { createSelector } from 'reselect';
+import has from 'lodash/has';
 import {
   findBreakpoints,
   messageHeight,
@@ -12,95 +12,85 @@ import { getApp } from './app';
 import { getSelectedTab } from './tab';
 import * as actions from './actions';
 
-const Message = Record({
-  id: null,
-  from: null,
-  content: '',
-  time: null,
-  type: null,
-  channel: false,
-  next: false,
-  height: 0,
-  length: 0,
-  breakpoints: null
-});
-
 export const getMessages = state => state.messages;
 
 export const getSelectedMessages = createSelector(
   getSelectedTab,
   getMessages,
-  (tab, messages) =>
-    messages.getIn([tab.server, tab.name || tab.server], List())
+  (tab, messages) => {
+    const target = tab.name || tab.server;
+    if (has(messages, [tab.server, target])) {
+      return messages[tab.server][target];
+    }
+    return [];
+  }
 );
 
 export const getHasMoreMessages = createSelector(
   getSelectedMessages,
   messages => {
-    const first = messages.get(0);
+    const first = messages[0];
     return first && first.next;
   }
 );
 
-export default createReducer(Map(), {
-  [actions.ADD_MESSAGE](state, { server, tab, message }) {
-    return state.updateIn([server, tab], List(), list =>
-      list.push(new Message(message))
-    );
-  },
-
-  [actions.ADD_MESSAGES](state, { server, tab, messages, prepend }) {
-    return state.withMutations(s => {
-      if (prepend) {
-        for (let i = messages.length - 1; i >= 0; i--) {
-          s.updateIn([server, tab], List(), list =>
-            list.unshift(new Message(messages[i]))
-          );
-        }
-      } else {
-        messages.forEach(message =>
-          s.updateIn([server, message.tab || tab], List(), list =>
-            list.push(new Message(message))
-          )
-        );
-      }
-    });
-  },
-
-  [actions.DISCONNECT](state, { server }) {
-    return state.delete(server);
-  },
-
-  [actions.PART](state, { server, channels }) {
-    return state.withMutations(s =>
-      channels.forEach(channel => s.deleteIn([server, channel]))
-    );
-  },
-
-  [actions.UPDATE_MESSAGE_HEIGHT](
-    state,
-    { wrapWidth, charWidth, windowWidth }
-  ) {
-    return state.withMutations(s =>
-      s.forEach((server, serverKey) =>
-        server.forEach((target, targetKey) =>
-          target.forEach((message, index) =>
-            s.setIn(
-              [serverKey, targetKey, index, 'height'],
-              messageHeight(
-                message,
-                wrapWidth,
-                charWidth,
-                6 * charWidth,
-                windowWidth
-              )
-            )
-          )
-        )
-      )
-    );
+function init(state, server, tab) {
+  if (!state[server]) {
+    state[server] = {};
   }
-});
+  if (!state[server][tab]) {
+    state[server][tab] = [];
+  }
+}
+
+export default createReducer(
+  {},
+  {
+    [actions.ADD_MESSAGE](state, { server, tab, message }) {
+      init(state, server, tab);
+      state[server][tab].push(message);
+    },
+
+    [actions.ADD_MESSAGES](state, { server, tab, messages, prepend }) {
+      if (prepend) {
+        init(state, server, tab);
+        state[server][tab].unshift(...messages);
+      } else {
+        messages.forEach(message => {
+          init(state, server, message.tab || tab);
+          state[server][message.tab || tab].push(message);
+        });
+      }
+    },
+
+    [actions.DISCONNECT](state, { server }) {
+      delete state[server];
+    },
+
+    [actions.PART](state, { server, channels }) {
+      channels.forEach(channel => delete state[server][channel]);
+    },
+
+    [actions.UPDATE_MESSAGE_HEIGHT](
+      state,
+      { wrapWidth, charWidth, windowWidth }
+    ) {
+      Object.keys(state).forEach(server =>
+        Object.keys(state[server]).forEach(target =>
+          state[server][target].forEach(message => {
+            message.height = messageHeight(
+              message,
+              wrapWidth,
+              charWidth,
+              6 * charWidth,
+              windowWidth
+            );
+          })
+        )
+      );
+    }
+  }
+);
 
 let nextID = 0;
 
@@ -156,14 +146,14 @@ export function getMessageTab(server, to) {
 export function fetchMessages() {
   return (dispatch, getState) => {
     const state = getState();
-    const first = getSelectedMessages(state).get(0);
+    const first = getSelectedMessages(state)[0];
 
     if (!first) {
       return;
     }
 
     const tab = state.tab.selected;
-    if (tab.isChannel()) {
+    if (isChannel(tab)) {
       dispatch({
         type: actions.FETCH_MESSAGES,
         socket: {
@@ -206,7 +196,7 @@ export function sendMessage(content, to, server) {
       tab: to,
       message: initMessage(
         {
-          from: state.servers.getIn([server, 'nick']),
+          from: state.servers[server].nick,
           content
         },
         to,

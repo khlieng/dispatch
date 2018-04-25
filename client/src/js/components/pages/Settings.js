@@ -3,8 +3,8 @@ import Navicon from 'containers/Navicon';
 import FileInput from 'components/ui/FileInput';
 
 const Settings = ({ settings, onCertChange, onKeyChange, uploadCert }) => {
-  const status = settings.get('uploadingCert') ? 'Uploading...' : 'Upload';
-  const error = settings.get('certError');
+  const status = settings.uploadingCert ? 'Uploading...' : 'Upload';
+  const error = settings.certError;
 
   return (
     <div className="settings">
@@ -14,14 +14,14 @@ const Settings = ({ settings, onCertChange, onKeyChange, uploadCert }) => {
       <div>
         <p>Certificate</p>
         <FileInput
-          name={settings.get('certFile') || 'Select Certificate'}
+          name={settings.certFile || 'Select Certificate'}
           onChange={onCertChange}
         />
       </div>
       <div>
         <p>Private Key</p>
         <FileInput
-          name={settings.get('keyFile') || 'Select Key'}
+          name={settings.keyFile || 'Select Key'}
           onChange={onKeyChange}
         />
       </div>

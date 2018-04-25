@@ -9,7 +9,7 @@ import {
 } from 'state/messages';
 import { reconnect } from 'state/servers';
 import { select } from 'state/tab';
-import { normalizeChannel } from 'utils';
+import { find, normalizeChannel } from 'utils';
 
 function withReason(message, reason) {
   return message + (reason ? ` (${reason})` : '');
@@ -18,9 +18,9 @@ function withReason(message, reason) {
 function findChannels(state, server, user) {
   const channels = [];
 
-  state.channels.get(server).forEach((channel, channelName) => {
-    if (channel.get('users').find(u => u.nick === user)) {
-      channels.push(channelName);
+  Object.keys(state.channels[server]).forEach(channel => {
+    if (find(state.channels[server][channel].users, u => u.nick === user)) {
+      channels.push(channel);
     }
   });
 
@@ -49,7 +49,7 @@ export default function handleSocket({
       const tab = state.tab.selected;
       const [joinedChannel] = channels;
       if (tab.server && tab.name) {
-        const { nick } = state.servers.get(tab.server);
+        const { nick } = state.servers[tab.server];
         if (
           tab.server === server &&
           nick === user &&

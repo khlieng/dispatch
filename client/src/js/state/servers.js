@@ -1,20 +1,8 @@
-import { Map, Record } from 'immutable';
 import { createSelector } from 'reselect';
+import get from 'lodash/get';
 import createReducer from 'utils/createReducer';
 import { getSelectedTab, updateSelection } from './tab';
 import * as actions from './actions';
-
-const Status = Record({
-  connected: false,
-  error: null
-});
-
-const Server = Record({
-  nick: '',
-  editedNick: null,
-  name: '',
-  status: new Status()
-});
 
 export const getServers = state => state.servers;
 
@@ -22,9 +10,12 @@ export const getCurrentNick = createSelector(
   getServers,
   getSelectedTab,
   (servers, tab) => {
-    const editedNick = servers.getIn([tab.server, 'editedNick']);
-    if (editedNick === null) {
-      return servers.getIn([tab.server, 'nick']);
+    if (!servers[tab.server]) {
+      return;
+    }
+    const { editedNick } = servers[tab.server];
+    if (!editedNick) {
+      return servers[tab.server].nick;
     }
     return editedNick;
   }
@@ -33,80 +24,77 @@ export const getCurrentNick = createSelector(
 export const getCurrentServerName = createSelector(
   getServers,
   getSelectedTab,
-  (servers, tab) => servers.getIn([tab.server, 'name'])
+  (servers, tab) => get(servers, [tab.server, 'name'])
 );
 
 export const getCurrentServerStatus = createSelector(
   getServers,
   getSelectedTab,
-  (servers, tab) => servers.getIn([tab.server, 'status'])
+  (servers, tab) => get(servers, [tab.server, 'status'], {})
 );
 
-export default createReducer(Map(), {
-  [actions.CONNECT](state, { host, nick, options }) {
-    if (!state.has(host)) {
-      return state.set(
-        host,
-        new Server({
+export default createReducer(
+  {},
+  {
+    [actions.CONNECT](state, { host, nick, options }) {
+      if (!state[host]) {
+        state[host] = {
           nick,
-          name: options.name || host
-        })
-      );
-    }
+          editedNick: null,
+          name: options.name || host,
+          status: {
+            connected: false,
+            error: null
+          }
+        };
+      }
 
-    return state;
-  },
-
-  [actions.DISCONNECT](state, { server }) {
-    return state.delete(server);
-  },
-
-  [actions.SET_SERVER_NAME](state, { server, name }) {
-    return state.setIn([server, 'name'], name);
-  },
-
-  [actions.SET_NICK](state, { server, nick, editing }) {
-    if (editing) {
-      return state.setIn([server, 'editedNick'], nick);
-    } else if (nick === '') {
-      return state.setIn([server, 'editedNick'], null);
-    }
-    return state;
-  },
-
-  [actions.socket.NICK](state, { server, oldNick, newNick }) {
-    if (!oldNick || oldNick === state.get(server).nick) {
-      return state.update(server, s =>
-        s.set('nick', newNick).set('editedNick', null)
-      );
-    }
-    return state;
-  },
-
-  [actions.socket.NICK_FAIL](state, { server }) {
-    return state.setIn([server, 'editedNick'], null);
-  },
-
-  [actions.socket.SERVERS](state, { data }) {
-    if (!data) {
       return state;
-    }
+    },
 
-    return state.withMutations(s => {
-      data.forEach(server => {
-        server.status = new Status(server.status);
-        s.set(server.host, new Server(server));
-      });
-    });
-  },
+    [actions.DISCONNECT](state, { server }) {
+      delete state[server];
+    },
 
-  [actions.socket.CONNECTION_UPDATE](state, action) {
-    if (state.has(action.server)) {
-      return state.setIn([action.server, 'status'], new Status(action));
+    [actions.SET_SERVER_NAME](state, { server, name }) {
+      state[server].name = name;
+    },
+
+    [actions.SET_NICK](state, { server, nick, editing }) {
+      if (editing) {
+        state[server].editedNick = nick;
+      } else if (nick === '') {
+        state[server].editedNick = null;
+      }
+    },
+
+    [actions.socket.NICK](state, { server, oldNick, newNick }) {
+      if (!oldNick || oldNick === state[server].nick) {
+        state[server].nick = newNick;
+        state[server].editedNick = null;
+      }
+    },
+
+    [actions.socket.NICK_FAIL](state, { server }) {
+      state[server].editedNick = null;
+    },
+
+    [actions.socket.SERVERS](state, { data }) {
+      if (data) {
+        data.forEach(({ host, name, nick, status }) => {
+          state[host] = { name, nick, status };
+        });
+      }
+    },
+
+    [actions.socket.CONNECTION_UPDATE](state, { server, connected, error }) {
+      if (state[server]) {
+        state[server].status.connected = connected;
+        state[server].status.error = error;
+      }
     }
-    return state;
   }
-});
+);
 
 export function connect(server, nick, options) {
   let host = server;

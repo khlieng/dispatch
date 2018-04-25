@@ -1,5 +1,18 @@
 import React from 'react';
+import { isChannel } from '..';
 import linkify from '../linkify';
+
+describe('isChannel()', () => {
+  it('it handles strings', () => {
+    expect(isChannel('#cake')).toBe(true);
+    expect(isChannel('cake')).toBe(false);
+  });
+
+  it('handles tab objects', () => {
+    expect(isChannel({ name: '#cake' })).toBe(true);
+    expect(isChannel({ name: 'cake' })).toBe(false);
+  });
+});
 
 describe('linkify()', () => {
   const proto = href => (href.indexOf('http') !== 0 ? `http://${href}` : href);

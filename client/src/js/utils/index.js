@@ -16,7 +16,23 @@ export function normalizeChannel(channel) {
 
 export function isChannel(name) {
   // TODO: Handle other channel types
+  if (typeof name === 'object') {
+    ({ name } = name);
+  }
   return typeof name === 'string' && name[0] === '#';
+}
+
+export function stringifyTab(server, name) {
+  if (typeof server === 'object') {
+    if (server.name) {
+      return `${server.server};${server.name}`;
+    }
+    return server.server;
+  }
+  if (name) {
+    return `${server};${name}`;
+  }
+  return server;
 }
 
 export function timestamp(date = new Date()) {
@@ -54,14 +70,24 @@ export function measureScrollBarWidth() {
   return widthNoScroll - widthWithScroll;
 }
 
-export function find(arr, pred) {
+export function findIndex(arr, pred) {
   if (!arr) {
-    return null;
+    return -1;
   }
 
   for (let i = 0; i < arr.length; i++) {
     if (pred(arr[i])) {
-      return arr[i];
+      return i;
     }
   }
+
+  return -1;
+}
+
+export function find(arr, pred) {
+  const i = findIndex(arr, pred);
+  if (i !== -1) {
+    return arr[i];
+  }
+  return null;
 }

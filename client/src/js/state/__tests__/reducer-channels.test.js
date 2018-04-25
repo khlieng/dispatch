@@ -1,11 +1,10 @@
-import Immutable from 'immutable';
-import reducer, { compareUsers } from '../channels';
+import reducer, { compareUsers, getSortedChannels } from '../channels';
 import { connect } from '../servers';
 import * as actions from '../actions';
 
 describe('channel reducer', () => {
   it('removes channels on PART', () => {
-    let state = Immutable.fromJS({
+    let state = {
       srv1: {
         chan1: {},
         chan2: {},
@@ -14,7 +13,7 @@ describe('channel reducer', () => {
       srv2: {
         chan1: {}
       }
-    });
+    };
 
     state = reducer(state, {
       type: actions.PART,
@@ -22,7 +21,7 @@ describe('channel reducer', () => {
       channels: ['chan1', 'chan3']
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv1: {
         chan2: {}
       },
@@ -44,7 +43,7 @@ describe('channel reducer', () => {
       user: 'nick2'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         chan1: {
           users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
@@ -59,7 +58,7 @@ describe('channel reducer', () => {
   it('handles SOCKET_JOIN', () => {
     const state = reducer(undefined, socket_join('srv', 'chan1', 'nick1'));
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         chan1: {
           users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
@@ -79,7 +78,7 @@ describe('channel reducer', () => {
       user: 'nick2'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         chan1: {
           users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
@@ -103,7 +102,7 @@ describe('channel reducer', () => {
       newNick: 'nick3'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         chan1: {
           users: [
@@ -126,7 +125,7 @@ describe('channel reducer', () => {
       users: ['user3', 'user2', '@user4', 'user1', '+user5']
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         chan1: {
           users: [
@@ -149,10 +148,11 @@ describe('channel reducer', () => {
       topic: 'the topic'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         chan1: {
-          topic: 'the topic'
+          topic: 'the topic',
+          users: []
         }
       }
     });
@@ -165,7 +165,7 @@ describe('channel reducer', () => {
 
     state = reducer(state, socket_mode('srv', 'chan1', 'nick1', 'o', ''));
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         chan1: {
           users: [
@@ -183,7 +183,7 @@ describe('channel reducer', () => {
     state = reducer(state, socket_mode('srv', 'chan1', 'nick2', 'o', ''));
     state = reducer(state, socket_mode('srv', 'chan2', 'not_there', 'x', ''));
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         chan1: {
           users: [
@@ -208,7 +208,7 @@ describe('channel reducer', () => {
       ]
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         chan1: { topic: 'the topic', users: [] },
         chan2: { users: [] }
@@ -225,7 +225,7 @@ describe('channel reducer', () => {
       data: [{ host: '127.0.0.1' }, { host: 'thehost' }]
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       '127.0.0.1': {},
       thehost: {}
     });
@@ -234,23 +234,23 @@ describe('channel reducer', () => {
   it('optimistically adds the server on CONNECT', () => {
     const state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       '127.0.0.1': {}
     });
   });
 
   it('removes the server on DISCONNECT', () => {
-    let state = Immutable.fromJS({
+    let state = {
       srv: {},
       srv2: {}
-    });
+    };
 
     state = reducer(state, {
       type: actions.DISCONNECT,
       server: 'srv2'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {}
     });
   });
@@ -298,6 +298,35 @@ describe('compareUsers()', () => {
       { renderName: 'user2' },
       { renderName: 'user3' },
       { renderName: 'user5' }
+    ]);
+  });
+});
+
+describe('getSortedChannels', () => {
+  it('sorts servers and channels', () => {
+    expect(
+      getSortedChannels({
+        channels: {
+          'bob.com': {},
+          '127.0.0.1': {
+            '#chan1': {
+              users: [],
+              topic: 'cake'
+            },
+            '#pie': {},
+            '##apples': {}
+          }
+        }
+      })
+    ).toEqual([
+      {
+        address: '127.0.0.1',
+        channels: ['##apples', '#chan1', '#pie']
+      },
+      {
+        address: 'bob.com',
+        channels: []
+      }
     ]);
   });
 });

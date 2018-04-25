@@ -11,20 +11,21 @@ export default class TabList extends PureComponent {
     const className = showTabList ? 'tablist off-canvas' : 'tablist';
     const tabs = [];
 
-    channels.forEach((server, address) => {
-      const srv = servers.get(address);
+    channels.forEach(server => {
+      const { address } = server;
+      const srv = servers[address];
       tabs.push(
         <TabListItem
           key={address}
           server={address}
           content={srv.name}
-          selected={tab.server === address && tab.name === null}
+          selected={tab.server === address && !tab.name}
           connected={srv.status.connected}
           onClick={this.handleTabClick}
         />
       );
 
-      server.forEach((channel, name) =>
+      server.channels.forEach(name =>
         tabs.push(
           <TabListItem
             key={address + name}
@@ -37,27 +38,25 @@ export default class TabList extends PureComponent {
         )
       );
 
-      if (privateChats.has(address) && privateChats.get(address).size > 0) {
+      if (privateChats[address] && privateChats[address].length > 0) {
         tabs.push(
           <div key={`${address}-pm}`} className="tab-label">
             Private messages
           </div>
         );
 
-        privateChats
-          .get(address)
-          .forEach(nick =>
-            tabs.push(
-              <TabListItem
-                key={address + nick}
-                server={address}
-                target={nick}
-                content={nick}
-                selected={tab.server === address && tab.name === nick}
-                onClick={this.handleTabClick}
-              />
-            )
-          );
+        privateChats[address].forEach(nick =>
+          tabs.push(
+            <TabListItem
+              key={address + nick}
+              server={address}
+              target={nick}
+              content={nick}
+              selected={tab.server === address && tab.name === nick}
+              onClick={this.handleTabClick}
+            />
+          )
+        );
       }
     });
 

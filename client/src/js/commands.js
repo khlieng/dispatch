@@ -79,13 +79,13 @@ export default createCommandMiddleware(COMMAND, {
   topic({ dispatch, getState, server, channel }, ...newTopic) {
     if (newTopic.length > 0) {
       dispatch(setTopic(newTopic.join(' '), channel, server));
-    } else {
-      const topic = getState().channels.getIn([server, channel, 'topic']);
+    } else if (channel) {
+      const { topic } = getState().channels[server][channel];
       if (topic) {
         return text(topic);
       }
-      return 'No topic set';
     }
+    return 'No topic set';
   },
 
   msg({ dispatch, server }, target, ...message) {

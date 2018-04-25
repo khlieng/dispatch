@@ -1,14 +1,10 @@
-import { Map, List, Record } from 'immutable';
 import { createSelector } from 'reselect';
+import get from 'lodash/get';
+import sortBy from 'lodash/sortBy';
 import createReducer from 'utils/createReducer';
+import { find, findIndex } from 'utils';
 import { getSelectedTab, updateSelection } from './tab';
 import * as actions from './actions';
-
-const User = Record({
-  nick: null,
-  renderName: null,
-  mode: ''
-});
 
 const modePrefixes = [
   { mode: 'q', prefix: '~' }, // Owner
@@ -18,24 +14,23 @@ const modePrefixes = [
   { mode: 'v', prefix: '+' } // Voice
 ];
 
-function updateRenderName(user) {
+function getRenderName(user) {
   for (let i = 0; i < modePrefixes.length; i++) {
     if (user.mode.indexOf(modePrefixes[i].mode) !== -1) {
-      return user.set('renderName', `${modePrefixes[i].prefix}${user.nick}`);
+      return `${modePrefixes[i].prefix}${user.nick}`;
     }
   }
 
-  return user.set('renderName', user.nick);
+  return user.nick;
 }
 
 function createUser(nick, mode) {
-  return updateRenderName(
-    new User({
-      nick,
-      renderName: nick,
-      mode: mode || ''
-    })
-  );
+  const user = {
+    nick,
+    mode: mode || ''
+  };
+  user.renderName = getRenderName(user);
+  return user;
 }
 
 function loadUser(nick) {
@@ -52,6 +47,22 @@ function loadUser(nick) {
   }
 
   return createUser(nick);
+}
+
+function removeUser(users, nick) {
+  const i = findIndex(users, u => u.nick === nick);
+  if (i !== -1) {
+    users.splice(i, 1);
+  }
+}
+
+function init(state, server, channel) {
+  if (!state[server]) {
+    state[server] = {};
+  }
+  if (channel && !state[server][channel]) {
+    state[server][channel] = { users: [] };
+  }
 }
 
 export function compareUsers(a, b) {
@@ -80,152 +91,119 @@ export function compareUsers(a, b) {
 
 export const getChannels = state => state.channels;
 
-const key = (v, k) => k.toLowerCase();
-
 export const getSortedChannels = createSelector(getChannels, channels =>
-  channels
-    .withMutations(c =>
-      c.forEach((server, address) =>
-        c.update(address, chans => chans.sortBy(key))
+  sortBy(
+    Object.keys(channels).map(server => ({
+      address: server,
+      channels: sortBy(Object.keys(channels[server]), channel =>
+        channel.toLowerCase()
       )
-    )
-    .sortBy(key)
+    })),
+    server => server.address.toLowerCase()
+  )
 );
 
 export const getSelectedChannel = createSelector(
   getSelectedTab,
   getChannels,
-  (tab, channels) => channels.getIn([tab.server, tab.name], Map())
+  (tab, channels) => get(channels, [tab.server, tab.name])
 );
 
 export const getSelectedChannelUsers = createSelector(
   getSelectedChannel,
-  channel => channel.get('users', List()).sort(compareUsers)
+  channel => {
+    if (channel) {
+      return channel.users.concat().sort(compareUsers);
+    }
+    return [];
+  }
 );
 
-export default createReducer(Map(), {
-  [actions.PART](state, { server, channels }) {
-    return state.withMutations(s => {
-      channels.forEach(channel => s.deleteIn([server, channel]));
-    });
-  },
+export default createReducer(
+  {},
+  {
+    [actions.PART](state, { server, channels }) {
+      channels.forEach(channel => delete state[server][channel]);
+    },
 
-  [actions.socket.JOIN](state, { server, channels, user }) {
-    return state.updateIn([server, channels[0], 'users'], List(), users =>
-      users.push(createUser(user))
-    );
-  },
+    [actions.socket.JOIN](state, { server, channels, user }) {
+      const channel = channels[0];
+      init(state, server, channel);
+      state[server][channel].users.push(createUser(user));
+    },
 
-  [actions.socket.PART](state, { server, channel, user }) {
-    if (state.hasIn([server, channel])) {
-      return state.updateIn([server, channel, 'users'], users =>
-        users.filter(u => u.nick !== user)
-      );
-    }
-    return state;
-  },
-
-  [actions.socket.QUIT](state, { server, user }) {
-    return state.withMutations(s => {
-      s.get(server).forEach((v, channel) => {
-        s.updateIn([server, channel, 'users'], users =>
-          users.filter(u => u.nick !== user)
-        );
-      });
-    });
-  },
-
-  [actions.socket.NICK](state, { server, oldNick, newNick }) {
-    return state.withMutations(s => {
-      s.get(server).forEach((v, channel) => {
-        s.updateIn([server, channel, 'users'], users => {
-          const i = users.findIndex(user => user.nick === oldNick);
-          if (i < 0) {
-            return users;
-          }
-
-          return users.update(i, user =>
-            updateRenderName(user.set('nick', newNick))
-          );
-        });
-      });
-    });
-  },
-
-  [actions.socket.USERS](state, { server, channel, users }) {
-    return state.setIn(
-      [server, channel, 'users'],
-      List(users.map(user => loadUser(user)))
-    );
-  },
-
-  [actions.socket.TOPIC](state, { server, channel, topic }) {
-    return state.setIn([server, channel, 'topic'], topic);
-  },
-
-  [actions.socket.MODE](state, { server, channel, user, remove, add }) {
-    return state.updateIn([server, channel, 'users'], users => {
-      const i = users.findIndex(u => u.nick === user);
-      if (i < 0) {
-        return users;
+    [actions.socket.PART](state, { server, channel, user }) {
+      if (state[server][channel]) {
+        removeUser(state[server][channel].users, user);
       }
+    },
 
-      return users.update(i, u => {
-        let { mode } = u;
+    [actions.socket.QUIT](state, { server, user }) {
+      Object.keys(state[server]).forEach(channel => {
+        removeUser(state[server][channel].users, user);
+      });
+    },
+
+    [actions.socket.NICK](state, { server, oldNick, newNick }) {
+      Object.keys(state[server]).forEach(channel => {
+        const user = find(
+          state[server][channel].users,
+          u => u.nick === oldNick
+        );
+        if (user) {
+          user.nick = newNick;
+          user.renderName = getRenderName(user);
+        }
+      });
+    },
+
+    [actions.socket.USERS](state, { server, channel, users }) {
+      init(state, server, channel);
+      state[server][channel].users = users.map(nick => loadUser(nick));
+    },
+
+    [actions.socket.TOPIC](state, { server, channel, topic }) {
+      init(state, server, channel);
+      state[server][channel].topic = topic;
+    },
+
+    [actions.socket.MODE](state, { server, channel, user, remove, add }) {
+      const u = find(state[server][channel].users, v => v.nick === user);
+      if (u) {
         let j = remove.length;
         while (j--) {
-          mode = mode.replace(remove[j], '');
+          u.mode = u.mode.replace(remove[j], '');
         }
 
-        return updateRenderName(u.set('mode', mode + add));
-      });
-    });
-  },
+        u.mode += add;
+        u.renderName = getRenderName(u);
+      }
+    },
 
-  [actions.socket.CHANNELS](state, { data }) {
-    if (!data) {
-      return state;
+    [actions.socket.CHANNELS](state, { data }) {
+      if (data) {
+        data.forEach(({ server, name, topic }) => {
+          init(state, server, name);
+          state[server][name].topic = topic;
+        });
+      }
+    },
+
+    [actions.socket.SERVERS](state, { data }) {
+      if (data) {
+        data.forEach(({ host }) => init(state, host));
+      }
+    },
+
+    [actions.CONNECT](state, { host }) {
+      init(state, host);
+    },
+
+    [actions.DISCONNECT](state, { server }) {
+      delete state[server];
     }
-
-    return state.withMutations(s => {
-      data.forEach(channel => {
-        s.setIn(
-          [channel.server, channel.name],
-          Map({
-            users: List(),
-            topic: channel.topic
-          })
-        );
-      });
-    });
-  },
-
-  [actions.socket.SERVERS](state, { data }) {
-    if (!data) {
-      return state;
-    }
-
-    return state.withMutations(s => {
-      data.forEach(server => {
-        if (!s.has(server.host)) {
-          s.set(server.host, Map());
-        }
-      });
-    });
-  },
-
-  [actions.CONNECT](state, { host }) {
-    if (!state.has(host)) {
-      return state.set(host, Map());
-    }
-
-    return state;
-  },
-
-  [actions.DISCONNECT](state, { server }) {
-    return state.delete(server);
   }
-});
+);
 
 export function join(channels, server) {
   return {

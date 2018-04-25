@@ -1,77 +1,48 @@
-import { Record, List } from 'immutable';
 import createReducer from 'utils/createReducer';
 import { push, replace, LOCATION_CHANGED } from 'utils/router';
 import * as actions from './actions';
 
-const TabRecord = Record({
-  server: null,
-  name: null
-});
-
-class Tab extends TabRecord {
-  isChannel() {
-    return this.name && this.name.charAt(0) === '#';
-  }
-
-  toString() {
-    let str = this.server;
-    if (this.name) {
-      str += `;${this.name}`;
-    }
-    return str;
-  }
-}
-
-const State = Record({
-  selected: new Tab(),
-  history: List()
-});
+const initialState = {
+  selected: {},
+  history: []
+};
 
 function selectTab(state, action) {
-  const tab = new Tab(action);
-  return state
-    .set('selected', tab)
-    .update('history', history => history.push(tab));
+  state.selected = {
+    server: action.server,
+    name: action.name
+  };
+  state.history.push(state.selected);
 }
 
 export const getSelectedTab = state => state.tab.selected;
 
-export default createReducer(new State(), {
+export default createReducer(initialState, {
   [actions.SELECT_TAB]: selectTab,
 
   [actions.PART](state, action) {
-    return state.set(
-      'history',
-      state.history.filter(
-        tab =>
-          !(tab.server === action.server && tab.name === action.channels[0])
-      )
+    state.history = state.history.filter(
+      tab => !(tab.server === action.server && tab.name === action.channels[0])
     );
   },
 
   [actions.CLOSE_PRIVATE_CHAT](state, action) {
-    return state.set(
-      'history',
-      state.history.filter(
-        tab => !(tab.server === action.server && tab.name === action.nick)
-      )
+    state.history = state.history.filter(
+      tab => !(tab.server === action.server && tab.name === action.nick)
     );
   },
 
   [actions.DISCONNECT](state, action) {
-    return state.set(
-      'history',
-      state.history.filter(tab => tab.server !== action.server)
-    );
+    state.history = state.history.filter(tab => tab.server !== action.server);
   },
 
   [LOCATION_CHANGED](state, action) {
     const { route, params } = action;
     if (route === 'chat') {
-      return selectTab(state, params);
+      selectTab(state, params);
+    } else {
+      state.selected = {};
     }
-
-    return state.set('selected', new Tab());
   }
 });
 
@@ -89,16 +60,17 @@ export function updateSelection() {
     const { history } = state.tab;
     const { servers } = state;
     const { server } = state.tab.selected;
+    const serverAddrs = Object.keys(servers);
 
-    if (servers.size === 0) {
+    if (serverAddrs.length === 0) {
       dispatch(replace('/connect'));
-    } else if (history.size > 0) {
-      const tab = history.last();
+    } else if (history.length > 0) {
+      const tab = history[history.length - 1];
       dispatch(select(tab.server, tab.name, true));
-    } else if (servers.has(server)) {
+    } else if (servers[server]) {
       dispatch(select(server, null, true));
     } else {
-      dispatch(select(servers.keySeq().first(), null, true));
+      dispatch(select(serverAddrs.sort()[0], null, true));
     }
   };
 }

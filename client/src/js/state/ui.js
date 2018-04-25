@@ -1,30 +1,29 @@
-import { Record } from 'immutable';
 import createReducer from 'utils/createReducer';
 import { LOCATION_CHANGED } from 'utils/router';
 import * as actions from './actions';
 
-const State = Record({
+const initialState = {
   showTabList: false,
   showUserList: false
-});
+};
 
 export const getShowTabList = state => state.ui.showTabList;
 export const getShowUserList = state => state.ui.showUserList;
 
 function setMenuHidden(state) {
-  return state.set('showTabList', false);
+  state.showTabList = false;
 }
 
-export default createReducer(new State(), {
+export default createReducer(initialState, {
   [actions.TOGGLE_MENU](state) {
-    return state.update('showTabList', show => !show);
+    state.showTabList = !state.showTabList;
   },
 
   [actions.HIDE_MENU]: setMenuHidden,
   [LOCATION_CHANGED]: setMenuHidden,
 
   [actions.TOGGLE_USERLIST](state) {
-    return state.update('showUserList', show => !show);
+    state.showUserList = !state.showUserList;
   }
 });
 

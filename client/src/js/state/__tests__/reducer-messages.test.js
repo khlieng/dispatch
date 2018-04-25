@@ -1,4 +1,3 @@
-import { Map, fromJS } from 'immutable';
 import reducer, { broadcast, getMessageTab } from '../messages';
 import * as actions from '../actions';
 import appReducer from '../app';
@@ -15,7 +14,7 @@ describe('message reducer', () => {
       }
     });
 
-    expect(state.toJS()).toMatchObject({
+    expect(state).toMatchObject({
       srv: {
         '#chan1': [
           {
@@ -49,7 +48,7 @@ describe('message reducer', () => {
       ]
     });
 
-    expect(state.toJS()).toMatchObject({
+    expect(state).toMatchObject({
       srv: {
         '#chan1': [
           {
@@ -72,11 +71,11 @@ describe('message reducer', () => {
   });
 
   it('handles prepending of messages on ADD_MESSAGES', () => {
-    let state = fromJS({
+    let state = {
       srv: {
         '#chan1': [{ id: 0 }]
       }
-    });
+    };
 
     state = reducer(state, {
       type: actions.ADD_MESSAGES,
@@ -86,7 +85,7 @@ describe('message reducer', () => {
       messages: [{ id: 1 }, { id: 2 }]
     });
 
-    expect(state.toJS()).toMatchObject({
+    expect(state).toMatchObject({
       srv: {
         '#chan1': [{ id: 1 }, { id: 2 }, { id: 0 }]
       }
@@ -103,7 +102,7 @@ describe('message reducer', () => {
       state.messages = reducer(undefined, action);
     }, () => state);
 
-    const messages = state.messages.toJS();
+    const messages = state.messages;
 
     expect(messages.srv).not.toHaveProperty('srv');
     expect(messages.srv['#chan1']).toHaveLength(1);
@@ -113,7 +112,7 @@ describe('message reducer', () => {
   });
 
   it('deletes all messages related to server when disconnecting', () => {
-    let state = fromJS({
+    let state = {
       srv: {
         '#chan1': [{ content: 'msg1' }, { content: 'msg2' }],
         '#chan2': [{ content: 'msg' }]
@@ -121,14 +120,14 @@ describe('message reducer', () => {
       srv2: {
         '#chan1': [{ content: 'msg' }]
       }
-    });
+    };
 
     state = reducer(state, {
       type: actions.DISCONNECT,
       server: 'srv'
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv2: {
         '#chan1': [{ content: 'msg' }]
       }
@@ -136,7 +135,7 @@ describe('message reducer', () => {
   });
 
   it('deletes all messages related to channel when parting', () => {
-    let state = fromJS({
+    let state = {
       srv: {
         '#chan1': [{ content: 'msg1' }, { content: 'msg2' }],
         '#chan2': [{ content: 'msg' }]
@@ -144,7 +143,7 @@ describe('message reducer', () => {
       srv2: {
         '#chan1': [{ content: 'msg' }]
       }
-    });
+    };
 
     state = reducer(state, {
       type: actions.PART,
@@ -152,7 +151,7 @@ describe('message reducer', () => {
       channels: ['#chan1']
     });
 
-    expect(state.toJS()).toEqual({
+    expect(state).toEqual({
       srv: {
         '#chan2': [{ content: 'msg' }]
       },

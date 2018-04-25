@@ -1,5 +1,11 @@
 import React, { Component } from 'react';
+import { createSelector } from 'reselect';
 import Navicon from 'containers/Navicon';
+
+const getSortedDefaultChannels = createSelector(
+  defaults => defaults.channels,
+  channels => channels.concat().sort()
+);
 
 export default class Connect extends Component {
   state = {
@@ -90,7 +96,9 @@ export default class Connect extends Component {
           {defaults.showDetails && (
             <div className="connect-details">
               <h2>{defaults.address}</h2>
-              {defaults.channels.sort().map(channel => <p>{channel}</p>)}
+              {getSortedDefaultChannels(defaults).map(channel => (
+                <p>{channel}</p>
+              ))}
             </div>
           )}
           <input name="nick" type="text" placeholder="Nick" />

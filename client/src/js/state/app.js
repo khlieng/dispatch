@@ -1,4 +1,3 @@
-import { Record } from 'immutable';
 import createReducer from 'utils/createReducer';
 import * as actions from './actions';
 
@@ -9,34 +8,31 @@ export const getCharWidth = state => state.app.charWidth;
 export const getWindowWidth = state => state.app.windowWidth;
 export const getConnectDefaults = state => state.app.connectDefaults;
 
-const ConnectDefaults = Record({
-  name: '',
-  address: '',
-  channels: [],
-  ssl: false,
-  password: false,
-  readonly: false,
-  showDetails: false
-});
-
-const App = Record({
+const initialState = {
   connected: true,
   wrapWidth: 0,
   charWidth: 0,
   windowWidth: 0,
-  connectDefaults: new ConnectDefaults()
-});
+  connectDefaults: {
+    name: '',
+    address: '',
+    channels: [],
+    ssl: false,
+    password: false,
+    readonly: false,
+    showDetails: false
+  }
+};
 
-export default createReducer(new App(), {
-  [actions.APP_SET](state, action) {
-    return state.set(action.key, action.value);
+export default createReducer(initialState, {
+  [actions.APP_SET](state, { key, value }) {
+    state[key] = value;
   },
 
   [actions.UPDATE_MESSAGE_HEIGHT](state, action) {
-    return state
-      .set('wrapWidth', action.wrapWidth)
-      .set('charWidth', action.charWidth)
-      .set('windowWidth', action.windowWidth);
+    state.wrapWidth = action.wrapWidth;
+    state.charWidth = action.charWidth;
+    state.windowWidth = action.windowWidth;
   }
 });
 
@@ -57,5 +53,5 @@ export function setCharWidth(width) {
 }
 
 export function setConnectDefaults(defaults) {
-  return appSet('connectDefaults', new ConnectDefaults(defaults));
+  return appSet('connectDefaults', defaults);
 }
