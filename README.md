@@ -86,6 +86,6 @@ The libraries this project is built with.
 ### Client
 - [React](https://github.com/facebook/react)
 - [Redux](https://github.com/reactjs/redux)
-- [Immutable](https://github.com/facebook/immutable-js)
+- [Immer](https://github.com/mweststrate/immer)
 - [React Virtualized](https://github.com/bvaughn/react-virtualized)
 - [Lodash](https://github.com/lodash/lodash)
