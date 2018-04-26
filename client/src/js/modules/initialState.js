@@ -23,7 +23,13 @@ export default function initialState({ store }) {
       if (tab) {
         const [server, name = null] = tab.split(/;(.+)/);
 
-        if (name && find(env.channels, chan => chan.name === name)) {
+        if (
+          name &&
+          find(
+            env.channels,
+            chan => chan.server === server && chan.name === name
+          )
+        ) {
           store.dispatch(select(server, name, true));
         } else if (find(env.servers, srv => srv.host === server)) {
           store.dispatch(select(server, null, true));
