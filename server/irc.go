@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/tls"
+	"log"
 	"net"
 
 	"github.com/khlieng/dispatch/irc"
@@ -27,8 +28,12 @@ func createNickInUseHandler(i *irc.Client, session *Session) func(string) string
 
 func reconnectIRC() {
 	for _, user := range storage.LoadUsers() {
-		session := NewSession(user)
-		sessions.set(user.ID, session)
+		session, err := NewSession(user)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		sessions.set(session)
 		go session.run()
 
 		channels := user.GetChannels()

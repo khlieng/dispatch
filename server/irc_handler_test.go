@@ -41,7 +41,7 @@ func dispatchMessage(msg *irc.Message) WSResponse {
 func dispatchMessageMulti(msg *irc.Message) chan WSResponse {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s := NewSession(user)
+	s, _ := NewSession(user)
 
 	newIRCHandler(c, s).dispatchMessage(msg)
 
@@ -187,7 +187,7 @@ func TestHandleIRCWelcome(t *testing.T) {
 func TestHandleIRCWhois(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s := NewSession(nil)
+	s, _ := NewSession(nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
@@ -255,7 +255,7 @@ func TestHandleIRCNoTopic(t *testing.T) {
 func TestHandleIRCNames(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s := NewSession(nil)
+	s, _ := NewSession(nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
@@ -281,7 +281,7 @@ func TestHandleIRCNames(t *testing.T) {
 func TestHandleIRCMotd(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s := NewSession(nil)
+	s, _ := NewSession(nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
@@ -308,7 +308,7 @@ func TestHandleIRCMotd(t *testing.T) {
 func TestHandleIRCBadNick(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s := NewSession(nil)
+	s, _ := NewSession(nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{

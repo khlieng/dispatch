@@ -37,7 +37,6 @@ func Run() {
 	}
 
 	reconnectIRC()
-	initAuth()
 	initFileServer()
 	startHTTP()
 }

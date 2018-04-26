@@ -20,13 +20,6 @@ var clearCmd = &cobra.Command{
 			log.Println(err)
 		}
 
-		err = os.RemoveAll(storage.Path.HMACKey())
-		if err == nil || os.IsNotExist(err) {
-			log.Println("HMAC key cleared")
-		} else {
-			log.Println(err)
-		}
-
 		err = os.RemoveAll(storage.Path.Users())
 		if err == nil {
 			log.Println("User data cleared")

@@ -52,7 +52,3 @@ func (d directory) Config() string {
 func (d directory) Database() string {
 	return filepath.Join(d.Root(), "dispatch.db")
 }
-
-func (d directory) HMACKey() string {
-	return filepath.Join(d.Root(), "hmac.key")
-}

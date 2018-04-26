@@ -1,6 +1,8 @@
 package server
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"sync"
 	"time"
 
@@ -11,7 +13,7 @@ import (
 )
 
 const (
-	AnonymousSessionExpiration = 24 * time.Hour
+	AnonymousSessionExpiration = 1 * time.Minute
 )
 
 type Session struct {
@@ -23,21 +25,33 @@ type Session struct {
 	wsLock    sync.Mutex
 	broadcast chan WSResponse
 
+	id         string
 	user       *storage.User
 	expiration *time.Timer
 	reset      chan time.Duration
 }
 
-func NewSession(user *storage.User) *Session {
+func NewSession(user *storage.User) (*Session, error) {
+	id, err := newSessionID()
+	if err != nil {
+		return nil, err
+	}
 	return &Session{
 		irc:             make(map[string]*irc.Client),
 		connectionState: make(map[string]irc.ConnectionState),
 		ws:              make(map[string]*wsConn),
 		broadcast:       make(chan WSResponse, 32),
+		id:              id,
 		user:            user,
 		expiration:      time.NewTimer(AnonymousSessionExpiration),
 		reset:           make(chan time.Duration, 1),
-	}
+	}, nil
+}
+
+func newSessionID() (string, error) {
+	key := make([]byte, 32)
+	_, err := rand.Read(key)
+	return base64.RawURLEncoding.EncodeToString(key), err
 }
 
 func (s *Session) getIRC(server string) (*irc.Client, bool) {
@@ -194,7 +208,7 @@ func (s *Session) run() {
 			s.wsLock.Unlock()
 
 		case <-s.expiration.C:
-			sessions.delete(s.user.ID)
+			sessions.delete(s.id)
 			s.user.Remove()
 			return
 
@@ -209,31 +223,31 @@ func (s *Session) run() {
 }
 
 type sessionStore struct {
-	sessions map[uint64]*Session
+	sessions map[string]*Session
 	lock     sync.Mutex
 }
 
 func newSessionStore() *sessionStore {
 	return &sessionStore{
-		sessions: make(map[uint64]*Session),
+		sessions: make(map[string]*Session),
 	}
 }
 
-func (s *sessionStore) get(userid uint64) *Session {
+func (s *sessionStore) get(id string) *Session {
 	s.lock.Lock()
-	session := s.sessions[userid]
+	session := s.sessions[id]
 	s.lock.Unlock()
 	return session
 }
 
-func (s *sessionStore) set(userid uint64, session *Session) {
+func (s *sessionStore) set(session *Session) {
 	s.lock.Lock()
-	s.sessions[userid] = session
+	s.sessions[session.id] = session
 	s.lock.Unlock()
 }
 
-func (s *sessionStore) delete(userid uint64) {
+func (s *sessionStore) delete(id string) {
 	s.lock.Lock()
-	delete(s.sessions, userid)
+	delete(s.sessions, id)
 	s.lock.Unlock()
 }
