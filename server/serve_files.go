@@ -70,7 +70,7 @@ func initFileServer() {
 		}
 
 		hash := md5.Sum(data)
-		files[0].Hash = base64.RawURLEncoding.EncodeToString(hash[:])
+		files[0].Hash = base64.RawURLEncoding.EncodeToString(hash[:])[:8]
 		files[0].Path = "bundle." + files[0].Hash + ".js"
 
 		br, err := brotli.NewReader(bytes.NewReader(data), nil)
@@ -94,7 +94,7 @@ func initFileServer() {
 		}
 
 		hash = md5.Sum(data)
-		files[1].Hash = base64.RawURLEncoding.EncodeToString(hash[:])
+		files[1].Hash = base64.RawURLEncoding.EncodeToString(hash[:])[:8]
 		files[1].Path = "bundle." + files[1].Hash + ".css"
 
 		br.Reset(bytes.NewReader(data))
