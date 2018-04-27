@@ -49,11 +49,11 @@ func parseMessage(line string) *Message {
 		trailing = line[i+2:]
 	}
 
-	cmd := strings.Split(line[cmdStart:cmdEnd], " ")
-	msg.Command = cmd[0]
-	if msg.Command == "" {
+	cmd := strings.Fields(line[cmdStart:cmdEnd])
+	if len(cmd) == 0 {
 		return nil
 	}
+	msg.Command = cmd[0]
 
 	if len(cmd) > 1 {
 		msg.Params = cmd[1:]

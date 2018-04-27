@@ -76,6 +76,30 @@ func TestParseMessage(t *testing.T) {
 				Command: "CMD",
 				Params:  []string{"#cake", "pie"},
 			},
+		}, {
+			"CMD #cake ::pie\r\n",
+			&Message{
+				Command: "CMD",
+				Params:  []string{"#cake", ":pie"},
+			},
+		}, {
+			"CMD #cake :  pie\r\n",
+			&Message{
+				Command: "CMD",
+				Params:  []string{"#cake", "  pie"},
+			},
+		}, {
+			"CMD #cake :pie :P <3\r\n",
+			&Message{
+				Command: "CMD",
+				Params:  []string{"#cake", "pie :P <3"},
+			},
+		}, {
+			"CMD   #cake  :pie!\r\n",
+			&Message{
+				Command: "CMD",
+				Params:  []string{"#cake", "pie!"},
+			},
 		},
 	}
 
