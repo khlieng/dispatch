@@ -222,6 +222,9 @@ func (c *Client) recv() {
 			c.sendRecv.Add(1)
 			go c.send()
 
+		case ReplyISupport:
+			c.Support.parse(msg.Params)
+
 		case ErrNicknameInUse:
 			if c.HandleNickInUse != nil {
 				go c.writeNick(c.HandleNickInUse(msg.Params[1]))

@@ -119,3 +119,31 @@ func TestBadMessagePanic(t *testing.T) {
 	parseMessage(":")
 	parseMessage("")
 }
+
+func TestParseISupport(t *testing.T) {
+	s := newISupport()
+	s.parse([]string{"bob", "CAKE=31", "PIE", ":durr"})
+	assert.Equal(t, 31, s.GetInt("CAKE"))
+	assert.Equal(t, "31", s.Get("CAKE"))
+	assert.True(t, s.Has("CAKE"))
+	assert.True(t, s.Has("PIE"))
+	assert.False(t, s.Has("APPLES"))
+	assert.Equal(t, "", s.Get("APPLES"))
+	assert.Equal(t, 0, s.GetInt("APPLES"))
+
+	s.parse([]string{"bob", "-PIE", ":hurr"})
+	assert.False(t, s.Has("PIE"))
+
+	s.parse([]string{"bob", "CAKE=1337", ":durr"})
+	assert.Equal(t, 1337, s.GetInt("CAKE"))
+
+	s.parse([]string{"bob", "CAKE=", ":durr"})
+	assert.Equal(t, "", s.Get("CAKE"))
+	assert.True(t, s.Has("CAKE"))
+
+	s.parse([]string{"bob", "CAKE===", ":durr"})
+	assert.Equal(t, "==", s.Get("CAKE"))
+
+	s.parse([]string{"bob", "-CAKE=31", ":durr"})
+	assert.False(t, s.Has("CAKE"))
+}

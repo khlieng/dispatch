@@ -24,6 +24,7 @@ type Client struct {
 
 	nick     string
 	channels []string
+	Support  *iSupport
 
 	conn      net.Conn
 	connected bool
@@ -41,6 +42,7 @@ type Client struct {
 func NewClient(nick, username string) *Client {
 	return &Client{
 		nick:              nick,
+		Support:           newISupport(),
 		Username:          username,
 		Realname:          nick,
 		Messages:          make(chan *Message, 32),

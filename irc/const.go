@@ -15,6 +15,7 @@ const (
 	ReplyWelcome         = "001"
 	ReplyYourHost        = "002"
 	ReplyCreated         = "003"
+	ReplyISupport        = "005"
 	ReplyLUserClient     = "251"
 	ReplyLUserOp         = "252"
 	ReplyLUserUnknown    = "253"
