@@ -81,9 +81,13 @@ func newISupport() *iSupport {
 }
 
 func (i *iSupport) parse(params []string) {
+	i.lock.Lock()
 	for _, param := range params[1 : len(params)-1] {
 		parts := strings.SplitN(param, "=", 2)
-		i.lock.Lock()
+		if parts[0] == "" {
+			continue
+		}
+
 		if parts[0][0] == '-' {
 			delete(i.support, parts[0][1:])
 		} else if len(parts) == 2 {
@@ -91,8 +95,8 @@ func (i *iSupport) parse(params []string) {
 		} else {
 			i.support[param] = ""
 		}
-		i.lock.Unlock()
 	}
+	i.lock.Unlock()
 }
 
 func (i *iSupport) Has(key string) bool {

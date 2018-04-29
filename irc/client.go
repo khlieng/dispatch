@@ -58,9 +58,9 @@ func NewClient(nick, username string) *Client {
 
 func (c *Client) GetNick() string {
 	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	return c.nick
+	nick := c.nick
+	c.lock.Unlock()
+	return nick
 }
 
 func (c *Client) setNick(nick string) {
@@ -71,9 +71,9 @@ func (c *Client) setNick(nick string) {
 
 func (c *Client) Connected() bool {
 	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	return c.connected
+	connected := c.connected
+	c.lock.Unlock()
+	return connected
 }
 
 func (c *Client) Nick(nick string) {
