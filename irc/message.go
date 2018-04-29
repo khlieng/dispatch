@@ -8,6 +8,7 @@ import (
 )
 
 type Message struct {
+	Tags    map[string]string
 	Prefix  string
 	Nick    string
 	Command string
@@ -24,17 +25,40 @@ func (m *Message) LastParam() string {
 func parseMessage(line string) *Message {
 	line = strings.Trim(line, "\r\n ")
 	msg := Message{}
-	cmdStart := 0
-	cmdEnd := len(line)
 
-	if strings.HasPrefix(line, ":") {
-		cmdStart = strings.Index(line, " ") + 1
-
-		if cmdStart > 0 {
-			msg.Prefix = line[1 : cmdStart-1]
-		} else {
+	if strings.HasPrefix(line, "@") {
+		next := strings.Index(line, " ")
+		if next == -1 {
 			return nil
 		}
+		tags := strings.Split(line[1:next], ";")
+
+		if len(tags) > 0 {
+			msg.Tags = map[string]string{}
+		}
+
+		for _, tag := range tags {
+			key, val := splitParam(tag)
+			if key == "" {
+				continue
+			}
+
+			if val != "" {
+				msg.Tags[key] = unescapeTag(val)
+			} else {
+				msg.Tags[key] = ""
+			}
+		}
+
+		line = line[next+1:]
+	}
+
+	if strings.HasPrefix(line, ":") {
+		next := strings.Index(line, " ")
+		if next == -1 {
+			return nil
+		}
+		msg.Prefix = line[1:next]
 
 		if i := strings.Index(msg.Prefix, "!"); i > 0 {
 			msg.Nick = msg.Prefix[:i]
@@ -43,16 +67,18 @@ func parseMessage(line string) *Message {
 		} else {
 			msg.Nick = msg.Prefix
 		}
+
+		line = line[next+1:]
 	}
 
-	var trailing string
-
+	cmdEnd := len(line)
+	trailing := ""
 	if i := strings.Index(line, " :"); i > 0 {
 		cmdEnd = i
 		trailing = line[i+2:]
 	}
 
-	cmd := strings.Fields(line[cmdStart:cmdEnd])
+	cmd := strings.Fields(line[:cmdEnd])
 	if len(cmd) == 0 {
 		return nil
 	}
@@ -61,7 +87,6 @@ func parseMessage(line string) *Message {
 	if len(cmd) > 1 {
 		msg.Params = cmd[1:]
 	}
-
 	if cmdEnd != len(line) {
 		msg.Params = append(msg.Params, trailing)
 	}
@@ -83,17 +108,15 @@ func newISupport() *iSupport {
 func (i *iSupport) parse(params []string) {
 	i.lock.Lock()
 	for _, param := range params[1 : len(params)-1] {
-		parts := strings.SplitN(param, "=", 2)
-		if parts[0] == "" {
+		key, val := splitParam(param)
+		if key == "" {
 			continue
 		}
 
-		if parts[0][0] == '-' {
-			delete(i.support, parts[0][1:])
-		} else if len(parts) == 2 {
-			i.support[parts[0]] = parts[1]
+		if key[0] == '-' {
+			delete(i.support, key[1:])
 		} else {
-			i.support[param] = ""
+			i.support[key] = val
 		}
 	}
 	i.lock.Unlock()
@@ -118,4 +141,21 @@ func (i *iSupport) GetInt(key string) int {
 	v := cast.ToInt(i.support[key])
 	i.lock.Unlock()
 	return v
+}
+
+func splitParam(param string) (string, string) {
+	parts := strings.SplitN(param, "=", 2)
+	if len(parts) == 2 {
+		return parts[0], parts[1]
+	}
+	return parts[0], ""
+}
+
+func unescapeTag(s string) string {
+	s = strings.Replace(s, "\\:", ";", -1)
+	s = strings.Replace(s, "\\s", " ", -1)
+	s = strings.Replace(s, "\\\\", "\\", -1)
+	s = strings.Replace(s, "\\r", "\r", -1)
+	s = strings.Replace(s, "\\n", "\n", -1)
+	return s
 }

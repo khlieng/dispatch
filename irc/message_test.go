@@ -100,6 +100,53 @@ func TestParseMessage(t *testing.T) {
 				Command: "CMD",
 				Params:  []string{"#cake", "pie!"},
 			},
+		}, {
+			"@x=y CMD\r\n",
+			&Message{
+				Tags: map[string]string{
+					"x": "y",
+				},
+				Command: "CMD",
+			},
+		}, {
+			"@x=y :nick!user@host.com CMD\r\n",
+			&Message{
+				Tags: map[string]string{
+					"x": "y",
+				},
+				Prefix:  "nick!user@host.com",
+				Nick:    "nick",
+				Command: "CMD",
+			},
+		}, {
+			"@x=y :nick!user@host.com CMD :pie and cake\r\n",
+			&Message{
+				Tags: map[string]string{
+					"x": "y",
+				},
+				Prefix:  "nick!user@host.com",
+				Nick:    "nick",
+				Command: "CMD",
+				Params:  []string{"pie and cake"},
+			},
+		}, {
+			"@x=y;a=b CMD\r\n",
+			&Message{
+				Tags: map[string]string{
+					"x": "y",
+					"a": "b",
+				},
+				Command: "CMD",
+			},
+		}, {
+			"@x=y;a=\\\\\\:\\s\\r\\n CMD\r\n",
+			&Message{
+				Tags: map[string]string{
+					"x": "y",
+					"a": "\\; \r\n",
+				},
+				Command: "CMD",
+			},
 		},
 	}
 
@@ -114,6 +161,9 @@ func TestLastParam(t *testing.T) {
 }
 
 func TestBadMessagePanic(t *testing.T) {
+	parseMessage("@\r\n")
+	parseMessage("@ :\r\n")
+	parseMessage("@  :\r\n")
 	parseMessage(":user\r\n")
 	parseMessage(":\r\n")
 	parseMessage(":")
