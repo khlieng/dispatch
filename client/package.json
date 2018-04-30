@@ -49,6 +49,7 @@
     "autolinker": "^1.4.3",
     "backo": "^1.1.0",
     "base64-arraybuffer": "^0.1.5",
+    "es6-promise": "^4.2.4",
     "fontfaceobserver": "^2.0.9",
     "history": "4.5.1",
     "immer": "^1.2.1",
