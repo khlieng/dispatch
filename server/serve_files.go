@@ -214,11 +214,11 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		} else {
 			pushed := false
 
-			if files[1].Hash != cookie.Value[22:] {
+			if files[1].Hash != cookie.Value[8:] {
 				pusher.Push("/"+files[1].Path, options)
 				pushed = true
 			}
-			if files[0].Hash != cookie.Value[:22] {
+			if files[0].Hash != cookie.Value[:8] {
 				pusher.Push("/"+files[0].Path, options)
 				pushed = true
 			}
