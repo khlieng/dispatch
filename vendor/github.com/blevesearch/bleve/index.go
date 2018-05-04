@@ -15,11 +15,13 @@
 package bleve
 
 import (
+	"context"
+
 	"github.com/blevesearch/bleve/document"
 	"github.com/blevesearch/bleve/index"
 	"github.com/blevesearch/bleve/index/store"
 	"github.com/blevesearch/bleve/mapping"
-	"golang.org/x/net/context"
+	"github.com/blevesearch/bleve/size"
 )
 
 // A Batch groups together multiple Index and Delete
@@ -31,6 +33,9 @@ import (
 type Batch struct {
 	index    Index
 	internal *index.Batch
+
+	lastDocSize uint64
+	totalSize   uint64
 }
 
 // Index adds the specified index operation to the
@@ -44,6 +49,30 @@ func (b *Batch) Index(id string, data interface{}) error {
 	err := b.index.Mapping().MapDocument(doc, data)
 	if err != nil {
 		return err
+	}
+	b.internal.Update(doc)
+
+	b.lastDocSize = uint64(doc.Size() +
+		len(id) + size.SizeOfString) // overhead from internal
+	b.totalSize += b.lastDocSize
+
+	return nil
+}
+
+func (b *Batch) LastDocSize() uint64 {
+	return b.lastDocSize
+}
+
+func (b *Batch) TotalDocsSize() uint64 {
+	return b.totalSize
+}
+
+// IndexAdvanced adds the specified index operation to the
+// batch which skips the mapping.  NOTE: the bleve Index is not updated
+// until the batch is executed.
+func (b *Batch) IndexAdvanced(doc *document.Document) (err error) {
+	if doc.ID == "" {
+		return ErrorEmptyID
 	}
 	b.internal.Update(doc)
 	return nil
@@ -65,7 +94,7 @@ func (b *Batch) SetInternal(key, val []byte) {
 	b.internal.SetInternal(key, val)
 }
 
-// SetInternal adds the specified delete internal
+// DeleteInternal adds the specified delete internal
 // operation to the batch. NOTE: the bleve Index is
 // not updated until the batch is executed.
 func (b *Batch) DeleteInternal(key []byte) {
@@ -99,12 +128,15 @@ func (b *Batch) Reset() {
 // them.
 //
 // The DocumentMapping used to index a value is deduced by the following rules:
-// 1) If value implements Classifier interface, resolve the mapping from Type().
-// 2) If value has a string field or value at IndexMapping.TypeField.
+// 1) If value implements mapping.bleveClassifier interface, resolve the mapping
+//    from BleveType().
+// 2) If value implements mapping.Classifier interface, resolve the mapping
+//    from Type().
+// 3) If value has a string field or value at IndexMapping.TypeField.
 // (defaulting to "_type"), use it to resolve the mapping. Fields addressing
 // is described below.
-// 3) If IndexMapping.DefaultType is registered, return it.
-// 4) Return IndexMapping.DefaultMapping.
+// 4) If IndexMapping.DefaultType is registered, return it.
+// 5) Return IndexMapping.DefaultMapping.
 //
 // Each field or nested field of the value is identified by a string path, then
 // mapped to one or several FieldMappings which extract the result for analysis.

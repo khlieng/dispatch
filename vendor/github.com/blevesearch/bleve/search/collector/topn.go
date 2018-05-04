@@ -15,12 +15,30 @@
 package collector
 
 import (
+	"context"
+	"reflect"
 	"time"
 
 	"github.com/blevesearch/bleve/index"
 	"github.com/blevesearch/bleve/search"
-	"golang.org/x/net/context"
+	"github.com/blevesearch/bleve/size"
 )
+
+var reflectStaticSizeTopNCollector int
+
+func init() {
+	var coll TopNCollector
+	reflectStaticSizeTopNCollector = int(reflect.TypeOf(coll).Size())
+}
+
+type collectorStore interface {
+	// Add the document, and if the new store size exceeds the provided size
+	// the last element is removed and returned.  If the size has not been
+	// exceeded, nil is returned.
+	AddNotExceedingSize(doc *search.DocumentMatch, size int) *search.DocumentMatch
+
+	Final(skip int, fixup collectorFixup) (search.DocumentMatchCollection, error)
+}
 
 // PreAllocSizeSkipCap will cap preallocation to this amount when
 // size+skip exceeds this value
@@ -41,7 +59,7 @@ type TopNCollector struct {
 	results       search.DocumentMatchCollection
 	facetsBuilder *search.FacetsBuilder
 
-	store *collectStoreHeap
+	store collectorStore
 
 	needDocIds    bool
 	neededFields  []string
@@ -49,6 +67,8 @@ type TopNCollector struct {
 	cachedDesc    []bool
 
 	lowestMatchOutsideResults *search.DocumentMatch
+	updateFieldVisitor        index.DocumentFieldTermVisitor
+	dvReader                  index.DocValueReader
 }
 
 // CheckDoneEvery controls how frequently we check the context deadline
@@ -68,9 +88,15 @@ func NewTopNCollector(size int, skip int, sort search.SortOrder) *TopNCollector 
 		backingSize = PreAllocSizeSkipCap + 1
 	}
 
-	hc.store = newStoreHeap(backingSize, func(i, j *search.DocumentMatch) int {
-		return hc.sort.Compare(hc.cachedScoring, hc.cachedDesc, i, j)
-	})
+	if size+skip > 10 {
+		hc.store = newStoreHeap(backingSize, func(i, j *search.DocumentMatch) int {
+			return hc.sort.Compare(hc.cachedScoring, hc.cachedDesc, i, j)
+		})
+	} else {
+		hc.store = newStoreSlice(backingSize, func(i, j *search.DocumentMatch) int {
+			return hc.sort.Compare(hc.cachedScoring, hc.cachedDesc, i, j)
+		})
+	}
 
 	// these lookups traverse an interface, so do once up-front
 	if sort.RequiresDocID() {
@@ -81,6 +107,22 @@ func NewTopNCollector(size int, skip int, sort search.SortOrder) *TopNCollector 
 	hc.cachedDesc = sort.CacheDescending()
 
 	return hc
+}
+
+func (hc *TopNCollector) Size() int {
+	sizeInBytes := reflectStaticSizeTopNCollector + size.SizeOfPtr
+
+	if hc.facetsBuilder != nil {
+		sizeInBytes += hc.facetsBuilder.Size()
+	}
+
+	for _, entry := range hc.neededFields {
+		sizeInBytes += len(entry) + size.SizeOfString
+	}
+
+	sizeInBytes += len(hc.cachedScoring) + len(hc.cachedDesc)
+
+	return sizeInBytes
 }
 
 // Collect goes to the index to find the matching documents
@@ -98,6 +140,18 @@ func (hc *TopNCollector) Collect(ctx context.Context, searcher search.Searcher, 
 	}
 	searchContext := &search.SearchContext{
 		DocumentMatchPool: search.NewDocumentMatchPool(backingSize+searcher.DocumentMatchPoolSize(), len(hc.sort)),
+	}
+
+	hc.dvReader, err = reader.DocValueReader(hc.neededFields)
+	if err != nil {
+		return err
+	}
+
+	hc.updateFieldVisitor = func(field string, term []byte) {
+		if hc.facetsBuilder != nil {
+			hc.facetsBuilder.UpdateVisitor(field, term)
+		}
+		hc.sort.UpdateVisitor(field, term)
 	}
 
 	select {
@@ -184,9 +238,8 @@ func (hc *TopNCollector) collectSingle(ctx *search.SearchContext, reader index.I
 		}
 	}
 
-	hc.store.Add(d)
-	if hc.store.Len() > hc.size+hc.skip {
-		removed := hc.store.RemoveLast()
+	removed := hc.store.AddNotExceedingSize(d, hc.size+hc.skip)
+	if removed != nil {
 		if hc.lowestMatchOutsideResults == nil {
 			hc.lowestMatchOutsideResults = removed
 		} else {
@@ -209,13 +262,7 @@ func (hc *TopNCollector) visitFieldTerms(reader index.IndexReader, d *search.Doc
 		hc.facetsBuilder.StartDoc()
 	}
 
-	err := reader.DocumentVisitFieldTerms(d.IndexInternalID, hc.neededFields, func(field string, term []byte) {
-		if hc.facetsBuilder != nil {
-			hc.facetsBuilder.UpdateVisitor(field, term)
-		}
-		hc.sort.UpdateVisitor(field, term)
-	})
-
+	err := hc.dvReader.VisitDocValues(d.IndexInternalID, hc.updateFieldVisitor)
 	if hc.facetsBuilder != nil {
 		hc.facetsBuilder.EndDoc()
 	}
@@ -243,6 +290,7 @@ func (hc *TopNCollector) finalizeResults(r index.IndexReader) error {
 				return err
 			}
 		}
+		doc.Complete(nil)
 		return nil
 	})
 
@@ -274,5 +322,5 @@ func (hc *TopNCollector) FacetResults() search.FacetResults {
 	if hc.facetsBuilder != nil {
 		return hc.facetsBuilder.Results()
 	}
-	return search.FacetResults{}
+	return nil
 }

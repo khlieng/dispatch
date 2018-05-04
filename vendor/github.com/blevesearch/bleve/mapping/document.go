@@ -15,6 +15,7 @@
 package mapping
 
 import (
+	"encoding"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -178,6 +179,7 @@ OUTER:
 				continue OUTER
 			}
 		}
+		break
 	}
 	return current
 }
@@ -481,6 +483,17 @@ func (dm *DocumentMapping) processProperty(property interface{}, path []string, 
 				fieldMapping := newDateTimeFieldMappingDynamic(context.im)
 				fieldMapping.processTime(property, pathString, path, indexes, context)
 			}
+		case encoding.TextMarshaler:
+			txt, err := property.MarshalText()
+			if err == nil && subDocMapping != nil {
+				// index by explicit mapping
+				for _, fieldMapping := range subDocMapping.Fields {
+					if fieldMapping.Type == "text" {
+						fieldMapping.processString(string(txt), pathString, path, indexes, context)
+					}
+				}
+			}
+			dm.walkDocument(property, path, indexes, context)
 		default:
 			if subDocMapping != nil {
 				for _, fieldMapping := range subDocMapping.Fields {
@@ -491,7 +504,7 @@ func (dm *DocumentMapping) processProperty(property interface{}, path []string, 
 			}
 			dm.walkDocument(property, path, indexes, context)
 		}
-	case reflect.Map:
+	case reflect.Map, reflect.Slice:
 		if subDocMapping != nil {
 			for _, fieldMapping := range subDocMapping.Fields {
 				if fieldMapping.Type == "geopoint" {
@@ -500,6 +513,27 @@ func (dm *DocumentMapping) processProperty(property interface{}, path []string, 
 			}
 		}
 		dm.walkDocument(property, path, indexes, context)
+	case reflect.Ptr:
+		if !propertyValue.IsNil() {
+			switch property := property.(type) {
+			case encoding.TextMarshaler:
+
+				txt, err := property.MarshalText()
+				if err == nil && subDocMapping != nil {
+					// index by explicit mapping
+					for _, fieldMapping := range subDocMapping.Fields {
+						if fieldMapping.Type == "text" {
+							fieldMapping.processString(string(txt), pathString, path, indexes, context)
+						}
+					}
+				} else {
+					dm.walkDocument(property, path, indexes, context)
+				}
+
+			default:
+				dm.walkDocument(property, path, indexes, context)
+			}
+		}
 	default:
 		dm.walkDocument(property, path, indexes, context)
 	}

@@ -16,12 +16,26 @@ package upsidedown
 
 import (
 	"bytes"
+	"reflect"
 	"sort"
 	"sync/atomic"
 
 	"github.com/blevesearch/bleve/index"
 	"github.com/blevesearch/bleve/index/store"
+	"github.com/blevesearch/bleve/size"
 )
+
+var reflectStaticSizeUpsideDownCouchTermFieldReader int
+var reflectStaticSizeUpsideDownCouchDocIDReader int
+
+func init() {
+	var tfr UpsideDownCouchTermFieldReader
+	reflectStaticSizeUpsideDownCouchTermFieldReader =
+		int(reflect.TypeOf(tfr).Size())
+	var cdr UpsideDownCouchDocIDReader
+	reflectStaticSizeUpsideDownCouchDocIDReader =
+		int(reflect.TypeOf(cdr).Size())
+}
 
 type UpsideDownCouchTermFieldReader struct {
 	count              uint64
@@ -33,6 +47,19 @@ type UpsideDownCouchTermFieldReader struct {
 	keyBuf             []byte
 	field              uint16
 	includeTermVectors bool
+}
+
+func (r *UpsideDownCouchTermFieldReader) Size() int {
+	sizeInBytes := reflectStaticSizeUpsideDownCouchTermFieldReader + size.SizeOfPtr +
+		len(r.term) +
+		r.tfrPrealloc.Size() +
+		len(r.keyBuf)
+
+	if r.tfrNext != nil {
+		sizeInBytes += r.tfrNext.Size()
+	}
+
+	return sizeInBytes
 }
 
 func newUpsideDownCouchTermFieldReader(indexReader *IndexReader, term []byte, field uint16, includeFreq, includeNorm, includeTermVectors bool) (*UpsideDownCouchTermFieldReader, error) {
@@ -174,8 +201,18 @@ type UpsideDownCouchDocIDReader struct {
 	onlyMode    bool
 }
 
-func newUpsideDownCouchDocIDReader(indexReader *IndexReader) (*UpsideDownCouchDocIDReader, error) {
+func (r *UpsideDownCouchDocIDReader) Size() int {
+	sizeInBytes := reflectStaticSizeUpsideDownCouchDocIDReader +
+		reflectStaticSizeIndexReader + size.SizeOfPtr
 
+	for _, entry := range r.only {
+		sizeInBytes += size.SizeOfString + len(entry)
+	}
+
+	return sizeInBytes
+}
+
+func newUpsideDownCouchDocIDReader(indexReader *IndexReader) (*UpsideDownCouchDocIDReader, error) {
 	startBytes := []byte{0x0}
 	endBytes := []byte{0xff}
 
@@ -190,15 +227,18 @@ func newUpsideDownCouchDocIDReader(indexReader *IndexReader) (*UpsideDownCouchDo
 }
 
 func newUpsideDownCouchDocIDReaderOnly(indexReader *IndexReader, ids []string) (*UpsideDownCouchDocIDReader, error) {
+	// we don't actually own the list of ids, so if before we sort we must copy
+	idsCopy := make([]string, len(ids))
+	copy(idsCopy, ids)
 	// ensure ids are sorted
-	sort.Strings(ids)
+	sort.Strings(idsCopy)
 	startBytes := []byte{0x0}
-	if len(ids) > 0 {
-		startBytes = []byte(ids[0])
+	if len(idsCopy) > 0 {
+		startBytes = []byte(idsCopy[0])
 	}
 	endBytes := []byte{0xff}
-	if len(ids) > 0 {
-		endBytes = incrementBytes([]byte(ids[len(ids)-1]))
+	if len(idsCopy) > 0 {
+		endBytes = incrementBytes([]byte(idsCopy[len(idsCopy)-1]))
 	}
 	bisr := NewBackIndexRow(startBytes, nil, nil)
 	bier := NewBackIndexRow(endBytes, nil, nil)
@@ -207,7 +247,7 @@ func newUpsideDownCouchDocIDReaderOnly(indexReader *IndexReader, ids []string) (
 	return &UpsideDownCouchDocIDReader{
 		indexReader: indexReader,
 		iterator:    it,
-		only:        ids,
+		only:        idsCopy,
 		onlyMode:    true,
 	}, nil
 }

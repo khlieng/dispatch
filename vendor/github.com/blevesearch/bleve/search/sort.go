@@ -67,8 +67,8 @@ func ParseSearchSortObj(input map[string]interface{}) (SearchSort, error) {
 		rvd := &SortGeoDistance{
 			Field:    field,
 			Desc:     descending,
-			lon:      lon,
-			lat:      lat,
+			Lon:      lon,
+			Lat:      lat,
 			unitMult: 1.0,
 		}
 		if distUnit, ok := input["unit"].(string); ok {
@@ -251,23 +251,21 @@ func (so SortOrder) Compare(cachedScoring, cachedDesc []bool, i, j *DocumentMatc
 }
 
 func (so SortOrder) RequiresScore() bool {
-	rv := false
 	for _, soi := range so {
 		if soi.RequiresScoring() {
-			rv = true
+			return true
 		}
 	}
-	return rv
+	return false
 }
 
 func (so SortOrder) RequiresDocID() bool {
-	rv := false
 	for _, soi := range so {
 		if soi.RequiresDocID() {
-			rv = true
+			return true
 		}
 	}
-	return rv
+	return false
 }
 
 func (so SortOrder) RequiredFields() []string {
@@ -279,7 +277,7 @@ func (so SortOrder) RequiredFields() []string {
 }
 
 func (so SortOrder) CacheIsScore() []bool {
-	var rv []bool
+	rv := make([]bool, 0, len(so))
 	for _, soi := range so {
 		rv = append(rv, soi.RequiresScoring())
 	}
@@ -287,7 +285,7 @@ func (so SortOrder) CacheIsScore() []bool {
 }
 
 func (so SortOrder) CacheDescending() []bool {
-	var rv []bool
+	rv := make([]bool, 0, len(so))
 	for _, soi := range so {
 		rv = append(rv, soi.Descending())
 	}
@@ -486,8 +484,7 @@ func (s *SortField) MarshalJSON() ([]byte, error) {
 }
 
 func (s *SortField) Copy() SearchSort {
-	var rv SortField
-	rv = *s
+	rv := *s
 	return &rv
 }
 
@@ -499,7 +496,6 @@ type SortDocID struct {
 // UpdateVisitor is a no-op for SortDocID as it's value
 // is not dependent on any field terms
 func (s *SortDocID) UpdateVisitor(field string, term []byte) {
-
 }
 
 // Value returns the sort value of the DocumentMatch
@@ -529,8 +525,7 @@ func (s *SortDocID) MarshalJSON() ([]byte, error) {
 }
 
 func (s *SortDocID) Copy() SearchSort {
-	var rv SortDocID
-	rv = *s
+	rv := *s
 	return &rv
 }
 
@@ -542,7 +537,6 @@ type SortScore struct {
 // UpdateVisitor is a no-op for SortScore as it's value
 // is not dependent on any field terms
 func (s *SortScore) UpdateVisitor(field string, term []byte) {
-
 }
 
 // Value returns the sort value of the DocumentMatch
@@ -572,8 +566,7 @@ func (s *SortScore) MarshalJSON() ([]byte, error) {
 }
 
 func (s *SortScore) Copy() SearchSort {
-	var rv SortScore
-	rv = *s
+	rv := *s
 	return &rv
 }
 
@@ -583,13 +576,12 @@ var maxDistance = string(numeric.MustNewPrefixCodedInt64(math.MaxInt64, 0))
 // their distance from the specified point.
 func NewSortGeoDistance(field, unit string, lon, lat float64, desc bool) (
 	*SortGeoDistance, error) {
-
 	rv := &SortGeoDistance{
 		Field: field,
 		Desc:  desc,
 		Unit:  unit,
-		lon:   lon,
-		lat:   lat,
+		Lon:   lon,
+		Lat:   lat,
 	}
 	var err error
 	rv.unitMult, err = geo.ParseDistanceUnit(unit)
@@ -608,8 +600,8 @@ type SortGeoDistance struct {
 	Desc     bool
 	Unit     string
 	values   []string
-	lon      float64
-	lat      float64
+	Lon      float64
+	Lat      float64
 	unitMult float64
 }
 
@@ -640,7 +632,7 @@ func (s *SortGeoDistance) Value(i *DocumentMatch) string {
 	docLon := geo.MortonUnhashLon(uint64(i64))
 	docLat := geo.MortonUnhashLat(uint64(i64))
 
-	dist := geo.Haversin(s.lon, s.lat, docLon, docLat)
+	dist := geo.Haversin(s.Lon, s.Lat, docLon, docLat)
 	// dist is returned in km, so convert to m
 	dist *= 1000
 	if s.unitMult != 0 {
@@ -690,8 +682,8 @@ func (s *SortGeoDistance) MarshalJSON() ([]byte, error) {
 		"by":    "geo_distance",
 		"field": s.Field,
 		"location": map[string]interface{}{
-			"lon": s.lon,
-			"lat": s.lat,
+			"lon": s.Lon,
+			"lat": s.Lat,
 		},
 	}
 	if s.Unit != "" {
@@ -705,7 +697,6 @@ func (s *SortGeoDistance) MarshalJSON() ([]byte, error) {
 }
 
 func (s *SortGeoDistance) Copy() SearchSort {
-	var rv SortGeoDistance
-	rv = *s
+	rv := *s
 	return &rv
 }
