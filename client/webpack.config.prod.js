@@ -44,7 +44,10 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               plugins: [
-                autoprefixer,
+                require('postcss-flexbugs-fixes'),
+                autoprefixer({
+                  flexbox: 'no-2009'
+                }),
                 cssnano({
                   discardUnused: {
                     fontFace: false
