@@ -198,6 +198,7 @@ i[class*=' icon-']:before {
 .connect {
   display: flex;
   justify-content: center;
+  align-items: center;
   position: absolute;
   top: 0;
   width: 100%;
@@ -355,6 +356,10 @@ i[class*=' icon-']:before {
   white-space: nowrap;
   background: none;
   line-height: 50px;
+}
+
+.chat-server .chat-title {
+  padding-right: 1px;
 }
 
 .chat-topic-wrap {
@@ -573,6 +578,7 @@ i[class*=' icon-']:before {
 
 .settings {
   text-align: center;
+  overflow: auto;
 }
 
 .settings p {

@@ -33,7 +33,8 @@ export default class Editable extends PureComponent {
       const padding =
         parseInt(style.paddingLeft, 10) + parseInt(style.paddingRight, 10);
       // Make sure the width is atleast 1px so the caret always shows
-      const width = stringWidth(value, style.font) || 1;
+      const width =
+        stringWidth(value, `${style.fontSize} ${style.fontFamily}`) || 1;
       return padding + width;
     }
   }
@@ -69,6 +70,12 @@ export default class Editable extends PureComponent {
     }
   };
 
+  handleFocus = e => {
+    const val = e.target.value;
+    e.target.value = '';
+    e.target.value = val;
+  };
+
   inputRef = el => {
     this.input = el;
   };
@@ -90,6 +97,7 @@ export default class Editable extends PureComponent {
         onBlur={this.handleBlur}
         onChange={this.handleChange}
         onKeyDown={this.handleKey}
+        onFocus={this.handleFocus}
         style={style}
         spellCheck={false}
       />
