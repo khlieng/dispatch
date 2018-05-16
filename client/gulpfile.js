@@ -9,6 +9,7 @@ var proxy = require('express-http-proxy');
 var webpack = require('webpack');
 var through = require('through2');
 var br = require('brotli');
+var del = require('del');
 
 function brotli(opts) {
   return through.obj(function(file, enc, callback) {
@@ -29,7 +30,11 @@ function brotli(opts) {
   });
 }
 
-gulp.task('js', function(cb) {
+function clean() {
+  return del(['dist']);
+};
+
+function js(cb) {
   var config = require('./webpack.config.prod.js');
   var compiler = webpack(config);
 
@@ -49,37 +54,42 @@ gulp.task('js', function(cb) {
 
     cb();
   });
-});
+}
 
-gulp.task('fonts', function() {
-  return gulp.src('src/font/*').pipe(gulp.dest('dist/font'));
-});
+function config() {
+  return gulp.src('../config.default.toml').pipe(gulp.dest('dist'));
+}
 
-gulp.task('fonts:woff', function() {
-  return gulp.src('src/font/*(*.woff|*.woff2)').pipe(gulp.dest('dist/br/font'));
-});
+function fonts() {
+  return gulp.src('src/font/*(*.woff|*.woff2)').pipe(gulp.dest('dist/font'));
+}
 
-gulp.task('config', function() {
-  return gulp.src('../config.default.toml').pipe(gulp.dest('dist/br'));
-});
+function compressTTF() {
+  return gulp
+    .src(['src/font/*.ttf'])
+    .pipe(brotli({ quality: 11 }))
+    .pipe(gulp.dest('dist/font'));
+}
 
 function compress() {
   return gulp
-    .src(['dist/**/!(*.br|*.woff|*.woff2)', '!dist/{br,br/**}'])
+    .src(['dist/!(*.toml)'])
     .pipe(brotli({ quality: 11 }))
-    .pipe(gulp.dest('dist/br'));
+    .pipe(gulp.dest('dist'));
 }
 
-gulp.task('compress', ['js', 'fonts'], compress);
+function cleanup() {
+  return del(['dist/*(*.js|*.css)']);
+}
 
-gulp.task('bindata', ['compress', 'fonts:woff', 'config'], function(cb) {
+function bindata(cb) {
   exec(
-    'go-bindata -nomemcopy -nocompress -pkg assets -o ../assets/bindata.go -prefix "dist/br" dist/br/...',
+    'go-bindata -nomemcopy -nocompress -pkg assets -o ../assets/bindata.go -prefix "dist" dist/...',
     cb
   );
-});
+}
 
-gulp.task('dev', ['fonts'], function() {
+function serve() {
   var config = require('./webpack.config.dev.js');
   var compiler = webpack(config);
   var app = express();
@@ -115,7 +125,13 @@ gulp.task('dev', ['fonts'], function() {
 
     console.log('Listening at http://localhost:3000');
   });
-});
+}
 
-gulp.task('build', ['bindata']);
-gulp.task('default', ['dev']);
+const assets = gulp.parallel(js, config, fonts, compressTTF);
+
+const build = gulp.series(clean, assets, compress, cleanup, bindata);
+
+const dev = gulp.series(clean, gulp.parallel(serve, fonts, gulp.series(config, bindata)));
+
+gulp.task('build', build);
+gulp.task('default', dev);
