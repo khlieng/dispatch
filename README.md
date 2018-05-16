@@ -26,7 +26,6 @@ This requires a [Go environment](http://golang.org/doc/install), version 1.8 or 
 Fetch, compile and run dispatch:
 ```bash
 go get github.com/khlieng/dispatch
-
 dispatch
 ```
 
@@ -45,19 +44,18 @@ docker run -p <http port>:80 -p <https port>:443 -v <path>:/data khlieng/dispatc
 ### Server
 ```bash
 cd $GOPATH/src/github.com/khlieng/dispatch
-
 go install
 ```
 
 ### Client
-This requires [Node.js](https://nodejs.org).
+This requires [Node.js](https://nodejs.org) and [yarn](https://yarnpkg.com).
 
 Fetch the dependencies:
 ```bash
-npm install -g gulp
 go get github.com/jteeuwen/go-bindata/...
+yarn global add gulp@next
 cd $GOPATH/src/github.com/khlieng/dispatch/client
-npm install
+yarn
 ```
 
 Run the build:
@@ -65,7 +63,7 @@ Run the build:
 gulp build
 ```
 
-The server needs to be rebuilt after this.
+The server needs to be rebuilt to embed new client builds.
 
 For development with hot reloading enabled run:
 ```bash
