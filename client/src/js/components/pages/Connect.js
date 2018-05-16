@@ -1,144 +1,94 @@
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
+import { Form, withFormik } from 'formik';
 import Navicon from 'containers/Navicon';
+import Checkbox from 'components/ui/Checkbox';
+import TextInput from 'components/ui/TextInput';
+import { isValidNick, isValidChannel, isValidUsername } from 'utils';
 
 const getSortedDefaultChannels = createSelector(
   defaults => defaults.channels,
-  channels => channels.concat().sort()
+  channels => channels.split(',').sort()
 );
 
-export default class Connect extends Component {
+const Error = ({ children }) =>
+  children ? <div className="form-error">{children}</div> : null;
+
+class Connect extends Component {
   state = {
-    showOptionals: false,
-    passwordTouched: false
+    showOptionals: false
   };
 
-  handleSubmit = e => {
-    const { connect, select, join, defaults } = this.props;
-
-    e.preventDefault();
-
-    const nick = e.target.nick.value.trim();
-    let { address, channels } = defaults;
-    const opts = {
-      name: defaults.name
-    };
-
-    if (!defaults.readonly) {
-      address = e.target.address.value.trim();
-      channels = e.target.channels.value
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s);
-      opts.name = e.target.name.value.trim();
-      opts.tls = e.target.ssl.checked;
-
-      if (this.state.showOptionals) {
-        opts.realname = e.target.realname.value.trim();
-        opts.username = e.target.username.value.trim();
-
-        if (this.state.passwordTouched) {
-          opts.password = e.target.password.value.trim();
-        }
-      }
+  handleSSLChange = e => {
+    const { values, setFieldValue } = this.props;
+    if (e.target.checked && values.port === '6667') {
+      setFieldValue('port', '6697', false);
+    } else if (!e.target.checked && values.port === '6697') {
+      setFieldValue('port', '6667', false);
     }
-
-    if (address.indexOf('.') > 0 && nick) {
-      connect(address, nick, opts);
-
-      const i = address.indexOf(':');
-      if (i > 0) {
-        address = address.slice(0, i);
-      }
-
-      select(address);
-
-      if (channels.length > 0) {
-        join(channels, address);
-      }
-    }
+    setFieldValue('ssl', e.target.checked);
   };
 
   handleShowClick = () => {
     this.setState({ showOptionals: !this.state.showOptionals });
   };
 
-  handlePasswordChange = () => {
-    this.setState({ passwordTouched: true });
+  renderOptionals = () => {
+    const { errors, touched } = this.props;
+    return (
+      <div>
+        <TextInput name="username" placeholder="Username" />
+        {touched.username && <Error>{errors.username}</Error>}
+        <TextInput type="password" name="password" placeholder="Password" />
+        <TextInput name="realname" placeholder="Realname" />
+      </div>
+    );
   };
 
   render() {
-    const { defaults } = this.props;
-    let optionals = null;
-
-    if (this.state.showOptionals) {
-      optionals = (
-        <div>
-          <input name="username" type="text" placeholder="Username" />
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            defaultValue={defaults.password ? '      ' : null}
-            onChange={this.handlePasswordChange}
-          />
-          <input name="realname" type="text" placeholder="Realname" />
-        </div>
-      );
-    }
-
+    const { defaults, values, errors, touched } = this.props;
+    const { readonly, showDetails } = defaults;
     let form;
 
-    if (defaults.readonly) {
+    if (readonly) {
       form = (
-        <form className="connect-form" onSubmit={this.handleSubmit}>
+        <Form className="connect-form">
           <h1>Connect</h1>
-          {defaults.showDetails && (
+          {showDetails && (
             <div className="connect-details">
-              <h2>{defaults.address}</h2>
-              {getSortedDefaultChannels(defaults).map(channel => (
+              <h2>
+                {values.host}:{values.port}
+              </h2>
+              {getSortedDefaultChannels(values).map(channel => (
                 <p>{channel}</p>
               ))}
             </div>
           )}
-          <input name="nick" type="text" placeholder="Nick" />
+          <TextInput name="nick" placeholder="Nick" />
+          {touched.nick && <Error>{errors.nick}</Error>}
           <input type="submit" value="Connect" />
-        </form>
+        </Form>
       );
     } else {
       form = (
-        <form className="connect-form" onSubmit={this.handleSubmit}>
+        <Form className="connect-form">
           <h1>Connect</h1>
-          <input
-            name="name"
-            type="text"
-            placeholder="Name"
-            defaultValue={defaults.name}
-          />
-          <input
-            name="address"
-            type="text"
-            placeholder="Address"
-            defaultValue={defaults.address}
-          />
-          <input name="nick" type="text" placeholder="Nick" />
-          <input
-            name="channels"
-            type="text"
-            placeholder="Channels"
-            defaultValue={
-              defaults.channels ? defaults.channels.join(',') : null
-            }
-          />
-          {optionals}
-          <p>
-            <label htmlFor="ssl">
-              <input name="ssl" type="checkbox" defaultChecked={defaults.ssl} />SSL
-            </label>
-            <i className="icon-ellipsis" onClick={this.handleShowClick} />
-          </p>
+          <TextInput name="name" placeholder="Name" />
+          <div className="connect-form-address">
+            <TextInput name="host" placeholder="Host" />
+            <TextInput name="port" placeholder="Port" />
+            <Checkbox name="ssl" label="SSL" onChange={this.handleSSLChange} />
+          </div>
+          {touched.host && <Error>{errors.host}</Error>}
+          {touched.port && <Error>{errors.port}</Error>}
+          <TextInput name="nick" placeholder="Nick" />
+          {touched.nick && <Error>{errors.nick}</Error>}
+          <TextInput name="channels" placeholder="Channels" />
+          {touched.channels && <Error>{errors.channels}</Error>}
+          {this.state.showOptionals && this.renderOptionals()}
+          <i className="icon-ellipsis" onClick={this.handleShowClick} />
           <input type="submit" value="Connect" />
-        </form>
+        </Form>
       );
     }
 
@@ -150,3 +100,80 @@ export default class Connect extends Component {
     );
   }
 }
+
+export default withFormik({
+  mapPropsToValues: ({ defaults }) => ({
+    name: defaults.name,
+    host: defaults.host,
+    port: defaults.port || defaults.ssl ? '6697' : '6667',
+    nick: '',
+    channels: defaults.channels.join(','),
+    username: '',
+    password: defaults.password ? '      ' : '',
+    realname: '',
+    ssl: defaults.ssl
+  }),
+  validate: values => {
+    Object.keys(values).forEach(k => {
+      if (typeof values[k] === 'string') {
+        values[k] = values[k].trim();
+      }
+    });
+
+    const errors = {};
+
+    if (!values.host) {
+      errors.host = 'Host is required';
+    } else if (values.host.indexOf('.') < 1) {
+      errors.host = 'Invalid host';
+    }
+
+    if (!values.port) {
+      values.port = values.ssl ? '6697' : '6667';
+    } else if (values.port < 1 || values.port > 65535) {
+      errors.port = 'Invalid port';
+    }
+
+    if (!values.nick) {
+      errors.nick = 'Nick is required';
+    } else if (!isValidNick(values.nick)) {
+      errors.nick = 'Invalid nick';
+    }
+
+    if (values.username && !isValidUsername(values.username)) {
+      errors.username = 'Invalid username';
+    }
+
+    values.channels = values.channels
+      .split(',')
+      .map(channel => {
+        channel = channel.trim();
+        if (channel) {
+          if (isValidChannel(channel, false)) {
+            if (channel[0] !== '#') {
+              channel = `#${channel}`;
+            }
+          } else {
+            errors.channels = 'Invalid channel(s)';
+          }
+        }
+        return channel;
+      })
+      .filter(s => s)
+      .join(',');
+
+    return errors;
+  },
+  handleSubmit: (values, { props }) => {
+    const { connect, select, join } = props;
+    const channels = values.channels.split(',');
+    delete values.channels;
+
+    connect(values);
+    select(values.host);
+
+    if (channels.length > 0) {
+      join(channels, values.host);
+    }
+  }
+})(Connect);

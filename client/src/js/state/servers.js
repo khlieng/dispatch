@@ -14,7 +14,7 @@ export const getCurrentNick = createSelector(
       return;
     }
     const { editedNick } = servers[tab.server];
-    if (!editedNick) {
+    if (editedNick === null) {
       return servers[tab.server].nick;
     }
     return editedNick;
@@ -36,12 +36,12 @@ export const getCurrentServerStatus = createSelector(
 export default createReducer(
   {},
   {
-    [actions.CONNECT](state, { host, nick, options }) {
+    [actions.CONNECT](state, { host, nick, name }) {
       if (!state[host]) {
         state[host] = {
           nick,
           editedNick: null,
-          name: options.name || host,
+          name: name || host,
           status: {
             connected: false,
             error: null
@@ -82,7 +82,7 @@ export default createReducer(
     [actions.socket.SERVERS](state, { data }) {
       if (data) {
         data.forEach(({ host, name, nick, status }) => {
-          state[host] = { name, nick, status };
+          state[host] = { name, nick, status, editedNick: null };
         });
       }
     },
@@ -96,32 +96,13 @@ export default createReducer(
   }
 );
 
-export function connect(server, nick, options) {
-  let host = server;
-  let port;
-  const i = server.indexOf(':');
-  if (i > 0) {
-    host = server.slice(0, i);
-    port = server.slice(i + 1);
-  }
-
+export function connect(config) {
   return {
     type: actions.CONNECT,
-    host,
-    nick,
-    options,
+    ...config,
     socket: {
       type: 'connect',
-      data: {
-        host,
-        port,
-        nick,
-        username: options.username || nick,
-        password: options.password,
-        realname: options.realname || nick,
-        tls: options.tls || false,
-        name: options.name || server
-      }
+      data: config
     }
   };
 }

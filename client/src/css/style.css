@@ -53,6 +53,62 @@ i[class*=' icon-']:before {
   color: #f6546a !important;
 }
 
+.textinput {
+  display: block;
+  position: relative;
+}
+
+.textinput input {
+  padding: 17.5px 15px;
+}
+
+.textinput input:focus,
+.textinput input.value {
+  padding-top: 25px;
+  padding-bottom: 10px;
+}
+
+.textinput span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transform: translateZ(0);
+  transition: all 0.2s;
+  color: #777;
+}
+
+.textinput-1 {
+  font: 12px 'Montserrat', sans-serif;
+  margin: 15px;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.textinput input:focus + .textinput-1,
+.textinput-1.value {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.textinput-2 {
+  margin: 22.5px 15px;
+}
+
+.textinput input:focus + .textinput-1 + .textinput-2,
+.textinput-2.value {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.form-error {
+  font-family: 'Montserrat', sans-serif;
+  background: #f6546a;
+  color: #fff;
+  padding: 6px 15px;
+  font-size: 14px;
+}
+
 .wrap {
   position: fixed;
   top: 0;
@@ -214,9 +270,10 @@ i[class*=' icon-']:before {
 }
 
 .connect-form {
-  margin: auto 0;
+  margin: auto 20px;
   padding-top: 20px;
-  width: 300px;
+  width: 350px;
+  text-align: center;
 }
 
 .connect-form h1 {
@@ -235,9 +292,7 @@ i[class*=' icon-']:before {
 }
 
 .connect-form input {
-  display: block;
-  margin: 5px 0px;
-  padding: 15px;
+  margin-top: 5px;
   border: none;
 }
 
@@ -249,6 +304,7 @@ i[class*=' icon-']:before {
 
 .connect-form input[type='submit'] {
   height: 50px;
+  margin-top: 0;
   margin-bottom: 20px;
   font-family: Montserrat, sans-serif;
   background: #6bb758;
@@ -264,28 +320,47 @@ i[class*=' icon-']:before {
   background: #6bb758;
 }
 
-.connect-form input[type='checkbox'] {
-  display: inline-block;
-  margin-right: 5px;
-  vertical-align: middle;
+.connect-form-address {
+  display: flex;
+}
+
+.connect-form-address .textinput:nth-child(1) {
+  flex: 1;
+}
+
+.connect-form-address .textinput:nth-child(2) {
+  width: 65px;
+}
+
+.connect-form-address input {
+  padding-right: 0;
+}
+
+.connect-form-address label {
+  margin-top: 5px;
+  font: 12px 'Montserrat', sans-serif;
+  padding: 10px;
+  padding-bottom: 0;
+  text-align: center;
+  background: #fff;
+  color: #777;
+}
+
+.connect-form-address input[type='checkbox'] {
+  margin-top: 5px;
 }
 
 .connect-form i {
-  float: right;
+  display: block;
   cursor: pointer;
   color: #999;
-  padding: 10px 5px;
+  text-align: center;
   font-size: 24px;
+  padding: 5px 0;
 }
 
 .connect-form i:hover {
-  color: #000;
-}
-
-.connect-form label {
-  display: inline-block;
-  padding: 10px 0;
-  color: #333;
+  color: #666;
 }
 
 .chat-title-bar {

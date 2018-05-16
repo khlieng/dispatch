@@ -11,9 +11,10 @@ import (
 )
 
 type connectDefaults struct {
-	Name        string   `json:"name"`
-	Address     string   `json:"address"`
-	Channels    []string `json:"channels"`
+	Name        string   `json:"name,omitempty"`
+	Host        string   `json:"host,omitempty"`
+	Port        int      `json:"port,omitempty"`
+	Channels    []string `json:"channels,omitempty"`
 	Password    bool     `json:"password,omitempty"`
 	SSL         bool     `json:"ssl,omitempty"`
 	ReadOnly    bool     `json:"readonly,omitempty"`
@@ -81,7 +82,8 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 
 	data.Defaults = connectDefaults{
 		Name:        viper.GetString("defaults.name"),
-		Address:     viper.GetString("defaults.address"),
+		Host:        viper.GetString("defaults.host"),
+		Port:        viper.GetInt("defaults.port"),
 		Channels:    viper.GetStringSlice("defaults.channels"),
 		Password:    viper.GetString("defaults.password") != "",
 		SSL:         viper.GetBool("defaults.ssl"),

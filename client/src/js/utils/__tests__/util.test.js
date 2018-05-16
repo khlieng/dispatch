@@ -1,5 +1,5 @@
 import React from 'react';
-import { isChannel } from '..';
+import { isChannel, isValidNick, isValidChannel, isValidUsername } from '..';
 import linkify from '../linkify';
 
 describe('isChannel()', () => {
@@ -12,6 +12,68 @@ describe('isChannel()', () => {
     expect(isChannel({ name: '#cake' })).toBe(true);
     expect(isChannel({ name: 'cake' })).toBe(false);
   });
+});
+
+describe('isValidNick()', () => {
+  it('validates nicks', () =>
+    Object.entries({
+      bob: true,
+      'bob likes cake': false,
+      '-bob': false,
+      'bob.': false,
+      'bob-': true,
+      '1bob': false,
+      '[bob}': true,
+      '': false,
+      '   ': false
+    }).forEach(([input, expected]) =>
+      expect(isValidNick(input)).toBe(expected)
+    ));
+});
+
+describe('isValidChannel()', () => {
+  it('validates channels', () =>
+    Object.entries({
+      '#chan': true,
+      '#cak e': false,
+      '#cake:': false,
+      '#[cake]': true,
+      '#ca,ke': false,
+      '': false,
+      '   ': false,
+      cake: false
+    }).forEach(([input, expected]) =>
+      expect(isValidChannel(input)).toBe(expected)
+    ));
+
+  it('handles requirePrefix', () =>
+    Object.entries({
+      chan: true,
+      'cak e': false,
+      '#cake:': false,
+      '#[cake]': true,
+      '#ca,ke': false
+    }).forEach(([input, expected]) =>
+      expect(isValidChannel(input, false)).toBe(expected)
+    ));
+});
+
+describe('isValidUsername()', () => {
+  it('validates usernames', () =>
+    Object.entries({
+      bob: true,
+      'bob likes cake': false,
+      '-bob': true,
+      'bob.': true,
+      'bob-': true,
+      '1bob': true,
+      '[bob}': true,
+      '': false,
+      '   ': false,
+      'b@b': false
+    }).forEach(([input, expected]) =>
+      expect(isValidUsername(input)).toBe(expected)
+    ));
 });
 
 describe('linkify()', () => {

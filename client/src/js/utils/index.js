@@ -35,6 +35,93 @@ export function stringifyTab(server, name) {
   return server;
 }
 
+function isString(s, maxLength) {
+  if (!s || typeof s !== 'string') {
+    return false;
+  }
+  if (maxLength && s.length > maxLength) {
+    return false;
+  }
+  return true;
+}
+
+// RFC 2812
+// nickname = ( letter / special ) *( letter / digit / special / "-" )
+// letter   = A-Z / a-z
+// digit    = 0-9
+// special  = "[", "]", "\", "`", "_", "^", "{", "|", "}"
+export function isValidNick(nick, maxLength = 30) {
+  if (!isString(nick, maxLength)) {
+    return false;
+  }
+
+  for (let i = 0; i < nick.length; i++) {
+    const char = nick.charCodeAt(i);
+    if (
+      (i > 0 && char < 45) ||
+      (char > 45 && char < 48) ||
+      (char > 57 && char < 65) ||
+      char > 125
+    ) {
+      return false;
+    } else if ((i === 0 && char < 65) || char > 125) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// chanstring = any octet except NUL, BELL, CR, LF, " ", "," and ":"
+export function isValidChannel(channel, requirePrefix = true) {
+  if (!isString(channel)) {
+    return false;
+  }
+
+  if (requirePrefix && channel[0] !== '#') {
+    return false;
+  }
+
+  for (let i = 0; i < channel.length; i++) {
+    const char = channel.charCodeAt(i);
+    if (
+      char === 0 ||
+      char === 7 ||
+      char === 10 ||
+      char === 13 ||
+      char === 32 ||
+      char === 44 ||
+      char === 58
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// user = any octet except NUL, CR, LF, " " and "@"
+export function isValidUsername(username) {
+  if (!isString(username)) {
+    return false;
+  }
+
+  for (let i = 0; i < username.length; i++) {
+    const char = username.charCodeAt(i);
+    if (
+      char === 0 ||
+      char === 10 ||
+      char === 13 ||
+      char === 32 ||
+      char === 64
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export function timestamp(date = new Date()) {
   const h = padStart(date.getHours(), 2, '0');
   const m = padStart(date.getMinutes(), 2, '0');

@@ -85,7 +85,7 @@ func (h *wsHandler) connect(b []byte) {
 	json.Unmarshal(b, &data)
 
 	if _, ok := h.session.getIRC(data.Host); !ok {
-		log.Println(h.addr, "[IRC] Add server", data.Server)
+		log.Println(h.addr, "[IRC] Add server", data.Host)
 
 		connectIRC(data.Server, h.session)
 

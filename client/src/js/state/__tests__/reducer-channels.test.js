@@ -232,7 +232,10 @@ describe('channel reducer', () => {
   });
 
   it('optimistically adds the server on CONNECT', () => {
-    const state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    const state = reducer(
+      undefined,
+      connect({ host: '127.0.0.1', nick: 'nick' })
+    );
 
     expect(state).toEqual({
       '127.0.0.1': {}

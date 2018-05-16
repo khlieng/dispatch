@@ -32,7 +32,7 @@ function brotli(opts) {
 
 function clean() {
   return del(['dist']);
-};
+}
 
 function js(cb) {
   var config = require('./webpack.config.prod.js');
@@ -131,7 +131,10 @@ const assets = gulp.parallel(js, config, fonts, compressTTF);
 
 const build = gulp.series(clean, assets, compress, cleanup, bindata);
 
-const dev = gulp.series(clean, gulp.parallel(serve, fonts, gulp.series(config, bindata)));
+const dev = gulp.series(
+  clean,
+  gulp.parallel(serve, fonts, gulp.series(config, bindata))
+);
 
 gulp.task('build', build);
 gulp.task('default', dev);

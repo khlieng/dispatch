@@ -3,7 +3,10 @@ import * as actions from '../actions';
 
 describe('server reducer', () => {
   it('adds the server on CONNECT', () => {
-    let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    let state = reducer(
+      undefined,
+      connect({ host: '127.0.0.1', nick: 'nick' })
+    );
 
     expect(state).toEqual({
       '127.0.0.1': {
@@ -17,7 +20,7 @@ describe('server reducer', () => {
       }
     });
 
-    state = reducer(state, connect('127.0.0.1:1337', 'nick', {}));
+    state = reducer(state, connect({ host: '127.0.0.1', nick: 'nick' }));
 
     expect(state).toEqual({
       '127.0.0.1': {
@@ -33,9 +36,7 @@ describe('server reducer', () => {
 
     state = reducer(
       state,
-      connect('127.0.0.2:1337', 'nick', {
-        name: 'srv'
-      })
+      connect({ host: '127.0.0.2', nick: 'nick', name: 'srv' })
     );
 
     expect(state).toEqual({
@@ -93,7 +94,10 @@ describe('server reducer', () => {
   });
 
   it('sets editedNick when editing the nick', () => {
-    let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    let state = reducer(
+      undefined,
+      connect({ host: '127.0.0.1', nick: 'nick' })
+    );
     state = reducer(state, {
       type: actions.SET_NICK,
       server: '127.0.0.1',
@@ -111,7 +115,10 @@ describe('server reducer', () => {
   });
 
   it('clears editedNick when receiving an empty nick after editing finishes', () => {
-    let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    let state = reducer(
+      undefined,
+      connect({ host: '127.0.0.1', nick: 'nick' })
+    );
     state = reducer(state, {
       type: actions.SET_NICK,
       server: '127.0.0.1',
@@ -134,7 +141,10 @@ describe('server reducer', () => {
   });
 
   it('updates the nick on SOCKET_NICK', () => {
-    let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    let state = reducer(
+      undefined,
+      connect({ host: '127.0.0.1', nick: 'nick' })
+    );
     state = reducer(state, {
       type: actions.socket.NICK,
       server: '127.0.0.1',
@@ -152,7 +162,10 @@ describe('server reducer', () => {
   });
 
   it('clears editedNick on SOCKET_NICK_FAIL', () => {
-    let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    let state = reducer(
+      undefined,
+      connect({ host: '127.0.0.1', nick: 'nick' })
+    );
     state = reducer(state, {
       type: actions.SET_NICK,
       server: '127.0.0.1',
@@ -200,6 +213,7 @@ describe('server reducer', () => {
       '127.0.0.1': {
         name: 'stuff',
         nick: 'nick',
+        editedNick: null,
         status: {
           connected: true
         }
@@ -207,6 +221,7 @@ describe('server reducer', () => {
       '127.0.0.2': {
         name: 'stuffz',
         nick: 'nick2',
+        editedNick: null,
         status: {
           connected: false
         }
@@ -215,7 +230,10 @@ describe('server reducer', () => {
   });
 
   it('updates connection status on SOCKET_CONNECTION_UPDATE', () => {
-    let state = reducer(undefined, connect('127.0.0.1:1337', 'nick', {}));
+    let state = reducer(
+      undefined,
+      connect({ host: '127.0.0.1', nick: 'nick' })
+    );
     state = reducer(state, {
       type: actions.socket.CONNECTION_UPDATE,
       server: '127.0.0.1',
