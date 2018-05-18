@@ -40,6 +40,10 @@ type Client struct {
 }
 
 func NewClient(nick, username string) *Client {
+	if username == "" {
+		username = nick
+	}
+
 	return &Client{
 		nick:              nick,
 		Support:           newISupport(),
