@@ -105,7 +105,7 @@ export default withFormik({
   mapPropsToValues: ({ defaults }) => ({
     name: defaults.name,
     host: defaults.host,
-    port: defaults.port || defaults.ssl ? '6697' : '6667',
+    port: defaults.port || (defaults.ssl ? '6697' : '6667'),
     nick: '',
     channels: defaults.channels.join(','),
     username: '',
