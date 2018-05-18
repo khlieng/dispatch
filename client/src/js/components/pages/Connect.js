@@ -26,7 +26,7 @@ class Connect extends Component {
     } else if (!e.target.checked && values.port === '6697') {
       setFieldValue('port', '6667', false);
     }
-    setFieldValue('ssl', e.target.checked);
+    setFieldValue('tls', e.target.checked);
   };
 
   handleShowClick = () => {
@@ -77,7 +77,7 @@ class Connect extends Component {
           <div className="connect-form-address">
             <TextInput name="host" placeholder="Host" />
             <TextInput name="port" placeholder="Port" />
-            <Checkbox name="ssl" label="SSL" onChange={this.handleSSLChange} />
+            <Checkbox name="tls" label="SSL" onChange={this.handleSSLChange} />
           </div>
           {touched.host && <Error>{errors.host}</Error>}
           {touched.port && <Error>{errors.port}</Error>}
@@ -119,7 +119,7 @@ export default withFormik({
       username: '',
       password: defaults.password ? '      ' : '',
       realname: '',
-      ssl: defaults.ssl
+      tls: defaults.ssl
     };
   },
   validate: values => {
@@ -138,7 +138,7 @@ export default withFormik({
     }
 
     if (!values.port) {
-      values.port = values.ssl ? '6697' : '6667';
+      values.port = values.tls ? '6697' : '6667';
     } else if (!isInt(values.port, 1, 65535)) {
       errors.port = 'Invalid port';
     }
