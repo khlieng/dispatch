@@ -102,17 +102,26 @@ class Connect extends Component {
 }
 
 export default withFormik({
-  mapPropsToValues: ({ defaults }) => ({
-    name: defaults.name,
-    host: defaults.host,
-    port: defaults.port || (defaults.ssl ? '6697' : '6667'),
-    nick: '',
-    channels: defaults.channels.join(','),
-    username: '',
-    password: defaults.password ? '      ' : '',
-    realname: '',
-    ssl: defaults.ssl
-  }),
+  mapPropsToValues: ({ defaults }) => {
+    let port = '6667';
+    if (defaults.port) {
+      port = `${defaults.port}`;
+    } else if (defaults.ssl) {
+      port = '6697';
+    }
+
+    return {
+      name: defaults.name,
+      host: defaults.host,
+      port,
+      nick: '',
+      channels: defaults.channels.join(','),
+      username: '',
+      password: defaults.password ? '      ' : '',
+      realname: '',
+      ssl: defaults.ssl
+    };
+  },
   validate: values => {
     Object.keys(values).forEach(k => {
       if (typeof values[k] === 'string') {
