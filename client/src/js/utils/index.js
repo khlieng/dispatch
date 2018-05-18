@@ -122,6 +122,21 @@ export function isValidUsername(username) {
   return true;
 }
 
+export function isInt(str, min, max) {
+  if (!str || str < min || str > max) {
+    return false;
+  }
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    if (char < 48 || char > 57) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export function timestamp(date = new Date()) {
   const h = padStart(date.getHours(), 2, '0');
   const m = padStart(date.getMinutes(), 2, '0');

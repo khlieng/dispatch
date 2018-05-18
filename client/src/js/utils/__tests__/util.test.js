@@ -1,5 +1,5 @@
 import React from 'react';
-import { isChannel, isValidNick, isValidChannel, isValidUsername } from '..';
+import { isChannel, isValidNick, isValidChannel, isValidUsername, isInt } from '..';
 import linkify from '../linkify';
 
 describe('isChannel()', () => {
@@ -74,6 +74,22 @@ describe('isValidUsername()', () => {
     }).forEach(([input, expected]) =>
       expect(isValidUsername(input)).toBe(expected)
     ));
+});
+
+describe('isInt()', () => {
+  it('validates integers', () => {
+    expect(isInt('0')).toBe(true);
+    expect(isInt('1337')).toBe(true);
+    expect(isInt('0', 0, 65535)).toBe(true);
+    expect(isInt('0', 1, 65535)).toBe(false);
+    expect(isInt('1', 1, 65535)).toBe(true);
+    expect(isInt('65535', 1, 65535)).toBe(true);
+    expect(isInt('00065535', 1, 65535)).toBe(true);
+    expect(isInt('65536', 1, 65535)).toBe(false);
+    expect(isInt('1cake', 1, 65535)).toBe(false);
+    expect(isInt('cake1', 1, 65535)).toBe(false);
+    expect(isInt('', 1, 65535)).toBe(false);
+  });
 });
 
 describe('linkify()', () => {

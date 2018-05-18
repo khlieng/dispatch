@@ -4,7 +4,7 @@ import { Form, withFormik } from 'formik';
 import Navicon from 'containers/Navicon';
 import Checkbox from 'components/ui/Checkbox';
 import TextInput from 'components/ui/TextInput';
-import { isValidNick, isValidChannel, isValidUsername } from 'utils';
+import { isValidNick, isValidChannel, isValidUsername, isInt } from 'utils';
 
 const getSortedDefaultChannels = createSelector(
   defaults => defaults.channels,
@@ -130,7 +130,7 @@ export default withFormik({
 
     if (!values.port) {
       values.port = values.ssl ? '6697' : '6667';
-    } else if (values.port < 1 || values.port > 65535) {
+    } else if (!isInt(values.port, 1, 65535)) {
       errors.port = 'Invalid port';
     }
 
