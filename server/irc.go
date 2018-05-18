@@ -72,7 +72,7 @@ func connectIRC(server storage.Server, session *Session) *irc.Client {
 
 	if server.Password == "" &&
 		viper.GetString("defaults.password") != "" &&
-		address == viper.GetString("defaults.address") {
+		address == viper.GetString("defaults.host") {
 		i.Password = viper.GetString("defaults.password")
 	} else {
 		i.Password = server.Password
