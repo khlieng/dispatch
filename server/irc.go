@@ -63,6 +63,13 @@ func connectIRC(server storage.Server, session *Session) *irc.Client {
 		address = net.JoinHostPort(server.Host, server.Port)
 	}
 
+	if i.Username == "" {
+		i.Username = server.Nick
+	}
+	if i.Realname == "" {
+		i.Realname = server.Nick
+	}
+
 	if server.Password == "" &&
 		viper.GetString("defaults.password") != "" &&
 		address == viper.GetString("defaults.address") {
