@@ -171,12 +171,7 @@ func serveFiles(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveIndex(w http.ResponseWriter, r *http.Request) {
-	session := handleAuth(w, r)
-	if session == nil {
-		log.Println("[Auth] No session")
-		w.WriteHeader(500)
-		return
-	}
+	session := handleAuth(w, r, false)
 
 	if cspEnabled {
 		var connectSrc string

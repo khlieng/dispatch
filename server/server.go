@@ -98,15 +98,21 @@ func startHTTP() {
 
 func serve(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
-		w.WriteHeader(404)
+		fail(w, http.StatusNotFound)
 		return
 	}
 
 	if strings.HasPrefix(r.URL.Path, "/ws") {
-		session := handleAuth(w, r)
+		if !websocket.IsWebSocketUpgrade(r) {
+			fail(w, http.StatusBadRequest)
+			return
+		}
+
+		session := handleAuth(w, r, true)
+
 		if session == nil {
 			log.Println("[Auth] No session")
-			w.WriteHeader(500)
+			fail(w, http.StatusInternalServerError)
 			return
 		}
 
@@ -161,4 +167,8 @@ func letsEncryptProxy(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httputil.NewSingleHostReverseProxy(upstream).ServeHTTP(w, r)
+}
+
+func fail(w http.ResponseWriter, code int) {
+	http.Error(w, http.StatusText(code), code)
 }

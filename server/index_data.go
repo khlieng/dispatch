@@ -61,6 +61,22 @@ func (d *indexData) addUsersAndMessages(server, channel string, session *Session
 
 func getIndexData(r *http.Request, session *Session) *indexData {
 	data := indexData{}
+
+	data.Defaults = connectDefaults{
+		Name:        viper.GetString("defaults.name"),
+		Host:        viper.GetString("defaults.host"),
+		Port:        viper.GetInt("defaults.port"),
+		Channels:    viper.GetStringSlice("defaults.channels"),
+		Password:    viper.GetString("defaults.password") != "",
+		SSL:         viper.GetBool("defaults.ssl"),
+		ReadOnly:    viper.GetBool("defaults.readonly"),
+		ShowDetails: viper.GetBool("defaults.show_details"),
+	}
+
+	if session == nil {
+		return &data
+	}
+
 	servers := session.user.GetServers()
 	connections := session.getConnectionStates()
 	for _, server := range servers {
@@ -79,17 +95,6 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 		channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
 	}
 	data.Channels = channels
-
-	data.Defaults = connectDefaults{
-		Name:        viper.GetString("defaults.name"),
-		Host:        viper.GetString("defaults.host"),
-		Port:        viper.GetInt("defaults.port"),
-		Channels:    viper.GetStringSlice("defaults.channels"),
-		Password:    viper.GetString("defaults.password") != "",
-		SSL:         viper.GetBool("defaults.ssl"),
-		ReadOnly:    viper.GetBool("defaults.readonly"),
-		ShowDetails: viper.GetBool("defaults.show_details"),
-	}
 
 	server, channel := getTabFromPath(r.URL.EscapedPath())
 	if isInChannel(channels, server, channel) {

@@ -12,18 +12,19 @@ const (
 	cookieName = "dispatch"
 )
 
-func handleAuth(w http.ResponseWriter, r *http.Request) *Session {
+func handleAuth(w http.ResponseWriter, r *http.Request, createUser bool) *Session {
 	var session *Session
 
 	cookie, err := r.Cookie(cookieName)
 	if err != nil {
-		authLog(r, "No cookie set")
-		session = newUser(w, r)
+		if createUser {
+			session = newUser(w, r)
+		}
 	} else {
 		session = sessions.get(cookie.Value)
 		if session != nil {
 			log.Println(r.RemoteAddr, "[Auth] GET", r.URL.Path, "| Valid token | User ID:", session.user.ID)
-		} else {
+		} else if createUser {
 			session = newUser(w, r)
 		}
 	}
@@ -56,8 +57,4 @@ func newUser(w http.ResponseWriter, r *http.Request) *Session {
 	})
 
 	return session
-}
-
-func authLog(r *http.Request, s string) {
-	log.Println(r.RemoteAddr, "[Auth] GET", r.URL.Path, "|", s)
 }
