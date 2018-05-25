@@ -1,5 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
+var autoprefixer = require('autoprefixer');
 
 module.exports = {
   mode: 'development',
@@ -28,7 +29,29 @@ module.exports = {
         }
       },
       { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.css$/, loader: 'style-loader!css-loader' }
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: false
+            }
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: [
+                require('postcss-flexbugs-fixes'),
+                autoprefixer({
+                  flexbox: 'no-2009'
+                })
+              ]
+            }
+          }
+        ]
+      }
     ]
   },
   plugins: [new webpack.HotModuleReplacementPlugin()]
