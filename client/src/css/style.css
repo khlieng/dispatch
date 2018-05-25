@@ -29,11 +29,28 @@ input {
   outline: none;
 }
 
+input::-ms-clear {
+  display: none;
+}
+
 button {
+  width: 100%;
+  height: 50px;
+  background: #6bb758;
+  color: #fff;
   font: 16px Montserrat, sans-serif;
   border: none;
   outline: none;
+  user-select: none;
   cursor: pointer;
+}
+
+button:hover {
+  background: #7bbf6a;
+}
+
+button:active {
+  background: #6bb758;
 }
 
 p {
@@ -43,6 +60,11 @@ p {
 i[class^='icon-']:before,
 i[class*=' icon-']:before {
   margin: 0;
+}
+
+::selection {
+  background: #ddd;
+  color: #000;
 }
 
 .success {
@@ -59,13 +81,7 @@ i[class*=' icon-']:before {
 }
 
 .textinput input {
-  padding: 17.5px 15px;
-}
-
-.textinput input:focus,
-.textinput input.value {
-  padding-top: 25px;
-  padding-bottom: 10px;
+  padding: 25px 15px 10px;
 }
 
 .textinput span {
@@ -73,6 +89,7 @@ i[class*=' icon-']:before {
   top: 0;
   left: 0;
   pointer-events: none;
+  user-select: none;
   transform: translateZ(0);
   transition: all 0.2s;
   color: #777;
@@ -144,6 +161,7 @@ i[class*=' icon-']:before {
   color: #fff;
   font-family: Montserrat, sans-serif;
   transition: transform 0.2s;
+  user-select: none;
 }
 
 .tab-container {
@@ -198,21 +216,6 @@ i[class*=' icon-']:before {
   margin-bottom: 5px;
   font-size: 12px;
   color: #999;
-}
-
-.button-connect {
-  width: 100%;
-  height: 50px;
-  background: #6bb758;
-  color: #fff;
-}
-
-.button-connect:hover {
-  background: #7bbf6a;
-}
-
-.button-connect:active {
-  background: #6bb758;
 }
 
 .side-buttons {
@@ -293,31 +296,26 @@ i[class*=' icon-']:before {
 
 .connect-form input {
   margin-top: 5px;
-  border: none;
-}
-
-.connect-form input[type='submit'],
-.connect-form input[type='text'],
-.connect-form input[type='password'] {
   width: 100%;
 }
 
-.connect-form input[type='submit'] {
-  height: 50px;
-  margin-top: 0;
+input[type='number'] {
+  appearance: textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0;
+}
+
+.connect-form label {
+  user-select: none;
+  cursor: default;
+}
+
+.connect-form button {
   margin-bottom: 20px;
-  font-family: Montserrat, sans-serif;
-  background: #6bb758;
-  color: #fff;
-  cursor: pointer;
-}
-
-.connect-form input[type='submit']:hover {
-  background: #7bbf6a;
-}
-
-.connect-form input[type='submit']:active {
-  background: #6bb758;
 }
 
 .connect-form-address {
@@ -426,15 +424,20 @@ i[class*=' icon-']:before {
 }
 
 .chat-title {
-  margin-left: 15px;
+  margin-left: 10px;
+  padding: 0 5px;
   font: 24px Montserrat, sans-serif;
   white-space: nowrap;
-  background: none;
   line-height: 50px;
 }
 
 .chat-server .chat-title {
-  padding-right: 1px;
+  cursor: pointer;
+}
+
+input.chat-title {
+  background: none;
+  cursor: text !important;
 }
 
 .chat-topic-wrap {
@@ -617,10 +620,19 @@ i[class*=' icon-']:before {
   line-height: 30px;
   height: 30px;
   padding: 0 10px;
-  background: #6bb758 !important;
+  background: #6bb758;
   color: #fff;
   font-family: Montserrat, sans-serif !important;
   margin-right: 0;
+  cursor: pointer;
+}
+
+input.message-input-nick {
+  cursor: text;
+}
+
+input.message-input-nick.invalid {
+  background: #f6546a;
 }
 
 .message-input {
@@ -670,18 +682,7 @@ i[class*=' icon-']:before {
 
 .settings button {
   margin: 5px;
-  color: #fff;
-  background: #6bb758;
-  padding: 10px 20px;
   width: 200px;
-}
-
-.settings button:hover {
-  background: #7bbf6a;
-}
-
-.settings button:active {
-  background: #6bb758;
 }
 
 .settings div {

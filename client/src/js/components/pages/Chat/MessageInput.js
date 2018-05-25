@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import Editable from 'components/ui/Editable';
+import { isValidNick } from 'utils';
 
 export default class MessageInput extends PureComponent {
   state = {
@@ -53,7 +54,11 @@ export default class MessageInput extends PureComponent {
     return (
       <div className="message-input-wrap">
         <Editable
-          className="message-input-nick"
+          className={
+            isValidNick(nick)
+              ? 'message-input-nick'
+              : 'message-input-nick invalid'
+          }
           value={nick}
           onBlur={onNickEditDone}
           onChange={onNickChange}

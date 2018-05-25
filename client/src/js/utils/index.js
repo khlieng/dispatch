@@ -122,16 +122,9 @@ export function isValidUsername(username) {
   return true;
 }
 
-export function isInt(str, min, max) {
-  if (!str || str < min || str > max) {
+export function isInt(i, min, max) {
+  if (i < min || i > max || Math.floor(i) !== i) {
     return false;
-  }
-
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    if (char < 48 || char > 57) {
-      return false;
-    }
   }
 
   return true;

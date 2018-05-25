@@ -10,6 +10,9 @@ const TextInput = ({ name, placeholder, ...props }) => (
           className={field.value ? 'value' : null}
           type="text"
           name={name}
+          autoCorrect="off"
+          autoComplete="off"
+          spellCheck="false"
           {...field}
           {...props}
         />

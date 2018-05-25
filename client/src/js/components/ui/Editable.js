@@ -12,32 +12,31 @@ export default class Editable extends PureComponent {
 
   componentWillReceiveProps(nextProps) {
     if (this.state.editing && nextProps.value !== this.props.value) {
-      this.setState({
-        width: this.getInputWidth(nextProps.value)
-      });
+      this.updateInputWidth(nextProps.value);
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (!prevState.editing && this.state.editing) {
       // eslint-disable-next-line react/no-did-update-set-state
-      this.setState({
-        width: this.getInputWidth(this.props.value)
-      });
+      this.updateInputWidth(this.props.value);
     }
   }
 
-  getInputWidth(value) {
+  updateInputWidth = value => {
     if (this.input) {
       const style = window.getComputedStyle(this.input);
-      const padding =
-        parseInt(style.paddingLeft, 10) + parseInt(style.paddingRight, 10);
+      const padding = parseInt(style.paddingRight, 10);
       // Make sure the width is atleast 1px so the caret always shows
       const width =
         stringWidth(value, `${style.fontSize} ${style.fontFamily}`) || 1;
-      return padding + width;
+
+      this.setState({
+        width: width + padding * 2,
+        indent: padding
+      });
     }
-  }
+  };
 
   startEditing = () => {
     if (this.props.editable) {
@@ -84,7 +83,9 @@ export default class Editable extends PureComponent {
     const { children, className, value } = this.props;
 
     const style = {
-      width: this.state.width
+      width: this.state.width,
+      textIndent: this.state.indent,
+      paddingLeft: 0
     };
 
     return this.state.editing ? (

@@ -11,9 +11,6 @@ const getSortedDefaultChannels = createSelector(
   channels => channels.split(',').sort()
 );
 
-const Error = ({ children }) =>
-  children ? <div className="form-error">{children}</div> : null;
-
 class Connect extends Component {
   state = {
     showOptionals: false
@@ -21,32 +18,35 @@ class Connect extends Component {
 
   handleSSLChange = e => {
     const { values, setFieldValue } = this.props;
-    if (e.target.checked && values.port === '6667') {
-      setFieldValue('port', '6697', false);
-    } else if (!e.target.checked && values.port === '6697') {
-      setFieldValue('port', '6667', false);
+    if (e.target.checked && values.port === 6667) {
+      setFieldValue('port', 6697, false);
+    } else if (!e.target.checked && values.port === 6697) {
+      setFieldValue('port', 6667, false);
     }
-    setFieldValue('tls', e.target.checked);
   };
 
   handleShowClick = () => {
     this.setState({ showOptionals: !this.state.showOptionals });
   };
 
-  renderOptionals = () => {
-    const { errors, touched } = this.props;
-    return (
-      <div>
-        <TextInput name="username" placeholder="Username" />
-        {touched.username && <Error>{errors.username}</Error>}
-        <TextInput type="password" name="password" placeholder="Password" />
-        <TextInput name="realname" placeholder="Realname" />
-      </div>
-    );
+  renderOptionals = () => (
+    <div>
+      <TextInput name="username" placeholder="Username" />
+      {this.renderError('username')}
+      <TextInput type="password" name="password" placeholder="Password" />
+      <TextInput name="realname" placeholder="Realname" />
+    </div>
+  );
+
+  renderError = name => {
+    const { touched, errors } = this.props;
+    if (touched[name] && errors[name]) {
+      return <div className="form-error">{errors[name]}</div>;
+    }
   };
 
   render() {
-    const { defaults, values, errors, touched } = this.props;
+    const { defaults, values } = this.props;
     const { readonly, showDetails } = defaults;
     let form;
 
@@ -65,8 +65,8 @@ class Connect extends Component {
             </div>
           )}
           <TextInput name="nick" placeholder="Nick" />
-          {touched.nick && <Error>{errors.nick}</Error>}
-          <input type="submit" value="Connect" />
+          {this.renderError('nick')}
+          <button>Connect</button>
         </Form>
       );
     } else {
@@ -76,18 +76,18 @@ class Connect extends Component {
           <TextInput name="name" placeholder="Name" />
           <div className="connect-form-address">
             <TextInput name="host" placeholder="Host" />
-            <TextInput name="port" placeholder="Port" />
+            <TextInput name="port" type="number" placeholder="Port" />
             <Checkbox name="tls" label="SSL" onChange={this.handleSSLChange} />
           </div>
-          {touched.host && <Error>{errors.host}</Error>}
-          {touched.port && <Error>{errors.port}</Error>}
+          {this.renderError('host')}
+          {this.renderError('port')}
           <TextInput name="nick" placeholder="Nick" />
-          {touched.nick && <Error>{errors.nick}</Error>}
+          {this.renderError('nick')}
           <TextInput name="channels" placeholder="Channels" />
-          {touched.channels && <Error>{errors.channels}</Error>}
+          {this.renderError('channels')}
           {this.state.showOptionals && this.renderOptionals()}
           <i className="icon-ellipsis" onClick={this.handleShowClick} />
-          <input type="submit" value="Connect" />
+          <button>Connect</button>
         </Form>
       );
     }
@@ -103,11 +103,11 @@ class Connect extends Component {
 
 export default withFormik({
   mapPropsToValues: ({ defaults }) => {
-    let port = '6667';
+    let port = 6667;
     if (defaults.port) {
-      port = `${defaults.port}`;
+      ({ port } = defaults);
     } else if (defaults.ssl) {
-      port = '6697';
+      port = 6697;
     }
 
     return {
@@ -138,7 +138,7 @@ export default withFormik({
     }
 
     if (!values.port) {
-      values.port = values.tls ? '6697' : '6667';
+      values.port = values.tls ? 6697 : 6667;
     } else if (!isInt(values.port, 1, 65535)) {
       errors.port = 'Invalid port';
     }
@@ -178,6 +178,7 @@ export default withFormik({
     const channels = values.channels.split(',');
     delete values.channels;
 
+    values.port = `${values.port}`;
     connect(values);
     select(values.host);
 
