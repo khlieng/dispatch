@@ -2,42 +2,43 @@ package server
 
 import (
 	"crypto/x509"
-	"encoding/json"
+
+	"github.com/mailru/easyjson"
 
 	"github.com/khlieng/dispatch/irc"
 	"github.com/khlieng/dispatch/storage"
 )
 
 type WSRequest struct {
-	Type string          `json:"type"`
-	Data json.RawMessage `json:"data"`
+	Type string
+	Data easyjson.RawMessage
 }
 
 type WSResponse struct {
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
+	Type string
+	Data interface{}
 }
 
 type Server struct {
 	storage.Server
-	Status ConnectionUpdate `json:"status"`
+	Status ConnectionUpdate
 }
 
 type ServerName struct {
-	Server string `json:"server"`
-	Name   string `json:"name"`
+	Server string
+	Name   string
 }
 
 type ReconnectSettings struct {
-	Server     string `json:"server"`
-	SkipVerify bool   `json:"skipVerify"`
+	Server     string
+	SkipVerify bool
 }
 
 type ConnectionUpdate struct {
-	Server    string `json:"server"`
-	Connected bool   `json:"connected"`
-	Error     string `json:"error,omitempty"`
-	ErrorType string `json:"errorType,omitempty"`
+	Server    string
+	Connected bool
+	Error     string
+	ErrorType string
 }
 
 func newConnectionUpdate(server string, state irc.ConnectionState) ConnectionUpdate {
@@ -55,139 +56,139 @@ func newConnectionUpdate(server string, state irc.ConnectionState) ConnectionUpd
 }
 
 type Nick struct {
-	Server string `json:"server"`
-	Old    string `json:"oldNick"`
-	New    string `json:"newNick"`
+	Server string
+	Old    string `json:"oldNick,omitempty"`
+	New    string `json:"newNick,omitempty"`
 }
 
 type NickFail struct {
-	Server string `json:"server"`
+	Server string
 }
 
 type Join struct {
-	Server   string   `json:"server"`
-	User     string   `json:"user"`
-	Channels []string `json:"channels"`
+	Server   string
+	User     string
+	Channels []string
 }
 
 type Part struct {
-	Server   string   `json:"server"`
-	User     string   `json:"user"`
-	Channel  string   `json:"channel,omitempty"`
-	Channels []string `json:"channels,omitempty"`
-	Reason   string   `json:"reason,omitempty"`
+	Server   string
+	User     string
+	Channel  string
+	Channels []string
+	Reason   string
 }
 
 type Mode struct {
-	Server  string `json:"server"`
-	Channel string `json:"channel"`
-	User    string `json:"user"`
-	Add     string `json:"add"`
-	Remove  string `json:"remove"`
+	Server  string
+	Channel string
+	User    string
+	Add     string
+	Remove  string
 }
 
 type Quit struct {
-	Server string `json:"server"`
-	User   string `json:"user"`
-	Reason string `json:"reason,omitempty"`
+	Server string
+	User   string
+	Reason string
 }
 
 type Message struct {
-	ID      string `json:"id,omitempty"`
-	Server  string `json:"server,omitempty"`
-	From    string `json:"from,omitempty"`
-	To      string `json:"to,omitempty"`
-	Content string `json:"content"`
-	Type    string `json:"type,omitempty"`
+	ID      string
+	Server  string
+	From    string
+	To      string
+	Content string
+	Type    string
 }
 
 type Messages struct {
-	Server   string            `json:"server"`
-	To       string            `json:"to"`
-	Messages []storage.Message `json:"messages"`
-	Prepend  bool              `json:"prepend,omitempty"`
-	Next     string            `json:"next,omitempty"`
+	Server   string
+	To       string
+	Messages []storage.Message
+	Prepend  bool
+	Next     string
 }
 
 type Topic struct {
-	Server  string `json:"server"`
-	Channel string `json:"channel"`
-	Topic   string `json:"topic,omitempty"`
-	Nick    string `json:"nick,omitempty"`
+	Server  string
+	Channel string
+	Topic   string
+	Nick    string
 }
 
 type Userlist struct {
-	Server  string   `json:"server"`
-	Channel string   `json:"channel"`
-	Users   []string `json:"users"`
+	Server  string
+	Channel string
+	Users   []string
 }
 
 type MOTD struct {
-	Server  string   `json:"server"`
-	Title   string   `json:"title"`
-	Content []string `json:"content"`
+	Server  string
+	Title   string
+	Content []string
 }
 
 type Invite struct {
-	Server  string `json:"server"`
-	Channel string `json:"channel"`
-	User    string `json:"user"`
+	Server  string
+	Channel string
+	User    string
 }
 
 type Kick struct {
-	Server  string `json:"server"`
-	Channel string `json:"channel"`
-	User    string `json:"user"`
+	Server  string
+	Channel string
+	User    string
 }
 
 type Whois struct {
-	Server string `json:"server"`
-	User   string `json:"user"`
+	Server string
+	User   string
 }
 
 type WhoisReply struct {
-	Nick     string   `json:"nick"`
-	Username string   `json:"username"`
-	Host     string   `json:"host"`
-	Realname string   `json:"realname"`
-	Server   string   `json:"server"`
-	Channels []string `json:"channels"`
+	Nick     string
+	Username string
+	Host     string
+	Realname string
+	Server   string
+	Channels []string
 }
 
 type Away struct {
-	Server  string `json:"server"`
-	Message string `json:"message"`
+	Server  string
+	Message string
 }
 
 type Raw struct {
-	Server  string `json:"server"`
-	Message string `json:"message"`
+	Server  string
+	Message string
 }
 
 type SearchRequest struct {
-	Server  string `json:"server"`
-	Channel string `json:"channel"`
-	Phrase  string `json:"phrase"`
+	Server  string
+	Channel string
+	Phrase  string
 }
 
 type SearchResult struct {
-	Server  string            `json:"server"`
-	Channel string            `json:"channel"`
-	Results []storage.Message `json:"results"`
+	Server  string
+	Channel string
+	Results []storage.Message
 }
 
 type ClientCert struct {
-	Cert []byte `json:"cert"`
-	Key  []byte `json:"key"`
+	Cert []byte
+	Key  []byte
 }
 
 type FetchMessages struct {
-	Server  string `json:"server"`
-	Channel string `json:"channel"`
-	Next    string `json:"next"`
+	Server  string
+	Channel string
+	Next    string
 }
 
 type Error struct {
-	Server  string `json:"server"`
-	Message string `json:"message"`
+	Server  string
+	Message string
 }

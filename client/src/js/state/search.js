@@ -10,7 +10,7 @@ export const getSearch = state => state.search;
 
 export default createReducer(initialState, {
   [actions.socket.SEARCH](state, { results }) {
-    state.results = results;
+    state.results = results || [];
   },
 
   [actions.TOGGLE_SEARCH](state) {

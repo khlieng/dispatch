@@ -411,6 +411,30 @@
 			"revisionTime": "2018-02-17T13:45:45Z"
 		},
 		{
+			"checksumSHA1": "HIMDeysKGqDKh9a3N5lFLZRNHaU=",
+			"path": "github.com/mailru/easyjson",
+			"revision": "8b799c424f57fa123fc63a99d6383bc6e4c02578",
+			"revisionTime": "2018-03-23T15:44:45Z"
+		},
+		{
+			"checksumSHA1": "T8soMJArSZrYnhmdpAnq1bVxQ6Q=",
+			"path": "github.com/mailru/easyjson/buffer",
+			"revision": "8b799c424f57fa123fc63a99d6383bc6e4c02578",
+			"revisionTime": "2018-03-23T15:44:45Z"
+		},
+		{
+			"checksumSHA1": "r2z0mW+SLfGn93Psm3tvEs3WQDM=",
+			"path": "github.com/mailru/easyjson/jlexer",
+			"revision": "8b799c424f57fa123fc63a99d6383bc6e4c02578",
+			"revisionTime": "2018-03-23T15:44:45Z"
+		},
+		{
+			"checksumSHA1": "4BAeeJ7JywEQyR6GqRrxfSfN2/Q=",
+			"path": "github.com/mailru/easyjson/jwriter",
+			"revision": "8b799c424f57fa123fc63a99d6383bc6e4c02578",
+			"revisionTime": "2018-03-23T15:44:45Z"
+		},
+		{
 			"checksumSHA1": "n/zX9TwtVztVCRPou/4CLmZAeLw=",
 			"path": "github.com/miekg/dns",
 			"revision": "01d59357d468872339068bcd5d55a00e2463051f",

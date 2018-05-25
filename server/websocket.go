@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/mailru/easyjson"
 )
 
 type wsConn struct {
@@ -31,10 +32,10 @@ func (c *wsConn) send() {
 				return
 			}
 
-			err = c.conn.WriteJSON(res)
+			err = c.writeJSON(res)
 
 		case <-ping:
-			err = c.conn.WriteJSON(WSResponse{Type: "ping"})
+			err = c.writeJSON(WSResponse{Type: "ping"})
 		}
 
 		if err != nil {
@@ -47,7 +48,7 @@ func (c *wsConn) recv() {
 	var req WSRequest
 
 	for {
-		err := c.conn.ReadJSON(&req)
+		err := c.readJSON(&req)
 		if err != nil {
 			close(c.in)
 			return
@@ -60,4 +61,26 @@ func (c *wsConn) recv() {
 func (c *wsConn) close() {
 	close(c.out)
 	c.conn.Close()
+}
+
+func (c *wsConn) readJSON(v easyjson.Unmarshaler) error {
+	_, r, err := c.conn.NextReader()
+	if err != nil {
+		return err
+	}
+
+	return easyjson.UnmarshalFromReader(r, v)
+}
+
+func (c *wsConn) writeJSON(v easyjson.Marshaler) error {
+	w, err := c.conn.NextWriter(websocket.TextMessage)
+	if err != nil {
+		return err
+	}
+	_, err1 := easyjson.MarshalToWriter(v, w)
+	err2 := w.Close()
+	if err1 != nil {
+		return err1
+	}
+	return err2
 }

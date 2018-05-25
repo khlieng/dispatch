@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
@@ -82,7 +81,7 @@ func (h *wsHandler) init(r *http.Request) {
 
 func (h *wsHandler) connect(b []byte) {
 	var data Server
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if _, ok := h.session.getIRC(data.Host); !ok {
 		log.Println(h.addr, "[IRC] Add server", data.Host)
@@ -97,7 +96,7 @@ func (h *wsHandler) connect(b []byte) {
 
 func (h *wsHandler) reconnect(b []byte) {
 	var data ReconnectSettings
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok && !i.Connected() {
 		if i.TLS {
@@ -109,7 +108,7 @@ func (h *wsHandler) reconnect(b []byte) {
 
 func (h *wsHandler) join(b []byte) {
 	var data Join
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Join(data.Channels...)
@@ -118,7 +117,7 @@ func (h *wsHandler) join(b []byte) {
 
 func (h *wsHandler) part(b []byte) {
 	var data Part
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Part(data.Channels...)
@@ -127,7 +126,7 @@ func (h *wsHandler) part(b []byte) {
 
 func (h *wsHandler) quit(b []byte) {
 	var data Quit
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	log.Println(h.addr, "[IRC] Remove server", data.Server)
 	if i, ok := h.session.getIRC(data.Server); ok {
@@ -140,7 +139,7 @@ func (h *wsHandler) quit(b []byte) {
 
 func (h *wsHandler) message(b []byte) {
 	var data Message
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Privmsg(data.To, data.Content)
@@ -152,7 +151,7 @@ func (h *wsHandler) message(b []byte) {
 
 func (h *wsHandler) nick(b []byte) {
 	var data Nick
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Nick(data.New)
@@ -161,7 +160,7 @@ func (h *wsHandler) nick(b []byte) {
 
 func (h *wsHandler) topic(b []byte) {
 	var data Topic
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Topic(data.Channel, data.Topic)
@@ -170,7 +169,7 @@ func (h *wsHandler) topic(b []byte) {
 
 func (h *wsHandler) invite(b []byte) {
 	var data Invite
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Invite(data.User, data.Channel)
@@ -179,7 +178,7 @@ func (h *wsHandler) invite(b []byte) {
 
 func (h *wsHandler) kick(b []byte) {
 	var data Invite
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Kick(data.Channel, data.User)
@@ -188,7 +187,7 @@ func (h *wsHandler) kick(b []byte) {
 
 func (h *wsHandler) whois(b []byte) {
 	var data Whois
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Whois(data.User)
@@ -197,7 +196,7 @@ func (h *wsHandler) whois(b []byte) {
 
 func (h *wsHandler) away(b []byte) {
 	var data Away
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Away(data.Message)
@@ -206,7 +205,7 @@ func (h *wsHandler) away(b []byte) {
 
 func (h *wsHandler) raw(b []byte) {
 	var data Raw
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if i, ok := h.session.getIRC(data.Server); ok {
 		i.Write(data.Message)
@@ -216,7 +215,7 @@ func (h *wsHandler) raw(b []byte) {
 func (h *wsHandler) search(b []byte) {
 	go func() {
 		var data SearchRequest
-		json.Unmarshal(b, &data)
+		data.UnmarshalJSON(b)
 
 		results, err := h.session.user.SearchMessages(data.Server, data.Channel, data.Phrase)
 		if err != nil {
@@ -234,7 +233,7 @@ func (h *wsHandler) search(b []byte) {
 
 func (h *wsHandler) cert(b []byte) {
 	var data ClientCert
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	err := h.session.user.SetCertificate(data.Cert, data.Key)
 	if err != nil {
@@ -247,14 +246,14 @@ func (h *wsHandler) cert(b []byte) {
 
 func (h *wsHandler) fetchMessages(b []byte) {
 	var data FetchMessages
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	h.session.sendMessages(data.Server, data.Channel, 200, data.Next)
 }
 
 func (h *wsHandler) setServerName(b []byte) {
 	var data ServerName
-	json.Unmarshal(b, &data)
+	data.UnmarshalJSON(b)
 
 	if isValidServerName(data.Name) {
 		h.session.user.SetServerName(data.Name, data.Server)

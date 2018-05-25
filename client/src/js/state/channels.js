@@ -170,12 +170,17 @@ export default createReducer(
     [actions.socket.MODE](state, { server, channel, user, remove, add }) {
       const u = find(state[server][channel].users, v => v.nick === user);
       if (u) {
-        let j = remove.length;
-        while (j--) {
-          u.mode = u.mode.replace(remove[j], '');
+        if (remove) {
+          let j = remove.length;
+          while (j--) {
+            u.mode = u.mode.replace(remove[j], '');
+          }
         }
 
-        u.mode += add;
+        if (add) {
+          u.mode += add;
+        }
+
         u.renderName = getRenderName(u);
       }
     },

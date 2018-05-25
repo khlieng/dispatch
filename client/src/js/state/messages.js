@@ -88,6 +88,14 @@ export default createReducer(
           })
         )
       );
+    },
+
+    [actions.socket.SERVERS](state, { data }) {
+      if (data) {
+        data.forEach(({ host }) => {
+          state[host] = {};
+        });
+      }
     }
   }
 );

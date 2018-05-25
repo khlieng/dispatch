@@ -74,7 +74,11 @@
     "prettier:all": "prettier --write {.*,*.js,src/**/*.js,src/css/*.css}",
     "test": "jest",
     "test:verbose": "jest --verbose",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "gen:install": "go get -u github.com/andyleap/gencode github.com/mailru/easyjson/... github.com/SlinSo/egon/cmd/egon",
+    "gen:binary": "gencode go -package storage -schema ../storage/storage.schema -unsafe",
+    "gen:json": "easyjson -all -lower_camel_case -omit_empty ../server/json.go ../server/index_data.go",
+    "gen:template": "egon -s -m ../server"
   },
   "jest": {
     "moduleNameMapper": {

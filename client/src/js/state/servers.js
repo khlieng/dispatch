@@ -48,8 +48,6 @@ export default createReducer(
           }
         };
       }
-
-      return state;
     },
 
     [actions.DISCONNECT](state, { server }) {

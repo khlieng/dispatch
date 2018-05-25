@@ -1,6 +1,6 @@
 <%! data *indexData, cssPath, jsPath string %>
 
-<%% import "encoding/json" %%>
+<%% import "github.com/mailru/easyjson" %%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +15,7 @@
 </head>
 <body>
   <div id="root"></div>
-  <script id="env" type="application/json"><% json.NewEncoder(w).Encode(data) %></script>
+  <script id="env" type="application/json"><% easyjson.MarshalToWriter(data, w) %></script>
   <script src="/<%== jsPath %>"></script>
 </body>
 </html>
