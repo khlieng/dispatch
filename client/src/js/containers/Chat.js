@@ -81,4 +81,7 @@ const mapDispatch = dispatch => ({
   )
 });
 
-export default connect(mapState, mapDispatch)(Chat);
+export default connect(
+  mapState,
+  mapDispatch
+)(Chat);

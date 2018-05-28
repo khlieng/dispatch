@@ -13,4 +13,7 @@ const mapDispatch = {
   uploadCert
 };
 
-export default connect(mapState, mapDispatch)(Settings);
+export default connect(
+  mapState,
+  mapDispatch
+)(Settings);
