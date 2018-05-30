@@ -87,3 +87,9 @@ The libraries this project is built with.
 - [Immer](https://github.com/mweststrate/immer)
 - [React Virtualized](https://github.com/bvaughn/react-virtualized)
 - [Lodash](https://github.com/lodash/lodash)
+
+## Big Thanks
+
+Cross-browser Testing Platform and Open Source <3 Provided by [Sauce Labs][homepage]
+
+[homepage]: https://saucelabs.com
