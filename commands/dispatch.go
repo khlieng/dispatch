@@ -14,6 +14,8 @@ import (
 	"github.com/khlieng/dispatch/assets"
 	"github.com/khlieng/dispatch/server"
 	"github.com/khlieng/dispatch/storage"
+	"github.com/khlieng/dispatch/storage/bleve"
+	"github.com/khlieng/dispatch/storage/boltdb"
 )
 
 const logo = `
@@ -61,10 +63,25 @@ var rootCmd = &cobra.Command{
 		}
 		log.Println("Storing data at", storage.Path.Root())
 
-		storage.Open()
-		defer storage.Close()
+		db, err := boltdb.New(storage.Path.Database())
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
 
-		server.Run()
+		srv := server.Dispatch{
+			Store:        db,
+			SessionStore: db,
+
+			GetMessageStore: func(user *storage.User) (storage.MessageStore, error) {
+				return boltdb.New(storage.Path.Log(user.Username))
+			},
+			GetMessageSearchProvider: func(user *storage.User) (storage.MessageSearchProvider, error) {
+				return bleve.New(storage.Path.Index(user.Username))
+			},
+		}
+
+		srv.Run()
 	},
 }
 

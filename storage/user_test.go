@@ -1,4 +1,4 @@
-package storage
+package storage_test
 
 import (
 	"io/ioutil"
@@ -6,6 +6,9 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/khlieng/dispatch/storage"
+	"github.com/khlieng/dispatch/storage/bleve"
+	"github.com/khlieng/dispatch/storage/boltdb"
 	"github.com/kjk/betterguid"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,80 +19,95 @@ func tempdir() string {
 }
 
 func TestUser(t *testing.T) {
-	defer func() {
-		r := recover()
-		assert.Nil(t, r)
-	}()
+	storage.Initialize(tempdir())
 
-	Initialize(tempdir())
-	Open()
+	db, err := boltdb.New(storage.Path.Database())
+	assert.Nil(t, err)
 
-	srv := Server{
+	user, err := storage.NewUser(db)
+	assert.Nil(t, err)
+
+	srv := storage.Server{
 		Name: "Freenode",
 		Host: "irc.freenode.net",
 		Nick: "test",
 	}
-	chan1 := Channel{
+	chan1 := storage.Channel{
 		Server: srv.Host,
 		Name:   "#test",
 	}
-	chan2 := Channel{
+	chan2 := storage.Channel{
 		Server: srv.Host,
 		Name:   "#testing",
 	}
 
-	user, err := NewUser()
-	assert.Nil(t, err)
-	user.AddServer(srv)
-	user.AddChannel(chan1)
-	user.AddChannel(chan2)
-	user.closeMessageLog()
+	user.AddServer(&srv)
+	user.AddChannel(&chan1)
+	user.AddChannel(&chan2)
 
-	users := LoadUsers()
+	users, err := storage.LoadUsers(db)
+	assert.Nil(t, err)
 	assert.Len(t, users, 1)
 
-	user = users[0]
+	user = &users[0]
 	assert.Equal(t, uint64(1), user.ID)
 
-	servers := user.GetServers()
+	servers, err := user.GetServers()
 	assert.Len(t, servers, 1)
 	assert.Equal(t, srv, servers[0])
 
-	channels := user.GetChannels()
+	channels, err := user.GetChannels()
 	assert.Len(t, channels, 2)
 	assert.Equal(t, chan1, channels[0])
 	assert.Equal(t, chan2, channels[1])
 
 	user.SetNick("bob", srv.Host)
-	assert.Equal(t, "bob", user.GetServers()[0].Nick)
+	servers, err = user.GetServers()
+	assert.Equal(t, "bob", servers[0].Nick)
 
 	user.SetServerName("cake", srv.Host)
-	assert.Equal(t, "cake", user.GetServers()[0].Name)
+	servers, err = user.GetServers()
+	assert.Equal(t, "cake", servers[0].Name)
 
 	user.RemoveChannel(srv.Host, chan1.Name)
-	channels = user.GetChannels()
+	channels, err = user.GetChannels()
 	assert.Len(t, channels, 1)
 	assert.Equal(t, chan2, channels[0])
 
 	user.RemoveServer(srv.Host)
-	assert.Len(t, user.GetServers(), 0)
-	assert.Len(t, user.GetChannels(), 0)
+	servers, err = user.GetServers()
+	assert.Len(t, servers, 0)
+	channels, err = user.GetChannels()
+	assert.Len(t, channels, 0)
 
 	user.Remove()
-	_, err = os.Stat(Path.User(user.Username))
+	_, err = os.Stat(storage.Path.User(user.Username))
 	assert.True(t, os.IsNotExist(err))
 
-	for _, storedUser := range LoadUsers() {
-		assert.NotEqual(t, user.ID, storedUser.ID)
+	users, err = storage.LoadUsers(db)
+	assert.Nil(t, err)
+
+	for i := range users {
+		assert.NotEqual(t, user.ID, users[i].ID)
 	}
 }
 
 func TestMessages(t *testing.T) {
-	Initialize(tempdir())
-	Open()
+	storage.Initialize(tempdir())
 
-	user, err := NewUser()
+	db, err := boltdb.New(storage.Path.Database())
 	assert.Nil(t, err)
+
+	user, err := storage.NewUser(db)
+	assert.Nil(t, err)
+
+	os.MkdirAll(storage.Path.User(user.Username), 0700)
+
+	search, err := bleve.New(storage.Path.Index(user.Username))
+	assert.Nil(t, err)
+
+	user.SetMessageStore(db)
+	user.SetMessageSearchProvider(search)
 
 	messages, hasMore, err := user.GetMessages("irc.freenode.net", "#go-nuts", 10, "6")
 	assert.Nil(t, err)
@@ -152,5 +170,5 @@ func TestMessages(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, len(messages) > 0)
 
-	Close()
+	db.Close()
 }

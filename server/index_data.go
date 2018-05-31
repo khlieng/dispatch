@@ -11,55 +11,29 @@ import (
 )
 
 type connectDefaults struct {
-	Name        string   `json:"name,omitempty"`
-	Host        string   `json:"host,omitempty"`
-	Port        int      `json:"port,omitempty"`
-	Channels    []string `json:"channels,omitempty"`
-	Password    bool     `json:"password,omitempty"`
-	SSL         bool     `json:"ssl,omitempty"`
-	ReadOnly    bool     `json:"readonly,omitempty"`
-	ShowDetails bool     `json:"showDetails,omitempty"`
+	Name        string
+	Host        string
+	Port        int
+	Channels    []string
+	Password    bool
+	SSL         bool
+	ReadOnly    bool
+	ShowDetails bool
 }
 
 type indexData struct {
-	Defaults connectDefaults   `json:"defaults"`
-	Servers  []Server          `json:"servers,omitempty"`
-	Channels []storage.Channel `json:"channels,omitempty"`
+	Defaults connectDefaults
+	Servers  []Server
+	Channels []storage.Channel
 
 	// Users in the selected channel
-	Users *Userlist `json:"users,omitempty"`
+	Users *Userlist
 
 	// Last messages in the selected channel
-	Messages *Messages `json:"messages,omitempty"`
+	Messages *Messages
 }
 
-func (d *indexData) addUsersAndMessages(server, channel string, session *Session) {
-	users := channelStore.GetUsers(server, channel)
-	if len(users) > 0 {
-		d.Users = &Userlist{
-			Server:  server,
-			Channel: channel,
-			Users:   users,
-		}
-	}
-
-	messages, hasMore, err := session.user.GetLastMessages(server, channel, 50)
-	if err == nil && len(messages) > 0 {
-		m := Messages{
-			Server:   server,
-			To:       channel,
-			Messages: messages,
-		}
-
-		if hasMore {
-			m.Next = messages[0].ID
-		}
-
-		d.Messages = &m
-	}
-}
-
-func getIndexData(r *http.Request, session *Session) *indexData {
+func getIndexData(r *http.Request, state *State) *indexData {
 	data := indexData{}
 
 	data.Defaults = connectDefaults{
@@ -73,12 +47,15 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 		ShowDetails: viper.GetBool("defaults.show_details"),
 	}
 
-	if session == nil {
+	if state == nil {
 		return &data
 	}
 
-	servers := session.user.GetServers()
-	connections := session.getConnectionStates()
+	servers, err := state.user.GetServers()
+	if err != nil {
+		return nil
+	}
+	connections := state.getConnectionStates()
 	for _, server := range servers {
 		server.Password = ""
 		server.Username = ""
@@ -90,7 +67,10 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 		})
 	}
 
-	channels := session.user.GetChannels()
+	channels, err := state.user.GetChannels()
+	if err != nil {
+		return nil
+	}
 	for i, channel := range channels {
 		channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
 	}
@@ -98,16 +78,42 @@ func getIndexData(r *http.Request, session *Session) *indexData {
 
 	server, channel := getTabFromPath(r.URL.EscapedPath())
 	if isInChannel(channels, server, channel) {
-		data.addUsersAndMessages(server, channel, session)
+		data.addUsersAndMessages(server, channel, state)
 		return &data
 	}
 
 	server, channel = parseTabCookie(r, r.URL.Path)
 	if isInChannel(channels, server, channel) {
-		data.addUsersAndMessages(server, channel, session)
+		data.addUsersAndMessages(server, channel, state)
 	}
 
 	return &data
+}
+
+func (d *indexData) addUsersAndMessages(server, channel string, state *State) {
+	users := channelStore.GetUsers(server, channel)
+	if len(users) > 0 {
+		d.Users = &Userlist{
+			Server:  server,
+			Channel: channel,
+			Users:   users,
+		}
+	}
+
+	messages, hasMore, err := state.user.GetLastMessages(server, channel, 50)
+	if err == nil && len(messages) > 0 {
+		m := Messages{
+			Server:   server,
+			To:       channel,
+			Messages: messages,
+		}
+
+		if hasMore {
+			m.Next = messages[0].ID
+		}
+
+		d.Messages = &m
+	}
 }
 
 func isInChannel(channels []storage.Channel, server, channel string) bool {

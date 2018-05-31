@@ -5,7 +5,7 @@ import (
 
 	"github.com/mailru/easyjson"
 
-	"github.com/khlieng/dispatch/irc"
+	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
 )
 

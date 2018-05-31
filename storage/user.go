@@ -1,67 +1,33 @@
 package storage
 
 import (
-	"bytes"
 	"crypto/tls"
 	"os"
-	"strconv"
 	"sync"
-
-	"github.com/blevesearch/bleve"
-	"github.com/boltdb/bolt"
+	"time"
 )
 
 type User struct {
 	ID       uint64
+	IDBytes  []byte
 	Username string
 
-	id           []byte
-	messageLog   *bolt.DB
-	messageIndex bleve.Index
+	store        Store
+	messageLog   MessageStore
+	messageIndex MessageSearchProvider
 	certificate  *tls.Certificate
 	lock         sync.Mutex
 }
 
-type Server struct {
-	Name     string `json:"name"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	TLS      bool   `json:"tls,omitempty"`
-	Password string `json:"password,omitempty"`
-	Nick     string `json:"nick"`
-	Username string `json:"username,omitempty"`
-	Realname string `json:"realname,omitempty"`
-}
+func NewUser(store Store) (*User, error) {
+	user := &User{store: store}
 
-type Channel struct {
-	Server string `json:"server"`
-	Name   string `json:"name"`
-	Topic  string `json:"topic,omitempty"`
-}
-
-func NewUser() (*User, error) {
-	user := &User{}
-
-	err := db.Batch(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketUsers)
-
-		user.ID, _ = b.NextSequence()
-		user.Username = strconv.FormatUint(user.ID, 10)
-
-		data, err := user.Marshal(nil)
-		if err != nil {
-			return err
-		}
-
-		user.id = idToBytes(user.ID)
-		return b.Put(user.id, data)
-	})
-
+	err := store.SaveUser(user)
 	if err != nil {
 		return nil, err
 	}
 
-	err = user.openMessageLog()
+	err = os.MkdirAll(Path.User(user.Username), 0700)
 	if err != nil {
 		return nil, err
 	}
@@ -69,179 +35,131 @@ func NewUser() (*User, error) {
 	return user, nil
 }
 
-func LoadUsers() []*User {
-	var users []*User
-
-	db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketUsers)
-
-		b.ForEach(func(k, _ []byte) error {
-			id := idFromBytes(k)
-			user := &User{
-				ID:       id,
-				Username: strconv.FormatUint(id, 10),
-				id:       make([]byte, 8),
-			}
-			copy(user.id, k)
-
-			users = append(users, user)
-
-			return nil
-		})
-
-		return nil
-	})
-
-	for _, user := range users {
-		user.openMessageLog()
-		user.loadCertificate()
+func LoadUsers(store Store) ([]User, error) {
+	users, err := store.GetUsers()
+	if err != nil {
+		return nil, err
 	}
 
-	return users
+	for i := range users {
+		users[i].store = store
+		users[i].loadCertificate()
+	}
+
+	return users, nil
 }
 
-func (u *User) GetServers() []Server {
-	var servers []Server
-
-	db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket(bucketServers).Cursor()
-
-		for k, v := c.Seek(u.id); bytes.HasPrefix(k, u.id); k, v = c.Next() {
-			server := Server{}
-			server.Unmarshal(v)
-			servers = append(servers, server)
-		}
-
-		return nil
-	})
-
-	return servers
+func (u *User) SetMessageStore(store MessageStore) {
+	u.messageLog = store
 }
 
-func (u *User) GetChannels() []Channel {
-	var channels []Channel
-
-	db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket(bucketChannels).Cursor()
-
-		for k, v := c.Seek(u.id); bytes.HasPrefix(k, u.id); k, v = c.Next() {
-			channel := Channel{}
-			channel.Unmarshal(v)
-			channels = append(channels, channel)
-		}
-
-		return nil
-	})
-
-	return channels
-}
-
-func (u *User) AddServer(server Server) {
-	db.Batch(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketServers)
-		data, _ := server.Marshal(nil)
-
-		b.Put(u.serverID(server.Host), data)
-
-		return nil
-	})
-}
-
-func (u *User) AddChannel(channel Channel) {
-	db.Batch(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketChannels)
-		data, _ := channel.Marshal(nil)
-
-		b.Put(u.channelID(channel.Server, channel.Name), data)
-
-		return nil
-	})
-}
-
-func (u *User) SetNick(nick, address string) {
-	db.Batch(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketServers)
-		id := u.serverID(address)
-
-		server := Server{}
-		v := b.Get(id)
-		if v != nil {
-			server.Unmarshal(v)
-			server.Nick = nick
-
-			data, _ := server.Marshal(nil)
-			b.Put(id, data)
-		}
-
-		return nil
-	})
-}
-
-func (u *User) SetServerName(name, address string) {
-	db.Batch(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketServers)
-		id := u.serverID(address)
-
-		server := Server{}
-		v := b.Get(id)
-		if v != nil {
-			server.Unmarshal(v)
-			server.Name = name
-
-			data, _ := server.Marshal(nil)
-			b.Put(id, data)
-		}
-
-		return nil
-	})
-}
-
-func (u *User) RemoveServer(address string) {
-	db.Batch(func(tx *bolt.Tx) error {
-		serverID := u.serverID(address)
-		tx.Bucket(bucketServers).Delete(serverID)
-
-		b := tx.Bucket(bucketChannels)
-		c := b.Cursor()
-
-		for k, _ := c.Seek(serverID); bytes.HasPrefix(k, serverID); k, _ = c.Next() {
-			b.Delete(k)
-		}
-
-		return nil
-	})
-}
-
-func (u *User) RemoveChannel(server, channel string) {
-	db.Batch(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketChannels)
-		id := u.channelID(server, channel)
-
-		b.Delete(id)
-
-		return nil
-	})
+func (u *User) SetMessageSearchProvider(search MessageSearchProvider) {
+	u.messageIndex = search
 }
 
 func (u *User) Remove() {
-	db.Batch(func(tx *bolt.Tx) error {
-		return tx.Bucket(bucketUsers).Delete(u.id)
-	})
-	u.closeMessageLog()
+	u.store.DeleteUser(u)
+	if u.messageLog != nil {
+		u.messageLog.Close()
+	}
+	if u.messageIndex != nil {
+		u.messageIndex.Close()
+	}
 	os.RemoveAll(Path.User(u.Username))
 }
 
-func (u *User) serverID(address string) []byte {
-	id := make([]byte, 8+len(address))
-	copy(id, u.id)
-	copy(id[8:], address)
-	return id
+type Server struct {
+	Name     string
+	Host     string
+	Port     string
+	TLS      bool
+	Password string
+	Nick     string
+	Username string
+	Realname string
 }
 
-func (u *User) channelID(server, channel string) []byte {
-	id := make([]byte, 8+len(server)+1+len(channel))
-	copy(id, u.id)
-	copy(id[8:], server)
-	copy(id[8+len(server)+1:], channel)
-	return id
+func (u *User) GetServers() ([]Server, error) {
+	return u.store.GetServers(u)
+}
+
+func (u *User) AddServer(server *Server) error {
+	return u.store.AddServer(u, server)
+}
+
+func (u *User) RemoveServer(address string) error {
+	return u.store.RemoveServer(u, address)
+}
+
+func (u *User) SetNick(nick, address string) error {
+	return u.store.SetNick(u, nick, address)
+}
+
+func (u *User) SetServerName(name, address string) error {
+	return u.store.SetServerName(u, name, address)
+}
+
+type Channel struct {
+	Server string
+	Name   string
+	Topic  string
+}
+
+func (u *User) GetChannels() ([]Channel, error) {
+	return u.store.GetChannels(u)
+}
+
+func (u *User) AddChannel(channel *Channel) error {
+	return u.store.AddChannel(u, channel)
+}
+
+func (u *User) RemoveChannel(server, channel string) error {
+	return u.store.RemoveChannel(u, server, channel)
+}
+
+type Message struct {
+	ID      string `json:"-" bleve:"-"`
+	Server  string `json:"-" bleve:"server"`
+	From    string `bleve:"-"`
+	To      string `json:"-" bleve:"to"`
+	Content string `bleve:"content"`
+	Time    int64  `bleve:"-"`
+}
+
+func (m Message) Type() string {
+	return "message"
+}
+
+func (u *User) LogMessage(id, server, from, to, content string) error {
+	message := &Message{
+		ID:      id,
+		Server:  server,
+		From:    from,
+		To:      to,
+		Content: content,
+		Time:    time.Now().Unix(),
+	}
+
+	err := u.messageLog.LogMessage(message)
+	if err != nil {
+		return err
+	}
+	return u.messageIndex.Index(id, message)
+}
+
+func (u *User) GetMessages(server, channel string, count int, fromID string) ([]Message, bool, error) {
+	return u.messageLog.GetMessages(server, channel, count, fromID)
+}
+
+func (u *User) GetLastMessages(server, channel string, count int) ([]Message, bool, error) {
+	return u.GetMessages(server, channel, count, "")
+}
+
+func (u *User) SearchMessages(server, channel, q string) ([]Message, error) {
+	ids, err := u.messageIndex.SearchMessages(server, channel, q)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.messageLog.GetMessagesByID(server, channel, ids)
 }

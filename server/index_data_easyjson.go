@@ -344,7 +344,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer1(in *jlexer.Lexer, out
 			out.Password = bool(in.Bool())
 		case "ssl":
 			out.SSL = bool(in.Bool())
-		case "readonly":
+		case "readOnly":
 			out.ReadOnly = bool(in.Bool())
 		case "showDetails":
 			out.ShowDetails = bool(in.Bool())
@@ -432,7 +432,7 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer1(out *jwriter.Writer, 
 		out.Bool(bool(in.SSL))
 	}
 	if in.ReadOnly {
-		const prefix string = ",\"readonly\":"
+		const prefix string = ",\"readOnly\":"
 		if first {
 			first = false
 			out.RawString(prefix[1:])

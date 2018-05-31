@@ -62,7 +62,7 @@ var (
 	cspEnabled bool
 )
 
-func initFileServer() {
+func (d *Dispatch) initFileServer() {
 	if !viper.GetBool("dev") {
 		data, err := assets.Asset(files[0].Asset)
 		if err != nil {
@@ -154,24 +154,24 @@ func initFileServer() {
 	}
 }
 
-func serveFiles(w http.ResponseWriter, r *http.Request) {
+func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
-		serveIndex(w, r)
+		d.serveIndex(w, r)
 		return
 	}
 
 	for _, file := range files {
 		if strings.HasSuffix(r.URL.Path, file.Path) {
-			serveFile(w, r, file)
+			d.serveFile(w, r, file)
 			return
 		}
 	}
 
-	serveIndex(w, r)
+	d.serveIndex(w, r)
 }
 
-func serveIndex(w http.ResponseWriter, r *http.Request) {
-	session := handleAuth(w, r, false)
+func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
+	state := d.handleAuth(w, r, false)
 
 	if cspEnabled {
 		var connectSrc string
@@ -228,10 +228,10 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Encoding", "gzip")
 
 		gzw := gzip.NewWriter(w)
-		IndexTemplate(gzw, getIndexData(r, session), files[1].Path, files[0].Path)
+		IndexTemplate(gzw, getIndexData(r, state), files[1].Path, files[0].Path)
 		gzw.Close()
 	} else {
-		IndexTemplate(w, getIndexData(r, session), files[1].Path, files[0].Path)
+		IndexTemplate(w, getIndexData(r, state), files[1].Path, files[0].Path)
 	}
 }
 
@@ -246,7 +246,7 @@ func setPushCookie(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func serveFile(w http.ResponseWriter, r *http.Request, file *File) {
+func (d *Dispatch) serveFile(w http.ResponseWriter, r *http.Request, file *File) {
 	info, err := assets.AssetInfo(file.Asset)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)

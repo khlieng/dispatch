@@ -1,53 +1,46 @@
 package storage
 
 import (
-	"encoding/binary"
-	"log"
-
-	"github.com/boltdb/bolt"
+	"github.com/khlieng/dispatch/pkg/session"
 )
 
-var (
-	Path directory
-
-	db *bolt.DB
-
-	bucketUsers    = []byte("Users")
-	bucketServers  = []byte("Servers")
-	bucketChannels = []byte("Channels")
-	bucketMessages = []byte("Messages")
-)
+var Path directory
 
 func Initialize(dir string) {
 	Path = directory(dir)
 }
 
-func Open() {
-	var err error
-	db, err = bolt.Open(Path.Database(), 0600, nil)
-	if err != nil {
-		log.Fatal("Could not open database:", err)
-	}
+type Store interface {
+	GetUsers() ([]User, error)
+	SaveUser(*User) error
+	DeleteUser(*User) error
 
-	db.Update(func(tx *bolt.Tx) error {
-		tx.CreateBucketIfNotExists(bucketUsers)
-		tx.CreateBucketIfNotExists(bucketServers)
-		tx.CreateBucketIfNotExists(bucketChannels)
+	GetServers(*User) ([]Server, error)
+	AddServer(*User, *Server) error
+	RemoveServer(*User, string) error
+	SetNick(*User, string, string) error
+	SetServerName(*User, string, string) error
 
-		return nil
-	})
+	GetChannels(*User) ([]Channel, error)
+	AddChannel(*User, *Channel) error
+	RemoveChannel(*User, string, string) error
 }
 
-func Close() {
-	db.Close()
+type SessionStore interface {
+	GetSessions() ([]session.Session, error)
+	SaveSession(session *session.Session) error
+	DeleteSession(key string) error
 }
 
-func idToBytes(i uint64) []byte {
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, i)
-	return b
+type MessageStore interface {
+	LogMessage(message *Message) error
+	GetMessages(server, channel string, count int, fromID string) ([]Message, bool, error)
+	GetMessagesByID(server, channel string, ids []string) ([]Message, error)
+	Close()
 }
 
-func idFromBytes(b []byte) uint64 {
-	return binary.BigEndian.Uint64(b)
+type MessageSearchProvider interface {
+	SearchMessages(server, channel, q string) ([]string, error)
+	Index(id string, message *Message) error
+	Close()
 }

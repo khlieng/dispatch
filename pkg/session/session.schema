@@ -1,0 +1,5 @@
+struct Session {
+  UserID    uint64
+  key       string
+  createdAt int64
+}

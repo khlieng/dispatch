@@ -12,36 +12,99 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
 
-	"github.com/khlieng/dispatch/letsencrypt"
+	"github.com/khlieng/dispatch/pkg/letsencrypt"
+	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
 )
 
-var (
-	sessions     *sessionStore
-	channelStore *storage.ChannelStore
+var channelStore = storage.NewChannelStore()
 
-	upgrader = websocket.Upgrader{
+type Dispatch struct {
+	Store        storage.Store
+	SessionStore storage.SessionStore
+
+	GetMessageStore          func(*storage.User) (storage.MessageStore, error)
+	GetMessageSearchProvider func(*storage.User) (storage.MessageSearchProvider, error)
+
+	upgrader websocket.Upgrader
+	states   *stateStore
+}
+
+func (d *Dispatch) Run() {
+	d.upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
-)
-
-func Run() {
-	sessions = newSessionStore()
-	channelStore = storage.NewChannelStore()
 
 	if viper.GetBool("dev") {
-		upgrader.CheckOrigin = func(r *http.Request) bool {
+		d.upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
 	}
 
-	reconnectIRC()
-	initFileServer()
-	startHTTP()
+	session.CookieName = "dispatch"
+
+	d.states = newStateStore(d.SessionStore)
+
+	d.loadUsers()
+	d.initFileServer()
+	d.startHTTP()
 }
 
-func startHTTP() {
+func (d *Dispatch) loadUsers() {
+	users, err := storage.LoadUsers(d.Store)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Loading %d user(s)", len(users))
+
+	for i := range users {
+		go d.loadUser(&users[i])
+	}
+}
+
+func (d *Dispatch) loadUser(user *storage.User) {
+	messageStore, err := d.GetMessageStore(user)
+	if err != nil {
+		log.Fatal(err)
+	}
+	user.SetMessageStore(messageStore)
+
+	search, err := d.GetMessageSearchProvider(user)
+	if err != nil {
+		log.Fatal(err)
+	}
+	user.SetMessageSearchProvider(search)
+
+	state := NewState(user, d)
+	d.states.set(state)
+	go state.run()
+
+	channels, err := user.GetChannels()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	servers, err := user.GetServers()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, server := range servers {
+		i := connectIRC(&server, state)
+
+		var joining []string
+		for _, channel := range channels {
+			if channel.Server == server.Host {
+				joining = append(joining, channel.Name)
+			}
+		}
+		i.Join(joining...)
+	}
+}
+
+func (d *Dispatch) startHTTP() {
 	port := viper.GetString("port")
 
 	if viper.GetBool("https.enabled") {
@@ -55,7 +118,7 @@ func startHTTP() {
 
 		server := &http.Server{
 			Addr:    ":" + portHTTPS,
-			Handler: http.HandlerFunc(serve),
+			Handler: http.HandlerFunc(d.serve),
 		}
 
 		if certExists() {
@@ -71,13 +134,13 @@ func startHTTP() {
 				go http.ListenAndServe(":80", http.HandlerFunc(letsEncryptProxy))
 			}
 
-			letsEncrypt, err := letsencrypt.Run(dir, domain, email, ":"+lePort)
+			le, err := letsencrypt.Run(dir, domain, email, ":"+lePort)
 			if err != nil {
 				log.Fatal(err)
 			}
 
 			server.TLSConfig = &tls.Config{
-				GetCertificate: letsEncrypt.GetCertificate,
+				GetCertificate: le.GetCertificate,
 			}
 
 			log.Println("[HTTPS] Listening on port", portHTTPS)
@@ -92,11 +155,11 @@ func startHTTP() {
 			port = "1337"
 		}
 		log.Println("[HTTP] Listening on port", port)
-		log.Fatal(http.ListenAndServe(":"+port, http.HandlerFunc(serve)))
+		log.Fatal(http.ListenAndServe(":"+port, http.HandlerFunc(d.serve)))
 	}
 }
 
-func serve(w http.ResponseWriter, r *http.Request) {
+func (d *Dispatch) serve(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		fail(w, http.StatusNotFound)
 		return
@@ -108,28 +171,27 @@ func serve(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		session := handleAuth(w, r, true)
-
-		if session == nil {
-			log.Println("[Auth] No session")
+		state := d.handleAuth(w, r, true)
+		if state == nil {
+			log.Println("[Auth] No state")
 			fail(w, http.StatusInternalServerError)
 			return
 		}
 
-		upgradeWS(w, r, session)
+		d.upgradeWS(w, r, state)
 	} else {
-		serveFiles(w, r)
+		d.serveFiles(w, r)
 	}
 }
 
-func upgradeWS(w http.ResponseWriter, r *http.Request, session *Session) {
-	conn, err := upgrader.Upgrade(w, r, w.Header())
+func (d *Dispatch) upgradeWS(w http.ResponseWriter, r *http.Request, state *State) {
+	conn, err := d.upgrader.Upgrade(w, r, w.Header())
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	newWSHandler(conn, session, r).run()
+	newWSHandler(conn, state, r).run()
 }
 
 func createHTTPSRedirect(portHTTPS string) http.HandlerFunc {

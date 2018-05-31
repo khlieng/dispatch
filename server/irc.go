@@ -2,61 +2,35 @@ package server
 
 import (
 	"crypto/tls"
-	"log"
 	"net"
 
-	"github.com/khlieng/dispatch/irc"
-	"github.com/khlieng/dispatch/storage"
 	"github.com/spf13/viper"
+
+	"github.com/khlieng/dispatch/pkg/irc"
+	"github.com/khlieng/dispatch/storage"
 )
 
-func createNickInUseHandler(i *irc.Client, session *Session) func(string) string {
+func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
 	return func(nick string) string {
 		newNick := nick + "_"
 
 		if newNick == i.GetNick() {
-			session.sendJSON("nick_fail", NickFail{
+			state.sendJSON("nick_fail", NickFail{
 				Server: i.Host,
 			})
 		}
 
-		session.printError("Nickname", nick, "is already in use, using", newNick, "instead")
+		state.printError("Nickname", nick, "is already in use, using", newNick, "instead")
 
 		return newNick
 	}
 }
 
-func reconnectIRC() {
-	for _, user := range storage.LoadUsers() {
-		session, err := NewSession(user)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		sessions.set(session)
-		go session.run()
-
-		channels := user.GetChannels()
-
-		for _, server := range user.GetServers() {
-			i := connectIRC(server, session)
-
-			var joining []string
-			for _, channel := range channels {
-				if channel.Server == server.Host {
-					joining = append(joining, channel.Name)
-				}
-			}
-			i.Join(joining...)
-		}
-	}
-}
-
-func connectIRC(server storage.Server, session *Session) *irc.Client {
+func connectIRC(server *storage.Server, state *State) *irc.Client {
 	i := irc.NewClient(server.Nick, server.Username)
 	i.TLS = server.TLS
 	i.Realname = server.Realname
-	i.HandleNickInUse = createNickInUseHandler(i, session)
+	i.HandleNickInUse = createNickInUseHandler(i, state)
 
 	address := server.Host
 	if server.Port != "" {
@@ -83,14 +57,14 @@ func connectIRC(server storage.Server, session *Session) *irc.Client {
 			InsecureSkipVerify: !viper.GetBool("verify_certificates"),
 		}
 
-		if cert := session.user.GetCertificate(); cert != nil {
+		if cert := state.user.GetCertificate(); cert != nil {
 			i.TLSConfig.Certificates = []tls.Certificate{*cert}
 		}
 	}
 
-	session.setIRC(server.Host, i)
+	state.setIRC(server.Host, i)
 	i.Connect(address)
-	go newIRCHandler(i, session).run()
+	go newIRCHandler(i, state).run()
 
 	return i
 }

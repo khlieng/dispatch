@@ -99,6 +99,7 @@ type SegmentBase struct {
 	docValueOffset    uint64
 	dictLocs          []uint64
 	fieldDvReaders    map[uint16]*docValueReader // naive chunk cache per field
+	fieldDvNames      []string                   // field names cached in fieldDvReaders
 	size              uint64
 }
 
@@ -265,10 +266,6 @@ func (sb *SegmentBase) dictionary(field string) (rv *Dictionary, err error) {
 				if err != nil {
 					return nil, fmt.Errorf("dictionary field %s vellum err: %v", field, err)
 				}
-				rv.fstReader, err = rv.fst.Reader()
-				if err != nil {
-					return nil, fmt.Errorf("dictionary field %s vellum Reader err: %v", field, err)
-				}
 			}
 		}
 	}
@@ -294,10 +291,15 @@ var visitDocumentCtxPool = sync.Pool{
 // VisitDocument invokes the DocFieldValueVistor for each stored field
 // for the specified doc number
 func (s *SegmentBase) VisitDocument(num uint64, visitor segment.DocumentFieldValueVisitor) error {
+	vdc := visitDocumentCtxPool.Get().(*visitDocumentCtx)
+	defer visitDocumentCtxPool.Put(vdc)
+	return s.visitDocument(vdc, num, visitor)
+}
+
+func (s *SegmentBase) visitDocument(vdc *visitDocumentCtx, num uint64,
+	visitor segment.DocumentFieldValueVisitor) error {
 	// first make sure this is a valid number in this segment
 	if num < s.numDocs {
-		vdc := visitDocumentCtxPool.Get().(*visitDocumentCtx)
-
 		meta, compressed := s.getDocStoredMetaAndCompressed(num)
 
 		vdc.reader.Reset(meta)
@@ -367,7 +369,6 @@ func (s *SegmentBase) VisitDocument(num uint64, visitor segment.DocumentFieldVal
 		}
 
 		vdc.buf = uncompressed
-		visitDocumentCtxPool.Put(vdc)
 	}
 	return nil
 }
@@ -528,7 +529,12 @@ func (s *SegmentBase) loadDvReaders() error {
 		}
 		read += uint64(n)
 
-		s.fieldDvReaders[uint16(fieldID)], _ = s.loadFieldDocValueReader(field, fieldLocStart, fieldLocEnd)
+		fieldDvReader, _ := s.loadFieldDocValueReader(field, fieldLocStart, fieldLocEnd)
+		if fieldDvReader != nil {
+			s.fieldDvReaders[uint16(fieldID)] = fieldDvReader
+			s.fieldDvNames = append(s.fieldDvNames, field)
+		}
 	}
+
 	return nil
 }

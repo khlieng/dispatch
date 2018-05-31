@@ -11,16 +11,16 @@ import (
 
 type wsHandler struct {
 	ws       *wsConn
-	session  *Session
+	state    *State
 	addr     string
 	handlers map[string]func([]byte)
 }
 
-func newWSHandler(conn *websocket.Conn, session *Session, r *http.Request) *wsHandler {
+func newWSHandler(conn *websocket.Conn, state *State, r *http.Request) *wsHandler {
 	h := &wsHandler{
-		ws:      newWSConn(conn),
-		session: session,
-		addr:    conn.RemoteAddr().String(),
+		ws:    newWSConn(conn),
+		state: state,
+		addr:  conn.RemoteAddr().String(),
 	}
 	h.init(r)
 	h.initHandlers()
@@ -35,8 +35,8 @@ func (h *wsHandler) run() {
 	for {
 		req, ok := <-h.ws.in
 		if !ok {
-			if h.session != nil {
-				h.session.deleteWS(h.addr)
+			if h.state != nil {
+				h.state.deleteWS(h.addr)
 			}
 			return
 		}
@@ -52,13 +52,16 @@ func (h *wsHandler) dispatchRequest(req WSRequest) {
 }
 
 func (h *wsHandler) init(r *http.Request) {
-	h.session.setWS(h.addr, h.ws)
+	h.state.setWS(h.addr, h.ws)
 
-	log.Println(h.addr, "[Session] User ID:", h.session.user.ID, "|",
-		h.session.numIRC(), "IRC connections |",
-		h.session.numWS(), "WebSocket connections")
+	log.Println(h.addr, "[State] User ID:", h.state.user.ID, "|",
+		h.state.numIRC(), "IRC connections |",
+		h.state.numWS(), "WebSocket connections")
 
-	channels := h.session.user.GetChannels()
+	channels, err := h.state.user.GetChannels()
+	if err != nil {
+		log.Println(err)
+	}
 	path := r.URL.EscapedPath()[3:]
 	pathServer, pathChannel := getTabFromPath(path)
 	cookieServer, cookieChannel := parseTabCookie(r, path)
@@ -66,16 +69,17 @@ func (h *wsHandler) init(r *http.Request) {
 	for _, channel := range channels {
 		if (channel.Server == pathServer && channel.Name == pathChannel) ||
 			(channel.Server == cookieServer && channel.Name == cookieChannel) {
+			// Userlist and messages for this channel gets embedded in the index page
 			continue
 		}
 
-		h.session.sendJSON("users", Userlist{
+		h.state.sendJSON("users", Userlist{
 			Server:  channel.Server,
 			Channel: channel.Name,
 			Users:   channelStore.GetUsers(channel.Server, channel.Name),
 		})
 
-		h.session.sendLastMessages(channel.Server, channel.Name, 50)
+		h.state.sendLastMessages(channel.Server, channel.Name, 50)
 	}
 }
 
@@ -83,12 +87,12 @@ func (h *wsHandler) connect(b []byte) {
 	var data Server
 	data.UnmarshalJSON(b)
 
-	if _, ok := h.session.getIRC(data.Host); !ok {
+	if _, ok := h.state.getIRC(data.Host); !ok {
 		log.Println(h.addr, "[IRC] Add server", data.Host)
 
-		connectIRC(data.Server, h.session)
+		connectIRC(&data.Server, h.state)
 
-		go h.session.user.AddServer(data.Server)
+		go h.state.user.AddServer(&data.Server)
 	} else {
 		log.Println(h.addr, "[IRC]", data.Host, "already added")
 	}
@@ -98,7 +102,7 @@ func (h *wsHandler) reconnect(b []byte) {
 	var data ReconnectSettings
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok && !i.Connected() {
+	if i, ok := h.state.getIRC(data.Server); ok && !i.Connected() {
 		if i.TLS {
 			i.TLSConfig.InsecureSkipVerify = data.SkipVerify
 		}
@@ -110,7 +114,7 @@ func (h *wsHandler) join(b []byte) {
 	var data Join
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Join(data.Channels...)
 	}
 }
@@ -119,7 +123,7 @@ func (h *wsHandler) part(b []byte) {
 	var data Part
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Part(data.Channels...)
 	}
 }
@@ -129,22 +133,22 @@ func (h *wsHandler) quit(b []byte) {
 	data.UnmarshalJSON(b)
 
 	log.Println(h.addr, "[IRC] Remove server", data.Server)
-	if i, ok := h.session.getIRC(data.Server); ok {
-		h.session.deleteIRC(data.Server)
+	if i, ok := h.state.getIRC(data.Server); ok {
+		h.state.deleteIRC(data.Server)
 		i.Quit()
 	}
 
-	go h.session.user.RemoveServer(data.Server)
+	go h.state.user.RemoveServer(data.Server)
 }
 
 func (h *wsHandler) message(b []byte) {
 	var data Message
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Privmsg(data.To, data.Content)
 
-		go h.session.user.LogMessage(betterguid.New(),
+		go h.state.user.LogMessage(betterguid.New(),
 			data.Server, i.GetNick(), data.To, data.Content)
 	}
 }
@@ -153,7 +157,7 @@ func (h *wsHandler) nick(b []byte) {
 	var data Nick
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Nick(data.New)
 	}
 }
@@ -162,7 +166,7 @@ func (h *wsHandler) topic(b []byte) {
 	var data Topic
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Topic(data.Channel, data.Topic)
 	}
 }
@@ -171,7 +175,7 @@ func (h *wsHandler) invite(b []byte) {
 	var data Invite
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Invite(data.User, data.Channel)
 	}
 }
@@ -180,7 +184,7 @@ func (h *wsHandler) kick(b []byte) {
 	var data Invite
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Kick(data.Channel, data.User)
 	}
 }
@@ -189,7 +193,7 @@ func (h *wsHandler) whois(b []byte) {
 	var data Whois
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Whois(data.User)
 	}
 }
@@ -198,7 +202,7 @@ func (h *wsHandler) away(b []byte) {
 	var data Away
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Away(data.Message)
 	}
 }
@@ -207,7 +211,7 @@ func (h *wsHandler) raw(b []byte) {
 	var data Raw
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.session.getIRC(data.Server); ok {
+	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Write(data.Message)
 	}
 }
@@ -217,13 +221,13 @@ func (h *wsHandler) search(b []byte) {
 		var data SearchRequest
 		data.UnmarshalJSON(b)
 
-		results, err := h.session.user.SearchMessages(data.Server, data.Channel, data.Phrase)
+		results, err := h.state.user.SearchMessages(data.Server, data.Channel, data.Phrase)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		h.session.sendJSON("search", SearchResult{
+		h.state.sendJSON("search", SearchResult{
 			Server:  data.Server,
 			Channel: data.Channel,
 			Results: results,
@@ -235,20 +239,20 @@ func (h *wsHandler) cert(b []byte) {
 	var data ClientCert
 	data.UnmarshalJSON(b)
 
-	err := h.session.user.SetCertificate(data.Cert, data.Key)
+	err := h.state.user.SetCertificate(data.Cert, data.Key)
 	if err != nil {
-		h.session.sendJSON("cert_fail", Error{Message: err.Error()})
+		h.state.sendJSON("cert_fail", Error{Message: err.Error()})
 		return
 	}
 
-	h.session.sendJSON("cert_success", nil)
+	h.state.sendJSON("cert_success", nil)
 }
 
 func (h *wsHandler) fetchMessages(b []byte) {
 	var data FetchMessages
 	data.UnmarshalJSON(b)
 
-	h.session.sendMessages(data.Server, data.Channel, 200, data.Next)
+	h.state.sendMessages(data.Server, data.Channel, 200, data.Next)
 }
 
 func (h *wsHandler) setServerName(b []byte) {
@@ -256,7 +260,7 @@ func (h *wsHandler) setServerName(b []byte) {
 	data.UnmarshalJSON(b)
 
 	if isValidServerName(data.Name) {
-		h.session.user.SetServerName(data.Name, data.Server)
+		h.state.user.SetServerName(data.Name, data.Server)
 	}
 }
 

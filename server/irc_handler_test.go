@@ -8,8 +8,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/khlieng/dispatch/irc"
+	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
+	"github.com/khlieng/dispatch/storage/boltdb"
 )
 
 var user *storage.User
@@ -21,11 +22,18 @@ func TestMain(m *testing.M) {
 	}
 
 	storage.Initialize(tempdir)
-	storage.Open()
-	user, err = storage.NewUser()
+
+	db, err := boltdb.New(storage.Path.Database())
 	if err != nil {
-		os.Exit(1)
+		log.Fatal(err)
 	}
+
+	user, err = storage.NewUser(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+	user.SetMessageStore(db)
+
 	channelStore = storage.NewChannelStore()
 
 	code := m.Run()
@@ -41,7 +49,7 @@ func dispatchMessage(msg *irc.Message) WSResponse {
 func dispatchMessageMulti(msg *irc.Message) chan WSResponse {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s, _ := NewSession(user)
+	s := NewState(user, nil)
 
 	newIRCHandler(c, s).dispatchMessage(msg)
 
@@ -187,7 +195,7 @@ func TestHandleIRCWelcome(t *testing.T) {
 func TestHandleIRCWhois(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s, _ := NewSession(nil)
+	s := NewState(nil, nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
@@ -255,7 +263,7 @@ func TestHandleIRCNoTopic(t *testing.T) {
 func TestHandleIRCNames(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s, _ := NewSession(nil)
+	s := NewState(nil, nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
@@ -281,7 +289,7 @@ func TestHandleIRCNames(t *testing.T) {
 func TestHandleIRCMotd(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s, _ := NewSession(nil)
+	s := NewState(nil, nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
@@ -308,7 +316,7 @@ func TestHandleIRCMotd(t *testing.T) {
 func TestHandleIRCBadNick(t *testing.T) {
 	c := irc.NewClient("nick", "user")
 	c.Host = "host.com"
-	s, _ := NewSession(nil)
+	s := NewState(nil, nil)
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{

@@ -8,7 +8,7 @@ import (
 
 	"github.com/kjk/betterguid"
 
-	"github.com/khlieng/dispatch/irc"
+	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
 )
 
@@ -17,8 +17,8 @@ var excludedErrors = []string{
 }
 
 type ircHandler struct {
-	client  *irc.Client
-	session *Session
+	client *irc.Client
+	state  *State
 
 	whois       WhoisReply
 	userBuffers map[string][]string
@@ -27,10 +27,10 @@ type ircHandler struct {
 	handlers map[string]func(*irc.Message)
 }
 
-func newIRCHandler(client *irc.Client, session *Session) *ircHandler {
+func newIRCHandler(client *irc.Client, state *State) *ircHandler {
 	i := &ircHandler{
 		client:      client,
-		session:     session,
+		state:       state,
 		userBuffers: make(map[string][]string),
 	}
 	i.initHandlers()
@@ -43,15 +43,15 @@ func (i *ircHandler) run() {
 		select {
 		case msg, ok := <-i.client.Messages:
 			if !ok {
-				i.session.deleteIRC(i.client.Host)
+				i.state.deleteIRC(i.client.Host)
 				return
 			}
 
 			i.dispatchMessage(msg)
 
 		case state := <-i.client.ConnectionChanged:
-			i.session.sendJSON("connection_update", newConnectionUpdate(i.client.Host, state))
-			i.session.setConnectionState(i.client.Host, state)
+			i.state.sendJSON("connection_update", newConnectionUpdate(i.client.Host, state))
+			i.state.setConnectionState(i.client.Host, state)
 
 			if state.Error != nil && (lastConnErr == nil ||
 				state.Error.Error() != lastConnErr.Error()) {
@@ -66,7 +66,7 @@ func (i *ircHandler) run() {
 
 func (i *ircHandler) dispatchMessage(msg *irc.Message) {
 	if msg.Command[0] == '4' && !isExcludedError(msg.Command) {
-		i.session.printError(formatIRCError(msg))
+		i.state.printError(formatIRCError(msg))
 	}
 
 	if handler, ok := i.handlers[msg.Command]; ok {
@@ -75,7 +75,7 @@ func (i *ircHandler) dispatchMessage(msg *irc.Message) {
 }
 
 func (i *ircHandler) nick(msg *irc.Message) {
-	i.session.sendJSON("nick", Nick{
+	i.state.sendJSON("nick", Nick{
 		Server: i.client.Host,
 		Old:    msg.Nick,
 		New:    msg.LastParam(),
@@ -84,12 +84,12 @@ func (i *ircHandler) nick(msg *irc.Message) {
 	channelStore.RenameUser(msg.Nick, msg.LastParam(), i.client.Host)
 
 	if msg.LastParam() == i.client.GetNick() {
-		go i.session.user.SetNick(msg.LastParam(), i.client.Host)
+		go i.state.user.SetNick(msg.LastParam(), i.client.Host)
 	}
 }
 
 func (i *ircHandler) join(msg *irc.Message) {
-	i.session.sendJSON("join", Join{
+	i.state.sendJSON("join", Join{
 		Server:   i.client.Host,
 		User:     msg.Nick,
 		Channels: msg.Params,
@@ -102,9 +102,9 @@ func (i *ircHandler) join(msg *irc.Message) {
 		// Incase no topic is set and theres a cached one that needs to be cleared
 		i.client.Topic(channel)
 
-		i.session.sendLastMessages(i.client.Host, channel, 50)
+		i.state.sendLastMessages(i.client.Host, channel, 50)
 
-		go i.session.user.AddChannel(storage.Channel{
+		go i.state.user.AddChannel(&storage.Channel{
 			Server: i.client.Host,
 			Name:   channel,
 		})
@@ -122,12 +122,12 @@ func (i *ircHandler) part(msg *irc.Message) {
 		part.Reason = msg.Params[1]
 	}
 
-	i.session.sendJSON("part", part)
+	i.state.sendJSON("part", part)
 
 	channelStore.RemoveUser(msg.Nick, i.client.Host, part.Channel)
 
 	if msg.Nick == i.client.GetNick() {
-		go i.session.user.RemoveChannel(i.client.Host, part.Channel)
+		go i.state.user.RemoveChannel(i.client.Host, part.Channel)
 	}
 }
 
@@ -139,7 +139,7 @@ func (i *ircHandler) mode(msg *irc.Message) {
 		mode.Channel = target
 		mode.User = msg.Params[2]
 
-		i.session.sendJSON("mode", mode)
+		i.state.sendJSON("mode", mode)
 
 		channelStore.SetMode(i.client.Host, target, msg.Params[2], mode.Add, mode.Remove)
 	}
@@ -154,20 +154,20 @@ func (i *ircHandler) message(msg *irc.Message) {
 	}
 
 	if msg.Params[0] == i.client.GetNick() {
-		i.session.sendJSON("pm", message)
+		i.state.sendJSON("pm", message)
 	} else {
 		message.To = msg.Params[0]
-		i.session.sendJSON("message", message)
+		i.state.sendJSON("message", message)
 	}
 
 	if msg.Params[0] != "*" {
-		go i.session.user.LogMessage(message.ID,
+		go i.state.user.LogMessage(message.ID,
 			i.client.Host, msg.Nick, msg.Params[0], msg.LastParam())
 	}
 }
 
 func (i *ircHandler) quit(msg *irc.Message) {
-	i.session.sendJSON("quit", Quit{
+	i.state.sendJSON("quit", Quit{
 		Server: i.client.Host,
 		User:   msg.Nick,
 		Reason: msg.LastParam(),
@@ -178,15 +178,15 @@ func (i *ircHandler) quit(msg *irc.Message) {
 
 func (i *ircHandler) info(msg *irc.Message) {
 	if msg.Command == irc.ReplyWelcome {
-		i.session.sendJSON("nick", Nick{
+		i.state.sendJSON("nick", Nick{
 			Server: i.client.Host,
 			New:    msg.Params[0],
 		})
 
-		go i.session.user.SetNick(msg.Params[0], i.client.Host)
+		go i.state.user.SetNick(msg.Params[0], i.client.Host)
 	}
 
-	i.session.sendJSON("pm", Message{
+	i.state.sendJSON("pm", Message{
 		Server:  i.client.Host,
 		From:    msg.Nick,
 		Content: strings.Join(msg.Params[1:], " "),
@@ -210,7 +210,7 @@ func (i *ircHandler) whoisChannels(msg *irc.Message) {
 
 func (i *ircHandler) whoisEnd(msg *irc.Message) {
 	if i.whois.Nick != "" {
-		i.session.sendJSON("whois", i.whois)
+		i.state.sendJSON("whois", i.whois)
 	}
 	i.whois = WhoisReply{}
 }
@@ -226,7 +226,7 @@ func (i *ircHandler) topic(msg *irc.Message) {
 		channel = msg.Params[1]
 	}
 
-	i.session.sendJSON("topic", Topic{
+	i.state.sendJSON("topic", Topic{
 		Server:  i.client.Host,
 		Channel: channel,
 		Topic:   msg.LastParam(),
@@ -239,7 +239,7 @@ func (i *ircHandler) topic(msg *irc.Message) {
 func (i *ircHandler) noTopic(msg *irc.Message) {
 	channel := msg.Params[1]
 
-	i.session.sendJSON("topic", Topic{
+	i.state.sendJSON("topic", Topic{
 		Server:  i.client.Host,
 		Channel: channel,
 	})
@@ -257,7 +257,7 @@ func (i *ircHandler) namesEnd(msg *irc.Message) {
 	channel := msg.Params[1]
 	users := i.userBuffers[channel]
 
-	i.session.sendJSON("users", Userlist{
+	i.state.sendJSON("users", Userlist{
 		Server:  i.client.Host,
 		Channel: channel,
 		Users:   users,
@@ -277,18 +277,18 @@ func (i *ircHandler) motd(msg *irc.Message) {
 }
 
 func (i *ircHandler) motdEnd(msg *irc.Message) {
-	i.session.sendJSON("motd", i.motdBuffer)
+	i.state.sendJSON("motd", i.motdBuffer)
 	i.motdBuffer = MOTD{}
 }
 
 func (i *ircHandler) badNick(msg *irc.Message) {
-	i.session.sendJSON("nick_fail", NickFail{
+	i.state.sendJSON("nick_fail", NickFail{
 		Server: i.client.Host,
 	})
 }
 
 func (i *ircHandler) error(msg *irc.Message) {
-	i.session.printError(msg.LastParam())
+	i.state.printError(msg.LastParam())
 }
 
 func (i *ircHandler) initHandlers() {
@@ -327,7 +327,7 @@ func (i *ircHandler) initHandlers() {
 
 func (i *ircHandler) log(v ...interface{}) {
 	s := fmt.Sprintln(v...)
-	log.Println("[IRC]", i.session.user.ID, i.client.Host, s[:len(s)-1])
+	log.Println("[IRC]", i.state.user.ID, i.client.Host, s[:len(s)-1])
 }
 
 func parseMode(mode string) *Mode {
