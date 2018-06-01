@@ -90,9 +90,9 @@ func (h *wsHandler) connect(b []byte) {
 	if _, ok := h.state.getIRC(data.Host); !ok {
 		log.Println(h.addr, "[IRC] Add server", data.Host)
 
-		connectIRC(&data.Server, h.state)
+		connectIRC(data.Server, h.state)
 
-		go h.state.user.AddServer(&data.Server)
+		go h.state.user.AddServer(data.Server)
 	} else {
 		log.Println(h.addr, "[IRC]", data.Host, "already added")
 	}

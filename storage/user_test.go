@@ -27,29 +27,29 @@ func TestUser(t *testing.T) {
 	user, err := storage.NewUser(db)
 	assert.Nil(t, err)
 
-	srv := storage.Server{
+	srv := &storage.Server{
 		Name: "Freenode",
 		Host: "irc.freenode.net",
 		Nick: "test",
 	}
-	chan1 := storage.Channel{
+	chan1 := &storage.Channel{
 		Server: srv.Host,
 		Name:   "#test",
 	}
-	chan2 := storage.Channel{
+	chan2 := &storage.Channel{
 		Server: srv.Host,
 		Name:   "#testing",
 	}
 
-	user.AddServer(&srv)
-	user.AddChannel(&chan1)
-	user.AddChannel(&chan2)
+	user.AddServer(srv)
+	user.AddChannel(chan1)
+	user.AddChannel(chan2)
 
 	users, err := storage.LoadUsers(db)
 	assert.Nil(t, err)
 	assert.Len(t, users, 1)
 
-	user = &users[0]
+	user = users[0]
 	assert.Equal(t, uint64(1), user.ID)
 
 	servers, err := user.GetServers()

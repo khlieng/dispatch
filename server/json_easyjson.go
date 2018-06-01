@@ -766,6 +766,7 @@ func easyjson42239ddeDecodeGithubComKhliengDispatchServer7(in *jlexer.Lexer, out
 		in.Skip()
 		return
 	}
+	out.Server = new(storage.Server)
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeString()

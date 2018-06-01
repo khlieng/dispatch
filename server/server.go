@@ -59,8 +59,8 @@ func (d *Dispatch) loadUsers() {
 
 	log.Printf("Loading %d user(s)", len(users))
 
-	for i := range users {
-		go d.loadUser(&users[i])
+	for _, user := range users {
+		go d.loadUser(user)
 	}
 }
 
@@ -92,7 +92,7 @@ func (d *Dispatch) loadUser(user *storage.User) {
 	}
 
 	for _, server := range servers {
-		i := connectIRC(&server, state)
+		i := connectIRC(server, state)
 
 		var joining []string
 		for _, channel := range channels {

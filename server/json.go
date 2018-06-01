@@ -20,7 +20,7 @@ type WSResponse struct {
 }
 
 type Server struct {
-	storage.Server
+	*storage.Server
 	Status ConnectionUpdate
 }
 

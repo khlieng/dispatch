@@ -74,16 +74,24 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 				in.Delim('[')
 				if out.Channels == nil {
 					if !in.IsDelim(']') {
-						out.Channels = make([]storage.Channel, 0, 1)
+						out.Channels = make([]*storage.Channel, 0, 8)
 					} else {
-						out.Channels = []storage.Channel{}
+						out.Channels = []*storage.Channel{}
 					}
 				} else {
 					out.Channels = (out.Channels)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v2 storage.Channel
-					easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in, &v2)
+					var v2 *storage.Channel
+					if in.IsNull() {
+						in.Skip()
+						v2 = nil
+					} else {
+						if v2 == nil {
+							v2 = new(storage.Channel)
+						}
+						easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in, &*v2)
+					}
 					out.Channels = append(out.Channels, v2)
 					in.WantComma()
 				}
@@ -170,7 +178,11 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 				if v5 > 0 {
 					out.RawByte(',')
 				}
-				easyjson7e607aefEncodeGithubComKhliengDispatchStorage(out, v6)
+				if v6 == nil {
+					out.RawString("null")
+				} else {
+					easyjson7e607aefEncodeGithubComKhliengDispatchStorage(out, *v6)
+				}
 			}
 			out.RawByte(']')
 		}

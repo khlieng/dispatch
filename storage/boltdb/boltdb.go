@@ -48,8 +48,8 @@ func (s *BoltStore) Close() {
 	s.db.Close()
 }
 
-func (s *BoltStore) GetUsers() ([]storage.User, error) {
-	var users []storage.User
+func (s *BoltStore) GetUsers() ([]*storage.User, error) {
+	var users []*storage.User
 
 	s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketUsers)
@@ -63,7 +63,7 @@ func (s *BoltStore) GetUsers() ([]storage.User, error) {
 			}
 			copy(user.IDBytes, k)
 
-			users = append(users, user)
+			users = append(users, &user)
 
 			return nil
 		})
@@ -109,8 +109,8 @@ func (s *BoltStore) DeleteUser(user *storage.User) error {
 	})
 }
 
-func (s *BoltStore) GetServers(user *storage.User) ([]storage.Server, error) {
-	var servers []storage.Server
+func (s *BoltStore) GetServers(user *storage.User) ([]*storage.Server, error) {
+	var servers []*storage.Server
 
 	s.db.View(func(tx *bolt.Tx) error {
 		c := tx.Bucket(bucketServers).Cursor()
@@ -118,7 +118,7 @@ func (s *BoltStore) GetServers(user *storage.User) ([]storage.Server, error) {
 		for k, v := c.Seek(user.IDBytes); bytes.HasPrefix(k, user.IDBytes); k, v = c.Next() {
 			server := storage.Server{}
 			server.Unmarshal(v)
-			servers = append(servers, server)
+			servers = append(servers, &server)
 		}
 
 		return nil
@@ -190,8 +190,8 @@ func (s *BoltStore) SetServerName(user *storage.User, name, address string) erro
 	})
 }
 
-func (s *BoltStore) GetChannels(user *storage.User) ([]storage.Channel, error) {
-	var channels []storage.Channel
+func (s *BoltStore) GetChannels(user *storage.User) ([]*storage.Channel, error) {
+	var channels []*storage.Channel
 
 	s.db.View(func(tx *bolt.Tx) error {
 		c := tx.Bucket(bucketChannels).Cursor()
@@ -199,7 +199,7 @@ func (s *BoltStore) GetChannels(user *storage.User) ([]storage.Channel, error) {
 		for k, v := c.Seek(user.IDBytes); bytes.HasPrefix(k, user.IDBytes); k, v = c.Next() {
 			channel := storage.Channel{}
 			channel.Unmarshal(v)
-			channels = append(channels, channel)
+			channels = append(channels, &channel)
 		}
 
 		return nil
@@ -298,8 +298,8 @@ func (s *BoltStore) GetMessagesByID(server, channel string, ids []string) ([]sto
 	return messages, err
 }
 
-func (s *BoltStore) GetSessions() ([]session.Session, error) {
-	var sessions []session.Session
+func (s *BoltStore) GetSessions() ([]*session.Session, error) {
+	var sessions []*session.Session
 
 	err := s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketSessions)
@@ -307,7 +307,7 @@ func (s *BoltStore) GetSessions() ([]session.Session, error) {
 		return b.ForEach(func(_ []byte, v []byte) error {
 			session := session.Session{}
 			_, err := session.Unmarshal(v)
-			sessions = append(sessions, session)
+			sessions = append(sessions, &session)
 			return err
 		})
 	})

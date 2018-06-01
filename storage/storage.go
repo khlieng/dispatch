@@ -11,23 +11,23 @@ func Initialize(dir string) {
 }
 
 type Store interface {
-	GetUsers() ([]User, error)
-	SaveUser(*User) error
-	DeleteUser(*User) error
+	GetUsers() ([]*User, error)
+	SaveUser(user *User) error
+	DeleteUser(user *User) error
 
-	GetServers(*User) ([]Server, error)
-	AddServer(*User, *Server) error
-	RemoveServer(*User, string) error
-	SetNick(*User, string, string) error
-	SetServerName(*User, string, string) error
+	GetServers(user *User) ([]*Server, error)
+	AddServer(user *User, server *Server) error
+	RemoveServer(user *User, host string) error
+	SetNick(user *User, nick, host string) error
+	SetServerName(user *User, name, host string) error
 
-	GetChannels(*User) ([]Channel, error)
-	AddChannel(*User, *Channel) error
-	RemoveChannel(*User, string, string) error
+	GetChannels(user *User) ([]*Channel, error)
+	AddChannel(user *User, channel *Channel) error
+	RemoveChannel(user *User, server, channel string) error
 }
 
 type SessionStore interface {
-	GetSessions() ([]session.Session, error)
+	GetSessions() ([]*session.Session, error)
 	SaveSession(session *session.Session) error
 	DeleteSession(key string) error
 }

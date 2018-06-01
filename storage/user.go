@@ -35,15 +35,15 @@ func NewUser(store Store) (*User, error) {
 	return user, nil
 }
 
-func LoadUsers(store Store) ([]User, error) {
+func LoadUsers(store Store) ([]*User, error) {
 	users, err := store.GetUsers()
 	if err != nil {
 		return nil, err
 	}
 
-	for i := range users {
-		users[i].store = store
-		users[i].loadCertificate()
+	for _, user := range users {
+		user.store = store
+		user.loadCertificate()
 	}
 
 	return users, nil
@@ -79,7 +79,7 @@ type Server struct {
 	Realname string
 }
 
-func (u *User) GetServers() ([]Server, error) {
+func (u *User) GetServers() ([]*Server, error) {
 	return u.store.GetServers(u)
 }
 
@@ -105,7 +105,7 @@ type Channel struct {
 	Topic  string
 }
 
-func (u *User) GetChannels() ([]Channel, error) {
+func (u *User) GetChannels() ([]*Channel, error) {
 	return u.store.GetChannels(u)
 }
 

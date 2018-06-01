@@ -24,7 +24,7 @@ type connectDefaults struct {
 type indexData struct {
 	Defaults connectDefaults
 	Servers  []Server
-	Channels []storage.Channel
+	Channels []*storage.Channel
 
 	// Users in the selected channel
 	Users *Userlist
@@ -116,7 +116,7 @@ func (d *indexData) addUsersAndMessages(server, channel string, state *State) {
 	}
 }
 
-func isInChannel(channels []storage.Channel, server, channel string) bool {
+func isInChannel(channels []*storage.Channel, server, channel string) bool {
 	if channel != "" {
 		for _, ch := range channels {
 			if server == ch.Server && channel == ch.Name {
