@@ -293,7 +293,7 @@ func (s *stateStore) setSession(session *session.Session) {
 	s.lock.Lock()
 	s.sessions[session.Key()] = session
 	s.lock.Unlock()
-	s.sessionStore.SaveSession(session)
+	go s.sessionStore.SaveSession(session)
 }
 
 func (s *stateStore) deleteSession(key string) {
@@ -319,5 +319,5 @@ func (s *stateStore) deleteSession(key string) {
 		state.user.Remove()
 	}
 
-	s.sessionStore.DeleteSession(key)
+	go s.sessionStore.DeleteSession(key)
 }
