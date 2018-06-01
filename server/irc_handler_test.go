@@ -10,6 +10,7 @@ import (
 
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
+	"github.com/khlieng/dispatch/storage/bleve"
 	"github.com/khlieng/dispatch/storage/boltdb"
 )
 
@@ -33,6 +34,12 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 	user.SetMessageStore(db)
+
+	search, err := bleve.New(storage.Path.Index(user.Username))
+	if err != nil {
+		log.Fatal(err)
+	}
+	user.SetMessageSearchProvider(search)
 
 	channelStore = storage.NewChannelStore()
 
