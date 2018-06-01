@@ -35,6 +35,8 @@ func (d *Dispatch) handleAuth(w http.ResponseWriter, r *http.Request, createUser
 					d.states.deleteSession(key)
 					session.SetCookie(w, r)
 				}
+			} else {
+				d.states.deleteSession(key)
 			}
 		}
 
@@ -76,7 +78,6 @@ func (d *Dispatch) newUser(w http.ResponseWriter, r *http.Request) (*State, erro
 		return nil, err
 	}
 	d.states.setSession(session)
-	go d.deleteSessionWhenExpired(session)
 
 	state := NewState(user, d)
 	d.states.set(state)
@@ -85,13 +86,4 @@ func (d *Dispatch) newUser(w http.ResponseWriter, r *http.Request) (*State, erro
 	session.SetCookie(w, r)
 
 	return state, nil
-}
-
-func (d *Dispatch) deleteSessionWhenExpired(session *session.Session) {
-	deleteSessionWhenExpired(session, d.states)
-}
-
-func deleteSessionWhenExpired(session *session.Session, stateStore *stateStore) {
-	session.WaitUntilExpiration()
-	stateStore.deleteSession(session.Key())
 }

@@ -244,17 +244,34 @@ func newStateStore(sessionStore storage.SessionStore) *stateStore {
 		log.Fatal(err)
 	}
 
+	log.Printf("[Init] %d sessions", len(sessions))
+
 	for _, session := range sessions {
 		if !session.Expired() {
 			session.Init()
 			store.sessions[session.Key()] = session
-			go deleteSessionWhenExpired(session, store)
 		} else {
 			go sessionStore.DeleteSession(session.Key())
 		}
 	}
 
 	return store
+}
+
+func (s *stateStore) run() {
+	pruneSessions := time.Tick(time.Minute * 5)
+	for {
+		select {
+		case <-pruneSessions:
+			s.lock.Lock()
+			for key, session := range s.sessions {
+				if session.Expired() {
+					s.internalDeleteSession(key)
+				}
+			}
+			s.lock.Unlock()
+		}
+	}
 }
 
 func (s *stateStore) get(id uint64) *State {
@@ -298,26 +315,34 @@ func (s *stateStore) setSession(session *session.Session) {
 
 func (s *stateStore) deleteSession(key string) {
 	s.lock.Lock()
+	s.internalDeleteSession(key)
+	s.lock.Unlock()
+}
+
+func (s *stateStore) internalDeleteSession(key string) {
 	id := s.sessions[key].UserID
 	delete(s.sessions, key)
+
 	n := 0
 	for _, session := range s.sessions {
 		if session.UserID == id {
 			n++
 		}
 	}
+
 	state := s.states[id]
 	if n == 0 {
 		delete(s.states, id)
 	}
-	s.lock.Unlock()
 
-	if n == 0 {
-		// This anonymous user is not reachable anymore since all sessions have
-		// expired, so we clean it up
-		state.kill()
-		state.user.Remove()
-	}
+	go func() {
+		if n == 0 {
+			// This anonymous user is not reachable anymore since all sessions have
+			// expired, so we clean it up
+			state.kill()
+			state.user.Remove()
+		}
 
-	go s.sessionStore.DeleteSession(key)
+		s.sessionStore.DeleteSession(key)
+	}()
 }

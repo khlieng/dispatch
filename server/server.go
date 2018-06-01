@@ -45,6 +45,7 @@ func (d *Dispatch) Run() {
 	session.CookieName = "dispatch"
 
 	d.states = newStateStore(d.SessionStore)
+	go d.states.run()
 
 	d.loadUsers()
 	d.initFileServer()
@@ -57,7 +58,7 @@ func (d *Dispatch) loadUsers() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Loading %d user(s)", len(users))
+	log.Printf("[Init] %d users", len(users))
 
 	for _, user := range users {
 		go d.loadUser(user)
