@@ -18,10 +18,9 @@ var (
 type Session struct {
 	UserID uint64
 
-	key        string
-	createdAt  int64
-	expiration *time.Timer
-	lock       sync.Mutex
+	key       string
+	createdAt int64
+	lock      sync.Mutex
 }
 
 func New(id uint64) (*Session, error) {
@@ -31,16 +30,10 @@ func New(id uint64) (*Session, error) {
 	}
 
 	return &Session{
-		key:        key,
-		createdAt:  time.Now().Unix(),
-		UserID:     id,
-		expiration: time.NewTimer(Expiration),
+		key:       key,
+		createdAt: time.Now().Unix(),
+		UserID:    id,
 	}, nil
-}
-
-func (s *Session) Init() {
-	exp := time.Until(time.Unix(s.createdAt, 0).Add(Expiration))
-	s.expiration = time.NewTimer(exp)
 }
 
 func (s *Session) Key() string {
@@ -51,11 +44,15 @@ func (s *Session) Key() string {
 }
 
 func (s *Session) SetCookie(w http.ResponseWriter, r *http.Request) {
+	s.lock.Lock()
+	created := time.Unix(s.createdAt, 0)
+	s.lock.Unlock()
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     CookieName,
 		Value:    s.Key(),
 		Path:     "/",
-		Expires:  time.Now().Add(Expiration),
+		Expires:  created.Add(Expiration),
 		HttpOnly: true,
 		Secure:   r.TLS != nil,
 	})
@@ -83,8 +80,6 @@ func (s *Session) Refresh() (string, bool, error) {
 			return "", false, err
 		}
 
-		s.expiration.Reset(Expiration)
-
 		s.lock.Lock()
 		s.createdAt = time.Now().Unix()
 		s.key = key
@@ -93,10 +88,6 @@ func (s *Session) Refresh() (string, bool, error) {
 	}
 
 	return "", false, nil
-}
-
-func (s *Session) WaitUntilExpiration() {
-	<-s.expiration.C
 }
 
 func newSessionKey() (string, error) {

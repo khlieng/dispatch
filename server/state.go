@@ -248,7 +248,6 @@ func newStateStore(sessionStore storage.SessionStore) *stateStore {
 
 	for _, session := range sessions {
 		if !session.Expired() {
-			session.Init()
 			store.sessions[session.Key()] = session
 		} else {
 			go sessionStore.DeleteSession(session.Key())
