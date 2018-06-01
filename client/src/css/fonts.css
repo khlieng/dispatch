@@ -4,8 +4,7 @@
   font-weight: 400;
   src: local('Montserrat-Regular'),
     url(/font/Montserrat-Regular.woff2) format('woff2'),
-    url(/font/Montserrat-Regular.woff) format('woff'),
-    url(/font/Montserrat-Regular.ttf) format('truetype');
+    url(/font/Montserrat-Regular.woff) format('woff');
 }
 
 @font-face {
@@ -14,8 +13,7 @@
   font-weight: 700;
   src: local('Montserrat-Bold'),
     url(/font/Montserrat-Bold.woff2) format('woff2'),
-    url(/font/Montserrat-Bold.woff) format('woff'),
-    url(/font/Montserrat-Bold.ttf) format('truetype');
+    url(/font/Montserrat-Bold.woff) format('woff');
 }
 
 @font-face {
@@ -24,8 +22,7 @@
   font-weight: 400;
   src: local('Roboto Mono'), local('RobotoMono-Regular'),
     url(/font/RobotoMono-Regular.woff2) format('woff2'),
-    url(/font/RobotoMono-Regular.woff) format('woff'),
-    url(/font/RobotoMono-Regular.ttf) format('truetype');
+    url(/font/RobotoMono-Regular.woff) format('woff');
 }
 
 @font-face {
@@ -34,6 +31,5 @@
   font-weight: 700;
   src: local('Roboto Mono Bold'), local('RobotoMono-Bold'),
     url(/font/RobotoMono-Bold.woff2) format('woff2'),
-    url(/font/RobotoMono-Bold.woff) format('woff'),
-    url(/font/RobotoMono-Bold.ttf) format('truetype');
+    url(/font/RobotoMono-Bold.woff) format('woff');
 }

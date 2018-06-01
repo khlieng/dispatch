@@ -64,13 +64,6 @@ function fonts() {
   return gulp.src('src/font/*(*.woff|*.woff2)').pipe(gulp.dest('dist/font'));
 }
 
-function compressTTF() {
-  return gulp
-    .src(['src/font/*.ttf'])
-    .pipe(brotli({ quality: 11 }))
-    .pipe(gulp.dest('dist/font'));
-}
-
 function compress() {
   return gulp
     .src(['dist/!(*.toml)'])
@@ -127,7 +120,7 @@ function serve() {
   });
 }
 
-const assets = gulp.parallel(js, config, fonts, compressTTF);
+const assets = gulp.parallel(js, config, fonts);
 
 const build = gulp.series(clean, assets, compress, cleanup, bindata);
 
