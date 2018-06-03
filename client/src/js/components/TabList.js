@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import classnames from 'classnames';
 import TabListItem from './TabListItem';
 
 export default class TabList extends PureComponent {
@@ -8,8 +9,11 @@ export default class TabList extends PureComponent {
 
   render() {
     const { tab, channels, servers, privateChats, showTabList } = this.props;
-    const className = showTabList ? 'tablist off-canvas' : 'tablist';
     const tabs = [];
+
+    const className = classnames('tablist', {
+      'off-canvas': showTabList
+    });
 
     channels.forEach(server => {
       const { address } = server;

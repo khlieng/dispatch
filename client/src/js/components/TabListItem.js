@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import classnames from 'classnames';
 
 export default class TabListItem extends PureComponent {
   handleClick = () => {
@@ -8,25 +9,16 @@ export default class TabListItem extends PureComponent {
 
   render() {
     const { target, content, selected, connected } = this.props;
-    const classes = [];
-    const style = {};
 
-    if (!target) {
-      classes.push('tab-server');
-
-      if (connected) {
-        classes.push('success');
-      } else {
-        classes.push('error');
-      }
-    }
-
-    if (selected) {
-      classes.push('selected');
-    }
+    const className = classnames({
+      'tab-server': !target,
+      success: !target && connected,
+      error: !target && !connected,
+      selected
+    });
 
     return (
-      <p className={classes.join(' ')} style={style} onClick={this.handleClick}>
+      <p className={className} onClick={this.handleClick}>
         <span className="tab-content">{content}</span>
       </p>
     );

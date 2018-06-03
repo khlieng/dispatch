@@ -91,7 +91,7 @@ i[class*=' icon-']:before {
   pointer-events: none;
   user-select: none;
   transform: translateZ(0);
-  transition: all 0.2s;
+  transition: all 0.2s, color 0s;
   color: #777;
 }
 

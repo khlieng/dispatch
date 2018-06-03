@@ -73,7 +73,7 @@ class Connect extends Component {
       form = (
         <Form className="connect-form">
           <h1>Connect</h1>
-          <TextInput name="name" placeholder="Name" />
+          <TextInput name="name" placeholder="Name" autoCapitalize="words" />
           <div className="connect-form-address">
             <TextInput name="host" placeholder="Host" />
             <TextInput name="port" type="number" placeholder="Port" />

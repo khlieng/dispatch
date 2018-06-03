@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { List } from 'react-virtualized/dist/commonjs/List';
 import { AutoSizer } from 'react-virtualized/dist/commonjs/AutoSizer';
+import classnames from 'classnames';
 import UserListItem from './UserListItem';
 
 export default class UserList extends PureComponent {
@@ -29,7 +30,10 @@ export default class UserList extends PureComponent {
 
   render() {
     const { users, showUserList } = this.props;
-    const className = showUserList ? 'userlist off-canvas' : 'userlist';
+
+    const className = classnames('userlist', {
+      'off-canvas': showUserList
+    });
 
     return (
       <div className={className}>

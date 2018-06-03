@@ -4,6 +4,7 @@ import Chat from 'containers/Chat';
 import Connect from 'containers/Connect';
 import Settings from 'containers/Settings';
 import TabList from 'components/TabList';
+import classnames from 'classnames';
 
 export default class App extends Component {
   handleClick = () => {
@@ -24,9 +25,11 @@ export default class App extends Component {
       select,
       push
     } = this.props;
-    const mainClass = showTabList
-      ? 'main-container off-canvas'
-      : 'main-container';
+
+    const mainClass = classnames('main-container', {
+      'off-canvas': showTabList
+    });
+
     return (
       <div className="wrap">
         {!connected && (

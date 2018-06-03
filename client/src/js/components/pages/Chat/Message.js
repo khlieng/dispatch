@@ -1,13 +1,16 @@
 import React, { PureComponent } from 'react';
+import classnames from 'classnames';
 
 export default class Message extends PureComponent {
   handleNickClick = () => this.props.onNickClick(this.props.message.from);
 
   render() {
     const { message } = this.props;
-    const className = message.type
-      ? `message message-${message.type}`
-      : 'message';
+
+    const className = classnames('message', {
+      [`message-${message.type}`]: message.type
+    });
+
     const style = {
       paddingLeft: `${window.messageIndent + 15}px`,
       textIndent: `-${window.messageIndent}px`,
