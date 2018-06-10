@@ -21,6 +21,7 @@ const Checkbox = ({ name, label, onChange, ...props }) => (
           }}
           {...props}
         />
+        <span />
       </label>
     )}
   />

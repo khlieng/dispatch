@@ -53,6 +53,36 @@ button:active {
   background: #6bb758;
 }
 
+input[type=checkbox] {
+  position: absolute;
+  opacity: 0;
+}
+
+input[type=checkbox] + span {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #777;
+  display: inline-block;
+  position: relative;
+}
+
+input[type=checkbox]:checked + span {
+  background: #6bb758;
+  border-color: #6bb758;
+}
+
+input[type=checkbox]:checked + span:before {
+  content: "";
+  width: 5px;
+  height: 10px;
+  border-right: 3px solid #FFF;
+  border-bottom: 3px solid #FFF;
+  position: absolute;
+  color: #FFF;
+  transform: rotate(45deg);
+  left: 4px;
+}
+
 p {
   line-height: 1.5;
 }
@@ -342,10 +372,6 @@ input::-webkit-inner-spin-button {
   text-align: center;
   background: #fff;
   color: #777;
-}
-
-.connect-form-address input[type='checkbox'] {
-  margin-top: 5px;
 }
 
 .connect-form i {
