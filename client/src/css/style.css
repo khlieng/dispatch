@@ -55,7 +55,7 @@ button:active {
 
 input[type=checkbox] {
   position: absolute;
-  opacity: 0;
+  left: -999px;
 }
 
 input[type=checkbox] + span {
