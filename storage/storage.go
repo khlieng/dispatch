@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"os"
+
 	"github.com/khlieng/dispatch/pkg/session"
 )
 
@@ -8,6 +10,7 @@ var Path directory
 
 func Initialize(dir string) {
 	Path = directory(dir)
+	os.MkdirAll(Path.Root(), 0700)
 }
 
 type Store interface {
