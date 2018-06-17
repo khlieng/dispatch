@@ -60,6 +60,7 @@ func (c *Client) run() {
 	for {
 		select {
 		case <-c.quit:
+			c.setRegistered(false)
 			if c.Connected() {
 				c.disconnect()
 			}
@@ -69,6 +70,7 @@ func (c *Client) run() {
 			return
 
 		case <-c.reconnect:
+			c.setRegistered(false)
 			if c.Connected() {
 				c.disconnect()
 			}
@@ -191,6 +193,11 @@ func (c *Client) recv() {
 
 			default:
 				c.connChange(false, nil)
+
+				if !c.Registered() {
+					time.Sleep(15 * time.Second)
+				}
+
 				c.Reconnect()
 				return
 			}
@@ -219,6 +226,7 @@ func (c *Client) recv() {
 
 		case ReplyWelcome:
 			c.setNick(msg.Params[0])
+			c.setRegistered(true)
 			c.sendRecv.Add(1)
 			go c.send()
 

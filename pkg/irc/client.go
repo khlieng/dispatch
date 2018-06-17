@@ -26,12 +26,13 @@ type Client struct {
 	channels []string
 	Support  *iSupport
 
-	conn      net.Conn
-	connected bool
-	dialer    *net.Dialer
-	reader    *bufio.Reader
-	backoff   *backoff.Backoff
-	out       chan string
+	conn       net.Conn
+	connected  bool
+	registered bool
+	dialer     *net.Dialer
+	reader     *bufio.Reader
+	backoff    *backoff.Backoff
+	out        chan string
 
 	quit      chan struct{}
 	reconnect chan struct{}
@@ -74,6 +75,19 @@ func (c *Client) Connected() bool {
 	connected := c.connected
 	c.lock.Unlock()
 	return connected
+}
+
+func (c *Client) Registered() bool {
+	c.lock.Lock()
+	reg := c.registered
+	c.lock.Unlock()
+	return reg
+}
+
+func (c *Client) setRegistered(reg bool) {
+	c.lock.Lock()
+	c.registered = reg
+	c.lock.Unlock()
 }
 
 func (c *Client) Nick(nick string) {
