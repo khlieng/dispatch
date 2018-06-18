@@ -26,7 +26,7 @@ describe('message reducer', () => {
     });
   });
 
-  it('adds all the messsages on ADD_MESSAGES', () => {
+  it('adds all the messages on ADD_MESSAGES', () => {
     const state = reducer(undefined, {
       type: actions.ADD_MESSAGES,
       server: 'srv',
