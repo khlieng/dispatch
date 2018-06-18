@@ -99,7 +99,7 @@ func (i *ircHandler) join(msg *irc.Message) {
 	channelStore.AddUser(msg.Nick, i.client.Host, channel)
 
 	if msg.Nick == i.client.GetNick() {
-		// Incase no topic is set and theres a cached one that needs to be cleared
+		// In case no topic is set and there's a cached one that needs to be cleared
 		i.client.Topic(channel)
 
 		i.state.sendLastMessages(i.client.Host, channel, 50)

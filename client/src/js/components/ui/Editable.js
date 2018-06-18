@@ -27,7 +27,7 @@ export default class Editable extends PureComponent {
     if (this.input) {
       const style = window.getComputedStyle(this.input);
       const padding = parseInt(style.paddingRight, 10);
-      // Make sure the width is atleast 1px so the caret always shows
+      // Make sure the width is at least 1px so the caret always shows
       const width =
         stringWidth(value, `${style.fontSize} ${style.fontFamily}`) || 1;
 
