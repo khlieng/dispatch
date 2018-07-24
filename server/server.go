@@ -151,9 +151,7 @@ func (d *Dispatch) startHTTP() {
 		}
 	} else {
 		if viper.GetBool("dev") {
-			// The node dev server will proxy index page requests and
-			// websocket connections to this port
-			port = "1337"
+		        log.Println("Running in development mode")
 		}
 		log.Println("[HTTP] Listening on port", port)
 		log.Fatal(http.ListenAndServe(":"+port, http.HandlerFunc(d.serve)))
