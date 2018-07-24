@@ -17,10 +17,18 @@ type wsHandler struct {
 }
 
 func newWSHandler(conn *websocket.Conn, state *State, r *http.Request) *wsHandler {
+         var address string
+
+         if r.Header.Get("X-Forwarded-For") != "" {
+		address = r.Header.Get("X-Forwarded-For")
+         } else {
+		address = conn.RemoteAddr().String()
+         }
+
 	h := &wsHandler{
 		ws:    newWSConn(conn),
 		state: state,
-		addr:  conn.RemoteAddr().String(),
+		addr:  address,
 	}
 	h.init(r)
 	h.initHandlers()
