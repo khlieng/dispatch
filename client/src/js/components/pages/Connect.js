@@ -53,10 +53,10 @@ class Connect extends Component {
 
   render() {
     const { defaults, values } = this.props;
-    const { readonly, showDetails } = defaults;
+    const { readOnly, showDetails } = defaults;
     let form;
 
-    if (readonly) {
+    if (readOnly) {
       form = (
         <Form className="connect-form">
           <h1>Connect</h1>
