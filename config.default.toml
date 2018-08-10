@@ -1,4 +1,6 @@
 port = 80
+# Hex encode the users IP and use it as the ident
+hexIP = false
 verify_certificates = true
 
 # Defaults for the client connect form

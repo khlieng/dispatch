@@ -29,6 +29,21 @@ func (d *User) Size() (s uint64) {
 		}
 		s += l
 	}
+	{
+		l := uint64(len(d.lastIP))
+
+		{
+
+			t := l
+			for t >= 0x80 {
+				t >>= 7
+				s++
+			}
+			s++
+
+		}
+		s += l
+	}
 	s += 8
 	return
 }
@@ -67,6 +82,25 @@ func (d *User) Marshal(buf []byte) ([]byte, error) {
 		copy(buf[i+8:], d.Username)
 		i += l
 	}
+	{
+		l := uint64(len(d.lastIP))
+
+		{
+
+			t := uint64(l)
+
+			for t >= 0x80 {
+				buf[i+8] = byte(t) | 0x80
+				t >>= 7
+				i++
+			}
+			buf[i+8] = byte(t)
+			i++
+
+		}
+		copy(buf[i+8:], d.lastIP)
+		i += l
+	}
 	return buf[:i+8], nil
 }
 
@@ -96,6 +130,31 @@ func (d *User) Unmarshal(buf []byte) (uint64, error) {
 
 		}
 		d.Username = string(buf[i+8 : i+8+l])
+		i += l
+	}
+	{
+		l := uint64(0)
+
+		{
+
+			bs := uint8(7)
+			t := uint64(buf[i+8] & 0x7F)
+			for buf[i+8]&0x80 == 0x80 {
+				i++
+				t |= uint64(buf[i+8]&0x7F) << bs
+				bs += 7
+			}
+			i++
+
+			l = t
+
+		}
+		if uint64(cap(d.lastIP)) >= l {
+			d.lastIP = d.lastIP[:l]
+		} else {
+			d.lastIP = make([]byte, l)
+		}
+		copy(d.lastIP, buf[i+8:])
 		i += l
 	}
 	return i + 8, nil

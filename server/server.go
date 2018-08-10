@@ -93,7 +93,7 @@ func (d *Dispatch) loadUser(user *storage.User) {
 	}
 
 	for _, server := range servers {
-		i := connectIRC(server, state)
+		i := connectIRC(server, state, user.GetLastIP())
 
 		var joining []string
 		for _, channel := range channels {

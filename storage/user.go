@@ -15,6 +15,7 @@ type User struct {
 	store        Store
 	messageLog   MessageStore
 	messageIndex MessageSearchProvider
+	lastIP       []byte
 	certificate  *tls.Certificate
 	lock         sync.Mutex
 }
@@ -66,6 +67,21 @@ func (u *User) Remove() {
 		u.messageIndex.Close()
 	}
 	os.RemoveAll(Path.User(u.Username))
+}
+
+func (u *User) GetLastIP() []byte {
+	u.lock.Lock()
+	ip := u.lastIP
+	u.lock.Unlock()
+	return ip
+}
+
+func (u *User) SetLastIP(ip []byte) error {
+	u.lock.Lock()
+	u.lastIP = ip
+	u.lock.Unlock()
+
+	return u.store.SaveUser(u)
 }
 
 type Server struct {

@@ -97,6 +97,8 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 				}
 				in.Delim(']')
 			}
+		case "hexIP":
+			out.HexIP = bool(in.Bool())
 		case "users":
 			if in.IsNull() {
 				in.Skip()
@@ -186,6 +188,16 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 			}
 			out.RawByte(']')
 		}
+	}
+	if in.HexIP {
+		const prefix string = ",\"hexIP\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.HexIP))
 	}
 	if in.Users != nil {
 		const prefix string = ",\"users\":"

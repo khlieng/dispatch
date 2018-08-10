@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/tls"
+	"encoding/hex"
 	"net"
 
 	"github.com/spf13/viper"
@@ -26,7 +27,7 @@ func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
 	}
 }
 
-func connectIRC(server *storage.Server, state *State) *irc.Client {
+func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client {
 	i := irc.NewClient(server.Nick, server.Username)
 	i.TLS = server.TLS
 	i.Realname = server.Realname
@@ -37,9 +38,12 @@ func connectIRC(server *storage.Server, state *State) *irc.Client {
 		address = net.JoinHostPort(server.Host, server.Port)
 	}
 
-	if i.Username == "" {
+	if viper.GetBool("hexIP") {
+		i.Username = hex.EncodeToString(srcIP)
+	} else if i.Username == "" {
 		i.Username = server.Nick
 	}
+
 	if i.Realname == "" {
 		i.Realname = server.Nick
 	}

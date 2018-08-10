@@ -21,7 +21,8 @@ const initialState = {
     password: false,
     readonly: false,
     showDetails: false
-  }
+  },
+  hexIP: false
 };
 
 export default createReducer(initialState, {

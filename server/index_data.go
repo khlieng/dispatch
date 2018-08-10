@@ -25,6 +25,7 @@ type indexData struct {
 	Defaults connectDefaults
 	Servers  []Server
 	Channels []*storage.Channel
+	HexIP    bool
 
 	// Users in the selected channel
 	Users *Userlist
@@ -34,7 +35,9 @@ type indexData struct {
 }
 
 func getIndexData(r *http.Request, state *State) *indexData {
-	data := indexData{}
+	data := indexData{
+		HexIP: viper.GetBool("hexIP"),
+	}
 
 	data.Defaults = connectDefaults{
 		Name:        viper.GetString("defaults.name"),

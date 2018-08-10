@@ -2,6 +2,7 @@ package server
 
 import (
 	"log"
+	"net"
 	"net/http"
 	"strings"
 
@@ -12,24 +13,24 @@ import (
 type wsHandler struct {
 	ws       *wsConn
 	state    *State
-	addr     string
+	addr     net.Addr
 	handlers map[string]func([]byte)
 }
 
 func newWSHandler(conn *websocket.Conn, state *State, r *http.Request) *wsHandler {
-         var address string
-
-         if r.Header.Get("X-Forwarded-For") != "" {
-		address = r.Header.Get("X-Forwarded-For")
-         } else {
-		address = conn.RemoteAddr().String()
-         }
-
 	h := &wsHandler{
 		ws:    newWSConn(conn),
 		state: state,
-		addr:  address,
+		addr:  conn.RemoteAddr(),
 	}
+
+	if r.Header.Get("X-Forwarded-For") != "" {
+		ip := net.ParseIP(r.Header.Get("X-Forwarded-For"))
+		if ip != nil {
+			h.addr.(*net.TCPAddr).IP = ip
+		}
+	}
+
 	h.init(r)
 	h.initHandlers()
 	return h
@@ -44,7 +45,7 @@ func (h *wsHandler) run() {
 		req, ok := <-h.ws.in
 		if !ok {
 			if h.state != nil {
-				h.state.deleteWS(h.addr)
+				h.state.deleteWS(h.addr.String())
 			}
 			return
 		}
@@ -60,7 +61,8 @@ func (h *wsHandler) dispatchRequest(req WSRequest) {
 }
 
 func (h *wsHandler) init(r *http.Request) {
-	h.state.setWS(h.addr, h.ws)
+	h.state.setWS(h.addr.String(), h.ws)
+	h.state.user.SetLastIP(addrToIPBytes(h.addr))
 
 	log.Println(h.addr, "[State] User ID:", h.state.user.ID, "|",
 		h.state.numIRC(), "IRC connections |",
@@ -98,7 +100,7 @@ func (h *wsHandler) connect(b []byte) {
 	if _, ok := h.state.getIRC(data.Host); !ok {
 		log.Println(h.addr, "[IRC] Add server", data.Host)
 
-		connectIRC(data.Server, h.state)
+		connectIRC(data.Server, h.state, addrToIPBytes(h.addr))
 
 		go h.state.user.AddServer(data.Server)
 	} else {

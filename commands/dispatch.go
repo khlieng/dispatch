@@ -103,6 +103,7 @@ func init() {
 	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
 	viper.BindPFlag("dev", rootCmd.Flags().Lookup("dev"))
 
+	viper.SetDefault("hexIP", false)
 	viper.SetDefault("verify_client_certificates", true)
 }
 

@@ -1,6 +1,7 @@
 struct User {
   ID       uint64
   Username string
+  lastIP   []byte
 }
 
 struct Server {

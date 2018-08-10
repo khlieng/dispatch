@@ -54,13 +54,11 @@ func (s *BoltStore) GetUsers() ([]*storage.User, error) {
 	s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketUsers)
 
-		return b.ForEach(func(k, _ []byte) error {
-			id := idFromBytes(k)
+		return b.ForEach(func(k, v []byte) error {
 			user := storage.User{
-				ID:       id,
-				IDBytes:  make([]byte, 8),
-				Username: strconv.FormatUint(id, 10),
+				IDBytes: make([]byte, 8),
 			}
+			user.Unmarshal(v)
 			copy(user.IDBytes, k)
 
 			users = append(users, &user)
@@ -76,7 +74,10 @@ func (s *BoltStore) SaveUser(user *storage.User) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketUsers)
 
-		user.ID, _ = b.NextSequence()
+		if user.ID == 0 {
+			user.ID, _ = b.NextSequence()
+			user.IDBytes = idToBytes(user.ID)
+		}
 		user.Username = strconv.FormatUint(user.ID, 10)
 
 		data, err := user.Marshal(nil)
@@ -84,7 +85,6 @@ func (s *BoltStore) SaveUser(user *storage.User) error {
 			return err
 		}
 
-		user.IDBytes = idToBytes(user.ID)
 		return b.Put(user.IDBytes, data)
 	})
 }

@@ -29,14 +29,20 @@ class Connect extends Component {
     this.setState({ showOptionals: !this.state.showOptionals });
   };
 
-  renderOptionals = () => (
-    <div>
-      <TextInput name="username" placeholder="Username" />
-      {this.renderError('username')}
-      <TextInput type="password" name="password" placeholder="Password" />
-      <TextInput name="realname" placeholder="Realname" />
-    </div>
-  );
+  renderOptionals = () => {
+    const { hexIP } = this.props;
+
+    return (
+      <div>
+        {!hexIP && [
+          <TextInput name="username" placeholder="Username" />,
+          this.renderError('username')
+        ]}
+        <TextInput type="password" name="password" placeholder="Password" />
+        <TextInput name="realname" placeholder="Realname" />
+      </div>
+    );
+  };
 
   renderError = name => {
     const { touched, errors } = this.props;
