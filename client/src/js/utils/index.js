@@ -64,7 +64,8 @@ export function isValidNick(nick, maxLength = 30) {
       char > 125
     ) {
       return false;
-    } else if ((i === 0 && char < 65) || char > 125) {
+    }
+    if ((i === 0 && char < 65) || char > 125) {
       return false;
     }
   }

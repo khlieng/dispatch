@@ -98,9 +98,12 @@ describe('message reducer', () => {
     };
 
     const thunk = broadcast('test', 'srv', ['#chan1', '#chan3']);
-    thunk(action => {
-      state.messages = reducer(undefined, action);
-    }, () => state);
+    thunk(
+      action => {
+        state.messages = reducer(undefined, action);
+      },
+      () => state
+    );
 
     const messages = state.messages;
 

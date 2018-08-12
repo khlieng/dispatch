@@ -4,7 +4,9 @@ import TabListItem from './TabListItem';
 
 export default class TabList extends PureComponent {
   handleTabClick = (server, target) => this.props.select(server, target);
+
   handleConnectClick = () => this.props.push('/connect');
+
   handleSettingsClick = () => this.props.push('/settings');
 
   render() {

@@ -53,13 +53,13 @@ button:active {
   background: #6bb758;
 }
 
-input[type=checkbox] {
+input[type='checkbox'] {
   position: absolute;
   left: -99999px;
   opacity: 0;
 }
 
-input[type=checkbox] + span {
+input[type='checkbox'] + span {
   width: 20px;
   height: 20px;
   border: 2px solid #777;
@@ -67,19 +67,19 @@ input[type=checkbox] + span {
   position: relative;
 }
 
-input[type=checkbox]:checked + span {
+input[type='checkbox']:checked + span {
   background: #6bb758;
   border-color: #6bb758;
 }
 
-input[type=checkbox]:checked + span:before {
-  content: "";
+input[type='checkbox']:checked + span:before {
+  content: '';
   width: 5px;
   height: 10px;
-  border-right: 3px solid #FFF;
-  border-bottom: 3px solid #FFF;
+  border-right: 3px solid #fff;
+  border-bottom: 3px solid #fff;
   position: absolute;
-  color: #FFF;
+  color: #fff;
   transform: rotate(45deg);
   left: 4px;
 }

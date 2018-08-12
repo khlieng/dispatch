@@ -7,13 +7,12 @@ module.exports = {
         loose: true
       }
     ],
-    '@babel/preset-react',
-    [
-      '@babel/preset-stage-0',
-      {
-        decoratorsLegacy: true
-      }
-    ]
+    '@babel/preset-react'
+  ],
+  plugins: [
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-proposal-export-default-from',
+    '@babel/plugin-proposal-export-namespace-from'
   ],
   env: {
     development: {
