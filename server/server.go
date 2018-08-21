@@ -106,6 +106,7 @@ func (d *Dispatch) loadUser(user *storage.User) {
 }
 
 func (d *Dispatch) startHTTP() {
+	addr := viper.GetString("address")
 	port := viper.GetString("port")
 
 	if viper.GetBool("https.enabled") {
@@ -114,11 +115,11 @@ func (d *Dispatch) startHTTP() {
 
 		if redirect {
 			log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
-			go http.ListenAndServe(":"+port, createHTTPSRedirect(portHTTPS))
+			go http.ListenAndServe(net.JoinHostPort(addr, port), createHTTPSRedirect(portHTTPS))
 		}
 
 		server := &http.Server{
-			Addr:    ":" + portHTTPS,
+			Addr:    net.JoinHostPort(addr, portHTTPS),
 			Handler: http.HandlerFunc(d.serve),
 		}
 
@@ -132,7 +133,7 @@ func (d *Dispatch) startHTTP() {
 
 			if viper.GetBool("letsencrypt.proxy") && lePort != "" && (port != "80" || !redirect) {
 				log.Println("[HTTP] Listening on port 80 (Let's Encrypt Proxy))")
-				go http.ListenAndServe(":80", http.HandlerFunc(letsEncryptProxy))
+				go http.ListenAndServe(net.JoinHostPort(addr, "80"), http.HandlerFunc(letsEncryptProxy))
 			}
 
 			le, err := letsencrypt.Run(dir, domain, email, ":"+lePort)
@@ -156,7 +157,7 @@ func (d *Dispatch) startHTTP() {
 			port = "1337"
 		}
 		log.Println("[HTTP] Listening on port", port)
-		log.Fatal(http.ListenAndServe(":"+port, http.HandlerFunc(d.serve)))
+		log.Fatal(http.ListenAndServe(net.JoinHostPort(addr, port), http.HandlerFunc(d.serve)))
 	}
 }
 

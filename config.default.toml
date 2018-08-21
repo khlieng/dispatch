@@ -1,3 +1,5 @@
+# IP address to listen on, leave empty to listen on anything
+address = ""
 port = 80
 # Hex encode the users IP and use it as the ident
 hexIP = false
