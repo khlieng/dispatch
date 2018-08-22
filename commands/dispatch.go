@@ -95,11 +95,13 @@ func init() {
 
 	rootCmd.PersistentFlags().String("dir", storage.DefaultDirectory(), "directory to store config and data in")
 	rootCmd.PersistentFlags().Bool("reset-config", false, "reset to the default configuration, overwriting the current one")
+	rootCmd.Flags().StringP("address", "a", "", "interface to which the server will bind")
 	rootCmd.Flags().IntP("port", "p", 80, "port to listen on")
 	rootCmd.Flags().Bool("dev", false, "development mode")
 
 	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
 	viper.BindPFlag("reset_config", rootCmd.PersistentFlags().Lookup("reset-config"))
+	viper.BindPFlag("address", rootCmd.Flags().Lookup("address"))
 	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
 	viper.BindPFlag("dev", rootCmd.Flags().Lookup("dev"))
 
