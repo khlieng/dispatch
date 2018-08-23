@@ -68,7 +68,7 @@ export default class TabList extends PureComponent {
 
     return (
       <div className={className}>
-        <button onClick={this.handleConnectClick}>Connect</button>
+        <button onClick={this.handleConnectClick}>Add network</button>
         <div className="tab-container">{tabs}</div>
         <div className="side-buttons">
           <i className="icon-user" />
