@@ -11,7 +11,7 @@ import (
 	"github.com/xenolf/lego/acme"
 )
 
-const URL = "https://acme-v01.api.letsencrypt.org/directory"
+const URL = "https://acme-v02.api.letsencrypt.org/directory"
 const KeySize = 2048
 
 var directory Directory
@@ -28,16 +28,10 @@ func Run(dir, domain, email, port string) (*state, error) {
 	if err != nil {
 		return nil, err
 	}
-	client.ExcludeChallenges([]acme.Challenge{acme.TLSSNI01})
 	client.SetHTTPAddress(port)
 
 	if user.Registration == nil {
-		user.Registration, err = client.Register()
-		if err != nil {
-			return nil, err
-		}
-
-		err = client.AgreeToTOS()
+		user.Registration, err = client.Register(true)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +91,7 @@ func (s *state) getCertPEM() []byte {
 	return certPEM
 }
 
-func (s *state) setCert(meta acme.CertificateResource) {
+func (s *state) setCert(meta *acme.CertificateResource) {
 	cert, err := tls.X509KeyPair(meta.Certificate, meta.PrivateKey)
 	if err == nil {
 		s.lock.Lock()
@@ -126,23 +120,15 @@ func (s *state) setOCSP(ocsp []byte) {
 }
 
 func (s *state) obtain() error {
-	cert, errors := s.client.ObtainCertificate([]string{s.domain}, true, nil, false)
-	if err := errors[s.domain]; err != nil {
-		if _, ok := err.(acme.TOSError); ok {
-			err := s.client.AgreeToTOS()
-			if err != nil {
-				return err
-			}
-			return s.obtain()
-		}
-
+	cert, err := s.client.ObtainCertificate([]string{s.domain}, true, nil, false)
+	if err != nil {
 		return err
 	}
 
 	s.setCert(cert)
 	s.refreshOCSP()
 
-	err := saveCert(cert)
+	err = saveCert(cert)
 	if err != nil {
 		return err
 	}
@@ -182,16 +168,8 @@ func (s *state) renew() bool {
 		meta.Certificate = cert
 		meta.PrivateKey = key
 
-	Renew:
 		newMeta, err := s.client.RenewCertificate(meta, true, false)
 		if err != nil {
-			if _, ok := err.(acme.TOSError); ok {
-				err := s.client.AgreeToTOS()
-				if err != nil {
-					return false
-				}
-				goto Renew
-			}
 			return false
 		}
 
@@ -240,7 +218,7 @@ func (s *state) loadCert() error {
 		return err
 	}
 
-	s.setCert(acme.CertificateResource{
+	s.setCert(&acme.CertificateResource{
 		Certificate: cert,
 		PrivateKey:  key,
 	})
@@ -258,7 +236,7 @@ func certExists(domain string) bool {
 	return true
 }
 
-func saveCert(cert acme.CertificateResource) error {
+func saveCert(cert *acme.CertificateResource) error {
 	err := os.MkdirAll(directory.Domain(cert.Domain), 0700)
 	if err != nil {
 		return err

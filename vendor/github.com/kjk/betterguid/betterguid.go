@@ -24,14 +24,17 @@ var (
 )
 
 func init() {
-	// have to seed to get randomness
+	// seed to get randomness
 	rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
-	for i := 0; i < 12; i++ {
+}
+
+func genRandPart() {
+	for i := 0; i < len(lastRandChars); i++ {
 		lastRandChars[i] = rnd.Intn(64)
 	}
 }
 
-// New creates a new guid.
+// New creates a new random, unique id
 func New() string {
 	var id [8 + 12]byte
 	mu.Lock()
@@ -46,6 +49,8 @@ func New() string {
 			// increment the next byte
 			lastRandChars[i] = 0
 		}
+	} else {
+		genRandPart()
 	}
 	lastPushTimeMs = timeMs
 	// put random as the second part

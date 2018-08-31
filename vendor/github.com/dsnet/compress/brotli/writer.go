@@ -30,6 +30,6 @@ func (bw *writer) Close() error {
 	return nil
 }
 
-func (bw *writer) Reset(w io.Writer) {
-	return
+func (bw *writer) Reset(w io.Writer) error {
+	return nil
 }
