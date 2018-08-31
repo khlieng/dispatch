@@ -58,6 +58,18 @@ const log2WordSize = uint(6)
 // allBits has every bit set
 const allBits uint64 = 0xffffffffffffffff
 
+// default binary BigEndian
+var binaryOrder binary.ByteOrder = binary.BigEndian
+
+// default json encoding base64.URLEncoding
+var base64Encoding *base64.Encoding = base64.URLEncoding
+
+// Marshal/Unmarshal BitSet with base64.StdEncoding(Default: base64.URLEncoding)
+func Base64StdEncoding() { base64Encoding = base64.StdEncoding }
+
+// Marshal/Unmarshal Binary as Little Endian(Default: binary.BigEndian)
+func LittleEndian() { binaryOrder = binary.LittleEndian }
+
 // A BitSet is a set of bits. The zero value of a BitSet is an empty set of length 0.
 type BitSet struct {
 	length uint
@@ -87,8 +99,8 @@ func (b *BitSet) Bytes() []uint64 {
 
 // wordsNeeded calculates the number of words needed for i bits
 func wordsNeeded(i uint) int {
-	if i > ((^uint(0)) - wordSize + 1) {
-		return int((^uint(0)) >> log2WordSize)
+	if i > (Cap() - wordSize + 1) {
+		return int(Cap() >> log2WordSize)
 	}
 	return int((i + (wordSize - 1)) >> log2WordSize)
 }
@@ -112,7 +124,7 @@ func New(length uint) (bset *BitSet) {
 	return bset
 }
 
-// Cap returns the total possible capicity, or number of bits
+// Cap returns the total possible capacity, or number of bits
 func Cap() uint {
 	return ^uint(0)
 }
@@ -230,6 +242,62 @@ func (b *BitSet) NextSet(i uint) (uint, bool) {
 	return 0, false
 }
 
+// NextSetMany returns many next bit sets from the specified index,
+// including possibly the current index and up to cap(buffer).
+// If the returned slice has len zero, then no more set bits were found
+//
+//    buffer := make([]uint, 256) // this should be reused
+//    j := uint(0)
+//    j, buffer = bitmap.NextSetMany(j, buffer)
+//    for ; len(buffer) > 0; j, buffer = bitmap.NextSetMany(j,buffer) {
+//     for k := range buffer {
+//      do something with buffer[k]
+//     }
+//     j += 1
+//    }
+//
+func (b *BitSet) NextSetMany(i uint, buffer []uint) (uint, []uint) {
+	myanswer := buffer
+	capacity := cap(buffer)
+	x := int(i >> log2WordSize)
+	if x >= len(b.set) || capacity == 0 {
+		return 0, myanswer[:0]
+	}
+	skip := i & (wordSize - 1)
+	word := b.set[x] >> skip
+	myanswer = myanswer[:capacity]
+	size := int(0)
+	for word != 0 {
+		r := trailingZeroes64(word)
+		t := word & ((^word) + 1)
+		myanswer[size] = r + i
+		size++
+		if size == capacity {
+			goto End
+		}
+		word = word ^ t
+	}
+	x++
+	for idx, word := range b.set[x:] {
+		for word != 0 {
+			r := trailingZeroes64(word)
+			t := word & ((^word) + 1)
+			myanswer[size] = r + (uint(x+idx) << 6)
+			size++
+			if size == capacity {
+				goto End
+			}
+			word = word ^ t
+		}
+	}
+End:
+	if size > 0 {
+		return myanswer[size-1], myanswer[:size]
+	} else {
+		return 0, myanswer[:0]
+	}
+}
+
 // NextClear returns the next clear bit from the specified index,
 // including possibly the current index
 // along with an error code (true = valid, false = no bit found i.e. all bits are set)
@@ -241,13 +309,15 @@ func (b *BitSet) NextClear(i uint) (uint, bool) {
 	w := b.set[x]
 	w = w >> (i & (wordSize - 1))
 	wA := allBits >> (i & (wordSize - 1))
-	if w != wA {
-		return i + trailingZeroes64(^w), true
+	index := i + trailingZeroes64(^w)
+	if w != wA && index < b.length {
+		return index, true
 	}
 	x++
 	for x < len(b.set) {
-		if b.set[x] != allBits {
-			return uint(x)*wordSize + trailingZeroes64(^b.set[x]), true
+		index = uint(x)*wordSize + trailingZeroes64(^b.set[x])
+		if b.set[x] != allBits && index < b.length {
+			return index, true
 		}
 		x++
 	}
@@ -301,17 +371,6 @@ func (b *BitSet) Count() uint {
 		return uint(popcntSlice(b.set))
 	}
 	return 0
-}
-
-var deBruijn = [...]byte{
-	0, 1, 56, 2, 57, 49, 28, 3, 61, 58, 42, 50, 38, 29, 17, 4,
-	62, 47, 59, 36, 45, 43, 51, 22, 53, 39, 33, 30, 24, 18, 12, 5,
-	63, 55, 48, 27, 60, 41, 37, 16, 46, 35, 44, 21, 52, 32, 23, 11,
-	54, 26, 40, 15, 34, 20, 31, 10, 25, 14, 19, 9, 13, 8, 7, 6,
-}
-
-func trailingZeroes64(v uint64) uint {
-	return uint(deBruijn[((v&-v)*0x03f79d71b4ca8b09)>>58])
 }
 
 // Equal tests the equvalence of two BitSets.
@@ -439,7 +498,6 @@ func (b *BitSet) InPlaceIntersection(compare *BitSet) {
 	if compare.length > 0 {
 		b.extendSetMaybe(compare.length - 1)
 	}
-	return
 }
 
 // Union of base set and other set
@@ -627,13 +685,13 @@ func (b *BitSet) WriteTo(stream io.Writer) (int64, error) {
 	length := uint64(b.length)
 
 	// Write length
-	err := binary.Write(stream, binary.BigEndian, length)
+	err := binary.Write(stream, binaryOrder, length)
 	if err != nil {
 		return 0, err
 	}
 
 	// Write set
-	err = binary.Write(stream, binary.BigEndian, b.set)
+	err = binary.Write(stream, binaryOrder, b.set)
 	return int64(b.BinaryStorageSize()), err
 }
 
@@ -642,7 +700,7 @@ func (b *BitSet) ReadFrom(stream io.Reader) (int64, error) {
 	var length uint64
 
 	// Read length first
-	err := binary.Read(stream, binary.BigEndian, &length)
+	err := binary.Read(stream, binaryOrder, &length)
 	if err != nil {
 		return 0, err
 	}
@@ -653,7 +711,7 @@ func (b *BitSet) ReadFrom(stream io.Reader) (int64, error) {
 	}
 
 	// Read remaining bytes as set
-	err = binary.Read(stream, binary.BigEndian, newset.set)
+	err = binary.Read(stream, binaryOrder, newset.set)
 	if err != nil {
 		return 0, err
 	}
@@ -696,7 +754,7 @@ func (b *BitSet) MarshalJSON() ([]byte, error) {
 	}
 
 	// URLEncode all bytes
-	return json.Marshal(base64.URLEncoding.EncodeToString(buffer.Bytes()))
+	return json.Marshal(base64Encoding.EncodeToString(buffer.Bytes()))
 }
 
 // UnmarshalJSON unmarshals a BitSet from JSON created using MarshalJSON
@@ -709,7 +767,7 @@ func (b *BitSet) UnmarshalJSON(data []byte) error {
 	}
 
 	// URLDecode string
-	buf, err := base64.URLEncoding.DecodeString(s)
+	buf, err := base64Encoding.DecodeString(s)
 	if err != nil {
 		return err
 	}
