@@ -21,7 +21,7 @@ There is a few different ways of getting it:
 - [Other versions](https://github.com/khlieng/dispatch/releases)
 
 ### 2. Go
-This requires a [Go environment](http://golang.org/doc/install), version 1.8 or greater.
+This requires a [Go environment](http://golang.org/doc/install), version 1.9 or greater.
 
 Fetch, compile and run dispatch:
 ```bash
