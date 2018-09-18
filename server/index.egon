@@ -10,6 +10,12 @@
 
   <title>Dispatch</title>
 
+  <link rel="preload" href="/font/fontello.woff2?48901973" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="/font/RobotoMono-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="/font/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="/font/Montserrat-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="/font/RobotoMono-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
   <link href="/<%== cssPath %>" rel="stylesheet">
   <link rel="icon" href="data:;base64,=">
 </head>

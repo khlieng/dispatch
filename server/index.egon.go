@@ -8,7 +8,7 @@ import (
 )
 
 func IndexTemplate(w io.Writer, data *indexData, cssPath, jsPath string) error {
-io.WriteString(w, "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Dispatch</title><link href=\"/")
+io.WriteString(w, "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Dispatch</title><link rel=\"preload\" href=\"/font/fontello.woff2?48901973\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/RobotoMono-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/Montserrat-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/Montserrat-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/RobotoMono-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link href=\"/")
 io.WriteString(w,  cssPath )
 io.WriteString(w, "\" rel=\"stylesheet\"><link rel=\"icon\" href=\"data:;base64,=\"></head><body><div id=\"root\"></div><script id=\"env\" type=\"application/json\">")
  easyjson.MarshalToWriter(data, w) 
