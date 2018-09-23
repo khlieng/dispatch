@@ -27,6 +27,7 @@ input {
   font: 16px Roboto Mono, monospace;
   border: none;
   outline: none;
+  background: #FFF;
 }
 
 input::-ms-clear {
