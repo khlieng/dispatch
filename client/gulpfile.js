@@ -24,7 +24,7 @@ function brotli(opts) {
       );
     } else if (file.isBuffer()) {
       file.path += '.br';
-      file.contents = new Buffer(br.compress(file.contents, opts).buffer);
+      file.contents = Buffer.from(br.compress(file.contents, opts).buffer);
       return callback(null, file);
     }
   });
