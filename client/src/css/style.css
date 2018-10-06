@@ -198,7 +198,7 @@ i[class*=' icon-']:before {
 
 .tab-container {
   position: absolute;
-  top: 50px;
+  top: 0;
   bottom: 50px;
   width: 100%;
   overflow: auto;
@@ -251,25 +251,26 @@ i[class*=' icon-']:before {
 }
 
 .side-buttons {
+  display: flex;
   position: absolute;
   bottom: 0;
   height: 50px;
   width: 200px;
   text-align: center;
-}
-
-.side-buttons i {
-  display: inline-block;
-  color: #999;
-  width: 50%;
-  line-height: 50px;
-  cursor: pointer;
-  font-size: 20px;
   border-top: 1px solid #1d1d1d;
 }
 
-.side-buttons i:not(:first-child) {
+.side-buttons i {
+  flex: 100%;
+  color: #999;
+  line-height: 50px;
+  cursor: pointer;
+  font-size: 18px;
   border-left: 1px solid #1d1d1d;
+}
+
+.side-buttons button {
+  font-size: 24px;
 }
 
 .side-buttons i:hover {
