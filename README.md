@@ -2,7 +2,7 @@
 
 #### [Try it!](https://dispatch.khlieng.com)
 
-![Dispatch](https://khlieng.com/dispatch.png)
+![Dispatch](https://khlieng.com/dispatch.png?1)
 
 ### Features
 * Searchable history
