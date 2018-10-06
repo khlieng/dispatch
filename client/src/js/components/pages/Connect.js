@@ -4,6 +4,7 @@ import { Form, withFormik } from 'formik';
 import Navicon from 'containers/Navicon';
 import Checkbox from 'components/ui/Checkbox';
 import TextInput from 'components/ui/TextInput';
+import Error from 'components/ui/formik/Error';
 import { isValidNick, isValidChannel, isValidUsername, isInt } from 'utils';
 
 const getSortedDefaultChannels = createSelector(
@@ -36,19 +37,12 @@ class Connect extends Component {
       <div>
         {!hexIP && [
           <TextInput name="username" placeholder="Username" />,
-          this.renderError('username')
+          <Error name="username" />
         ]}
         <TextInput type="password" name="password" placeholder="Password" />
         <TextInput name="realname" placeholder="Realname" />
       </div>
     );
-  };
-
-  renderError = name => {
-    const { touched, errors } = this.props;
-    if (touched[name] && errors[name]) {
-      return <div className="form-error">{errors[name]}</div>;
-    }
   };
 
   render() {
@@ -71,7 +65,7 @@ class Connect extends Component {
             </div>
           )}
           <TextInput name="nick" placeholder="Nick" />
-          {this.renderError('nick')}
+          <Error name="nick" />
           <button>Connect</button>
         </Form>
       );
@@ -85,12 +79,12 @@ class Connect extends Component {
             <TextInput name="port" type="number" placeholder="Port" />
             <Checkbox name="tls" label="SSL" onChange={this.handleSSLChange} />
           </div>
-          {this.renderError('host')}
-          {this.renderError('port')}
+          <Error name="host" />
+          <Error name="port" />
           <TextInput name="nick" placeholder="Nick" />
-          {this.renderError('nick')}
+          <Error name="nick" />
           <TextInput name="channels" placeholder="Channels" />
-          {this.renderError('channels')}
+          <Error name="channels" />
           {this.state.showOptionals && this.renderOptionals()}
           <i className="icon-ellipsis" onClick={this.handleShowClick} />
           <button>Connect</button>
