@@ -48,14 +48,18 @@ func (s *Session) SetCookie(w http.ResponseWriter, r *http.Request) {
 	created := time.Unix(s.createdAt, 0)
 	s.lock.Unlock()
 
-	http.SetCookie(w, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:     CookieName,
 		Value:    s.Key(),
 		Path:     "/",
 		Expires:  created.Add(Expiration),
 		HttpOnly: true,
 		Secure:   r.TLS != nil,
-	})
+	}
+
+	if v := cookie.String(); v != "" {
+		w.Header().Add("Set-Cookie", v+"; SameSite=Strict")
+	}
 }
 
 func (s *Session) Expired() bool {
