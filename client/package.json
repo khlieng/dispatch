@@ -51,6 +51,7 @@
     "webpack-hot-middleware": "^2.24.2"
   },
   "dependencies": {
+    "@sindresorhus/fnv1a": "^1.0.0",
     "autolinker": "^1.7.1",
     "backo": "^1.1.0",
     "base64-arraybuffer": "^0.1.5",
