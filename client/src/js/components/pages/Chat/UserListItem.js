@@ -5,7 +5,7 @@ export default class UserListItem extends PureComponent {
   handleClick = () => this.props.onClick(this.props.user.nick);
 
   render() {
-    const { user } = this.props;
+    const { user } = this.props;
     const style = {
       color: stringToHSL(user.nick),
       ...this.props.style

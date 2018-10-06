@@ -27,7 +27,11 @@ export default class Message extends PureComponent {
       <p className={className} style={style}>
         <span className="message-time">{message.time}</span>
         {message.from && (
-          <span className="message-sender" style={senderStyle} onClick={this.handleNickClick}>
+          <span
+            className="message-sender"
+            style={senderStyle}
+            onClick={this.handleNickClick}
+          >
             {' '}
             {message.from}
           </span>
