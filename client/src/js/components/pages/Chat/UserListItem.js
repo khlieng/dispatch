@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import stringToHSL from 'utils/color';
+import stringToRGB from 'utils/color';
 
 export default class UserListItem extends PureComponent {
   handleClick = () => this.props.onClick(this.props.user.nick);
@@ -7,7 +7,7 @@ export default class UserListItem extends PureComponent {
   render() {
     const { user } = this.props;
     const style = {
-      color: stringToHSL(user.nick),
+      color: stringToRGB(user.nick),
       ...this.props.style
     };
 

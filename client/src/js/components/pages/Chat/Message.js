@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import classnames from 'classnames';
-import stringToHSL from 'utils/color';
+import stringToRGB from 'utils/color';
 
 export default class Message extends PureComponent {
   handleNickClick = () => this.props.onNickClick(this.props.message.from);
@@ -20,7 +20,7 @@ export default class Message extends PureComponent {
 
     const senderStyle = {};
     if (message.from) {
-      senderStyle.color = stringToHSL(message.from);
+      senderStyle.color = stringToRGB(message.from);
     }
 
     return (

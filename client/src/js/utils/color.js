@@ -1,21 +1,22 @@
 import fnv1a from '@sindresorhus/fnv1a';
+import { hsluvToHex } from 'hsluv';
 
 const colors = [];
 
 for (let i = 0; i < 72; i++) {
-  colors[i] = `hsl(${i * 5}, 30%, 40%)`;
-  colors[i + 72] = `hsl(${i * 5}, 60%, 40%)`;
-  colors[i + 144] = `hsl(${i * 5}, 90%, 40%)`;
+  colors[i] = hsluvToHex([i * 5, 40, 50]);
+  colors[i + 72] = hsluvToHex([i * 5, 70, 50]);
+  colors[i + 144] = hsluvToHex([i * 5, 100, 50]);
 }
 
 const cache = {};
 
-export default function stringToHSL(str) {
+export default function stringToRGB(str) {
   if (cache[str]) {
     return cache[str];
   }
 
-  const color = colors[fnv1a(str) % 216];
+  const color = colors[fnv1a(str) % colors.length];
   cache[str] = color;
   return color;
 }
