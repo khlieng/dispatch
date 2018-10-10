@@ -178,8 +178,8 @@ type SearchResult struct {
 }
 
 type ClientCert struct {
-	Cert []byte
-	Key  []byte
+	Cert string
+	Key  string
 }
 
 type FetchMessages struct {

@@ -1,6 +1,10 @@
 import React, { PureComponent } from 'react';
 
 export default class FileInput extends PureComponent {
+  static defaultProps = {
+    type: 'text'
+  };
+
   componentWillMount() {
     this.input = window.document.createElement('input');
     this.input.setAttribute('type', 'file');
@@ -8,12 +12,24 @@ export default class FileInput extends PureComponent {
     this.input.addEventListener('change', e => {
       const file = e.target.files[0];
       const reader = new FileReader();
+      const { onChange, type } = this.props;
 
       reader.onload = () => {
-        this.props.onChange(file.name, reader.result);
+        onChange(file.name, reader.result);
       };
 
-      reader.readAsArrayBuffer(file);
+      switch (type) {
+        case 'binary':
+          reader.readAsArrayBuffer(file);
+          break;
+
+        case 'text':
+          reader.readAsText(file);
+          break;
+
+        default:
+          reader.readAsText(file);
+      }
     });
   }
 

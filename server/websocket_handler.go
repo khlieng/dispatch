@@ -249,7 +249,7 @@ func (h *wsHandler) cert(b []byte) {
 	var data ClientCert
 	data.UnmarshalJSON(b)
 
-	err := h.state.user.SetCertificate(data.Cert, data.Key)
+	err := h.state.user.SetCertificate([]byte(data.Cert), []byte(data.Key))
 	if err != nil {
 		h.state.sendJSON("cert_fail", Error{Message: err.Error()})
 		return

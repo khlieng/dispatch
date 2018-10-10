@@ -54,7 +54,6 @@
     "@sindresorhus/fnv1a": "^1.0.0",
     "autolinker": "^1.7.1",
     "backo": "^1.1.0",
-    "base64-arraybuffer": "^0.1.5",
     "classnames": "^2.2.6",
     "es6-promise": "^4.2.5",
     "fontfaceobserver": "^2.0.9",

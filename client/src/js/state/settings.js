@@ -1,4 +1,3 @@
-import base64 from 'base64-arraybuffer';
 import createReducer from 'utils/createReducer';
 import * as actions from './actions';
 
@@ -72,7 +71,7 @@ export function setCert(fileName, cert) {
   return {
     type: actions.SET_CERT,
     fileName,
-    cert: base64.encode(cert)
+    cert: cert
   };
 }
 
@@ -80,6 +79,6 @@ export function setKey(fileName, key) {
   return {
     type: actions.SET_KEY,
     fileName,
-    key: base64.encode(key)
+    key: key
   };
 }

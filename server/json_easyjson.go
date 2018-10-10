@@ -2938,19 +2938,9 @@ func easyjson42239ddeDecodeGithubComKhliengDispatchServer26(in *jlexer.Lexer, ou
 		}
 		switch key {
 		case "cert":
-			if in.IsNull() {
-				in.Skip()
-				out.Cert = nil
-			} else {
-				out.Cert = in.Bytes()
-			}
+			out.Cert = string(in.String())
 		case "key":
-			if in.IsNull() {
-				in.Skip()
-				out.Key = nil
-			} else {
-				out.Key = in.Bytes()
-			}
+			out.Key = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -2965,7 +2955,7 @@ func easyjson42239ddeEncodeGithubComKhliengDispatchServer26(out *jwriter.Writer,
 	out.RawByte('{')
 	first := true
 	_ = first
-	if len(in.Cert) != 0 {
+	if in.Cert != "" {
 		const prefix string = ",\"cert\":"
 		if first {
 			first = false
@@ -2973,9 +2963,9 @@ func easyjson42239ddeEncodeGithubComKhliengDispatchServer26(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		out.Base64Bytes(in.Cert)
+		out.String(string(in.Cert))
 	}
-	if len(in.Key) != 0 {
+	if in.Key != "" {
 		const prefix string = ",\"key\":"
 		if first {
 			first = false
@@ -2983,7 +2973,7 @@ func easyjson42239ddeEncodeGithubComKhliengDispatchServer26(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		out.Base64Bytes(in.Key)
+		out.String(string(in.Key))
 	}
 	out.RawByte('}')
 }
