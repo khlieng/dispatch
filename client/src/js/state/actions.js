@@ -37,6 +37,7 @@ export const SET_CERT = 'SET_CERT';
 export const SET_CERT_ERROR = 'SET_CERT_ERROR';
 export const SET_KEY = 'SET_KEY';
 export const UPLOAD_CERT = 'UPLOAD_CERT';
+export const SETTINGS_SET = 'SETTINGS_SET';
 
 export const SELECT_TAB = 'SELECT_TAB';
 

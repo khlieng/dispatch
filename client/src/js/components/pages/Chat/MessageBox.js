@@ -176,13 +176,14 @@ export default class MessageBox extends PureComponent {
       return null;
     }
 
-    const { messages, onNickClick } = this.props;
+    const { messages, coloredNicks, onNickClick } = this.props;
     const message = messages[index - 1];
 
     return (
       <Message
         key={message.id}
         message={message}
+        coloredNick={coloredNicks}
         style={style}
         onNickClick={onNickClick}
       />

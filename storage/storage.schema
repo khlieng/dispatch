@@ -1,7 +1,12 @@
 struct User {
-  ID       uint64
-  Username string
-  lastIP   []byte
+  ID             uint64
+  Username       string
+  clientSettings *ClientSettings
+  lastIP         []byte
+}
+
+struct ClientSettings {
+  ColoredNicks bool
 }
 
 struct Server {

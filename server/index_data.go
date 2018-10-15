@@ -27,6 +27,8 @@ type indexData struct {
 	Channels []*storage.Channel
 	HexIP    bool
 
+	Settings *storage.ClientSettings
+
 	// Users in the selected channel
 	Users *Userlist
 
@@ -53,6 +55,8 @@ func getIndexData(r *http.Request, state *State) *indexData {
 	if state == nil {
 		return &data
 	}
+
+	data.Settings = state.user.GetClientSettings()
 
 	servers, err := state.user.GetServers()
 	if err != nil {

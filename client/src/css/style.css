@@ -7,6 +7,7 @@
 body {
   font-family: Roboto Mono, monospace;
   background: #f0f0f0;
+  color: #222;
 }
 
 h1,
@@ -16,11 +17,6 @@ h4,
 h5,
 h6 {
   font-family: Montserrat, sans-serif;
-  font-weight: 400;
-}
-
-h1 {
-  font-weight: 700;
 }
 
 input {
@@ -28,6 +24,7 @@ input {
   border: none;
   outline: none;
   background: #fff;
+  color: #222;
 }
 
 input::-ms-clear {
@@ -54,26 +51,44 @@ button:active {
   background: #6bb758;
 }
 
-input[type='checkbox'] {
+label {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+}
+
+.checkbox.top-label {
+  flex-direction: column;
+}
+
+.checkbox input {
   position: absolute;
   left: -99999px;
   opacity: 0;
 }
 
-input[type='checkbox'] + span {
+.checkbox span {
   width: 20px;
   height: 20px;
   border: 2px solid #777;
-  display: inline-block;
   position: relative;
 }
 
-input[type='checkbox']:checked + span {
+.checkbox:not(.top-label) span {
+  margin-right: 10px;
+}
+
+.checkbox input:checked + span {
   background: #6bb758;
   border-color: #6bb758;
 }
 
-input[type='checkbox']:checked + span:before {
+.checkbox input:checked + span:before {
   content: '';
   width: 5px;
   height: 10px;
@@ -456,6 +471,8 @@ input::-webkit-inner-spin-button {
   margin-left: 10px;
   padding: 0 5px;
   font: 24px Montserrat, sans-serif;
+  font-weight: 700;
+  color: #222;
   white-space: nowrap;
   line-height: 50px;
 }
@@ -692,46 +709,84 @@ input.message-input-nick.invalid {
   background: #ddd;
 }
 
-.settings {
-  text-align: center;
+.settings-container {
+  display: flex;
+  justify-content: center;
   overflow: auto;
+  height: 100%;
 }
 
-.settings p {
-  color: #999;
+.settings {
+  flex: 1;
+  max-width: 692px;
+}
+
+.settings-section {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 0 20px;
+  margin-bottom: 20px;
+}
+
+.settings .checkbox {
+  margin-top: 15px;
 }
 
 .settings h1 {
+  text-align: center;
   margin: 20px;
 }
 
 .settings h2 {
-  margin: 15px;
+  font-weight: 700;
+  color: #222;
 }
 
 .settings button {
-  margin: 5px;
   width: 200px;
 }
 
-.settings div {
-  display: inline-block;
-}
-
 .settings .error {
-  margin: 10px;
+  margin-top: 15px;
   color: #f6546a;
+  text-align: center;
 }
 
 .input-file {
   color: #fff;
   background: #222 !important;
   padding: 10px;
-  margin: 5px;
   width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.settings-file {
+  text-align: center;
+  display: inline-block;
+  margin-top: 15px;
+  margin-right: 10px;
+}
+
+@media (max-width: 906px) {
+  .settings-file {
+    display: block;
+    margin-right: 0;
+  }
+
+  .settings-button {
+    margin-top: 10px;
+  }
+}
+
+.settings-file p {
+  margin-bottom: 5px;
+  color: #999;
+}
+
+.settings-cert {
+  text-align: center;
 }
 
 .ReactVirtualized__List {
@@ -812,5 +867,9 @@ input.message-input-nick.invalid {
     width: 100%;
     margin: auto 50px;
     max-width: 400px;
+  }
+
+  .settings-section {
+    margin-left: 50px;
   }
 }

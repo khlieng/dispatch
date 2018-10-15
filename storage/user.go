@@ -12,16 +12,20 @@ type User struct {
 	IDBytes  []byte
 	Username string
 
-	store        Store
-	messageLog   MessageStore
-	messageIndex MessageSearchProvider
-	lastIP       []byte
-	certificate  *tls.Certificate
-	lock         sync.Mutex
+	store          Store
+	messageLog     MessageStore
+	messageIndex   MessageSearchProvider
+	clientSettings *ClientSettings
+	lastIP         []byte
+	certificate    *tls.Certificate
+	lock           sync.Mutex
 }
 
 func NewUser(store Store) (*User, error) {
-	user := &User{store: store}
+	user := &User{
+		store:          store,
+		clientSettings: DefaultClientSettings(),
+	}
 
 	err := store.SaveUser(user)
 	if err != nil {
@@ -80,6 +84,44 @@ func (u *User) SetLastIP(ip []byte) error {
 	u.lock.Lock()
 	u.lastIP = ip
 	u.lock.Unlock()
+
+	return u.store.SaveUser(u)
+}
+
+//easyjson:json
+type ClientSettings struct {
+	ColoredNicks bool
+}
+
+func DefaultClientSettings() *ClientSettings {
+	return &ClientSettings{
+		ColoredNicks: true,
+	}
+}
+
+func (u *User) GetClientSettings() *ClientSettings {
+	u.lock.Lock()
+	settings := *u.clientSettings
+	u.lock.Unlock()
+	return &settings
+}
+
+func (u *User) SetClientSettings(settings *ClientSettings) error {
+	u.lock.Lock()
+	u.clientSettings = settings
+	u.lock.Unlock()
+
+	return u.store.SaveUser(u)
+}
+
+func (u *User) UnmarshalClientSettingsJSON(b []byte) error {
+	u.lock.Lock()
+	err := u.clientSettings.UnmarshalJSON(b)
+	u.lock.Unlock()
+
+	if err != nil {
+		return err
+	}
 
 	return u.store.SaveUser(u)
 }

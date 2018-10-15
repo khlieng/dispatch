@@ -32,6 +32,7 @@ import {
   setNick,
   setServerName
 } from 'state/servers';
+import { getSettings } from 'state/settings';
 import { getSelectedTab, select } from 'state/tab';
 import { getShowUserList, toggleUserList } from 'state/ui';
 
@@ -46,7 +47,8 @@ const mapState = createStructuredSelector({
   status: getCurrentServerStatus,
   tab: getSelectedTab,
   title: getSelectedTabTitle,
-  users: getSelectedChannelUsers
+  users: getSelectedChannelUsers,
+  coloredNicks: state => getSettings(state).coloredNicks
 });
 
 const mapDispatch = dispatch => ({

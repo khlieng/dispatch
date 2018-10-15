@@ -1,3 +1,4 @@
+import assign from 'lodash/assign';
 import createReducer from 'utils/createReducer';
 import * as actions from './actions';
 
@@ -36,6 +37,14 @@ export default createReducer(
     [actions.SET_KEY](state, action) {
       state.keyFile = action.fileName;
       state.key = action.key;
+    },
+
+    [actions.SETTINGS_SET](state, { key, value, settings }) {
+      if (settings) {
+        assign(state, settings);
+      } else {
+        state[key] = value;
+      }
     }
   }
 );
@@ -81,4 +90,38 @@ export function setKey(fileName, key) {
     fileName,
     key: key
   };
+}
+
+export function setSetting(key, value) {
+  return {
+    type: actions.SETTINGS_SET,
+    key,
+    value,
+    socket: {
+      type: 'settings_set',
+      data: {
+        [key]: value
+      },
+      debounce: {
+        delay: 250,
+        key: `settings:${key}`
+      }
+    }
+  };
+}
+
+export function setSettings(settings, local = false) {
+  const action = {
+    type: actions.SETTINGS_SET,
+    settings
+  };
+
+  if (!local) {
+    action.socket = {
+      type: 'settings_set',
+      data: settings
+    };
+  }
+
+  return action;
 }

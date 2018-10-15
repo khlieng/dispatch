@@ -16,12 +16,13 @@ export default class UserList extends PureComponent {
   };
 
   renderUser = ({ index, style, key }) => {
-    const { users, onNickClick } = this.props;
+    const { users, coloredNicks, onNickClick } = this.props;
 
     return (
       <UserListItem
         key={key}
         user={users[index]}
+        coloredNick={coloredNicks}
         style={style}
         onClick={onNickClick}
       />

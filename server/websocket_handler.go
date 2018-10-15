@@ -274,6 +274,13 @@ func (h *wsHandler) setServerName(b []byte) {
 	}
 }
 
+func (h *wsHandler) setSettings(b []byte) {
+	err := h.state.user.UnmarshalClientSettingsJSON(b)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func (h *wsHandler) initHandlers() {
 	h.handlers = map[string]func([]byte){
 		"connect":         h.connect,
@@ -293,6 +300,7 @@ func (h *wsHandler) initHandlers() {
 		"cert":            h.cert,
 		"fetch_messages":  h.fetchMessages,
 		"set_server_name": h.setServerName,
+		"settings_set":    h.setSettings,
 	}
 }
 

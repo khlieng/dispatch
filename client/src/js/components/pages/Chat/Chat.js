@@ -50,6 +50,7 @@ export default class Chat extends Component {
   render() {
     const {
       channel,
+      coloredNicks,
       currentInputHistoryEntry,
       hasMoreMessages,
       messages,
@@ -69,7 +70,6 @@ export default class Chat extends Component {
       toggleSearch,
       toggleUserList
     } = this.props;
-
     let chatClass;
     if (isChannel(tab)) {
       chatClass = 'chat-channel';
@@ -93,6 +93,7 @@ export default class Chat extends Component {
         />
         <Search search={search} onSearch={this.handleSearch} />
         <MessageBox
+          coloredNicks={coloredNicks}
           hasMoreMessages={hasMoreMessages}
           messages={messages}
           tab={tab}
@@ -111,6 +112,7 @@ export default class Chat extends Component {
           {...inputActions}
         />
         <UserList
+          coloredNicks={coloredNicks}
           showUserList={showUserList}
           users={users}
           onNickClick={this.handleNickClick}

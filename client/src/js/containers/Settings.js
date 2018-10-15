@@ -1,7 +1,13 @@
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import Settings from 'components/pages/Settings';
-import { getSettings, setCert, setKey, uploadCert } from 'state/settings';
+import {
+  getSettings,
+  setSetting,
+  setCert,
+  setKey,
+  uploadCert
+} from 'state/settings';
 
 const mapState = createStructuredSelector({
   settings: getSettings
@@ -10,7 +16,8 @@ const mapState = createStructuredSelector({
 const mapDispatch = {
   onCertChange: setCert,
   onKeyChange: setKey,
-  uploadCert
+  uploadCert,
+  setSetting
 };
 
 export default connect(

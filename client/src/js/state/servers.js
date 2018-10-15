@@ -200,8 +200,8 @@ export function setServerName(name, server) {
         server
       },
       debounce: {
-        delay: 1000,
-        key: server
+        delay: 500,
+        key: `server_name:${server}`
       }
     };
   }

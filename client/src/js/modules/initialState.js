@@ -2,6 +2,7 @@ import Cookie from 'js-cookie';
 import { socket as socketActions } from 'state/actions';
 import { getWrapWidth, setConnectDefaults, appSet } from 'state/app';
 import { addMessages } from 'state/messages';
+import { setSettings } from 'state/settings';
 import { select, updateSelection } from 'state/tab';
 import { find } from 'utils';
 import { when } from 'utils/observe';
@@ -12,6 +13,7 @@ export default function initialState({ store }) {
 
   store.dispatch(setConnectDefaults(env.defaults));
   store.dispatch(appSet('hexIP', env.hexIP));
+  store.dispatch(setSettings(env.settings, true));
 
   if (env.servers) {
     store.dispatch({

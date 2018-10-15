@@ -99,6 +99,16 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 			}
 		case "hexIP":
 			out.HexIP = bool(in.Bool())
+		case "settings":
+			if in.IsNull() {
+				in.Skip()
+				out.Settings = nil
+			} else {
+				if out.Settings == nil {
+					out.Settings = new(storage.ClientSettings)
+				}
+				easyjson7e607aefDecodeGithubComKhliengDispatchStorage1(in, &*out.Settings)
+			}
 		case "users":
 			if in.IsNull() {
 				in.Skip()
@@ -199,6 +209,16 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 		}
 		out.Bool(bool(in.HexIP))
 	}
+	if in.Settings != nil {
+		const prefix string = ",\"settings\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		easyjson7e607aefEncodeGithubComKhliengDispatchStorage1(out, *in.Settings)
+	}
 	if in.Users != nil {
 		const prefix string = ",\"users\":"
 		if first {
@@ -244,6 +264,53 @@ func (v *indexData) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *indexData) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson7e607aefDecodeGithubComKhliengDispatchServer(l, v)
+}
+func easyjson7e607aefDecodeGithubComKhliengDispatchStorage1(in *jlexer.Lexer, out *storage.ClientSettings) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "coloredNicks":
+			out.ColoredNicks = bool(in.Bool())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson7e607aefEncodeGithubComKhliengDispatchStorage1(out *jwriter.Writer, in storage.ClientSettings) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if in.ColoredNicks {
+		const prefix string = ",\"coloredNicks\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.ColoredNicks))
+	}
+	out.RawByte('}')
 }
 func easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in *jlexer.Lexer, out *storage.Channel) {
 	isTopLevel := in.IsStart()

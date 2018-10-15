@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { Form, withFormik } from 'formik';
 import Navicon from 'containers/Navicon';
-import Checkbox from 'components/ui/Checkbox';
+import Checkbox from 'components/ui/formik/Checkbox';
 import TextInput from 'components/ui/TextInput';
 import Error from 'components/ui/formik/Error';
 import { isValidNick, isValidChannel, isValidUsername, isInt } from 'utils';
@@ -77,7 +77,12 @@ class Connect extends Component {
           <div className="connect-form-address">
             <TextInput name="host" placeholder="Host" />
             <TextInput name="port" type="number" placeholder="Port" />
-            <Checkbox name="tls" label="SSL" onChange={this.handleSSLChange} />
+            <Checkbox
+              name="tls"
+              label="SSL"
+              topLabel
+              onChange={this.handleSSLChange}
+            />
           </div>
           <Error name="host" />
           <Error name="port" />

@@ -80,6 +80,16 @@ func TestUser(t *testing.T) {
 	channels, err = user.GetChannels()
 	assert.Len(t, channels, 0)
 
+	settings := user.GetClientSettings()
+	assert.NotNil(t, settings)
+	assert.Equal(t, storage.DefaultClientSettings(), settings)
+
+	settings.ColoredNicks = !settings.ColoredNicks
+	err = user.SetClientSettings(settings)
+	assert.Nil(t, err)
+	assert.Equal(t, settings, user.GetClientSettings())
+	assert.NotEqual(t, settings, storage.DefaultClientSettings())
+
 	user.Remove()
 	_, err = os.Stat(storage.Path.User(user.Username))
 	assert.True(t, os.IsNotExist(err))

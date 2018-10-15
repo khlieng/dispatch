@@ -1,30 +1,18 @@
 import React from 'react';
-import { Field } from 'formik';
+import classnames from 'classnames';
 
-const Checkbox = ({ name, label, onChange, ...props }) => (
-  <Field
-    name={name}
-    render={({ field, form }) => (
-      <label htmlFor={name}>
-        {label && <div>{label}</div>}
-        <input
-          type="checkbox"
-          id={name}
-          name={name}
-          checked={field.value}
-          onChange={e => {
-            form.setFieldTouched(name, true);
-            field.onChange(e);
-            if (onChange) {
-              onChange(e);
-            }
-          }}
-          {...props}
-        />
-        <span />
-      </label>
-    )}
-  />
+const Checkbox = ({ name, label, topLabel, ...props }) => (
+  <label
+    className={classnames('checkbox', {
+      'top-label': topLabel
+    })}
+    htmlFor={name}
+  >
+    {topLabel && label}
+    <input type="checkbox" id={name} name={name} {...props} />
+    <span />
+    {!topLabel && label}
+  </label>
 );
 
 export default Checkbox;

@@ -6,7 +6,7 @@ export default class Message extends PureComponent {
   handleNickClick = () => this.props.onNickClick(this.props.message.from);
 
   render() {
-    const { message } = this.props;
+    const { message, coloredNick } = this.props;
 
     const className = classnames('message', {
       [`message-${message.type}`]: message.type
@@ -19,7 +19,7 @@ export default class Message extends PureComponent {
     };
 
     const senderStyle = {};
-    if (message.from) {
+    if (message.from && coloredNick) {
       senderStyle.color = stringToRGB(message.from);
     }
 

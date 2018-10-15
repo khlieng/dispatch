@@ -30,6 +30,15 @@ func (d *User) Size() (s uint64) {
 		s += l
 	}
 	{
+		if d.clientSettings != nil {
+
+			{
+				s += (*d.clientSettings).Size()
+			}
+			s += 0
+		}
+	}
+	{
 		l := uint64(len(d.lastIP))
 
 		{
@@ -44,7 +53,7 @@ func (d *User) Size() (s uint64) {
 		}
 		s += l
 	}
-	s += 8
+	s += 9
 	return
 }
 func (d *User) Marshal(buf []byte) ([]byte, error) {
@@ -83,6 +92,22 @@ func (d *User) Marshal(buf []byte) ([]byte, error) {
 		i += l
 	}
 	{
+		if d.clientSettings == nil {
+			buf[i+8] = 0
+		} else {
+			buf[i+8] = 1
+
+			{
+				nbuf, err := (*d.clientSettings).Marshal(buf[i+9:])
+				if err != nil {
+					return nil, err
+				}
+				i += uint64(len(nbuf))
+			}
+			i += 0
+		}
+	}
+	{
 		l := uint64(len(d.lastIP))
 
 		{
@@ -90,18 +115,18 @@ func (d *User) Marshal(buf []byte) ([]byte, error) {
 			t := uint64(l)
 
 			for t >= 0x80 {
-				buf[i+8] = byte(t) | 0x80
+				buf[i+9] = byte(t) | 0x80
 				t >>= 7
 				i++
 			}
-			buf[i+8] = byte(t)
+			buf[i+9] = byte(t)
 			i++
 
 		}
-		copy(buf[i+8:], d.lastIP)
+		copy(buf[i+9:], d.lastIP)
 		i += l
 	}
-	return buf[:i+8], nil
+	return buf[:i+9], nil
 }
 
 func (d *User) Unmarshal(buf []byte) (uint64, error) {
@@ -133,15 +158,33 @@ func (d *User) Unmarshal(buf []byte) (uint64, error) {
 		i += l
 	}
 	{
+		if buf[i+8] == 1 {
+			if d.clientSettings == nil {
+				d.clientSettings = new(ClientSettings)
+			}
+
+			{
+				ni, err := (*d.clientSettings).Unmarshal(buf[i+9:])
+				if err != nil {
+					return 0, err
+				}
+				i += ni
+			}
+			i += 0
+		} else {
+			d.clientSettings = nil
+		}
+	}
+	{
 		l := uint64(0)
 
 		{
 
 			bs := uint8(7)
-			t := uint64(buf[i+8] & 0x7F)
-			for buf[i+8]&0x80 == 0x80 {
+			t := uint64(buf[i+9] & 0x7F)
+			for buf[i+9]&0x80 == 0x80 {
 				i++
-				t |= uint64(buf[i+8]&0x7F) << bs
+				t |= uint64(buf[i+9]&0x7F) << bs
 				bs += 7
 			}
 			i++
@@ -154,10 +197,45 @@ func (d *User) Unmarshal(buf []byte) (uint64, error) {
 		} else {
 			d.lastIP = make([]byte, l)
 		}
-		copy(d.lastIP, buf[i+8:])
+		copy(d.lastIP, buf[i+9:])
 		i += l
 	}
-	return i + 8, nil
+	return i + 9, nil
+}
+
+func (d *ClientSettings) Size() (s uint64) {
+
+	s += 1
+	return
+}
+func (d *ClientSettings) Marshal(buf []byte) ([]byte, error) {
+	size := d.Size()
+	{
+		if uint64(cap(buf)) >= size {
+			buf = buf[:size]
+		} else {
+			buf = make([]byte, size)
+		}
+	}
+	i := uint64(0)
+
+	{
+		if d.ColoredNicks {
+			buf[0] = 1
+		} else {
+			buf[0] = 0
+		}
+	}
+	return buf[:i+1], nil
+}
+
+func (d *ClientSettings) Unmarshal(buf []byte) (uint64, error) {
+	i := uint64(0)
+
+	{
+		d.ColoredNicks = buf[0] == 1
+	}
+	return i + 1, nil
 }
 
 func (d *Server) Size() (s uint64) {
