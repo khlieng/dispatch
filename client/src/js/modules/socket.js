@@ -152,6 +152,10 @@ export default function handleSocket({
       handlers[type](data);
     }
 
+    if (type.charAt(0) === '_') {
+      return;
+    }
+
     dispatch(action);
   });
 }

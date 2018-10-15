@@ -13,6 +13,7 @@ export default class Socket {
       jitter: 0.25
     });
     this.handlers = [];
+    this.connected = false;
 
     this.connect();
   }
@@ -26,6 +27,7 @@ export default class Socket {
     }, this.connectTimeout);
 
     this.ws.onopen = () => {
+      this.connected = true;
       this.emit('_connected', true);
       clearTimeout(this.timeoutConnect);
       this.backoff.reset();
@@ -33,7 +35,10 @@ export default class Socket {
     };
 
     this.ws.onclose = () => {
-      this.emit('_connected', false);
+      if (this.connected) {
+        this.connected = false;
+        this.emit('_connected', false);
+      }
       clearTimeout(this.timeoutConnect);
       clearTimeout(this.timeoutPing);
       if (!this.closing) {
@@ -57,6 +62,7 @@ export default class Socket {
 
       if (msg.type === 'ping') {
         this.send('pong');
+        return;
       }
 
       this.emit(msg.type, msg.data);
