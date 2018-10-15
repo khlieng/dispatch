@@ -53,6 +53,7 @@ func getIndexData(r *http.Request, state *State) *indexData {
 	}
 
 	if state == nil {
+		data.Settings = storage.DefaultClientSettings()
 		return &data
 	}
 
