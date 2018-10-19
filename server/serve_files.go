@@ -21,7 +21,7 @@ import (
 	"github.com/khlieng/dispatch/assets"
 )
 
-const longCacheControl = "public, max-age=31536000"
+const longCacheControl = "public, max-age=31536000, immutable"
 const disabledCacheControl = "no-cache, no-store, must-revalidate"
 
 type File struct {

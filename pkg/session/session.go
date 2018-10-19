@@ -58,7 +58,7 @@ func (s *Session) SetCookie(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if v := cookie.String(); v != "" {
-		w.Header().Add("Set-Cookie", v+"; SameSite=Strict")
+		w.Header().Add("Set-Cookie", v+"; SameSite=Lax")
 	}
 }
 
