@@ -6,14 +6,16 @@ import UserListItem from './UserListItem';
 
 export default class UserList extends PureComponent {
   getSnapshotBeforeUpdate(prevProps) {
-    const { users } = this.props;
+    if (this.list.current) {
+      const { users } = this.props;
 
-    if (prevProps.users.length !== users.length) {
-      this.list.current.resetAfterIndex(
-        Math.min(prevProps.users.length, users.length) + 1
-      );
-    } else {
-      this.list.current.forceUpdate();
+      if (prevProps.users.length !== users.length) {
+        this.list.current.resetAfterIndex(
+          Math.min(prevProps.users.length, users.length) + 1
+        );
+      } else {
+        this.list.current.forceUpdate();
+      }
     }
 
     return null;
