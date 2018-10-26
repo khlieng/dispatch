@@ -601,8 +601,9 @@ input.chat-title {
   padding-top: 40px;
 }
 
-.VirtualScroll {
+.messagebox-window {
   overflow-x: hidden !important;
+  overflow-y: scroll !important;
 }
 
 .message {
@@ -787,20 +788,6 @@ input.message-input-nick.invalid {
 
 .settings-cert {
   text-align: center;
-}
-
-.ReactVirtualized__List {
-  box-sizing: content-box !important;
-  outline: none;
-}
-
-.rvlist-messages {
-  padding: 7px 0;
-  overflow-y: scroll !important;
-}
-
-.rvlist-users {
-  padding: 10px 0;
 }
 
 @media (max-width: 600px) {

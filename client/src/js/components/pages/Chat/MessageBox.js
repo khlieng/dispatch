@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
-import { List } from 'react-virtualized/dist/commonjs/List';
-import { AutoSizer } from 'react-virtualized/dist/commonjs/AutoSizer';
+import { VariableSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import debounce from 'lodash/debounce';
 import { getScrollPos, saveScrollPos } from 'utils/scrollPosition';
 import Message from './Message';
@@ -12,40 +12,56 @@ const fetchThreshold = 600;
 const scrollbackDebounce = 100;
 
 export default class MessageBox extends PureComponent {
-  componentWillMount() {
+  constructor(props) {
+    super(props);
+
     this.loadScrollPos();
   }
 
   componentDidMount() {
-    this.mounted = true;
-    this.scrollTop = -1;
+    const scrollToBottom = this.bottom;
+
+    window.requestAnimationFrame(() => {
+      const { messages } = this.props;
+
+      if (scrollToBottom && messages.length > 0) {
+        this.list.current.scrollToItem(messages.length + 1);
+      }
+    });
   }
 
-  componentWillUpdate(nextProps) {
-    if (nextProps.messages !== this.props.messages) {
-      this.list.recomputeRowHeights();
+  getSnapshotBeforeUpdate(prevProps) {
+    if (prevProps.messages !== this.props.messages) {
+      this.list.current.resetAfterIndex(0);
     }
 
-    if (nextProps.tab !== this.props.tab) {
+    if (prevProps.tab !== this.props.tab) {
       this.saveScrollPos();
       this.bottom = false;
     }
 
-    if (nextProps.messages[0] !== this.props.messages[0]) {
-      if (nextProps.tab === this.props.tab) {
-        const addedMessages =
-          nextProps.messages.length - this.props.messages.length;
+    if (prevProps.messages[0] !== this.props.messages[0]) {
+      const { messages, hasMoreMessages } = this.props;
+
+      if (prevProps.tab === this.props.tab) {
+        const addedMessages = messages.length - prevProps.messages.length;
         let addedHeight = 0;
         for (let i = 0; i < addedMessages; i++) {
-          addedHeight += nextProps.messages[i].height;
+          addedHeight += messages[i].height;
         }
 
-        this.nextScrollTop = addedHeight + this.container.scrollTop;
+        this.nextScrollTop = addedHeight + this.outer.current.scrollTop;
+
+        if (!hasMoreMessages) {
+          this.nextScrollTop -= 93;
+        }
       }
 
       this.loading = false;
       this.ready = false;
     }
+
+    return null;
   }
 
   componentDidUpdate(prevProps) {
@@ -54,10 +70,10 @@ export default class MessageBox extends PureComponent {
     }
 
     if (this.nextScrollTop > 0) {
-      this.container.scrollTop = this.nextScrollTop;
+      this.list.current.scrollTo(this.nextScrollTop);
       this.nextScrollTop = 0;
     } else if (this.bottom) {
-      this.list.scrollToRow(this.props.messages.length);
+      this.list.current.scrollToItem(this.props.messages.length + 1);
     }
   }
 
@@ -65,23 +81,33 @@ export default class MessageBox extends PureComponent {
     this.saveScrollPos();
   }
 
-  getRowHeight = ({ index }) => {
+  getRowHeight = index => {
+    const { messages, hasMoreMessages } = this.props;
+
     if (index === 0) {
-      if (this.props.hasMoreMessages) {
+      if (hasMoreMessages) {
         return 100;
       }
-      return 0;
+      return 7;
+    } else if (index === messages.length + 1) {
+      return 7;
     }
-    return this.props.messages[index - 1].height;
+    return messages[index - 1].height;
   };
 
-  listRef = el => {
-    this.list = el;
-    if (el) {
-      // eslint-disable-next-line no-underscore-dangle
-      this.container = el.Grid._scrollingContainer;
+  getItemKey = index => {
+    const { messages } = this.props;
+
+    if (index === 0) {
+      return 'top';
+    } else if (index === messages.length + 1) {
+      return 'bottom';
     }
+    return messages[index - 1].id;
   };
+
+  list = React.createRef();
+  outer = React.createRef();
 
   updateScrollKey = () => {
     const { tab } = this.props;
@@ -94,14 +120,14 @@ export default class MessageBox extends PureComponent {
     if (pos >= 0) {
       this.bottom = false;
       if (scroll) {
-        this.list.scrollToPosition(pos);
+        this.list.current.scrollTo(pos);
       } else {
-        this.scrollTop = pos;
+        this.initialScrollTop = pos;
       }
     } else {
       this.bottom = true;
       if (scroll) {
-        this.list.scrollToRow(this.props.messages.length);
+        this.list.current.scrollToItem(this.props.messages.length + 1);
       }
     }
   };
@@ -110,7 +136,7 @@ export default class MessageBox extends PureComponent {
     if (this.bottom) {
       saveScrollPos(this.scrollKey, -1);
     } else {
-      saveScrollPos(this.scrollKey, this.container.scrollTop);
+      saveScrollPos(this.scrollKey, this.outer.current.scrollTop);
     }
   };
 
@@ -125,29 +151,28 @@ export default class MessageBox extends PureComponent {
     onAddMore(tab.server, tab.name);
   }, scrollbackDebounce);
 
-  handleScroll = ({ scrollTop, clientHeight, scrollHeight }) => {
-    if (this.mounted) {
-      if (
-        !this.loading &&
-        this.props.hasMoreMessages &&
-        scrollTop <= fetchThreshold &&
-        scrollTop < this.prevScrollTop
-      ) {
-        this.fetchMore();
-      }
-
-      if (this.loading && !this.ready) {
-        if (this.mouseDown) {
-          this.ready = true;
-          this.shouldAdd = true;
-        } else {
-          this.addMore();
-        }
-      }
-
-      this.bottom = scrollTop + clientHeight >= scrollHeight - 10;
-      this.prevScrollTop = scrollTop;
+  handleScroll = ({ scrollOffset, scrollDirection }) => {
+    if (
+      !this.loading &&
+      this.props.hasMoreMessages &&
+      scrollOffset <= fetchThreshold &&
+      scrollDirection === 'backward'
+    ) {
+      this.fetchMore();
     }
+
+    if (this.loading && !this.ready) {
+      if (this.mouseDown) {
+        this.ready = true;
+        this.shouldAdd = true;
+      } else {
+        this.addMore();
+      }
+    }
+
+    const { clientHeight, scrollHeight } = this.outer.current;
+
+    this.bottom = scrollOffset + clientHeight >= scrollHeight - 20;
   };
 
   handleMouseDown = () => {
@@ -165,23 +190,26 @@ export default class MessageBox extends PureComponent {
   };
 
   renderMessage = ({ index, style }) => {
+    const { messages } = this.props;
+
     if (index === 0) {
       if (this.props.hasMoreMessages) {
         return (
-          <div key="top" className="messagebox-top-indicator" style={style}>
+          <div className="messagebox-top-indicator" style={style}>
             Loading messages...
           </div>
         );
       }
       return null;
+    } else if (index === messages.length + 1) {
+      return null;
     }
 
-    const { messages, coloredNicks, onNickClick } = this.props;
+    const { coloredNicks, onNickClick } = this.props;
     const message = messages[index - 1];
 
     return (
       <Message
-        key={message.id}
         message={message}
         coloredNick={coloredNicks}
         style={style}
@@ -191,13 +219,6 @@ export default class MessageBox extends PureComponent {
   };
 
   render() {
-    const props = {};
-    if (this.bottom) {
-      props.scrollToIndex = this.props.messages.length;
-    } else if (this.scrollTop >= 0) {
-      props.scrollTop = this.scrollTop;
-    }
-
     return (
       <div
         className="messagebox"
@@ -207,16 +228,20 @@ export default class MessageBox extends PureComponent {
         <AutoSizer>
           {({ width, height }) => (
             <List
-              ref={this.listRef}
+              ref={this.list}
+              outerRef={this.outer}
               width={width}
-              height={height - 14}
-              rowCount={this.props.messages.length + 1}
-              rowHeight={this.getRowHeight}
-              rowRenderer={this.renderMessage}
+              height={height}
+              itemCount={this.props.messages.length + 2}
+              itemKey={this.getItemKey}
+              itemSize={this.getRowHeight}
+              estimatedItemSize={32}
+              initialScrollOffset={this.initialScrollTop}
               onScroll={this.handleScroll}
-              className="rvlist-messages"
-              {...props}
-            />
+              className="messagebox-window"
+            >
+              {this.renderMessage}
+            </List>
           )}
         </AutoSizer>
       </div>

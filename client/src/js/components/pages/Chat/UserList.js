@@ -1,27 +1,58 @@
 import React, { PureComponent } from 'react';
-import { List } from 'react-virtualized/dist/commonjs/List';
-import { AutoSizer } from 'react-virtualized/dist/commonjs/AutoSizer';
+import { VariableSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import classnames from 'classnames';
 import UserListItem from './UserListItem';
 
 export default class UserList extends PureComponent {
-  componentWillUpdate(nextProps) {
-    if (nextProps.users.size === this.props.users.size) {
-      this.list.forceUpdateGrid();
+  getSnapshotBeforeUpdate(prevProps) {
+    const { users } = this.props;
+
+    if (prevProps.users.length !== users.length) {
+      this.list.current.resetAfterIndex(
+        Math.min(prevProps.users.length, users.length) + 1
+      );
+    } else {
+      this.list.current.forceUpdate();
     }
+
+    return null;
   }
 
-  listRef = el => {
-    this.list = el;
+  getItemHeight = index => {
+    const { users } = this.props;
+
+    if (index === 0) {
+      return 12;
+    } else if (index === users.length + 1) {
+      return 10;
+    }
+    return 24;
   };
 
-  renderUser = ({ index, style, key }) => {
+  getItemKey = index => {
+    const { users } = this.props;
+
+    if (index === 0) {
+      return 'top';
+    } else if (index === users.length + 1) {
+      return 'bottom';
+    }
+    return index;
+  };
+
+  list = React.createRef();
+
+  renderUser = ({ index, style }) => {
     const { users, coloredNicks, onNickClick } = this.props;
+
+    if (index === 0 || index === users.length + 1) {
+      return null;
+    }
 
     return (
       <UserListItem
-        key={key}
-        user={users[index]}
+        user={users[index - 1]}
         coloredNick={coloredNicks}
         style={style}
         onClick={onNickClick}
@@ -41,14 +72,16 @@ export default class UserList extends PureComponent {
         <AutoSizer disableWidth>
           {({ height }) => (
             <List
-              ref={this.listRef}
+              ref={this.list}
               width={200}
-              height={height - 20}
-              rowCount={users.length}
-              rowHeight={24}
-              rowRenderer={this.renderUser}
-              className="rvlist-users"
-            />
+              height={height}
+              itemCount={users.length + 2}
+              itemKey={this.getItemKey}
+              itemSize={this.getItemHeight}
+              estimatedItemSize={24}
+            >
+              {this.renderUser}
+            </List>
           )}
         </AutoSizer>
       </div>

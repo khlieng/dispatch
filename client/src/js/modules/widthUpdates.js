@@ -2,6 +2,7 @@ import { getCharWidth } from 'state/app';
 import { updateMessageHeight } from 'state/messages';
 import { when } from 'utils/observe';
 import { measureScrollBarWidth } from 'utils';
+import { addResizeListener } from 'utils/size';
 
 const menuWidth = 200;
 const messagePadding = 30;
@@ -13,8 +14,7 @@ export default function widthUpdates({ store }) {
     const scrollBarWidth = measureScrollBarWidth();
     let prevWrapWidth;
 
-    function updateWidth() {
-      const windowWidth = window.innerWidth;
+    function updateWidth(windowWidth) {
       let wrapWidth = windowWidth - scrollBarWidth - messagePadding;
       if (windowWidth > smallScreen) {
         wrapWidth -= menuWidth;
@@ -26,16 +26,6 @@ export default function widthUpdates({ store }) {
       }
     }
 
-    let resizeRAF;
-
-    function resize() {
-      if (resizeRAF) {
-        window.cancelAnimationFrame(resizeRAF);
-      }
-      resizeRAF = window.requestAnimationFrame(updateWidth);
-    }
-
-    updateWidth();
-    window.addEventListener('resize', resize);
+    addResizeListener(updateWidth, true);
   });
 }
