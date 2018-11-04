@@ -1,25 +1,27 @@
-import React from 'react';
-import { Field } from 'formik';
+import React, { memo } from 'react';
+import { FastField } from 'formik';
 import Checkbox from 'components/ui/Checkbox';
 
 const FormikCheckbox = ({ name, onChange, ...props }) => (
-  <Field
+  <FastField
     name={name}
-    render={({ field, form }) => (
-      <Checkbox
-        name={name}
-        checked={field.value}
-        onChange={e => {
-          form.setFieldTouched(name, true);
-          field.onChange(e);
-          if (onChange) {
-            onChange(e);
-          }
-        }}
-        {...props}
-      />
-    )}
+    render={({ field, form }) => {
+      return (
+        <Checkbox
+          name={name}
+          checked={field.value}
+          onChange={e => {
+            form.setFieldTouched(name, true);
+            field.onChange(e);
+            if (onChange) {
+              onChange(e);
+            }
+          }}
+          {...props}
+        />
+      );
+    }}
   />
 );
 
-export default FormikCheckbox;
+export default memo(FormikCheckbox);

@@ -34,6 +34,7 @@ export default function linkify(text) {
           target="_blank"
           rel="noopener noreferrer"
           href={match.getAnchorHref()}
+          key={i}
         >
           {match.matchedText}
         </a>

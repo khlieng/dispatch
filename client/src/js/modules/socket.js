@@ -123,7 +123,7 @@ export default function handleSocket({
     connection_update({ server, errorType }) {
       if (
         errorType === 'verify' &&
-        confirm(
+        window.confirm(
           'The server is using a self-signed certificate, continue anyway?'
         )
       ) {

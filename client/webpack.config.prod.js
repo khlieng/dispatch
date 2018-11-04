@@ -1,14 +1,16 @@
 var path = require('path');
-var webpack = require('webpack');
 var MiniCssExtractPlugin = require('mini-css-extract-plugin');
-var autoprefixer = require('autoprefixer');
+var postcssPresetEnv = require('postcss-preset-env');
 var cssnano = require('cssnano');
+var TerserPlugin = require('terser-webpack-plugin');
+var ManifestPlugin = require('webpack-manifest-plugin');
 
 module.exports = {
   mode: 'production',
   entry: ['./src/js/index'],
   output: {
-    filename: 'bundle.js'
+    filename: '[name].[chunkhash:8].js',
+    chunkFilename: '[name].[chunkhash:8].js'
   },
   resolve: {
     alias: {
@@ -29,7 +31,11 @@ module.exports = {
           fix: true
         }
       },
-      { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/
+      },
       {
         test: /\.css$/,
         use: [
@@ -43,10 +49,13 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
+              ident: 'postcss',
               plugins: [
                 require('postcss-flexbugs-fixes'),
-                autoprefixer({
-                  flexbox: 'no-2009'
+                postcssPresetEnv({
+                  autoprefixer: {
+                    flexbox: 'no-2009'
+                  }
                 }),
                 cssnano({
                   discardUnused: {
@@ -62,17 +71,24 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: 'bundle.css'
+      filename: '[name].[contenthash:8].css',
+      chunkFilename: '[name].[contenthash:8].css'
+    }),
+    new ManifestPlugin({
+      fileName: 'asset-manifest.json'
     })
   ],
   optimization: {
+    minimizer: [new TerserPlugin()],
     splitChunks: {
+      chunks: 'all',
       cacheGroups: {
         styles: {
           test: /\.css$/,
           chunks: 'all'
         }
       }
-    }
+    },
+    runtimeChunk: true
   }
 };

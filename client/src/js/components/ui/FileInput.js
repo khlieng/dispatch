@@ -1,11 +1,14 @@
 import React, { PureComponent } from 'react';
+import Button from 'components/ui/Button';
 
 export default class FileInput extends PureComponent {
   static defaultProps = {
     type: 'text'
   };
 
-  componentWillMount() {
+  constructor(props) {
+    super(props);
+
     this.input = window.document.createElement('input');
     this.input.setAttribute('type', 'file');
 
@@ -37,9 +40,9 @@ export default class FileInput extends PureComponent {
 
   render() {
     return (
-      <button className="input-file" onClick={this.handleClick}>
+      <Button className="input-file" onClick={this.handleClick}>
         {this.props.name}
-      </button>
+      </Button>
     );
   }
 }

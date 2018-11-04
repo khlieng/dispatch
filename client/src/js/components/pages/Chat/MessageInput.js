@@ -1,25 +1,24 @@
-import React, { PureComponent } from 'react';
+import React, { memo, useState } from 'react';
 import classnames from 'classnames';
 import Editable from 'components/ui/Editable';
 import { isValidNick } from 'utils';
 
-export default class MessageInput extends PureComponent {
-  state = {
-    value: ''
-  };
+const MessageInput = ({
+  nick,
+  currentHistoryEntry,
+  onNickChange,
+  onNickEditDone,
+  tab,
+  onCommand,
+  onMessage,
+  add,
+  reset,
+  increment,
+  decrement
+}) => {
+  const [value, setValue] = useState('');
 
-  handleKey = e => {
-    const {
-      tab,
-      onCommand,
-      onMessage,
-      add,
-      reset,
-      increment,
-      decrement,
-      currentHistoryEntry
-    } = this.props;
-
+  const handleKey = e => {
     if (e.key === 'Enter' && e.target.value) {
       if (e.target.value[0] === '/') {
         onCommand(e.target.value, tab.name, tab.server);
@@ -29,50 +28,41 @@ export default class MessageInput extends PureComponent {
 
       add(e.target.value);
       reset();
-      this.setState({ value: '' });
+      setValue('');
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       increment();
     } else if (e.key === 'ArrowDown') {
       decrement();
     } else if (currentHistoryEntry) {
-      this.setState({ value: e.target.value });
+      setValue(e.target.value);
       reset();
     }
   };
 
-  handleChange = e => {
-    this.setState({ value: e.target.value });
-  };
+  const handleChange = e => setValue(e.target.value);
 
-  render() {
-    const {
-      nick,
-      currentHistoryEntry,
-      onNickChange,
-      onNickEditDone
-    } = this.props;
+  return (
+    <div className="message-input-wrap">
+      <Editable
+        className={classnames('message-input-nick', {
+          invalid: !isValidNick(nick)
+        })}
+        value={nick}
+        onBlur={onNickEditDone}
+        onChange={onNickChange}
+      >
+        <span className="message-input-nick">{nick}</span>
+      </Editable>
+      <input
+        className="message-input"
+        type="text"
+        value={currentHistoryEntry || value}
+        onKeyDown={handleKey}
+        onChange={handleChange}
+      />
+    </div>
+  );
+};
 
-    return (
-      <div className="message-input-wrap">
-        <Editable
-          className={classnames('message-input-nick', {
-            invalid: !isValidNick(nick)
-          })}
-          value={nick}
-          onBlur={onNickEditDone}
-          onChange={onNickChange}
-        >
-          <span className="message-input-nick">{nick}</span>
-        </Editable>
-        <input
-          className="message-input"
-          type="text"
-          value={currentHistoryEntry || this.state.value}
-          onKeyDown={this.handleKey}
-          onChange={this.handleChange}
-        />
-      </div>
-    );
-  }
-}
+export default memo(MessageInput);

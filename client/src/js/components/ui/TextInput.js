@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react';
-import { Field } from 'formik';
+import { FastField } from 'formik';
 import classnames from 'classnames';
+import capitalize from 'lodash/capitalize';
+import Error from 'components/ui/formik/Error';
 
 export default class TextInput extends PureComponent {
   constructor(props) {
@@ -36,44 +38,49 @@ export default class TextInput extends PureComponent {
   };
 
   render() {
-    const { name, placeholder, ...props } = this.props;
+    const { name, label = capitalize(name), noError, ...props } = this.props;
 
     return (
-      <Field
+      <FastField
         name={name}
-        render={({ field, form }) => (
-          <div className="textinput">
-            <input
-              className={field.value && 'value'}
-              type="text"
-              name={name}
-              autoCapitalize="off"
-              autoCorrect="off"
-              autoComplete="off"
-              spellCheck="false"
-              ref={this.input}
-              onFocus={this.handleFocus}
-              {...field}
-              {...props}
-            />
-            <span
-              className={classnames('textinput-1', {
-                value: field.value,
-                error: form.touched[name] && form.errors[name]
-              })}
-            >
-              {placeholder}
-            </span>
-            <span
-              className={classnames('textinput-2', {
-                value: field.value,
-                error: form.touched[name] && form.errors[name]
-              })}
-            >
-              {placeholder}
-            </span>
-          </div>
-        )}
+        render={({ field, form }) => {
+          return (
+            <>
+              <div className="textinput">
+                <input
+                  className={field.value && 'value'}
+                  type="text"
+                  name={name}
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  autoComplete="off"
+                  spellCheck="false"
+                  ref={this.input}
+                  onFocus={this.handleFocus}
+                  {...field}
+                  {...props}
+                />
+                <span
+                  className={classnames('textinput-1', {
+                    value: field.value,
+                    error: form.touched[name] && form.errors[name]
+                  })}
+                >
+                  {label}
+                </span>
+                <span
+                  className={classnames('textinput-2', {
+                    value: field.value,
+                    error: form.touched[name] && form.errors[name]
+                  })}
+                >
+                  {label}
+                </span>
+              </div>
+              {!noError && <Error name={name} />}
+            </>
+          );
+        }}
       />
     );
   }

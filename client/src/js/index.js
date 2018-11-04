@@ -1,5 +1,5 @@
-import 'es6-promise/auto';
-import 'utils/ie11';
+//import 'es6-promise/auto';
+//import 'utils/ie11';
 import React from 'react';
 import { render } from 'react-dom';
 

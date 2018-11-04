@@ -1,10 +1,12 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, createRef } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import classnames from 'classnames';
 import UserListItem from './UserListItem';
 
 export default class UserList extends PureComponent {
+  list = createRef();
+
   getSnapshotBeforeUpdate(prevProps) {
     if (this.list.current) {
       const { users } = this.props;
@@ -42,8 +44,6 @@ export default class UserList extends PureComponent {
     }
     return index;
   };
-
-  list = React.createRef();
 
   renderUser = ({ index, style }) => {
     const { users, coloredNicks, onNickClick } = this.props;

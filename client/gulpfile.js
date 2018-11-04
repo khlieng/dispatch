@@ -66,7 +66,7 @@ function fonts() {
 
 function compress() {
   return gulp
-    .src(['dist/!(*.toml)'])
+    .src(['dist/!(*.toml|*.json)'])
     .pipe(brotli({ quality: 11 }))
     .pipe(gulp.dest('dist'));
 }

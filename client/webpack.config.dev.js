@@ -1,6 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
-var autoprefixer = require('autoprefixer');
+var postcssPresetEnv = require('postcss-preset-env');
 
 module.exports = {
   mode: 'development',
@@ -44,8 +44,10 @@ module.exports = {
             options: {
               plugins: [
                 require('postcss-flexbugs-fixes'),
-                autoprefixer({
-                  flexbox: 'no-2009'
+                postcssPresetEnv({
+                  autoprefixer: {
+                    flexbox: 'no-2009'
+                  }
                 })
               ]
             }

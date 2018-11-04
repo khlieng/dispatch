@@ -790,6 +790,15 @@ input.message-input-nick.invalid {
   text-align: center;
 }
 
+.suspense-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 64px 'Montserrat', sans-serif;
+  height: 100%;
+  color: #ddd;
+}
+
 @media (max-width: 600px) {
   .app-info {
     font-size: 12px;

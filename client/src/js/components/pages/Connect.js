@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { Form, withFormik } from 'formik';
 import Navicon from 'containers/Navicon';
+import Button from 'components/ui/Button';
 import Checkbox from 'components/ui/formik/Checkbox';
 import TextInput from 'components/ui/TextInput';
 import Error from 'components/ui/formik/Error';
@@ -27,7 +28,7 @@ class Connect extends Component {
   };
 
   handleShowClick = () => {
-    this.setState({ showOptionals: !this.state.showOptionals });
+    this.setState(prevState => ({ showOptionals: !prevState.showOptionals }));
   };
 
   renderOptionals = () => {
@@ -35,12 +36,9 @@ class Connect extends Component {
 
     return (
       <div>
-        {!hexIP && [
-          <TextInput name="username" placeholder="Username" />,
-          <Error name="username" />
-        ]}
-        <TextInput type="password" name="password" placeholder="Password" />
-        <TextInput name="realname" placeholder="Realname" />
+        {!hexIP && <TextInput name="username" />}
+        <TextInput name="password" type="password" />
+        <TextInput name="realname" />
       </div>
     );
   };
@@ -64,19 +62,18 @@ class Connect extends Component {
               ))}
             </div>
           )}
-          <TextInput name="nick" placeholder="Nick" />
-          <Error name="nick" />
-          <button>Connect</button>
+          <TextInput name="nick" />
+          <Button type="submit">Connect</Button>
         </Form>
       );
     } else {
       form = (
         <Form className="connect-form">
           <h1>Connect</h1>
-          <TextInput name="name" placeholder="Name" autoCapitalize="words" />
+          <TextInput name="name" autoCapitalize="words" />
           <div className="connect-form-address">
-            <TextInput name="host" placeholder="Host" />
-            <TextInput name="port" type="number" placeholder="Port" />
+            <TextInput name="host" noError />
+            <TextInput name="port" type="number" noError />
             <Checkbox
               name="tls"
               label="SSL"
@@ -86,13 +83,11 @@ class Connect extends Component {
           </div>
           <Error name="host" />
           <Error name="port" />
-          <TextInput name="nick" placeholder="Nick" />
-          <Error name="nick" />
-          <TextInput name="channels" placeholder="Channels" />
-          <Error name="channels" />
+          <TextInput name="nick" />
+          <TextInput name="channels" />
           {this.state.showOptionals && this.renderOptionals()}
           <i className="icon-ellipsis" onClick={this.handleShowClick} />
-          <button>Connect</button>
+          <Button type="submit">Connect</Button>
         </Form>
       );
     }

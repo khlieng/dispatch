@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import classnames from 'classnames';
+import Button from 'components/ui/Button';
 import TabListItem from './TabListItem';
 
 export default class TabList extends PureComponent {
@@ -70,7 +71,7 @@ export default class TabList extends PureComponent {
       <div className={className}>
         <div className="tab-container">{tabs}</div>
         <div className="side-buttons">
-          <button onClick={this.handleConnectClick}>+</button>
+          <Button onClick={this.handleConnectClick}>+</Button>
           <i className="icon-user" />
           <i className="icon-cog" onClick={this.handleSettingsClick} />
         </div>

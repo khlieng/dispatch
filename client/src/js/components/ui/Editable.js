@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, createRef } from 'react';
 import { stringWidth } from 'utils';
 
 export default class Editable extends PureComponent {
@@ -6,26 +6,29 @@ export default class Editable extends PureComponent {
     editable: true
   };
 
+  inputEl = createRef();
+
   state = {
     editing: false
   };
-
-  componentWillReceiveProps(nextProps) {
-    if (this.state.editing && nextProps.value !== this.props.value) {
-      this.updateInputWidth(nextProps.value);
-    }
-  }
 
   componentDidUpdate(prevProps, prevState) {
     if (!prevState.editing && this.state.editing) {
       // eslint-disable-next-line react/no-did-update-set-state
       this.updateInputWidth(this.props.value);
+      this.inputEl.current.focus();
+    }
+  }
+
+  getSnapshotBeforeUpdate(prevProps) {
+    if (this.state.editing && prevProps.value !== this.props.value) {
+      this.updateInputWidth(this.props.value);
     }
   }
 
   updateInputWidth = value => {
-    if (this.input) {
-      const style = window.getComputedStyle(this.input);
+    if (this.inputEl.current) {
+      const style = window.getComputedStyle(this.inputEl.current);
       const padding = parseInt(style.paddingRight, 10);
       // Make sure the width is at least 1px so the caret always shows
       const width =
@@ -75,10 +78,6 @@ export default class Editable extends PureComponent {
     e.target.value = val;
   };
 
-  inputRef = el => {
-    this.input = el;
-  };
-
   render() {
     const { children, className, value } = this.props;
 
@@ -90,8 +89,7 @@ export default class Editable extends PureComponent {
 
     return this.state.editing ? (
       <input
-        autoFocus
-        ref={this.inputRef}
+        ref={this.inputEl}
         className={className}
         type="text"
         value={value}

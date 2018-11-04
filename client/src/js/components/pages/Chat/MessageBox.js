@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, createRef } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import debounce from 'lodash/debounce';
@@ -12,6 +12,15 @@ const fetchThreshold = 600;
 const scrollbackDebounce = 100;
 
 export default class MessageBox extends PureComponent {
+  list = createRef();
+  outer = createRef();
+
+  addMore = debounce(() => {
+    const { tab, onAddMore } = this.props;
+    this.ready = true;
+    onAddMore(tab.server, tab.name);
+  }, scrollbackDebounce);
+
   constructor(props) {
     super(props);
 
@@ -28,6 +37,23 @@ export default class MessageBox extends PureComponent {
         this.list.current.scrollToItem(messages.length + 1);
       }
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.tab !== this.props.tab) {
+      this.loadScrollPos(true);
+    }
+
+    if (this.nextScrollTop > 0) {
+      this.list.current.scrollTo(this.nextScrollTop);
+      this.nextScrollTop = 0;
+    } else if (this.bottom) {
+      this.list.current.scrollToItem(this.props.messages.length + 1);
+    }
+  }
+
+  componentWillUnmount() {
+    this.saveScrollPos();
   }
 
   getSnapshotBeforeUpdate(prevProps) {
@@ -64,23 +90,6 @@ export default class MessageBox extends PureComponent {
     return null;
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.tab !== this.props.tab) {
-      this.loadScrollPos(true);
-    }
-
-    if (this.nextScrollTop > 0) {
-      this.list.current.scrollTo(this.nextScrollTop);
-      this.nextScrollTop = 0;
-    } else if (this.bottom) {
-      this.list.current.scrollToItem(this.props.messages.length + 1);
-    }
-  }
-
-  componentWillUnmount() {
-    this.saveScrollPos();
-  }
-
   getRowHeight = index => {
     const { messages, hasMoreMessages } = this.props;
 
@@ -105,9 +114,6 @@ export default class MessageBox extends PureComponent {
     }
     return messages[index - 1].id;
   };
-
-  list = React.createRef();
-  outer = React.createRef();
 
   updateScrollKey = () => {
     const { tab } = this.props;
@@ -144,12 +150,6 @@ export default class MessageBox extends PureComponent {
     this.loading = true;
     this.props.onFetchMore();
   };
-
-  addMore = debounce(() => {
-    const { tab, onAddMore } = this.props;
-    this.ready = true;
-    onAddMore(tab.server, tab.name);
-  }, scrollbackDebounce);
 
   handleScroll = ({ scrollOffset, scrollDirection }) => {
     if (

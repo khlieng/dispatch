@@ -1,26 +1,26 @@
-import React, { PureComponent } from 'react';
+import React, { memo } from 'react';
 import classnames from 'classnames';
 
-export default class TabListItem extends PureComponent {
-  handleClick = () => {
-    const { server, target, onClick } = this.props;
-    onClick(server, target);
-  };
+const TabListItem = ({
+  target,
+  content,
+  server,
+  selected,
+  connected,
+  onClick
+}) => {
+  const className = classnames({
+    'tab-server': !target,
+    success: !target && connected,
+    error: !target && !connected,
+    selected
+  });
 
-  render() {
-    const { target, content, selected, connected } = this.props;
+  return (
+    <p className={className} onClick={() => onClick(server, target)}>
+      <span className="tab-content">{content}</span>
+    </p>
+  );
+};
 
-    const className = classnames({
-      'tab-server': !target,
-      success: !target && connected,
-      error: !target && !connected,
-      selected
-    });
-
-    return (
-      <p className={className} onClick={this.handleClick}>
-        <span className="tab-content">{content}</span>
-      </p>
-    );
-  }
-}
+export default memo(TabListItem);

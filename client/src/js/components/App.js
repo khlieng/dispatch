@@ -1,53 +1,55 @@
-import React, { Component } from 'react';
+import React, { Suspense, lazy } from 'react';
 import Route from 'containers/Route';
-import Chat from 'containers/Chat';
-import Connect from 'containers/Connect';
-import Settings from 'containers/Settings';
 import TabList from 'components/TabList';
 import classnames from 'classnames';
 
-export default class App extends Component {
-  handleClick = () => {
-    const { showTabList, hideMenu } = this.props;
+const Chat = lazy(() => import('containers/Chat'));
+const Connect = lazy(() => import('containers/Connect'));
+const Settings = lazy(() => import('containers/Settings'));
+
+const App = ({
+  connected,
+  tab,
+  channels,
+  servers,
+  privateChats,
+  showTabList,
+  select,
+  push,
+  hideMenu
+}) => {
+  const mainClass = classnames('main-container', {
+    'off-canvas': showTabList
+  });
+
+  const handleClick = () => {
     if (showTabList) {
       hideMenu();
     }
   };
 
-  render() {
-    const {
-      connected,
-      tab,
-      channels,
-      servers,
-      privateChats,
-      showTabList,
-      select,
-      push
-    } = this.props;
-
-    const mainClass = classnames('main-container', {
-      'off-canvas': showTabList
-    });
-
-    return (
-      <div className="wrap">
-        {!connected && (
-          <div className="app-info">
-            Connection lost, attempting to reconnect...
-          </div>
-        )}
-        <div className="app-container" onClick={this.handleClick}>
-          <TabList
-            tab={tab}
-            channels={channels}
-            servers={servers}
-            privateChats={privateChats}
-            showTabList={showTabList}
-            select={select}
-            push={push}
-          />
-          <div className={mainClass}>
+  return (
+    <div className="wrap" onClick={handleClick}>
+      {!connected && (
+        <div className="app-info">
+          Connection lost, attempting to reconnect...
+        </div>
+      )}
+      <div className="app-container">
+        <TabList
+          tab={tab}
+          channels={channels}
+          servers={servers}
+          privateChats={privateChats}
+          showTabList={showTabList}
+          select={select}
+          push={push}
+        />
+        <div className={mainClass}>
+          <Suspense
+            maxDuration={1000}
+            fallback={<div className="suspense-fallback">...</div>}
+          >
             <Route name="chat">
               <Chat />
             </Route>
@@ -57,9 +59,11 @@ export default class App extends Component {
             <Route name="settings">
               <Settings />
             </Route>
-          </div>
+          </Suspense>
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+export default App;

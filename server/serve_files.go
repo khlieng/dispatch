@@ -3,8 +3,9 @@ package server
 import (
 	"bytes"
 	"compress/gzip"
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,9 +17,8 @@ import (
 	"time"
 
 	"github.com/dsnet/compress/brotli"
-	"github.com/spf13/viper"
-
 	"github.com/khlieng/dispatch/assets"
+	"github.com/spf13/viper"
 )
 
 const longCacheControl = "public, max-age=31536000, immutable"
@@ -34,25 +34,32 @@ type File struct {
 	Compressed   bool
 }
 
-var (
-	files = []*File{
-		&File{
-			Path:         "bundle.js",
-			Asset:        "bundle.js.br",
-			ContentType:  "text/javascript",
-			CacheControl: longCacheControl,
-			Compressed:   true,
-		},
-		&File{
-			Path:         "bundle.css",
-			Asset:        "bundle.css.br",
-			ContentType:  "text/css",
-			CacheControl: longCacheControl,
-			Compressed:   true,
-		},
+type h2PushAsset struct {
+	path string
+	hash string
+}
+
+func newH2PushAsset(name string) h2PushAsset {
+	return h2PushAsset{
+		path: "/" + name,
+		hash: strings.Split(name, ".")[1],
 	}
+}
+
+var (
+	files []*File
+
+	indexStylesheet    string
+	indexScripts       []string
+	inlineScript       string
+	inlineScriptSha256 string
+
+	h2PushAssets      []h2PushAsset
+	h2PushCookieValue string
 
 	contentTypes = map[string]string{
+		".js":    "text/javascript",
+		".css":   "text/css",
 		".woff2": "font/woff2",
 		".woff":  "application/font-woff",
 		".ttf":   "application/x-font-ttf",
@@ -63,47 +70,58 @@ var (
 )
 
 func (d *Dispatch) initFileServer() {
-	if !viper.GetBool("dev") {
-		data, err := assets.Asset(files[0].Asset)
+	if viper.GetBool("dev") {
+		indexScripts = []string{"bundle.js"}
+	} else {
+		data, err := assets.Asset("asset-manifest.json")
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		hash := md5.Sum(data)
-		files[0].Hash = base64.RawURLEncoding.EncodeToString(hash[:])[:8]
-		files[0].Path = "bundle." + files[0].Hash + ".js"
-
-		br, err := brotli.NewReader(bytes.NewReader(data), nil)
+		manifest := map[string]string{}
+		err = json.Unmarshal(data, &manifest)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		buf := &bytes.Buffer{}
-		gzw, err := gzip.NewWriterLevel(buf, gzip.BestCompression)
+		runtime, err := assets.Asset(manifest["runtime~main.js"] + ".br")
 		if err != nil {
 			log.Fatal(err)
 		}
+		runtime = decompressAsset(runtime)
+		inlineScript = string(runtime)
 
-		io.Copy(gzw, br)
-		gzw.Close()
-		files[0].GzipAsset = buf.Bytes()
+		hash := sha256.New()
+		hash.Write(runtime)
+		inlineScriptSha256 = base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
-		data, err = assets.Asset(files[1].Asset)
-		if err != nil {
-			log.Fatal(err)
+		indexStylesheet = manifest["main.css"]
+		indexScripts = []string{
+			manifest["vendors~main.js"],
+			manifest["main.js"],
 		}
 
-		hash = md5.Sum(data)
-		files[1].Hash = base64.RawURLEncoding.EncodeToString(hash[:])[:8]
-		files[1].Path = "bundle." + files[1].Hash + ".css"
+		h2PushAssets = []h2PushAsset{
+			newH2PushAsset(indexStylesheet),
+			newH2PushAsset(indexScripts[0]),
+			newH2PushAsset(indexScripts[1]),
+		}
 
-		br.Reset(bytes.NewReader(data))
-		buf = &bytes.Buffer{}
-		gzw.Reset(buf)
+		for _, asset := range h2PushAssets {
+			h2PushCookieValue += asset.hash
+		}
 
-		io.Copy(gzw, br)
-		gzw.Close()
-		files[1].GzipAsset = buf.Bytes()
+		for _, assetPath := range manifest {
+			file := &File{
+				Path:         assetPath,
+				Asset:        assetPath + ".br",
+				ContentType:  contentTypes[filepath.Ext(assetPath)],
+				CacheControl: longCacheControl,
+				Compressed:   true,
+			}
+
+			files = append(files, file)
+		}
 
 		fonts, err := assets.AssetDir("font")
 		if err != nil {
@@ -121,22 +139,18 @@ func (d *Dispatch) initFileServer() {
 				Compressed:   strings.HasSuffix(font, ".br"),
 			}
 
+			files = append(files, file)
+		}
+
+		for _, file := range files {
 			if file.Compressed {
-				data, err = assets.Asset(file.Asset)
+				data, err := assets.Asset(file.Asset)
 				if err != nil {
 					log.Fatal(err)
 				}
 
-				br.Reset(bytes.NewReader(data))
-				buf = &bytes.Buffer{}
-				gzw.Reset(buf)
-
-				io.Copy(gzw, br)
-				gzw.Close()
-				file.GzipAsset = buf.Bytes()
+				file.GzipAsset = gzipAsset(data)
 			}
-
-			files = append(files, file)
 		}
 
 		if viper.GetBool("https.hsts.enabled") && viper.GetBool("https.enabled") {
@@ -152,6 +166,34 @@ func (d *Dispatch) initFileServer() {
 
 		cspEnabled = true
 	}
+}
+
+func decompressAsset(data []byte) []byte {
+	br, err := brotli.NewReader(bytes.NewReader(data), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	buf := &bytes.Buffer{}
+	io.Copy(buf, br)
+	return buf.Bytes()
+}
+
+func gzipAsset(data []byte) []byte {
+	br, err := brotli.NewReader(bytes.NewReader(data), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	buf := &bytes.Buffer{}
+	gzw, err := gzip.NewWriterLevel(buf, gzip.BestCompression)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	io.Copy(gzw, br)
+	gzw.Close()
+	return buf.Bytes()
 }
 
 func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
@@ -181,7 +223,7 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 			connectSrc = "ws://" + r.Host
 		}
 
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src data:; connect-src "+connectSrc)
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self' 'sha256-"+inlineScriptSha256+"'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src data:; connect-src "+connectSrc)
 	}
 
 	w.Header().Set("Content-Type", "text/html")
@@ -200,22 +242,22 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 				"Accept-Encoding": r.Header["Accept-Encoding"],
 			},
 		}
-
 		cookie, err := r.Cookie("push")
 		if err != nil {
-			pusher.Push("/"+files[1].Path, options)
-			pusher.Push("/"+files[0].Path, options)
+			for _, asset := range h2PushAssets {
+				pusher.Push(asset.path, options)
+			}
+
 			setPushCookie(w, r)
 		} else {
 			pushed := false
 
-			if files[1].Hash != cookie.Value[8:] {
-				pusher.Push("/"+files[1].Path, options)
-				pushed = true
-			}
-			if files[0].Hash != cookie.Value[:8] {
-				pusher.Push("/"+files[0].Path, options)
-				pushed = true
+			for i, asset := range h2PushAssets {
+				if len(cookie.Value) >= (i+1)*8 &&
+					asset.hash != cookie.Value[i*8:(i+1)*8] {
+					pusher.Push(asset.path, options)
+					pushed = true
+				}
 			}
 
 			if pushed {
@@ -228,17 +270,17 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Encoding", "gzip")
 
 		gzw := gzip.NewWriter(w)
-		IndexTemplate(gzw, getIndexData(r, state), files[1].Path, files[0].Path)
+		IndexTemplate(gzw, getIndexData(r, state), indexStylesheet, inlineScript, indexScripts)
 		gzw.Close()
 	} else {
-		IndexTemplate(w, getIndexData(r, state), files[1].Path, files[0].Path)
+		IndexTemplate(w, getIndexData(r, state), indexStylesheet, inlineScript, indexScripts)
 	}
 }
 
 func setPushCookie(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "push",
-		Value:    files[0].Hash + files[1].Hash,
+		Value:    h2PushCookieValue,
 		Path:     "/",
 		Expires:  time.Now().AddDate(1, 0, 0),
 		HttpOnly: true,

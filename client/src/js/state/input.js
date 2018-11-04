@@ -19,7 +19,7 @@ export const getCurrentInputHistoryEntry = state => {
 export default createReducer(initialState, {
   [actions.INPUT_HISTORY_ADD](state, { line }) {
     if (line.trim() && line !== state.history[0]) {
-      if (history.length === HISTORY_MAX_LENGTH) {
+      if (state.history.length === HISTORY_MAX_LENGTH) {
         state.history.pop();
       }
       state.history.unshift(line);

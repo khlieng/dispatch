@@ -1,5 +1,6 @@
 import React from 'react';
 import Navicon from 'containers/Navicon';
+import Button from 'components/ui/Button';
 import Checkbox from 'components/ui/Checkbox';
 import FileInput from 'components/ui/FileInput';
 
@@ -44,9 +45,13 @@ const Settings = ({
                 onChange={onKeyChange}
               />
             </div>
-            <button className="settings-button" onClick={uploadCert}>
+            <Button
+              type="submit"
+              className="settings-button"
+              onClick={uploadCert}
+            >
               {status}
-            </button>
+            </Button>
             {error ? <p className="error">{error}</p> : null}
           </div>
         </div>
