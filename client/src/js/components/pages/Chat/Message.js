@@ -20,7 +20,7 @@ const Message = ({ message, coloredNick, style, onNickClick }) => {
 
   return (
     <p className={className} style={style}>
-      <span className="message-time">{message.time}</span>{' '}
+      <span className="message-time">{message.time} </span>
       {message.from && (
         <span
           className="message-sender"
@@ -30,7 +30,7 @@ const Message = ({ message, coloredNick, style, onNickClick }) => {
           {message.from}
         </span>
       )}
-      {` ${message.content}`}
+      <span> {message.content}</span>
     </p>
   );
 };
