@@ -47,6 +47,7 @@
     "postcss-loader": "^3.0.0",
     "postcss-preset-env": "^6.3.0",
     "prettier": "1.14.3",
+    "react-test-renderer": "^16.7.0-alpha.0",
     "style-loader": "^0.23.1",
     "terser-webpack-plugin": "^1.1.0",
     "through2": "^2.0.3",

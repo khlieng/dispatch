@@ -1,6 +1,9 @@
 import React from 'react';
+import TestRenderer from 'react-test-renderer';
 import { isChannel, isValidNick, isValidChannel, isValidUsername } from '..';
 import linkify from '../linkify';
+
+const render = el => TestRenderer.create(el).toJSON();
 
 describe('isChannel()', () => {
   it('it handles strings', () => {
@@ -78,11 +81,12 @@ describe('isValidUsername()', () => {
 
 describe('linkify()', () => {
   const proto = href => (href.indexOf('http') !== 0 ? `http://${href}` : href);
-  const linkTo = href => (
-    <a href={proto(href)} rel="noopener noreferrer" target="_blank">
-      {href}
-    </a>
-  );
+  const linkTo = href =>
+    render(
+      <a href={proto(href)} rel="noopener noreferrer" target="_blank">
+        {href}
+      </a>
+    );
 
   it('returns the arg when no matches are found', () =>
     [null, undefined, 10, false, true, 'just some text', ''].forEach(input =>
@@ -111,6 +115,6 @@ describe('linkify()', () => {
       'google.com ': [linkTo('google.com'), ' '],
       '/google.com?': ['/', linkTo('google.com'), '?']
     }).forEach(([input, expected]) =>
-      expect(linkify(input)).toEqual(expected)
+      expect(render(linkify(input))).toEqual(expected)
     ));
 });
