@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import Cookie from 'js-cookie';
 import { socket as socketActions } from 'state/actions';
 import { getWrapWidth, setConnectDefaults, appSet } from 'state/app';
@@ -8,9 +9,7 @@ import { find } from 'utils';
 import { when } from 'utils/observe';
 import { replace } from 'utils/router';
 
-export default function initialState({ store }) {
-  const env = JSON.parse(document.getElementById('env').innerHTML);
-
+function loadState({ store }, env) {
   store.dispatch(setConnectDefaults(env.defaults));
   store.dispatch(appSet('hexIP', env.hexIP));
   store.dispatch(setSettings(env.settings, true));
@@ -69,4 +68,13 @@ export default function initialState({ store }) {
       store.dispatch(addMessages(messages, server, to, false, next));
     }
   });
+}
+
+export default function initialState(ctx) {
+  if (window.__env__) {
+    window.__env__.then(env => loadState(ctx, env));
+  } else {
+    const env = JSON.parse(document.getElementById('env').innerHTML);
+    loadState(ctx, env);
+  }
 }

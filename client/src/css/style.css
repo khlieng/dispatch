@@ -186,11 +186,14 @@ i[class*=' icon-']:before {
 .app-info {
   width: 100%;
   font-family: Montserrat, sans-serif;
-  background: #f6546a;
+  background: #6bb758;
   color: #fff;
-  height: 50px;
-  line-height: 50px;
   text-align: center;
+  padding: 15px;
+}
+
+.app-info-error {
+  background: #f6546a;
 }
 
 .app-container {
@@ -800,10 +803,6 @@ input.message-input-nick.invalid {
 }
 
 @media (max-width: 600px) {
-  .app-info {
-    font-size: 12px;
-  }
-
   .tablist {
     width: 200px;
     transform: translateX(-200px);

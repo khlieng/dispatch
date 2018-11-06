@@ -102,6 +102,7 @@ class Connect extends Component {
 }
 
 export default withFormik({
+  enableReinitialize: true,
   mapPropsToValues: ({ defaults }) => {
     let port = 6667;
     if (defaults.port) {

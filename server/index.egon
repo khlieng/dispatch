@@ -21,6 +21,7 @@
   <% if cssPath != "" { %>
   <link href="/<%== cssPath %>" rel="stylesheet">
   <% } %>
+
   <link rel="icon" href="data:;base64,=">
 
   <script><%== inlineScript %></script>
@@ -28,7 +29,11 @@
 
 <body>
   <div id="root"></div>
+
+  <% if data != nil { %>
   <script id="env" type="application/json"><% easyjson.MarshalToWriter(data, w) %></script>
+  <% } %>
+
   <% for _, script := range scripts { %>
   <script src="/<%== script %>"></script>
   <% } %>

@@ -10,11 +10,11 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
-	"github.com/spf13/viper"
-
 	"github.com/khlieng/dispatch/pkg/letsencrypt"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
+	"github.com/mailru/easyjson"
+	"github.com/spf13/viper"
 )
 
 var channelStore = storage.NewChannelStore()
@@ -181,6 +181,15 @@ func (d *Dispatch) serve(w http.ResponseWriter, r *http.Request) {
 		}
 
 		d.upgradeWS(w, r, state)
+	} else if strings.HasPrefix(r.URL.Path, "/data") {
+		state := d.handleAuth(w, r, true)
+		if state == nil {
+			log.Println("[Auth] No state")
+			fail(w, http.StatusInternalServerError)
+			return
+		}
+
+		easyjson.MarshalToHTTPResponseWriter(getIndexData(r, state), w)
 	} else {
 		d.serveFiles(w, r)
 	}

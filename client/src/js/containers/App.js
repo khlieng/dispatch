@@ -15,7 +15,8 @@ const mapState = createStructuredSelector({
   privateChats: getPrivateChats,
   servers: getServers,
   showTabList: getShowTabList,
-  tab: getSelectedTab
+  tab: getSelectedTab,
+  newVersionAvailable: state => state.app.newVersionAvailable
 });
 
 const mapDispatch = { push, select, hideMenu };

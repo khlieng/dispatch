@@ -1,14 +1,14 @@
-//import 'es6-promise/auto';
-//import 'utils/ie11';
 import React from 'react';
 import { render } from 'react-dom';
 
 import Root from 'components/Root';
+import { appSet } from 'state/app';
 import initRouter from 'utils/router';
 import Socket from 'utils/Socket';
 import configureStore from './store';
 import routes from './routes';
 import runModules from './modules';
+import { register } from './serviceWorker';
 import '../css/fonts.css';
 import '../css/fontello.css';
 import '../css/style.css';
@@ -24,3 +24,7 @@ initRouter(routes, store);
 runModules({ store, socket });
 
 render(<Root store={store} />, document.getElementById('root'));
+
+register({
+  onUpdate: () => store.dispatch(appSet('newVersionAvailable', true))
+});

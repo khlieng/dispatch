@@ -1,7 +1,8 @@
 import React, { Suspense, lazy } from 'react';
 import Route from 'containers/Route';
+import AppInfo from 'components/AppInfo';
 import TabList from 'components/TabList';
-import classnames from 'classnames';
+import cn from 'classnames';
 
 const Chat = lazy(() => import('containers/Chat'));
 const Connect = lazy(() => import('containers/Connect'));
@@ -16,9 +17,10 @@ const App = ({
   showTabList,
   select,
   push,
-  hideMenu
+  hideMenu,
+  newVersionAvailable
 }) => {
-  const mainClass = classnames('main-container', {
+  const mainClass = cn('main-container', {
     'off-canvas': showTabList
   });
 
@@ -31,9 +33,15 @@ const App = ({
   return (
     <div className="wrap" onClick={handleClick}>
       {!connected && (
-        <div className="app-info">
+        <AppInfo type="error">
           Connection lost, attempting to reconnect...
-        </div>
+        </AppInfo>
+      )}
+      {newVersionAvailable && (
+        <AppInfo dismissible>
+          A new version of dispatch just got installed, reload to start using
+          it!
+        </AppInfo>
       )}
       <div className="app-container">
         <TabList

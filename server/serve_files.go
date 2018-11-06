@@ -49,10 +49,13 @@ func newH2PushAsset(name string) h2PushAsset {
 var (
 	files []*File
 
-	indexStylesheet    string
-	indexScripts       []string
-	inlineScript       string
-	inlineScriptSha256 string
+	indexStylesheet      string
+	indexScripts         []string
+	inlineScript         string
+	inlineScriptSha256   string
+	inlineScriptSW       string
+	inlineScriptSWSha256 string
+	serviceWorker        []byte
 
 	h2PushAssets      []h2PushAsset
 	h2PushCookieValue string
@@ -84,16 +87,20 @@ func (d *Dispatch) initFileServer() {
 			log.Fatal(err)
 		}
 
-		runtime, err := assets.Asset(manifest["runtime~main.js"] + ".br")
-		if err != nil {
-			log.Fatal(err)
-		}
-		runtime = decompressAsset(runtime)
+		bootloader := decompressedAsset(manifest["boot.js"])
+		runtime := decompressedAsset(manifest["runtime.js"])
+
 		inlineScript = string(runtime)
+		inlineScriptSW = string(bootloader) + string(runtime)
 
 		hash := sha256.New()
 		hash.Write(runtime)
 		inlineScriptSha256 = base64.StdEncoding.EncodeToString(hash.Sum(nil))
+
+		hash.Reset()
+		hash.Write(bootloader)
+		hash.Write(runtime)
+		inlineScriptSWSha256 = base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
 		indexStylesheet = manifest["main.css"]
 		indexScripts = []string{
@@ -111,7 +118,19 @@ func (d *Dispatch) initFileServer() {
 			h2PushCookieValue += asset.hash
 		}
 
+		ignoreAssets := []string{
+			manifest["runtime.js"],
+			manifest["boot.js"],
+			"sw.js",
+		}
+
 		for _, assetPath := range manifest {
+			for _, ignored := range ignoreAssets {
+				if assetPath == ignored {
+					continue
+				}
+			}
+
 			file := &File{
 				Path:         assetPath,
 				Asset:        assetPath + ".br",
@@ -153,6 +172,18 @@ func (d *Dispatch) initFileServer() {
 			}
 		}
 
+		serviceWorker = decompressedAsset("sw.js")
+		hash.Reset()
+		IndexTemplate(hash, nil, indexStylesheet, inlineScriptSW, indexScripts)
+		indexHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
+
+		serviceWorker = append(serviceWorker, []byte(`
+workbox.precaching.precacheAndRoute([{
+	revision: '`+indexHash+`',
+	url: '/?sw'
+}]);
+workbox.routing.registerNavigationRoute('/?sw');`)...)
+
 		if viper.GetBool("https.hsts.enabled") && viper.GetBool("https.enabled") {
 			hstsHeader = "max-age=" + viper.GetString("https.hsts.max_age")
 
@@ -179,6 +210,14 @@ func decompressAsset(data []byte) []byte {
 	return buf.Bytes()
 }
 
+func decompressedAsset(name string) []byte {
+	asset, err := assets.Asset(name + ".br")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return decompressAsset(asset)
+}
+
 func gzipAsset(data []byte) []byte {
 	br, err := brotli.NewReader(bytes.NewReader(data), nil)
 	if err != nil {
@@ -202,6 +241,14 @@ func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Path == "/sw.js" {
+		w.Header().Set("Cache-Control", disabledCacheControl)
+		w.Header().Set("Content-Type", "text/javascript")
+		w.Header().Set("Content-Length", strconv.Itoa(len(serviceWorker)))
+		w.Write(serviceWorker)
+		return
+	}
+
 	for _, file := range files {
 		if strings.HasSuffix(r.URL.Path, file.Path) {
 			d.serveFile(w, r, file)
@@ -215,15 +262,22 @@ func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
 func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 	state := d.handleAuth(w, r, false)
 
+	_, sw := r.URL.Query()["sw"]
+
 	if cspEnabled {
-		var connectSrc string
+		var wsSrc string
 		if r.TLS != nil {
-			connectSrc = "wss://" + r.Host
+			wsSrc = "wss://" + r.Host
 		} else {
-			connectSrc = "ws://" + r.Host
+			wsSrc = "ws://" + r.Host
 		}
 
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self' 'sha256-"+inlineScriptSha256+"'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src data:; connect-src "+connectSrc)
+		inlineSha := inlineScriptSha256
+		if sw {
+			inlineSha = inlineScriptSWSha256
+		}
+
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self' 'sha256-"+inlineSha+"'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src data:; connect-src 'self' "+wsSrc)
 	}
 
 	w.Header().Set("Content-Type", "text/html")
@@ -266,14 +320,24 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	var data *indexData
+	if !sw {
+		data = getIndexData(r, state)
+	}
+
+	inline := inlineScript
+	if sw {
+		inline = inlineScriptSW
+	}
+
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w.Header().Set("Content-Encoding", "gzip")
 
 		gzw := gzip.NewWriter(w)
-		IndexTemplate(gzw, getIndexData(r, state), indexStylesheet, inlineScript, indexScripts)
+		IndexTemplate(gzw, data, indexStylesheet, inline, indexScripts)
 		gzw.Close()
 	} else {
-		IndexTemplate(w, getIndexData(r, state), indexStylesheet, inlineScript, indexScripts)
+		IndexTemplate(w, data, indexStylesheet, inline, indexScripts)
 	}
 }
 
@@ -289,16 +353,6 @@ func setPushCookie(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d *Dispatch) serveFile(w http.ResponseWriter, r *http.Request, file *File) {
-	info, err := assets.AssetInfo(file.Asset)
-	if err != nil {
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	if !modifiedSince(w, r, info.ModTime()) {
-		return
-	}
-
 	data, err := assets.Asset(file.Asset)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
@@ -333,16 +387,4 @@ func (d *Dispatch) serveFile(w http.ResponseWriter, r *http.Request, file *File)
 		w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
 		w.Write(buf)
 	}
-}
-
-func modifiedSince(w http.ResponseWriter, r *http.Request, modtime time.Time) bool {
-	t, err := time.Parse(http.TimeFormat, r.Header.Get("If-Modified-Since"))
-
-	if err == nil && modtime.Before(t.Add(1*time.Second)) {
-		w.WriteHeader(http.StatusNotModified)
-		return false
-	}
-
-	w.Header().Set("Last-Modified", modtime.UTC().Format(http.TimeFormat))
-	return true
 }

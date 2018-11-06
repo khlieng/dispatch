@@ -22,7 +22,8 @@ const initialState = {
     readonly: false,
     showDetails: false
   },
-  hexIP: false
+  hexIP: false,
+  newVersionAvailable: false
 };
 
 export default createReducer(initialState, {

@@ -4,10 +4,14 @@ var postcssPresetEnv = require('postcss-preset-env');
 var cssnano = require('cssnano');
 var TerserPlugin = require('terser-webpack-plugin');
 var ManifestPlugin = require('webpack-manifest-plugin');
+var { InjectManifest } = require('workbox-webpack-plugin');
 
 module.exports = {
   mode: 'production',
-  entry: ['./src/js/index'],
+  entry: {
+    main: './src/js/index',
+    boot: './src/js/boot'
+  },
   output: {
     filename: '[name].[chunkhash:8].js',
     chunkFilename: '[name].[chunkhash:8].js'
@@ -76,6 +80,11 @@ module.exports = {
     }),
     new ManifestPlugin({
       fileName: 'asset-manifest.json'
+    }),
+    new InjectManifest({
+      swSrc: './src/js/sw.js',
+      globDirectory: './src',
+      globPatterns: ['font/*.woff2']
     })
   ],
   optimization: {
@@ -89,6 +98,6 @@ module.exports = {
         }
       }
     },
-    runtimeChunk: true
+    runtimeChunk: 'single'
   }
 };

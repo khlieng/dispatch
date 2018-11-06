@@ -16,9 +16,12 @@ io.WriteString(w, "\" rel=\"stylesheet\">")
  } 
 io.WriteString(w, "<link rel=\"icon\" href=\"data:;base64,=\"><script>")
 io.WriteString(w,  inlineScript )
-io.WriteString(w, "</script></head><body><div id=\"root\"></div><script id=\"env\" type=\"application/json\">")
+io.WriteString(w, "</script></head><body><div id=\"root\"></div>")
+ if data != nil { 
+io.WriteString(w, "<script id=\"env\" type=\"application/json\">")
  easyjson.MarshalToWriter(data, w) 
 io.WriteString(w, "</script>")
+ } 
  for _, script := range scripts { 
 io.WriteString(w, "<script src=\"/")
 io.WriteString(w,  script )
