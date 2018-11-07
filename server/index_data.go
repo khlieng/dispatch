@@ -5,9 +5,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/spf13/viper"
-
 	"github.com/khlieng/dispatch/storage"
+	"github.com/spf13/viper"
 )
 
 type connectDefaults struct {
@@ -36,7 +35,7 @@ type indexData struct {
 	Messages *Messages
 }
 
-func getIndexData(r *http.Request, state *State) *indexData {
+func getIndexData(r *http.Request, path string, state *State) *indexData {
 	data := indexData{
 		HexIP: viper.GetBool("hexIP"),
 	}
@@ -84,13 +83,13 @@ func getIndexData(r *http.Request, state *State) *indexData {
 	}
 	data.Channels = channels
 
-	server, channel := getTabFromPath(r.URL.EscapedPath())
+	server, channel := getTabFromPath(path)
 	if isInChannel(channels, server, channel) {
 		data.addUsersAndMessages(server, channel, state)
 		return &data
 	}
 
-	server, channel = parseTabCookie(r, r.URL.Path)
+	server, channel = parseTabCookie(r, path)
 	if isInChannel(channels, server, channel) {
 		data.addUsersAndMessages(server, channel, state)
 	}
@@ -137,10 +136,10 @@ func isInChannel(channels []*storage.Channel, server, channel string) bool {
 
 func getTabFromPath(rawPath string) (string, string) {
 	path := strings.Split(strings.Trim(rawPath, "/"), "/")
-	if len(path) == 2 {
-		name, err := url.PathUnescape(path[1])
+	if len(path) >= 2 {
+		name, err := url.PathUnescape(path[len(path)-1])
 		if err == nil && isChannel(name) {
-			return path[0], name
+			return path[len(path)-2], name
 		}
 	}
 	return "", ""

@@ -189,7 +189,7 @@ func (d *Dispatch) serve(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		easyjson.MarshalToHTTPResponseWriter(getIndexData(r, state), w)
+		easyjson.MarshalToHTTPResponseWriter(getIndexData(r, r.URL.EscapedPath()[5:], state), w)
 	} else {
 		d.serveFiles(w, r)
 	}

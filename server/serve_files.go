@@ -323,7 +323,7 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 
 	var data *indexData
 	if !sw {
-		data = getIndexData(r, state)
+		data = getIndexData(r, r.URL.EscapedPath(), state)
 	}
 
 	inline := inlineScript

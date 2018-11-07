@@ -32,6 +32,10 @@ func TestGetTabFromPath(t *testing.T) {
 			"/chat.freenode.net/%23stuff/cake",
 			"",
 			"",
+		}, {
+			"/data/chat.freenode.net/%23apples",
+			"chat.freenode.net",
+			"#apples",
 		},
 	}
 

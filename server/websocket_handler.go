@@ -72,9 +72,9 @@ func (h *wsHandler) init(r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	path := r.URL.EscapedPath()[3:]
+	path := r.URL.EscapedPath()
 	pathServer, pathChannel := getTabFromPath(path)
-	cookieServer, cookieChannel := parseTabCookie(r, path)
+	cookieServer, cookieChannel := parseTabCookie(r, path[3:])
 
 	for _, channel := range channels {
 		if (channel.Server == pathServer && channel.Name == pathChannel) ||
