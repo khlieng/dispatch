@@ -10,7 +10,7 @@ import (
 func IndexTemplate(w io.Writer, data *indexData, cssPath string, inlineScript string, scripts []string) error {
 io.WriteString(w, "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#222\"><title>Dispatch</title><link rel=\"preload\" href=\"/font/fontello.woff2?48901973\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/RobotoMono-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/Montserrat-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/Montserrat-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/RobotoMono-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\">")
  if cssPath != "" { 
-io.WriteString(w, "<link href=\"/")
+io.WriteString(w, "<link href=\"")
 io.WriteString(w,  cssPath )
 io.WriteString(w, "\" rel=\"stylesheet\">")
  } 
@@ -23,7 +23,7 @@ io.WriteString(w, "<script id=\"env\" type=\"application/json\">")
 io.WriteString(w, "</script>")
  } 
  for _, script := range scripts { 
-io.WriteString(w, "<script src=\"/")
+io.WriteString(w, "<script src=\"")
 io.WriteString(w,  script )
 io.WriteString(w, "\"></script>")
  } 

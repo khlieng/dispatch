@@ -41,7 +41,7 @@ type h2PushAsset struct {
 
 func newH2PushAsset(name string) h2PushAsset {
 	return h2PushAsset{
-		path: "/" + name,
+		path: name,
 		hash: strings.Split(name, ".")[1],
 	}
 }
@@ -121,19 +121,20 @@ func (d *Dispatch) initFileServer() {
 		ignoreAssets := []string{
 			manifest["runtime.js"],
 			manifest["boot.js"],
-			"sw.js",
+			manifest["sw.js"],
 		}
 
+	outer:
 		for _, assetPath := range manifest {
 			for _, ignored := range ignoreAssets {
 				if assetPath == ignored {
-					continue
+					continue outer
 				}
 			}
 
 			file := &File{
 				Path:         assetPath,
-				Asset:        assetPath + ".br",
+				Asset:        strings.TrimLeft(assetPath, "/") + ".br",
 				ContentType:  contentTypes[filepath.Ext(assetPath)],
 				CacheControl: longCacheControl,
 				Compressed:   true,
@@ -211,7 +212,7 @@ func decompressAsset(data []byte) []byte {
 }
 
 func decompressedAsset(name string) []byte {
-	asset, err := assets.Asset(name + ".br")
+	asset, err := assets.Asset(strings.TrimLeft(name, "/") + ".br")
 	if err != nil {
 		log.Fatal(err)
 	}
