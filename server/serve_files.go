@@ -261,7 +261,36 @@ func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
-	state := d.handleAuth(w, r, false)
+	if pusher, ok := w.(http.Pusher); ok {
+		options := &http.PushOptions{
+			Header: http.Header{
+				"Accept-Encoding": r.Header["Accept-Encoding"],
+			},
+		}
+
+		cookie, err := r.Cookie("push")
+		if err != nil {
+			for _, asset := range h2PushAssets {
+				pusher.Push(asset.path, options)
+			}
+
+			setPushCookie(w, r)
+		} else {
+			pushed := false
+
+			for i, asset := range h2PushAssets {
+				if len(cookie.Value) >= (i+1)*8 &&
+					asset.hash != cookie.Value[i*8:(i+1)*8] {
+					pusher.Push(asset.path, options)
+					pushed = true
+				}
+			}
+
+			if pushed {
+				setPushCookie(w, r)
+			}
+		}
+	}
 
 	_, sw := r.URL.Query()["sw"]
 
@@ -291,44 +320,11 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Strict-Transport-Security", hstsHeader)
 	}
 
-	if pusher, ok := w.(http.Pusher); ok {
-		options := &http.PushOptions{
-			Header: http.Header{
-				"Accept-Encoding": r.Header["Accept-Encoding"],
-			},
-		}
-		cookie, err := r.Cookie("push")
-		if err != nil {
-			for _, asset := range h2PushAssets {
-				pusher.Push(asset.path, options)
-			}
-
-			setPushCookie(w, r)
-		} else {
-			pushed := false
-
-			for i, asset := range h2PushAssets {
-				if len(cookie.Value) >= (i+1)*8 &&
-					asset.hash != cookie.Value[i*8:(i+1)*8] {
-					pusher.Push(asset.path, options)
-					pushed = true
-				}
-			}
-
-			if pushed {
-				setPushCookie(w, r)
-			}
-		}
-	}
-
 	var data *indexData
+	inline := inlineScriptSW
 	if !sw {
-		data = getIndexData(r, r.URL.EscapedPath(), state)
-	}
-
-	inline := inlineScript
-	if sw {
-		inline = inlineScriptSW
+		data = getIndexData(r, r.URL.EscapedPath(), d.handleAuth(w, r, false))
+		inline = inlineScript
 	}
 
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
