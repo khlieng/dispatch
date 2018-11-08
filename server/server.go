@@ -173,7 +173,7 @@ func (d *Dispatch) serve(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		state := d.handleAuth(w, r, true)
+		state := d.handleAuth(w, r, true, true)
 		if state == nil {
 			log.Println("[Auth] No state")
 			fail(w, http.StatusInternalServerError)
@@ -182,14 +182,10 @@ func (d *Dispatch) serve(w http.ResponseWriter, r *http.Request) {
 
 		d.upgradeWS(w, r, state)
 	} else if strings.HasPrefix(r.URL.Path, "/data") {
-		state := d.handleAuth(w, r, true)
-		if state == nil {
-			log.Println("[Auth] No state")
-			fail(w, http.StatusInternalServerError)
-			return
-		}
+		state := d.handleAuth(w, r, false, false)
+		data := getIndexData(r, r.URL.EscapedPath()[5:], state)
 
-		easyjson.MarshalToHTTPResponseWriter(getIndexData(r, r.URL.EscapedPath()[5:], state), w)
+		easyjson.MarshalToHTTPResponseWriter(data, w)
 	} else {
 		d.serveFiles(w, r)
 	}

@@ -69,29 +69,25 @@ func (s *Session) Expired() bool {
 	return time.Since(created) > Expiration
 }
 
-func (s *Session) Refresh() (string, bool, error) {
+func (s *Session) Refresh() (string, error) {
 	s.lock.Lock()
 	created := time.Unix(s.createdAt, 0)
 	s.lock.Unlock()
 
-	if time.Since(created) > Expiration {
-		return "", true, nil
-	}
-
 	if time.Since(created) > RefreshInterval {
 		key, err := newSessionKey()
 		if err != nil {
-			return "", false, err
+			return "", err
 		}
 
 		s.lock.Lock()
 		s.createdAt = time.Now().Unix()
 		s.key = key
 		s.lock.Unlock()
-		return key, false, nil
+		return key, nil
 	}
 
-	return "", false, nil
+	return "", nil
 }
 
 func newSessionKey() (string, error) {

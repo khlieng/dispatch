@@ -8,7 +8,7 @@ import (
 	"github.com/khlieng/dispatch/storage"
 )
 
-func (d *Dispatch) handleAuth(w http.ResponseWriter, r *http.Request, createUser bool) *State {
+func (d *Dispatch) handleAuth(w http.ResponseWriter, r *http.Request, createUser, refresh bool) *State {
 	var state *State
 
 	cookie, err := r.Cookie(session.CookieName)
@@ -23,17 +23,21 @@ func (d *Dispatch) handleAuth(w http.ResponseWriter, r *http.Request, createUser
 		session := d.states.getSession(cookie.Value)
 		if session != nil {
 			key := session.Key()
-			newKey, expired, err := session.Refresh()
-			if err != nil {
-				return nil
-			}
 
-			if !expired {
+			if !session.Expired() {
 				state = d.states.get(session.UserID)
-				if newKey != "" {
-					d.states.setSession(session)
-					d.states.deleteSession(key)
-					session.SetCookie(w, r)
+
+				if refresh {
+					newKey, err := session.Refresh()
+					if err != nil {
+						log.Println(err)
+					}
+
+					if newKey != "" {
+						d.states.setSession(session)
+						d.states.deleteSession(key)
+						session.SetCookie(w, r)
+					}
 				}
 			} else {
 				d.states.deleteSession(key)
