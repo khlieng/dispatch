@@ -85,7 +85,13 @@ module.exports = {
     new InjectManifest({
       swSrc: './src/js/sw.js',
       globDirectory: './src',
-      globPatterns: ['font/*.woff2']
+      globPatterns: ['font/*.woff2'],
+      exclude: [
+        /\.map$/,
+        /^manifest.*\.js(?:on)?$/,
+        /^boot.*\.js$/,
+        /^runtime.*\.js$/
+      ]
     })
   ],
   optimization: {
