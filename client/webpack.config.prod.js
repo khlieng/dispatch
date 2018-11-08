@@ -84,6 +84,7 @@ module.exports = {
     }),
     new InjectManifest({
       swSrc: './src/js/sw.js',
+      importWorkboxFrom: 'local',
       globDirectory: './src',
       globPatterns: ['font/*.woff2'],
       exclude: [

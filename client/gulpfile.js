@@ -66,13 +66,13 @@ function fonts() {
 
 function compress() {
   return gulp
-    .src(['dist/!(*.toml|*.json)'])
+    .src(['dist/**/!(*.dev.js|*.map|*.toml|*.json|*.woff|*.woff2)'])
     .pipe(brotli({ quality: 11 }))
     .pipe(gulp.dest('dist'));
 }
 
 function cleanup() {
-  return del(['dist/*(*.js|*.css)']);
+  return del(['dist/**/*(*.js|*.css|*.map)']);
 }
 
 function bindata(cb) {

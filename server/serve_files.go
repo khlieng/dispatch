@@ -143,23 +143,11 @@ func (d *Dispatch) initFileServer() {
 			files = append(files, file)
 		}
 
-		fonts, err := assets.AssetDir("font")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for _, font := range fonts {
-			p := strings.TrimSuffix(font, ".br")
-
-			file := &File{
-				Path:         path.Join("font", p),
-				Asset:        path.Join("font", font),
-				ContentType:  contentTypes[filepath.Ext(p)],
-				CacheControl: longCacheControl,
-				Compressed:   strings.HasSuffix(font, ".br"),
+		root, _ := assets.AssetDir("")
+		for _, asset := range root {
+			if _, err = assets.AssetDir(asset); err == nil {
+				loadDir(asset)
 			}
-
-			files = append(files, file)
 		}
 
 		for _, file := range files {
@@ -197,6 +185,27 @@ workbox.routing.registerNavigationRoute('/?sw');`)...)
 		}
 
 		cspEnabled = true
+	}
+}
+
+func loadDir(dirName string) {
+	dir, err := assets.AssetDir(dirName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, asset := range dir {
+		assetName := strings.TrimSuffix(asset, ".br")
+
+		file := &File{
+			Path:         path.Join(dirName, assetName),
+			Asset:        path.Join(dirName, asset),
+			ContentType:  contentTypes[filepath.Ext(assetName)],
+			CacheControl: longCacheControl,
+			Compressed:   strings.HasSuffix(asset, ".br"),
+		}
+
+		files = append(files, file)
 	}
 }
 
