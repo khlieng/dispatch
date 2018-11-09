@@ -119,7 +119,7 @@ func (d *Dispatch) startHTTP() {
 
 		server := &http.Server{
 			Addr:    net.JoinHostPort(addr, portHTTPS),
-			Handler: http.HandlerFunc(d.serve),
+			Handler: d,
 		}
 
 		if certExists() {
@@ -156,11 +156,11 @@ func (d *Dispatch) startHTTP() {
 			port = "1337"
 		}
 		log.Println("[HTTP] Listening on port", port)
-		log.Fatal(http.ListenAndServe(net.JoinHostPort(addr, port), http.HandlerFunc(d.serve)))
+		log.Fatal(http.ListenAndServe(net.JoinHostPort(addr, port), d))
 	}
 }
 
-func (d *Dispatch) serve(w http.ResponseWriter, r *http.Request) {
+func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		fail(w, http.StatusNotFound)
 		return
