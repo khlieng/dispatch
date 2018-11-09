@@ -6,7 +6,7 @@
 // dist/7.2948bed1.js.br
 // dist/8.00bbe8cc.js.br
 // dist/asset-manifest.json
-// dist/boot.150df3bc.js.br
+// dist/boot.fbea1381.js.br
 // dist/config.default.toml
 // dist/font/Montserrat-Bold.woff
 // dist/font/Montserrat-Bold.woff2
@@ -109,7 +109,7 @@ func _42ad6c946JsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "4.2ad6c946.js.br", size: 9768, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "4.2ad6c946.js.br", size: 9768, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -129,7 +129,7 @@ func _51ce46502JsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "5.1ce46502.js.br", size: 2318, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "5.1ce46502.js.br", size: 2318, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -149,7 +149,7 @@ func _637d7ed80JsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "6.37d7ed80.js.br", size: 1317, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "6.37d7ed80.js.br", size: 1317, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -169,7 +169,7 @@ func _72948bed1JsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "7.2948bed1.js.br", size: 5941, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "7.2948bed1.js.br", size: 5941, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -189,12 +189,12 @@ func _800bbe8ccJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "8.00bbe8cc.js.br", size: 4227, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "8.00bbe8cc.js.br", size: 4227, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _assetManifestJson = "\x7b\x0a\x20\x20\x22\x72\x75\x6e\x74\x69\x6d\x65\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x72\x75\x6e\x74\x69\x6d\x65\x2e\x39\x34\x65\x32\x61\x32\x36\x30\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x62\x6f\x6f\x74\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x62\x6f\x6f\x74\x2e\x31\x35\x30\x64\x66\x33\x62\x63\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x6d\x61\x69\x6e\x2e\x63\x73\x73\x22\x3a\x20\x22\x2f\x6d\x61\x69\x6e\x2e\x62\x38\x37\x31\x62\x30\x36\x31\x2e\x63\x73\x73\x22\x2c\x0a\x20\x20\x22\x6d\x61\x69\x6e\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x6d\x61\x69\x6e\x2e\x33\x34\x62\x35\x65\x30\x66\x66\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x76\x65\x6e\x64\x6f\x72\x73\x7e\x6d\x61\x69\x6e\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x76\x65\x6e\x64\x6f\x72\x73\x7e\x6d\x61\x69\x6e\x2e\x30\x39\x64\x35\x34\x39\x61\x66\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x34\x2e\x32\x61\x64\x36\x63\x39\x34\x36\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x34\x2e\x32\x61\x64\x36\x63\x39\x34\x36\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x35\x2e\x31\x63\x65\x34\x36\x35\x30\x32\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x35\x2e\x31\x63\x65\x34\x36\x35\x30\x32\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x36\x2e\x33\x37\x64\x37\x65\x64\x38\x30\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x36\x2e\x33\x37\x64\x37\x65\x64\x38\x30\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x37\x2e\x32\x39\x34\x38\x62\x65\x64\x31\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x37\x2e\x32\x39\x34\x38\x62\x65\x64\x31\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x38\x2e\x30\x30\x62\x62\x65\x38\x63\x63\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x38\x2e\x30\x30\x62\x62\x65\x38\x63\x63\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x70\x72\x65\x63\x61\x63\x68\x65\x2d\x6d\x61\x6e\x69\x66\x65\x73\x74\x2e\x61\x63\x66\x38\x33\x30\x33\x33\x30\x36\x30\x34\x35\x30\x31\x65\x32\x31\x36\x62\x36\x33\x62\x66\x38\x31\x66\x65\x31\x37\x30\x61\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x70\x72\x65\x63\x61\x63\x68\x65\x2d\x6d\x61\x6e\x69\x66\x65\x73\x74\x2e\x61\x63\x66\x38\x33\x30\x33\x33\x30\x36\x30\x34\x35\x30\x31\x65\x32\x31\x36\x62\x36\x33\x62\x66\x38\x31\x66\x65\x31\x37\x30\x61\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x73\x77\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x73\x77\x2e\x6a\x73\x22\x0a\x7d"
+var _assetManifestJson = "\x7b\x0a\x20\x20\x22\x72\x75\x6e\x74\x69\x6d\x65\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x72\x75\x6e\x74\x69\x6d\x65\x2e\x39\x34\x65\x32\x61\x32\x36\x30\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x62\x6f\x6f\x74\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x62\x6f\x6f\x74\x2e\x66\x62\x65\x61\x31\x33\x38\x31\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x6d\x61\x69\x6e\x2e\x63\x73\x73\x22\x3a\x20\x22\x2f\x6d\x61\x69\x6e\x2e\x62\x38\x37\x31\x62\x30\x36\x31\x2e\x63\x73\x73\x22\x2c\x0a\x20\x20\x22\x6d\x61\x69\x6e\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x6d\x61\x69\x6e\x2e\x33\x34\x62\x35\x65\x30\x66\x66\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x76\x65\x6e\x64\x6f\x72\x73\x7e\x6d\x61\x69\x6e\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x76\x65\x6e\x64\x6f\x72\x73\x7e\x6d\x61\x69\x6e\x2e\x30\x39\x64\x35\x34\x39\x61\x66\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x34\x2e\x32\x61\x64\x36\x63\x39\x34\x36\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x34\x2e\x32\x61\x64\x36\x63\x39\x34\x36\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x35\x2e\x31\x63\x65\x34\x36\x35\x30\x32\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x35\x2e\x31\x63\x65\x34\x36\x35\x30\x32\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x36\x2e\x33\x37\x64\x37\x65\x64\x38\x30\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x36\x2e\x33\x37\x64\x37\x65\x64\x38\x30\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x37\x2e\x32\x39\x34\x38\x62\x65\x64\x31\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x37\x2e\x32\x39\x34\x38\x62\x65\x64\x31\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x38\x2e\x30\x30\x62\x62\x65\x38\x63\x63\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x38\x2e\x30\x30\x62\x62\x65\x38\x63\x63\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x70\x72\x65\x63\x61\x63\x68\x65\x2d\x6d\x61\x6e\x69\x66\x65\x73\x74\x2e\x61\x63\x66\x38\x33\x30\x33\x33\x30\x36\x30\x34\x35\x30\x31\x65\x32\x31\x36\x62\x36\x33\x62\x66\x38\x31\x66\x65\x31\x37\x30\x61\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x70\x72\x65\x63\x61\x63\x68\x65\x2d\x6d\x61\x6e\x69\x66\x65\x73\x74\x2e\x61\x63\x66\x38\x33\x30\x33\x33\x30\x36\x30\x34\x35\x30\x31\x65\x32\x31\x36\x62\x36\x33\x62\x66\x38\x31\x66\x65\x31\x37\x30\x61\x2e\x6a\x73\x22\x2c\x0a\x20\x20\x22\x73\x77\x2e\x6a\x73\x22\x3a\x20\x22\x2f\x73\x77\x2e\x6a\x73\x22\x0a\x7d"
 
 func assetManifestJsonBytes() ([]byte, error) {
 	return bindataRead(
@@ -209,27 +209,27 @@ func assetManifestJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "asset-manifest.json", size: 519, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "asset-manifest.json", size: 519, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _boot150df3bcJsBr = "\x1b\xee\x00\x00\x8c\x94\x2e\x6f\x14\x23\x24\x99\x35\x6a\x5b\xa9\xc2\x3b\xa2\x51\xa7\x7f\xa8\xa8\xef\x61\x5a\x33\x5d\x9f\x2e\xe4\x4e\x33\x8a\x68\x4a\x95\x8a\x54\x85\x68\xcc\xde\x5e\x0b\xe4\x36\x76\x4e\x20\xaa\xdd\x22\x48\x7e\x08\x5b\xd3\xc8\x6d\xe9\x3f\x12\x74\x66\x1d\x17\x3e\x98\x89\x6c\xb1\x6d\x25\x7f\xaa\x64\x4d\x54\xf8\x81\x27\xcc\x89\x7c\xfa\x7e\x8a\xc5\xf7\xcd\x2c\x9d\xe2\xe2\x17\x48\x64\xd9\xeb\x64\x24\xd1\x0f\xa8\xff\xb8\x03\xfe\x8c\x87\x34\x49\x31\x95\x61\x33\x6a\x8f\x11\x0b\x61\xda\xe3\x66\xde\xae\x31\xc2\xb4\xce\x32\xfb\x41\x24\x35\xd3\x4f\xc2\x4b\x3c\x3a\x46\x9f\x8a\x81\xac\x14\xd2\xf5\xde\xb1\xff\x20\x5a\x83\x69\xa7\x83\xb9\x99\xfb\xe6\x6d\x5b\x25\xf3\xf2\x94\xd1\x01"
+var _bootFbea1381JsBr = "\x1b\xd3\x00\x00\x8c\x94\x2e\x6f\x14\x59\x36\x97\xb2\xcd\xa9\xdd\x02\x49\x8c\xaf\xb0\x0c\x73\x85\x07\xac\x99\x2e\x3d\x59\xc8\x9d\x66\x57\x44\x53\xaa\x9c\x84\x68\xcc\xe8\x0d\x8f\xd7\xa1\x96\x19\x27\x29\x4a\x08\x7f\x76\x75\xb6\xa5\xf8\x92\xd8\x43\x3f\x2f\x7c\x80\x25\x5b\x92\xc4\xa9\x7f\x5d\xb6\x47\x2a\x11\xf4\x8e\xbf\xc8\xb7\x28\x3a\x3c\x8a\x22\xec\xbb\x5b\x33\x92\xb0\x82\xbd\x42\xff\x36\x67\xd7\x76\xb8\x4d\xd5\x7a\x79\xa2\xdb\x60\x28\xe6\xe2\xcf\xbf\xd5\x18\x11\x46\xdf\xa9\x27\x98\x72\xe1\xa2\x09\xfe\xde\xd1\xb1\x7f\x1b\x4f\xf9\x54\xd0\x3d\x8f\x1a\x07\xc1\xe4\x4f\x23\x4d\x07\xff\xf9\xff\xd7\x93\xc4\x65\xeb\x76\x63\xec\x03"
 
-func boot150df3bcJsBrBytes() ([]byte, error) {
+func bootFbea1381JsBrBytes() ([]byte, error) {
 	return bindataRead(
-		_boot150df3bcJsBr,
-		"boot.150df3bc.js.br",
+		_bootFbea1381JsBr,
+		"boot.fbea1381.js.br",
 	)
 }
 
-func boot150df3bcJsBr() (*asset, error) {
-	bytes, err := boot150df3bcJsBrBytes()
+func bootFbea1381JsBr() (*asset, error) {
+	bytes, err := bootFbea1381JsBrBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "boot.150df3bc.js.br", size: 172, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "boot.fbea1381.js.br", size: 157, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -469,7 +469,7 @@ func main34b5e0ffJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.34b5e0ff.js.br", size: 11010, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "main.34b5e0ff.js.br", size: 11010, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -489,7 +489,7 @@ func mainB871b061CssBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "main.b871b061.css.br", size: 2437, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "main.b871b061.css.br", size: 2437, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -509,7 +509,7 @@ func precacheManifestAcf830330604501e216b63bf81fe170aJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "precache-manifest.acf830330604501e216b63bf81fe170a.js.br", size: 404, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "precache-manifest.acf830330604501e216b63bf81fe170a.js.br", size: 404, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -529,7 +529,7 @@ func runtime94e2a260JsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime.94e2a260.js.br", size: 1004, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "runtime.94e2a260.js.br", size: 1004, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -549,7 +549,7 @@ func swJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "sw.js.br", size: 197, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "sw.js.br", size: 197, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -569,7 +569,7 @@ func vendorsMain09d549afJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "vendors~main.09d549af.js.br", size: 67529, mode: os.FileMode(436), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "vendors~main.09d549af.js.br", size: 67529, mode: os.FileMode(436), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -589,7 +589,7 @@ func workboxV363WorkboxBackgroundSyncProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-background-sync.prod.js.br", size: 1297, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-background-sync.prod.js.br", size: 1297, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -609,7 +609,7 @@ func workboxV363WorkboxBroadcastCacheUpdateProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-broadcast-cache-update.prod.js.br", size: 512, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-broadcast-cache-update.prod.js.br", size: 512, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -629,7 +629,7 @@ func workboxV363WorkboxCacheExpirationProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-cache-expiration.prod.js.br", size: 1242, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-cache-expiration.prod.js.br", size: 1242, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -649,7 +649,7 @@ func workboxV363WorkboxCacheableResponseProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-cacheable-response.prod.js.br", size: 298, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-cacheable-response.prod.js.br", size: 298, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -669,7 +669,7 @@ func workboxV363WorkboxCoreProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-core.prod.js.br", size: 2585, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-core.prod.js.br", size: 2585, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -689,7 +689,7 @@ func workboxV363WorkboxGoogleAnalyticsProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-google-analytics.prod.js.br", size: 869, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-google-analytics.prod.js.br", size: 869, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -709,7 +709,7 @@ func workboxV363WorkboxNavigationPreloadProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-navigation-preload.prod.js.br", size: 253, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-navigation-preload.prod.js.br", size: 253, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -729,7 +729,7 @@ func workboxV363WorkboxPrecachingProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-precaching.prod.js.br", size: 1978, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-precaching.prod.js.br", size: 1978, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -749,7 +749,7 @@ func workboxV363WorkboxRangeRequestsProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-range-requests.prod.js.br", size: 700, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-range-requests.prod.js.br", size: 700, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -769,7 +769,7 @@ func workboxV363WorkboxRoutingProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-routing.prod.js.br", size: 1147, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-routing.prod.js.br", size: 1147, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -789,7 +789,7 @@ func workboxV363WorkboxStrategiesProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-strategies.prod.js.br", size: 1093, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-strategies.prod.js.br", size: 1093, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -809,7 +809,7 @@ func workboxV363WorkboxStreamsProdJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-streams.prod.js.br", size: 667, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-streams.prod.js.br", size: 667, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -829,7 +829,7 @@ func workboxV363WorkboxSwJsBr() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-sw.js.br", size: 670, mode: os.FileMode(420), modTime: time.Unix(1541664444, 0)}
+	info := bindataFileInfo{name: "workbox-v3.6.3/workbox-sw.js.br", size: 670, mode: os.FileMode(420), modTime: time.Unix(1541732120, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -892,7 +892,7 @@ var _bindata = map[string]func() (*asset, error){
 	"7.2948bed1.js.br": _72948bed1JsBr,
 	"8.00bbe8cc.js.br": _800bbe8ccJsBr,
 	"asset-manifest.json": assetManifestJson,
-	"boot.150df3bc.js.br": boot150df3bcJsBr,
+	"boot.fbea1381.js.br": bootFbea1381JsBr,
 	"config.default.toml": configDefaultToml,
 	"font/Montserrat-Bold.woff": fontMontserratBoldWoff,
 	"font/Montserrat-Bold.woff2": fontMontserratBoldWoff2,
@@ -971,7 +971,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"7.2948bed1.js.br": &bintree{_72948bed1JsBr, map[string]*bintree{}},
 	"8.00bbe8cc.js.br": &bintree{_800bbe8ccJsBr, map[string]*bintree{}},
 	"asset-manifest.json": &bintree{assetManifestJson, map[string]*bintree{}},
-	"boot.150df3bc.js.br": &bintree{boot150df3bcJsBr, map[string]*bintree{}},
+	"boot.fbea1381.js.br": &bintree{bootFbea1381JsBr, map[string]*bintree{}},
 	"config.default.toml": &bintree{configDefaultToml, map[string]*bintree{}},
 	"font": &bintree{nil, map[string]*bintree{
 		"Montserrat-Bold.woff": &bintree{fontMontserratBoldWoff, map[string]*bintree{}},

@@ -7,16 +7,20 @@ import (
 "github.com/mailru/easyjson"
 )
 
-func IndexTemplate(w io.Writer, data *indexData, cssPath string, inlineScript string, scripts []string) error {
-io.WriteString(w, "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#222\"><title>Dispatch</title><link rel=\"preload\" href=\"/font/fontello.woff2?48901973\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/RobotoMono-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/Montserrat-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/Montserrat-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/RobotoMono-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\">")
+func IndexTemplate(w io.Writer, data *indexData, cssPath string, inlineScript string, scripts []string, sw bool) error {
+io.WriteString(w, "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#f0f0f0\"><title>Dispatch</title>")
+ if sw { 
+io.WriteString(w, "<link rel=\"preload\" href=\"/data\" as=\"fetch\" crossorigin=\"anonymous\">")
+ } 
+io.WriteString(w, "<script>")
+io.WriteString(w,  inlineScript )
+io.WriteString(w, "</script><link rel=\"preload\" href=\"/font/fontello.woff2?48901973\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/RobotoMono-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/Montserrat-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/Montserrat-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\"><link rel=\"preload\" href=\"/font/RobotoMono-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\">")
  if cssPath != "" { 
 io.WriteString(w, "<link href=\"")
 io.WriteString(w,  cssPath )
 io.WriteString(w, "\" rel=\"stylesheet\">")
  } 
-io.WriteString(w, "<link rel=\"icon\" href=\"data:;base64,=\"><script>")
-io.WriteString(w,  inlineScript )
-io.WriteString(w, "</script></head><body><div id=\"root\"></div>")
+io.WriteString(w, "<link rel=\"icon\" href=\"data:;base64,=\"></head><body><div id=\"root\"></div>")
  if data != nil { 
 io.WriteString(w, "<script id=\"env\" type=\"application/json\">")
  easyjson.MarshalToWriter(data, w) 

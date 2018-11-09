@@ -13,7 +13,6 @@ import (
 	"github.com/khlieng/dispatch/pkg/letsencrypt"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
-	"github.com/mailru/easyjson"
 	"github.com/spf13/viper"
 )
 
@@ -183,9 +182,9 @@ func (d *Dispatch) serve(w http.ResponseWriter, r *http.Request) {
 		d.upgradeWS(w, r, state)
 	} else if strings.HasPrefix(r.URL.Path, "/data") {
 		state := d.handleAuth(w, r, false, false)
-		data := getIndexData(r, r.URL.EscapedPath()[5:], state)
+		data := getIndexData(r, "/", state)
 
-		easyjson.MarshalToHTTPResponseWriter(data, w)
+		writeJSON(w, r, data)
 	} else {
 		d.serveFiles(w, r)
 	}

@@ -163,7 +163,7 @@ func (d *Dispatch) initFileServer() {
 
 		serviceWorker = decompressedAsset("sw.js")
 		hash.Reset()
-		IndexTemplate(hash, nil, indexStylesheet, inlineScriptSW, indexScripts)
+		IndexTemplate(hash, nil, indexStylesheet, inlineScriptSW, indexScripts, true)
 		indexHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
 		serviceWorker = append(serviceWorker, []byte(`
@@ -324,6 +324,7 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("X-Frame-Options", "deny")
 	w.Header().Set("X-XSS-Protection", "1; mode=block")
+	w.Header().Set("Referrer-Policy", "same-origin")
 
 	if hstsHeader != "" {
 		w.Header().Set("Strict-Transport-Security", hstsHeader)
@@ -339,11 +340,11 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w.Header().Set("Content-Encoding", "gzip")
 
-		gzw := gzip.NewWriter(w)
-		IndexTemplate(gzw, data, indexStylesheet, inline, indexScripts)
-		gzw.Close()
+		gzw := getGzipWriter(w)
+		IndexTemplate(gzw, data, indexStylesheet, inline, indexScripts, sw)
+		putGzipWriter(gzw)
 	} else {
-		IndexTemplate(w, data, indexStylesheet, inline, indexScripts)
+		IndexTemplate(w, data, indexStylesheet, inline, indexScripts, sw)
 	}
 }
 

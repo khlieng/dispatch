@@ -83,6 +83,15 @@ func getIndexData(r *http.Request, path string, state *State) *indexData {
 	}
 	data.Channels = channels
 
+	referer, err := url.Parse(r.Header.Get("Referer"))
+	if err == nil {
+		server, channel := getTabFromPath(referer.EscapedPath())
+		if isInChannel(channels, server, channel) {
+			data.addUsersAndMessages(server, channel, state)
+			return &data
+		}
+	}
+
 	server, channel := getTabFromPath(path)
 	if isInChannel(channels, server, channel) {
 		data.addUsersAndMessages(server, channel, state)
