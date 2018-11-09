@@ -1,5 +1,4 @@
 import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import Chat from 'components/pages/Chat';
 import { getSelectedTabTitle } from 'state';
@@ -35,6 +34,7 @@ import {
 import { getSettings } from 'state/settings';
 import { getSelectedTab, select } from 'state/tab';
 import { getShowUserList, toggleUserList } from 'state/ui';
+import connect from 'utils/connect';
 
 const mapState = createStructuredSelector({
   channel: getSelectedChannel,

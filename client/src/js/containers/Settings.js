@@ -1,4 +1,3 @@
-import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import Settings from 'components/pages/Settings';
 import {
@@ -8,6 +7,7 @@ import {
   setKey,
   uploadCert
 } from 'state/settings';
+import connect from 'utils/connect';
 
 const mapState = createStructuredSelector({
   settings: getSettings

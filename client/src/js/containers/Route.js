@@ -1,5 +1,5 @@
-import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import connect from 'utils/connect';
 
 const Route = ({ route, name, children }) => {
   if (route === name) {

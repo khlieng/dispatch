@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom';
 
 import Root from 'components/Root';
 import { appSet } from 'state/app';
@@ -23,7 +23,7 @@ const store = configureStore(socket);
 initRouter(routes, store);
 runModules({ store, socket });
 
-render(<Root store={store} />, document.getElementById('root'));
+createRoot(document.getElementById('root')).render(<Root store={store} />);
 
 register({
   onUpdate: () => store.dispatch(appSet('newVersionAvailable', true))
