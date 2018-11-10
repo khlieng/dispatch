@@ -92,7 +92,7 @@ github.com/mailru/easyjson
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
 github.com/mailru/easyjson/buffer
-# github.com/miekg/dns v1.0.12
+# github.com/miekg/dns v1.0.15
 github.com/miekg/dns
 # github.com/mitchellh/go-homedir v1.0.0
 github.com/mitchellh/go-homedir
@@ -109,7 +109,7 @@ github.com/pmezard/go-difflib/difflib
 # github.com/spf13/afero v1.1.2
 github.com/spf13/afero
 github.com/spf13/afero/mem
-# github.com/spf13/cast v1.2.0
+# github.com/spf13/cast v1.3.0
 github.com/spf13/cast
 # github.com/spf13/cobra v0.0.3
 github.com/spf13/cobra
@@ -127,15 +127,15 @@ github.com/stretchr/testify/assert
 github.com/tinylib/msgp/msgp
 # github.com/willf/bitset v1.1.9
 github.com/willf/bitset
-# github.com/xenolf/lego v1.0.1
+# github.com/xenolf/lego v1.1.0
 github.com/xenolf/lego/acme
 github.com/xenolf/lego/log
-# golang.org/x/crypto v0.0.0-20181001203147-e3636079e1a4
+# golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16
 golang.org/x/crypto/ocsp
 golang.org/x/crypto/ed25519
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/ed25519/internal/edwards25519
-# golang.org/x/net v0.0.0-20181005035420-146acd28ed58
+# golang.org/x/net v0.0.0-20181102091132-c10e9556a7bc
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/ipv4
@@ -143,7 +143,7 @@ golang.org/x/net/ipv6
 golang.org/x/net/bpf
 golang.org/x/net/internal/iana
 golang.org/x/net/internal/socket
-# golang.org/x/sys v0.0.0-20181005133103-4497e2df6f9e
+# golang.org/x/sys v0.0.0-20181031143558-9b800f95dbbc
 golang.org/x/sys/unix
 # golang.org/x/text v0.3.0
 golang.org/x/text/transform

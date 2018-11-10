@@ -29,7 +29,6 @@ require (
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kjk/betterguid v0.0.0-20170621091430-c442874ba63a
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/kr/pty v1.1.3 // indirect
 	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
 	github.com/miekg/dns v1.0.15 // indirect
 	github.com/mitchellh/go-homedir v1.0.0
@@ -37,6 +36,7 @@ require (
 	github.com/mschoch/smat v0.0.0-20160514031455-90eadee771ae // indirect
 	github.com/onsi/gomega v1.4.2 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20170806203942-52369c62f446 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/spf13/cast v1.3.0

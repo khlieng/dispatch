@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -25,6 +26,9 @@ const (
 	// “new-reg”, “new-authz” and “new-cert” endpoints. From the documentation the
 	// limitation is 20 requests per second, but using 20 as value doesn't work but 18 do
 	overallRequestLimit = 18
+
+	statusValid   = "valid"
+	statusInvalid = "invalid"
 )
 
 // User interface is to be implemented by users of this library.
@@ -38,6 +42,17 @@ type User interface {
 // Interface for all challenge solvers to implement.
 type solver interface {
 	Solve(challenge challenge, domain string) error
+}
+
+// Interface for challenges like dns, where we can set a record in advance for ALL challenges.
+// This saves quite a bit of time vs creating the records and solving them serially.
+type preSolver interface {
+	PreSolve(challenge challenge, domain string) error
+}
+
+// Interface for challenges like dns, where we can solve all the challenges before to delete them.
+type cleanup interface {
+	CleanUp(challenge challenge, domain string) error
 }
 
 type validateFunc func(j *jws, domain, uri string, chlng challenge) error
@@ -81,8 +96,10 @@ func NewClient(caDirURL string, user User, keyType KeyType) (*Client, error) {
 	// REVIEW: best possibility?
 	// Add all available solvers with the right index as per ACME
 	// spec to this map. Otherwise they won`t be found.
-	solvers := make(map[Challenge]solver)
-	solvers[HTTP01] = &httpChallenge{jws: jws, validate: validate, provider: &HTTPProviderServer{}}
+	solvers := map[Challenge]solver{
+		HTTP01:    &httpChallenge{jws: jws, validate: validate, provider: &HTTPProviderServer{}},
+		TLSALPN01: &tlsALPNChallenge{jws: jws, validate: validate, provider: &TLSALPNProviderServer{}},
+	}
 
 	return &Client{directory: dir, user: user, jws: jws, keyType: keyType, solvers: solvers}, nil
 }
@@ -94,8 +111,10 @@ func (c *Client) SetChallengeProvider(challenge Challenge, p ChallengeProvider) 
 		c.solvers[challenge] = &httpChallenge{jws: c.jws, validate: validate, provider: p}
 	case DNS01:
 		c.solvers[challenge] = &dnsChallenge{jws: c.jws, validate: validate, provider: p}
+	case TLSALPN01:
+		c.solvers[challenge] = &tlsALPNChallenge{jws: c.jws, validate: validate, provider: p}
 	default:
-		return fmt.Errorf("Unknown challenge %v", challenge)
+		return fmt.Errorf("unknown challenge %v", challenge)
 	}
 	return nil
 }
@@ -116,6 +135,24 @@ func (c *Client) SetHTTPAddress(iface string) error {
 		chlng.(*httpChallenge).provider = NewHTTPProviderServer(host, port)
 	}
 
+	return nil
+}
+
+// SetTLSAddress specifies a custom interface:port to be used for TLS based challenges.
+// If this option is not used, the default port 443 and all interfaces will be used.
+// To only specify a port and no interface use the ":port" notation.
+//
+// NOTE: This REPLACES any custom TLS-ALPN provider previously set by calling
+// c.SetChallengeProvider with the default TLS-ALPN challenge provider.
+func (c *Client) SetTLSAddress(iface string) error {
+	host, port, err := net.SplitHostPort(iface)
+	if err != nil {
+		return err
+	}
+
+	if chlng, ok := c.solvers[TLSALPN01]; ok {
+		chlng.(*tlsALPNChallenge).provider = NewTLSALPNProviderServer(host, port)
+	}
 	return nil
 }
 
@@ -142,7 +179,7 @@ func (c *Client) Register(tosAgreed bool) (*RegistrationResource, error) {
 	if c == nil || c.user == nil {
 		return nil, errors.New("acme: cannot register a nil client or user")
 	}
-	log.Printf("[INFO] acme: Registering account for %s", c.user.GetEmail())
+	log.Infof("acme: Registering account for %s", c.user.GetEmail())
 
 	accMsg := accountMessage{}
 	if c.user.GetEmail() != "" {
@@ -176,7 +213,7 @@ func (c *Client) RegisterWithExternalAccountBinding(tosAgreed bool, kid string, 
 	if c == nil || c.user == nil {
 		return nil, errors.New("acme: cannot register a nil client or user")
 	}
-	log.Printf("[INFO] acme: Registering account (EAB) for %s", c.user.GetEmail())
+	log.Infof("acme: Registering account (EAB) for %s", c.user.GetEmail())
 
 	accMsg := accountMessage{}
 	if c.user.GetEmail() != "" {
@@ -222,7 +259,7 @@ func (c *Client) RegisterWithExternalAccountBinding(tosAgreed bool, kid string, 
 // ResolveAccountByKey will attempt to look up an account using the given account key
 // and return its registration resource.
 func (c *Client) ResolveAccountByKey() (*RegistrationResource, error) {
-	log.Printf("[INFO] acme: Trying to resolve account by key")
+	log.Infof("acme: Trying to resolve account by key")
 
 	acc := accountMessage{OnlyReturnExisting: true}
 	hdr, err := postJSON(c.jws, c.directory.NewAccountURL, acc, nil)
@@ -251,7 +288,7 @@ func (c *Client) DeleteRegistration() error {
 	if c == nil || c.user == nil {
 		return errors.New("acme: cannot unregister a nil client or user")
 	}
-	log.Printf("[INFO] acme: Deleting account for %s", c.user.GetEmail())
+	log.Infof("acme: Deleting account for %s", c.user.GetEmail())
 
 	accMsg := accountMessage{
 		Status: "deactivated",
@@ -271,7 +308,7 @@ func (c *Client) QueryRegistration() (*RegistrationResource, error) {
 		return nil, errors.New("acme: cannot query the registration of a nil client or user")
 	}
 	// Log the URL here instead of the email as the email may not be set
-	log.Printf("[INFO] acme: Querying account for %s", c.user.GetRegistration().URI)
+	log.Infof("acme: Querying account for %s", c.user.GetRegistration().URI)
 
 	accMsg := accountMessage{}
 
@@ -317,9 +354,9 @@ DNSNames:
 	}
 
 	if bundle {
-		log.Printf("[INFO][%s] acme: Obtaining bundled SAN certificate given a CSR", strings.Join(domains, ", "))
+		log.Infof("[%s] acme: Obtaining bundled SAN certificate given a CSR", strings.Join(domains, ", "))
 	} else {
-		log.Printf("[INFO][%s] acme: Obtaining SAN certificate given a CSR", strings.Join(domains, ", "))
+		log.Infof("[%s] acme: Obtaining SAN certificate given a CSR", strings.Join(domains, ", "))
 	}
 
 	order, err := c.createOrderForIdentifiers(domains)
@@ -341,7 +378,7 @@ DNSNames:
 		return nil, err
 	}
 
-	log.Printf("[INFO][%s] acme: Validations succeeded; requesting certificates", strings.Join(domains, ", "))
+	log.Infof("[%s] acme: Validations succeeded; requesting certificates", strings.Join(domains, ", "))
 
 	failures := make(ObtainError)
 	cert, err := c.requestCertificateForCsr(order, bundle, csr.Raw, nil)
@@ -351,8 +388,10 @@ DNSNames:
 		}
 	}
 
-	// Add the CSR to the certificate so that it can be used for renewals.
-	cert.CSR = pemEncode(&csr)
+	if cert != nil {
+		// Add the CSR to the certificate so that it can be used for renewals.
+		cert.CSR = pemEncode(&csr)
+	}
 
 	// do not return an empty failures map, because
 	// it would still be a non-nil error value
@@ -373,13 +412,13 @@ DNSNames:
 // the whole certificate will fail.
 func (c *Client) ObtainCertificate(domains []string, bundle bool, privKey crypto.PrivateKey, mustStaple bool) (*CertificateResource, error) {
 	if len(domains) == 0 {
-		return nil, errors.New("No domains to obtain a certificate for")
+		return nil, errors.New("no domains to obtain a certificate for")
 	}
 
 	if bundle {
-		log.Printf("[INFO][%s] acme: Obtaining bundled SAN certificate", strings.Join(domains, ", "))
+		log.Infof("[%s] acme: Obtaining bundled SAN certificate", strings.Join(domains, ", "))
 	} else {
-		log.Printf("[INFO][%s] acme: Obtaining SAN certificate", strings.Join(domains, ", "))
+		log.Infof("[%s] acme: Obtaining SAN certificate", strings.Join(domains, ", "))
 	}
 
 	order, err := c.createOrderForIdentifiers(domains)
@@ -401,7 +440,7 @@ func (c *Client) ObtainCertificate(domains []string, bundle bool, privKey crypto
 		return nil, err
 	}
 
-	log.Printf("[INFO][%s] acme: Validations succeeded; requesting certificates", strings.Join(domains, ", "))
+	log.Infof("[%s] acme: Validations succeeded; requesting certificates", strings.Join(domains, ", "))
 
 	failures := make(ObtainError)
 	cert, err := c.requestCertificateForOrder(order, bundle, privKey, mustStaple)
@@ -460,15 +499,15 @@ func (c *Client) RenewCertificate(cert CertificateResource, bundle, mustStaple b
 
 	// This is just meant to be informal for the user.
 	timeLeft := x509Cert.NotAfter.Sub(time.Now().UTC())
-	log.Printf("[INFO][%s] acme: Trying renewal with %d hours remaining", cert.Domain, int(timeLeft.Hours()))
+	log.Infof("[%s] acme: Trying renewal with %d hours remaining", cert.Domain, int(timeLeft.Hours()))
 
 	// We always need to request a new certificate to renew.
 	// Start by checking to see if the certificate was based off a CSR, and
 	// use that if it's defined.
 	if len(cert.CSR) > 0 {
-		csr, err := pemDecodeTox509CSR(cert.CSR)
-		if err != nil {
-			return nil, err
+		csr, errP := pemDecodeTox509CSR(cert.CSR)
+		if errP != nil {
+			return nil, errP
 		}
 		newCert, failures := c.ObtainCertificateForCSR(*csr, bundle)
 		return newCert, failures
@@ -501,7 +540,6 @@ func (c *Client) RenewCertificate(cert CertificateResource, bundle, mustStaple b
 }
 
 func (c *Client) createOrderForIdentifiers(domains []string) (orderResource, error) {
-
 	var identifiers []identifier
 	for _, domain := range domains {
 		identifiers = append(identifiers, identifier{Type: "dns", Value: domain})
@@ -525,29 +563,75 @@ func (c *Client) createOrderForIdentifiers(domains []string) (orderResource, err
 	return orderRes, nil
 }
 
+// an authz with the solver we have chosen and the index of the challenge associated with it
+type selectedAuthSolver struct {
+	authz          authorization
+	challengeIndex int
+	solver         solver
+}
+
 // Looks through the challenge combinations to find a solvable match.
 // Then solves the challenges in series and returns.
 func (c *Client) solveChallengeForAuthz(authorizations []authorization) error {
 	failures := make(ObtainError)
 
-	// loop through the resources, basically through the domains.
+	authSolvers := []*selectedAuthSolver{}
+
+	// loop through the resources, basically through the domains. First pass just selects a solver for each authz.
 	for _, authz := range authorizations {
-		if authz.Status == "valid" {
+		if authz.Status == statusValid {
 			// Boulder might recycle recent validated authz (see issue #267)
-			log.Printf("[INFO][%s] acme: Authorization already valid; skipping challenge", authz.Identifier.Value)
+			log.Infof("[%s] acme: Authorization already valid; skipping challenge", authz.Identifier.Value)
 			continue
 		}
+		if i, solvr := c.chooseSolver(authz, authz.Identifier.Value); solvr != nil {
+			authSolvers = append(authSolvers, &selectedAuthSolver{
+				authz:          authz,
+				challengeIndex: i,
+				solver:         solvr,
+			})
+		} else {
+			failures[authz.Identifier.Value] = fmt.Errorf("[%s] acme: Could not determine solvers", authz.Identifier.Value)
+		}
+	}
 
-		// no solvers - no solving
-		if i, solver := c.chooseSolver(authz, authz.Identifier.Value); solver != nil {
-			err := solver.Solve(authz.Challenges[i], authz.Identifier.Value)
-			if err != nil {
-				//c.disableAuthz(authz.Identifier)
+	// for all valid presolvers, first submit the challenges so they have max time to propagate
+	for _, item := range authSolvers {
+		authz := item.authz
+		i := item.challengeIndex
+		if presolver, ok := item.solver.(preSolver); ok {
+			if err := presolver.PreSolve(authz.Challenges[i], authz.Identifier.Value); err != nil {
 				failures[authz.Identifier.Value] = err
 			}
-		} else {
-			//c.disableAuthz(authz)
-			failures[authz.Identifier.Value] = fmt.Errorf("[%s] acme: Could not determine solvers", authz.Identifier.Value)
+		}
+	}
+
+	defer func() {
+		// clean all created TXT records
+		for _, item := range authSolvers {
+			if clean, ok := item.solver.(cleanup); ok {
+				if failures[item.authz.Identifier.Value] != nil {
+					// already failed in previous loop
+					continue
+				}
+				err := clean.CleanUp(item.authz.Challenges[item.challengeIndex], item.authz.Identifier.Value)
+				if err != nil {
+					log.Warnf("Error cleaning up %s: %v ", item.authz.Identifier.Value, err)
+				}
+			}
+		}
+	}()
+
+	// finally solve all challenges for real
+	for _, item := range authSolvers {
+		authz := item.authz
+		i := item.challengeIndex
+		if failures[authz.Identifier.Value] != nil {
+			// already failed in previous loop
+			continue
+		}
+		if err := item.solver.Solve(authz.Challenges[i], authz.Identifier.Value); err != nil {
+			failures[authz.Identifier.Value] = err
 		}
 	}
 
@@ -565,7 +649,7 @@ func (c *Client) chooseSolver(auth authorization, domain string) (int, solver) {
 		if solver, ok := c.solvers[Challenge(challenge.Type)]; ok {
 			return i, solver
 		}
-		log.Printf("[INFO][%s] acme: Could not find solver for: %s", domain, challenge.Type)
+		log.Infof("[%s] acme: Could not find solver for: %s", domain, challenge.Type)
 	}
 	return 0, nil
 }
@@ -617,7 +701,7 @@ func (c *Client) getAuthzForOrder(order orderResource) ([]authorization, error) 
 
 func logAuthz(order orderResource) {
 	for i, auth := range order.Authorizations {
-		log.Printf("[INFO][%s] AuthURL: %s", order.Identifiers[i].Value, auth)
+		log.Infof("[%s] AuthURL: %s", order.Identifiers[i].Value, auth)
 	}
 }
 
@@ -640,9 +724,18 @@ func (c *Client) requestCertificateForOrder(order orderResource, bundle bool, pr
 
 	// determine certificate name(s) based on the authorization resources
 	commonName := order.Domains[0]
-	var san []string
+
+	// ACME draft Section 7.4 "Applying for Certificate Issuance"
+	// https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.4
+	// says:
+	//   Clients SHOULD NOT make any assumptions about the sort order of
+	//   "identifiers" or "authorizations" elements in the returned order
+	//   object.
+	san := []string{commonName}
 	for _, auth := range order.Identifiers {
-		san = append(san, auth.Value)
+		if auth.Value != commonName {
+			san = append(san, auth.Value)
+		}
 	}
 
 	// TODO: should the CSR be customizable?
@@ -659,13 +752,13 @@ func (c *Client) requestCertificateForCsr(order orderResource, bundle bool, csr 
 
 	csrString := base64.RawURLEncoding.EncodeToString(csr)
 	var retOrder orderMessage
-	_, error := postJSON(c.jws, order.Finalize, csrMessage{Csr: csrString}, &retOrder)
-	if error != nil {
-		return nil, error
+	_, err := postJSON(c.jws, order.Finalize, csrMessage{Csr: csrString}, &retOrder)
+	if err != nil {
+		return nil, err
 	}
 
-	if retOrder.Status == "invalid" {
-		return nil, error
+	if retOrder.Status == statusInvalid {
+		return nil, err
 	}
 
 	certRes := CertificateResource{
@@ -674,7 +767,7 @@ func (c *Client) requestCertificateForCsr(order orderResource, bundle bool, csr 
 		PrivateKey: privateKeyPem,
 	}
 
-	if retOrder.Status == "valid" {
+	if retOrder.Status == statusValid {
 		// if the certificate is available right away, short cut!
 		ok, err := c.checkCertResponse(retOrder, &certRes, bundle)
 		if err != nil {
@@ -686,25 +779,30 @@ func (c *Client) requestCertificateForCsr(order orderResource, bundle bool, csr 
 		}
 	}
 
-	maxChecks := 1000
-	for i := 0; i < maxChecks; i++ {
-		_, err := getJSON(order.URL, &retOrder)
-		if err != nil {
-			return nil, err
-		}
-		done, err := c.checkCertResponse(retOrder, &certRes, bundle)
-		if err != nil {
-			return nil, err
-		}
-		if done {
-			break
-		}
-		if i == maxChecks-1 {
-			return nil, fmt.Errorf("polled for certificate %d times; giving up", i)
+	stopTimer := time.NewTimer(30 * time.Second)
+	defer stopTimer.Stop()
+	retryTick := time.NewTicker(500 * time.Millisecond)
+	defer retryTick.Stop()
+
+	for {
+		select {
+		case <-stopTimer.C:
+			return nil, errors.New("certificate polling timed out")
+		case <-retryTick.C:
+			_, err := getJSON(order.URL, &retOrder)
+			if err != nil {
+				return nil, err
+			}
+
+			done, err := c.checkCertResponse(retOrder, &certRes, bundle)
+			if err != nil {
+				return nil, err
+			}
+			if done {
+				return &certRes, nil
+			}
 		}
 	}
-
-	return &certRes, nil
 }
 
 // checkCertResponse checks to see if the certificate is ready and a link is contained in the
@@ -713,9 +811,8 @@ func (c *Client) requestCertificateForCsr(order orderResource, bundle bool, csr 
 // should already have the Domain (common name) field populated. If bundle is
 // true, the certificate will be bundled with the issuer's cert.
 func (c *Client) checkCertResponse(order orderMessage, certRes *CertificateResource, bundle bool) (bool, error) {
-
 	switch order.Status {
-	case "valid":
+	case statusValid:
 		resp, err := httpGet(order.Certificate)
 		if err != nil {
 			return false, err
@@ -726,15 +823,16 @@ func (c *Client) checkCertResponse(order orderMessage, certRes *CertificateResou
 			return false, err
 		}
 
-		// The issuer certificate link is always supplied via an "up" link
-		// in the response headers of a new certificate.
+		// The issuer certificate link may be supplied via an "up" link
+		// in the response headers of a new certificate.  See
+		// https://tools.ietf.org/html/draft-ietf-acme-acme-12#section-7.4.2
 		links := parseLinks(resp.Header["Link"])
 		if link, ok := links["up"]; ok {
 			issuerCert, err := c.getIssuerCertificate(link)
 
 			if err != nil {
 				// If we fail to acquire the issuer cert, return the issued certificate - do not fail.
-				log.Printf("[WARNING][%s] acme: Could not bundle issuer certificate: %v", certRes.Domain, err)
+				log.Warnf("[%s] acme: Could not bundle issuer certificate: %v", certRes.Domain, err)
 			} else {
 				issuerCert = pemEncode(derCertificateBytes(issuerCert))
 
@@ -746,26 +844,33 @@ func (c *Client) checkCertResponse(order orderMessage, certRes *CertificateResou
 
 				certRes.IssuerCertificate = issuerCert
 			}
+		} else {
+			// Get issuerCert from bundled response from Let's Encrypt
+			// See https://community.letsencrypt.org/t/acme-v2-no-up-link-in-response/64962
+			_, rest := pem.Decode(cert)
+			if rest != nil {
+				certRes.IssuerCertificate = rest
+			}
 		}
 
 		certRes.Certificate = cert
 		certRes.CertURL = order.Certificate
 		certRes.CertStableURL = order.Certificate
-		log.Printf("[INFO][%s] Server responded with a certificate.", certRes.Domain)
+		log.Infof("[%s] Server responded with a certificate.", certRes.Domain)
 		return true, nil
 
 	case "processing":
 		return false, nil
-	case "invalid":
-		return false, errors.New("Order has invalid state: invalid")
+	case statusInvalid:
+		return false, errors.New("order has invalid state: invalid")
+	default:
+		return false, nil
 	}
-
-	return false, nil
 }
 
 // getIssuerCertificate requests the issuer certificate
 func (c *Client) getIssuerCertificate(url string) ([]byte, error) {
-	log.Printf("[INFO] acme: Requesting issuer cert from %s", url)
+	log.Infof("acme: Requesting issuer cert from %s", url)
 	resp, err := httpGet(url)
 	if err != nil {
 		return nil, err
@@ -818,12 +923,12 @@ func validate(j *jws, domain, uri string, c challenge) error {
 	// Repeatedly check the server for an updated status on our request.
 	for {
 		switch chlng.Status {
-		case "valid":
-			log.Printf("[INFO][%s] The server validated our request", domain)
+		case statusValid:
+			log.Infof("[%s] The server validated our request", domain)
 			return nil
 		case "pending":
 		case "processing":
-		case "invalid":
+		case statusInvalid:
 			return handleChallengeError(chlng)
 		default:
 			return errors.New("the server returned an unexpected state")

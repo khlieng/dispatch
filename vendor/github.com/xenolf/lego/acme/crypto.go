@@ -81,20 +81,20 @@ func GetOCSPForCert(bundle []byte) ([]byte, *ocsp.Response, error) {
 			return nil, nil, errors.New("no issuing certificate URL")
 		}
 
-		resp, err := httpGet(issuedCert.IssuingCertificateURL[0])
-		if err != nil {
-			return nil, nil, err
+		resp, errC := httpGet(issuedCert.IssuingCertificateURL[0])
+		if errC != nil {
+			return nil, nil, errC
 		}
 		defer resp.Body.Close()
 
-		issuerBytes, err := ioutil.ReadAll(limitReader(resp.Body, 1024*1024))
-		if err != nil {
-			return nil, nil, err
+		issuerBytes, errC := ioutil.ReadAll(limitReader(resp.Body, 1024*1024))
+		if errC != nil {
+			return nil, nil, errC
 		}
 
-		issuerCert, err := x509.ParseCertificate(issuerBytes)
-		if err != nil {
-			return nil, nil, err
+		issuerCert, errC := x509.ParseCertificate(issuerBytes)
+		if errC != nil {
+			return nil, nil, errC
 		}
 
 		// Insert it into the slice on position 0
@@ -215,9 +215,7 @@ func generatePrivateKey(keyType KeyType) (crypto.PrivateKey, error) {
 
 func generateCsr(privateKey crypto.PrivateKey, domain string, san []string, mustStaple bool) ([]byte, error) {
 	template := x509.CertificateRequest{
-		Subject: pkix.Name{
-			CommonName: domain,
-		},
+		Subject: pkix.Name{CommonName: domain},
 	}
 
 	if len(san) > 0 {
@@ -260,15 +258,6 @@ func pemDecode(data []byte) (*pem.Block, error) {
 	return pemBlock, nil
 }
 
-func pemDecodeTox509(pem []byte) (*x509.Certificate, error) {
-	pemBlock, err := pemDecode(pem)
-	if pemBlock == nil {
-		return nil, err
-	}
-
-	return x509.ParseCertificate(pemBlock.Bytes)
-}
-
 func pemDecodeTox509CSR(pem []byte) (*x509.CertificateRequest, error) {
 	pemBlock, err := pemDecode(pem)
 	if pemBlock == nil {
@@ -303,8 +292,8 @@ func getCertExpiration(cert []byte) (time.Time, error) {
 	return pCert.NotAfter, nil
 }
 
-func generatePemCert(privKey *rsa.PrivateKey, domain string) ([]byte, error) {
-	derBytes, err := generateDerCert(privKey, time.Time{}, domain)
+func generatePemCert(privKey *rsa.PrivateKey, domain string, extensions []pkix.Extension) ([]byte, error) {
+	derBytes, err := generateDerCert(privKey, time.Time{}, domain, extensions)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +301,7 @@ func generatePemCert(privKey *rsa.PrivateKey, domain string) ([]byte, error) {
 	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes}), nil
 }
 
-func generateDerCert(privKey *rsa.PrivateKey, expiration time.Time, domain string) ([]byte, error) {
+func generateDerCert(privKey *rsa.PrivateKey, expiration time.Time, domain string, extensions []pkix.Extension) ([]byte, error) {
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
@@ -334,6 +323,7 @@ func generateDerCert(privKey *rsa.PrivateKey, expiration time.Time, domain strin
 		KeyUsage:              x509.KeyUsageKeyEncipherment,
 		BasicConstraintsValid: true,
 		DNSNames:              []string{domain},
+		ExtraExtensions:       extensions,
 	}
 
 	return x509.CreateCertificate(rand.Reader, &template, &template, &privKey.PublicKey, privKey)
