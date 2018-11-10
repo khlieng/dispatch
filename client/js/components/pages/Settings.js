@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import Navicon from 'containers/Navicon';
 import Button from 'components/ui/Button';
 import Checkbox from 'components/ui/Checkbox';
@@ -6,19 +6,35 @@ import FileInput from 'components/ui/FileInput';
 
 const Settings = ({
   settings,
+  installable,
   setSetting,
   onCertChange,
   onKeyChange,
+  onInstall,
   uploadCert
 }) => {
   const status = settings.uploadingCert ? 'Uploading...' : 'Upload';
   const error = settings.certError;
+
+  const handleInstallClick = useCallback(
+    async () => {
+      installable.prompt();
+      await installable.userChoice;
+      onInstall();
+    },
+    [installable]
+  );
 
   return (
     <div className="settings-container">
       <div className="settings">
         <Navicon />
         <h1>Settings</h1>
+        {installable && (
+          <Button className="button-install" onClick={handleInstallClick}>
+            <h2>Install</h2>
+          </Button>
+        )}
         <div className="settings-section">
           <h2>Visuals</h2>
           <Checkbox

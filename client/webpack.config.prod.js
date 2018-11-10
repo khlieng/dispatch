@@ -3,14 +3,13 @@ var MiniCssExtractPlugin = require('mini-css-extract-plugin');
 var postcssPresetEnv = require('postcss-preset-env');
 var cssnano = require('cssnano');
 var TerserPlugin = require('terser-webpack-plugin');
-var ManifestPlugin = require('webpack-manifest-plugin');
 var { InjectManifest } = require('workbox-webpack-plugin');
 
 module.exports = {
   mode: 'production',
   entry: {
-    main: './src/js/index',
-    boot: './src/js/boot'
+    main: './js/index',
+    boot: './js/boot'
   },
   output: {
     filename: '[name].[chunkhash:8].js',
@@ -19,10 +18,10 @@ module.exports = {
   },
   resolve: {
     alias: {
-      components: path.resolve(__dirname, 'src/js/components'),
-      containers: path.resolve(__dirname, 'src/js/containers'),
-      state: path.resolve(__dirname, 'src/js/state'),
-      utils: path.resolve(__dirname, 'src/js/utils')
+      components: path.resolve(__dirname, 'js/components'),
+      containers: path.resolve(__dirname, 'js/containers'),
+      state: path.resolve(__dirname, 'js/state'),
+      utils: path.resolve(__dirname, 'js/utils')
     }
   },
   module: {
@@ -79,14 +78,11 @@ module.exports = {
       filename: '[name].[contenthash:8].css',
       chunkFilename: '[name].[contenthash:8].css'
     }),
-    new ManifestPlugin({
-      fileName: 'asset-manifest.json'
-    }),
     new InjectManifest({
-      swSrc: './src/js/sw.js',
+      swSrc: './js/sw.js',
       importWorkboxFrom: 'local',
-      globDirectory: './src',
-      globPatterns: ['font/*.woff2'],
+      globDirectory: './public',
+      globPatterns: ['*', 'font/*.woff2'],
       exclude: [
         /\.map$/,
         /^manifest.*\.js(?:on)?$/,

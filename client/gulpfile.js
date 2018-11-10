@@ -60,19 +60,19 @@ function config() {
   return gulp.src('../config.default.toml').pipe(gulp.dest('dist'));
 }
 
-function fonts() {
-  return gulp.src('src/font/*(*.woff|*.woff2)').pipe(gulp.dest('dist/font'));
+function public() {
+  return gulp.src('public/**/*').pipe(gulp.dest('dist'));
 }
 
 function compress() {
   return gulp
-    .src(['dist/**/!(*.dev.js|*.map|*.toml|*.json|*.woff|*.woff2)'])
+    .src(['dist/**/*(*.js|*.css|*.json)', '!dist/**/*(*.dev.js)'])
     .pipe(brotli({ quality: 11 }))
     .pipe(gulp.dest('dist'));
 }
 
 function cleanup() {
-  return del(['dist/**/*(*.js|*.css|*.map)']);
+  return del(['dist/**/*(*.js|*.css|*.json|*.map)']);
 }
 
 function bindata(cb) {
@@ -120,13 +120,13 @@ function serve() {
   });
 }
 
-const assets = gulp.parallel(js, config, fonts);
+const assets = gulp.parallel(js, config, public);
 
 const build = gulp.series(clean, assets, compress, cleanup, bindata);
 
 const dev = gulp.series(
   clean,
-  gulp.parallel(serve, fonts, gulp.series(config, bindata))
+  gulp.parallel(serve, public, gulp.series(config, bindata))
 );
 
 gulp.task('build', build);

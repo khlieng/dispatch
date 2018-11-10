@@ -23,7 +23,8 @@ const initialState = {
     showDetails: false
   },
   hexIP: false,
-  newVersionAvailable: false
+  newVersionAvailable: false,
+  installable: null
 };
 
 export default createReducer(initialState, {

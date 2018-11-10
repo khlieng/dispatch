@@ -723,6 +723,7 @@ input.message-input-nick.invalid {
 .settings {
   flex: 1;
   max-width: 692px;
+  text-align: center;
 }
 
 .settings-section {
@@ -730,6 +731,7 @@ input.message-input-nick.invalid {
   padding: 15px;
   margin: 0 20px;
   margin-bottom: 20px;
+  text-align: left;
 }
 
 .settings .checkbox {
@@ -771,6 +773,17 @@ input.message-input-nick.invalid {
   display: inline-block;
   margin-top: 15px;
   margin-right: 10px;
+}
+
+.button-install {
+  padding: 0 15px;
+  width: auto !important;
+  margin: 20px;
+  margin-top: 0;
+}
+
+.button-install h2 {
+  color: #fff;
 }
 
 @media (max-width: 906px) {
@@ -865,6 +878,10 @@ input.message-input-nick.invalid {
   }
 
   .settings-section {
+    margin-left: 50px;
+  }
+
+  .button-install {
     margin-left: 50px;
   }
 }

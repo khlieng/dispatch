@@ -4,17 +4,17 @@ var postcssPresetEnv = require('postcss-preset-env');
 
 module.exports = {
   mode: 'development',
-  entry: ['webpack-hot-middleware/client', './src/js/index'],
+  entry: ['webpack-hot-middleware/client', './js/index'],
   output: {
     filename: 'bundle.js',
     publicPath: '/'
   },
   resolve: {
     alias: {
-      components: path.resolve(__dirname, 'src/js/components'),
-      containers: path.resolve(__dirname, 'src/js/containers'),
-      state: path.resolve(__dirname, 'src/js/state'),
-      utils: path.resolve(__dirname, 'src/js/utils')
+      components: path.resolve(__dirname, 'js/components'),
+      containers: path.resolve(__dirname, 'js/containers'),
+      state: path.resolve(__dirname, 'js/state'),
+      utils: path.resolve(__dirname, 'js/utils')
     }
   },
   module: {

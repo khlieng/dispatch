@@ -5,12 +5,10 @@ import (
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -66,6 +64,9 @@ var (
 		".woff2": "font/woff2",
 		".woff":  "application/font-woff",
 		".ttf":   "application/x-font-ttf",
+		".png":   "image/png",
+		".ico":   "image/x-icon",
+		".json":  "application/json",
 	}
 
 	hstsHeader string
@@ -76,19 +77,8 @@ func (d *Dispatch) initFileServer() {
 	if viper.GetBool("dev") {
 		indexScripts = []string{"bundle.js"}
 	} else {
-		data, err := assets.Asset("asset-manifest.json")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		manifest := map[string]string{}
-		err = json.Unmarshal(data, &manifest)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		bootloader := decompressedAsset(manifest["boot.js"])
-		runtime := decompressedAsset(manifest["runtime.js"])
+		bootloader := decompressedAsset(findAssetName("boot*.js"))
+		runtime := decompressedAsset(findAssetName("runtime*.js"))
 
 		inlineScript = string(runtime)
 		inlineScriptSW = string(bootloader) + string(runtime)
@@ -102,10 +92,10 @@ func (d *Dispatch) initFileServer() {
 		hash.Write(runtime)
 		inlineScriptSWSha256 = base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
-		indexStylesheet = manifest["main.css"]
+		indexStylesheet = findAssetName("main*.css")
 		indexScripts = []string{
-			manifest["vendors~main.js"],
-			manifest["main.js"],
+			findAssetName("vendors*.js"),
+			findAssetName("main*.js"),
 		}
 
 		h2PushAssets = []h2PushAsset{
@@ -119,38 +109,29 @@ func (d *Dispatch) initFileServer() {
 		}
 
 		ignoreAssets := []string{
-			manifest["runtime.js"],
-			manifest["boot.js"],
-			manifest["sw.js"],
+			findAssetName("runtime*.js"),
+			findAssetName("boot*.js"),
+			"sw.js",
 		}
 
 	outer:
-		for _, assetPath := range manifest {
+		for _, asset := range assets.AssetNames() {
+			assetName := strings.TrimSuffix(asset, ".br")
+
 			for _, ignored := range ignoreAssets {
-				if assetPath == ignored {
+				if ignored == assetName {
 					continue outer
 				}
 			}
 
 			file := &File{
-				Path:         assetPath,
-				Asset:        strings.TrimLeft(assetPath, "/") + ".br",
-				ContentType:  contentTypes[filepath.Ext(assetPath)],
+				Path:         assetName,
+				Asset:        asset,
+				ContentType:  contentTypes[filepath.Ext(assetName)],
 				CacheControl: longCacheControl,
-				Compressed:   true,
+				Compressed:   strings.HasSuffix(asset, ".br"),
 			}
 
-			files = append(files, file)
-		}
-
-		root, _ := assets.AssetDir("")
-		for _, asset := range root {
-			if _, err = assets.AssetDir(asset); err == nil {
-				loadDir(asset)
-			}
-		}
-
-		for _, file := range files {
 			if file.Compressed {
 				data, err := assets.Asset(file.Asset)
 				if err != nil {
@@ -159,6 +140,8 @@ func (d *Dispatch) initFileServer() {
 
 				file.GzipAsset = gzipAsset(data)
 			}
+
+			files = append(files, file)
 		}
 
 		serviceWorker = decompressedAsset("sw.js")
@@ -188,25 +171,15 @@ workbox.routing.registerNavigationRoute('/?sw');`)...)
 	}
 }
 
-func loadDir(dirName string) {
-	dir, err := assets.AssetDir(dirName)
-	if err != nil {
-		log.Fatal(err)
-	}
+func findAssetName(glob string) string {
+	for _, assetName := range assets.AssetNames() {
+		assetName = strings.TrimSuffix(assetName, ".br")
 
-	for _, asset := range dir {
-		assetName := strings.TrimSuffix(asset, ".br")
-
-		file := &File{
-			Path:         path.Join(dirName, assetName),
-			Asset:        path.Join(dirName, asset),
-			ContentType:  contentTypes[filepath.Ext(assetName)],
-			CacheControl: longCacheControl,
-			Compressed:   strings.HasSuffix(asset, ".br"),
+		if m, _ := filepath.Match(glob, assetName); m {
+			return assetName
 		}
-
-		files = append(files, file)
 	}
+	return ""
 }
 
 func decompressAsset(data []byte) []byte {
@@ -221,7 +194,7 @@ func decompressAsset(data []byte) []byte {
 }
 
 func decompressedAsset(name string) []byte {
-	asset, err := assets.Asset(strings.TrimLeft(name, "/") + ".br")
+	asset, err := assets.Asset(name + ".br")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -316,7 +289,7 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 			inlineSha = inlineScriptSWSha256
 		}
 
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self' 'sha256-"+inlineSha+"'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src data:; connect-src 'self' "+wsSrc)
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self' 'sha256-"+inlineSha+"'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self'; manifest-src 'self'; connect-src 'self' "+wsSrc)
 	}
 
 	w.Header().Set("Content-Type", "text/html")

@@ -54,7 +54,6 @@
     "webpack": "^4.25.1",
     "webpack-dev-middleware": "^3.4.0",
     "webpack-hot-middleware": "^2.24.3",
-    "webpack-manifest-plugin": "^2.0.4",
     "workbox-webpack-plugin": "^3.6.3"
   },
   "dependencies": {
@@ -92,10 +91,10 @@
   },
   "jest": {
     "moduleNameMapper": {
-      "^components(.*)$": "<rootDir>/src/js/components$1",
-      "^containers(.*)$": "<rootDir>/src/js/containers$1",
-      "^state(.*)$": "<rootDir>/src/js/state$1",
-      "^utils(.*)$": "<rootDir>/src/js/utils$1"
+      "^components(.*)$": "<rootDir>/js/components$1",
+      "^containers(.*)$": "<rootDir>/js/containers$1",
+      "^state(.*)$": "<rootDir>/js/state$1",
+      "^utils(.*)$": "<rootDir>/js/utils$1"
     }
   }
 }

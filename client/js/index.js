@@ -25,6 +25,11 @@ runModules({ store, socket });
 
 createRoot(document.getElementById('root')).render(<Root store={store} />);
 
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  store.dispatch(appSet('installable', e));
+});
+
 register({
   onUpdate: () => store.dispatch(appSet('newVersionAvailable', true))
 });
