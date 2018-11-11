@@ -8,14 +8,13 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"github.com/khlieng/dispatch/assets"
 	"github.com/khlieng/dispatch/server"
 	"github.com/khlieng/dispatch/storage"
 	"github.com/khlieng/dispatch/storage/bleve"
 	"github.com/khlieng/dispatch/storage/boltdb"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 const logo = `
@@ -25,7 +24,7 @@ const logo = `
    | |_| || |\__ \| |_) || (_| || |_| (__ | | | |
    |____/ |_||___/| .__/  \__,_| \__|\___||_| |_|
                   |_|
-                       v0.4
+                       v0.5
 `
 
 var rootCmd = &cobra.Command{
