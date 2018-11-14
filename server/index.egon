@@ -6,28 +6,29 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f0f0f0" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f0f0f0">
 
   <title>Dispatch</title>
+  <meta name="description" content="Web-based IRC client.">
 
   <% if sw { %>
-  <link rel="preload" href="/data" as="fetch" crossorigin="anonymous" />
+  <link rel="preload" href="/data" as="fetch" crossorigin>
   <% } %>
 
   <script>
   <%== inlineScript %>
   </script>
 
-  <link rel="preload" href="/font/fontello.woff2?48901973" as="font" type="font/woff2" crossorigin="anonymous" />
-  <link rel="preload" href="/font/RobotoMono-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
-  <link rel="preload" href="/font/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
-  <link rel="preload" href="/font/Montserrat-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
-  <link rel="preload" href="/font/RobotoMono-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+  <link rel="preload" href="/font/fontello.woff2?48901973" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/font/RobotoMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/font/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/font/Montserrat-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/font/RobotoMono-Bold.woff2" as="font" type="font/woff2" crossorigin>
 
   <% if cssPath != "" { %>
-  <link href="<%== cssPath %>" rel="stylesheet" />
+  <link href="<%== cssPath %>" rel="stylesheet">
   <% } %>
 
   <link rel="manifest" href="/manifest.json">
@@ -43,6 +44,8 @@
   <% for _, script := range scripts { %>
   <script src="<%== script %>"></script>
   <% } %>
+
+  <noscript>This page needs JavaScript enabled to function.</noscript>
 </body>
 
 </html>

@@ -69,6 +69,8 @@ var (
 		".json":  "application/json",
 	}
 
+	robots = []byte("User-agent: *\nDisallow: /")
+
 	hstsHeader string
 	cspEnabled bool
 )
@@ -229,6 +231,13 @@ func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/javascript")
 		w.Header().Set("Content-Length", strconv.Itoa(len(serviceWorker)))
 		w.Write(serviceWorker)
+		return
+	}
+
+	if r.URL.Path == "/robots.txt" {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Length", strconv.Itoa(len(robots)))
+		w.Write(robots)
 		return
 	}
 
