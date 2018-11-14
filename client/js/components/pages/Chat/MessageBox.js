@@ -239,6 +239,7 @@ export default class MessageBox extends PureComponent {
               initialScrollOffset={this.initialScrollTop}
               onScroll={this.handleScroll}
               className="messagebox-window"
+              overscanCount={5}
             >
               {this.renderMessage}
             </List>

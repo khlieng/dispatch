@@ -81,6 +81,7 @@ export default class UserList extends PureComponent {
               itemKey={this.getItemKey}
               itemSize={this.getItemHeight}
               estimatedItemSize={24}
+              overscanCount={5}
             >
               {this.renderUser}
             </List>
