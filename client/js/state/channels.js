@@ -91,16 +91,18 @@ export function compareUsers(a, b) {
 
 export const getChannels = state => state.channels;
 
-export const getSortedChannels = createSelector(getChannels, channels =>
-  sortBy(
-    Object.keys(channels).map(server => ({
-      address: server,
-      channels: sortBy(Object.keys(channels[server]), channel =>
-        channel.toLowerCase()
-      )
-    })),
-    server => server.address.toLowerCase()
-  )
+export const getSortedChannels = createSelector(
+  getChannels,
+  channels =>
+    sortBy(
+      Object.keys(channels).map(server => ({
+        address: server,
+        channels: sortBy(Object.keys(channels[server]), channel =>
+          channel.toLowerCase()
+        )
+      })),
+      server => server.address.toLowerCase()
+    )
 );
 
 export const getSelectedChannel = createSelector(
