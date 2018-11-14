@@ -4,6 +4,7 @@ var postcssPresetEnv = require('postcss-preset-env');
 var cssnano = require('cssnano');
 var TerserPlugin = require('terser-webpack-plugin');
 var { InjectManifest } = require('workbox-webpack-plugin');
+var HashOutputPlugin = require('webpack-plugin-hash-output');
 
 module.exports = {
   mode: 'production',
@@ -12,8 +13,8 @@ module.exports = {
     boot: './js/boot'
   },
   output: {
-    filename: '[name].[chunkhash:8].js',
-    chunkFilename: '[name].[chunkhash:8].js',
+    filename: '[name].[chunkhash].js',
+    chunkFilename: '[name].[chunkhash].js',
     publicPath: '/'
   },
   resolve: {
@@ -75,8 +76,8 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: '[name].[contenthash:8].css',
-      chunkFilename: '[name].[contenthash:8].css'
+      filename: '[name].[contenthash].css',
+      chunkFilename: '[name].[contenthash].css'
     }),
     new InjectManifest({
       swSrc: './js/sw.js',
@@ -89,10 +90,19 @@ module.exports = {
         /^boot.*\.js$/,
         /^runtime.*\.js$/
       ]
-    })
+    }),
+    new HashOutputPlugin()
   ],
   optimization: {
-    minimizer: [new TerserPlugin()],
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          safari10: true
+        },
+        cache: true,
+        parallel: true
+      })
+    ],
     splitChunks: {
       chunks: 'all',
       cacheGroups: {

@@ -54,6 +54,7 @@
     "webpack": "^4.25.1",
     "webpack-dev-middleware": "^3.4.0",
     "webpack-hot-middleware": "^2.24.3",
+    "webpack-plugin-hash-output": "^3.1.0",
     "workbox-webpack-plugin": "^3.6.3"
   },
   "dependencies": {
