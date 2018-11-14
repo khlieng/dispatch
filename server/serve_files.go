@@ -289,7 +289,18 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 			inlineSha = inlineScriptSWSha256
 		}
 
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self' 'sha256-"+inlineSha+"'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self'; manifest-src 'self'; connect-src 'self' "+wsSrc)
+		csp := []string{
+			"default-src 'none'",
+			"script-src 'self' 'sha256-" + inlineSha + "'",
+			"style-src 'self' 'unsafe-inline'",
+			"font-src 'self'",
+			"img-src 'self'",
+			"manifest-src 'self'",
+			"connect-src 'self' " + wsSrc,
+			"worker-src 'self'",
+		}
+
+		w.Header().Set("Content-Security-Policy", strings.Join(csp, "; "))
 	}
 
 	w.Header().Set("Content-Type", "text/html")
