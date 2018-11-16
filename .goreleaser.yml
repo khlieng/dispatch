@@ -1,0 +1,41 @@
+builds:
+  - ldflags:
+      - -s -w -X github.com/khlieng/dispatch/commands.version=v{{.Version}} -X github.com/khlieng/dispatch/commands.commit={{.ShortCommit}} -X github.com/khlieng/dispatch/commands.date={{.Date}}
+
+    env:
+      - CGO_ENABLED=0
+
+    goos:
+      - linux
+      - darwin
+      - windows
+
+    goarch:
+      - amd64
+      - arm
+      - arm64
+
+    goarm:
+      - 6
+      - 7
+
+archive:
+  files:
+    - none*
+
+  format_overrides:
+    - goos: windows
+      format: zip
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  filters:
+    exclude:
+      - "(?i)^update.*dep"
+      - Merge pull request
+      - Merge branch
+
+release:
+  name_template: "{{.Version}}"

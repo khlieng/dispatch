@@ -1,5 +1,4 @@
-build
-release
+dist
 dispatch
 client/dist
 client/node_modules

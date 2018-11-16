@@ -1,8 +1,7 @@
 language: go
 
 go:
-  - "1.10.x"
-  - "1.11.x"
+  - 1.x
   - tip
 
 os:
@@ -16,11 +15,11 @@ matrix:
 install:
   - go get github.com/jteeuwen/go-bindata/...
   - cd client
-  - nvm install 10.11.0
-  - nvm use 10.11.0
+  - nvm install 11.2.0
+  - nvm use 11.2.0
   - npm install -g yarn
   - yarn global add gulp@next
-  - yarn --ignore-engines
+  - yarn
 
 script:
   - yarn test:verbose
@@ -28,3 +27,11 @@ script:
   - cd ..
   - go vet ./...
   - go test -v -race ./...
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: curl -sL https://git.io/goreleaser | bash
+    on:
+      tags: true
+      condition: $TRAVIS_OS_NAME = linux && $TRAVIS_GO_VERSION = 1.*

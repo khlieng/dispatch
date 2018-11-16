@@ -17,6 +17,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 const logo = `
     ____   _                     _         _
    |  _ \ (_) ___  _ __    __ _ | |_  ___ | |__
@@ -24,7 +30,11 @@ const logo = `
    | |_| || |\__ \| |_) || (_| || |_| (__ | | | |
    |____/ |_||___/| .__/  \__,_| \__|\___||_| |_|
                   |_|
-                       v0.5
+
+   %s
+   Commit: %s
+   Build Date: %s
+
 `
 
 var rootCmd = &cobra.Command{
@@ -32,7 +42,7 @@ var rootCmd = &cobra.Command{
 	Short: "Web-based IRC client in Go.",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if cmd.Use == "dispatch" {
-			fmt.Println(logo)
+			fmt.Printf(logo, version, commit, date)
 		}
 
 		storage.Initialize(viper.GetString("dir"))
