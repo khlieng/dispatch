@@ -33,6 +33,7 @@ checksum:
 changelog:
   filters:
     exclude:
+      - ^v.*
       - "(?i)^update.*dep"
       - Merge pull request
       - Merge branch
