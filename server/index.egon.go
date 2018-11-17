@@ -4,15 +4,10 @@
 package server
 import (
 "io"
-"github.com/mailru/easyjson"
 )
 
-func IndexTemplate(w io.Writer, data *indexData, cssPath string, inlineScript string, scripts []string, sw bool) error {
-io.WriteString(w, "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#f0f0f0\"><title>Dispatch</title><meta name=\"description\" content=\"Web-based IRC client.\">")
- if sw { 
-io.WriteString(w, "<link rel=\"preload\" href=\"/data\" as=\"fetch\" crossorigin>")
- } 
-io.WriteString(w, "<script>")
+func IndexTemplate(w io.Writer, cssPath string, inlineScript string, scripts []string) error {
+io.WriteString(w, "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#f0f0f0\"><title>Dispatch</title><meta name=\"description\" content=\"Web-based IRC client.\"><link rel=\"preload\" href=\"/init\" as=\"fetch\" crossorigin><script>")
 io.WriteString(w,  inlineScript )
 io.WriteString(w, "</script><link rel=\"preload\" href=\"/font/fontello.woff2?48901973\" as=\"font\" type=\"font/woff2\" crossorigin><link rel=\"preload\" href=\"/font/RobotoMono-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin><link rel=\"preload\" href=\"/font/Montserrat-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin><link rel=\"preload\" href=\"/font/Montserrat-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin><link rel=\"preload\" href=\"/font/RobotoMono-Bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>")
  if cssPath != "" { 
@@ -21,11 +16,6 @@ io.WriteString(w,  cssPath )
 io.WriteString(w, "\" rel=\"stylesheet\">")
  } 
 io.WriteString(w, "<link rel=\"manifest\" href=\"/manifest.json\"></head><body><div id=\"root\"></div>")
- if data != nil { 
-io.WriteString(w, "<script id=\"env\" type=\"application/json\">")
- easyjson.MarshalToWriter(data, w) 
-io.WriteString(w, "</script>")
- } 
  for _, script := range scripts { 
 io.WriteString(w, "<script src=\"")
 io.WriteString(w,  script )

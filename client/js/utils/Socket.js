@@ -14,8 +14,6 @@ export default class Socket {
     });
     this.handlers = [];
     this.connected = false;
-
-    this.connect();
   }
 
   connect() {

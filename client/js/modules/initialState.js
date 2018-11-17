@@ -70,11 +70,8 @@ function loadState({ store }, env) {
   });
 }
 
-export default function initialState(ctx) {
-  if (window.__env__) {
-    window.__env__.then(env => loadState(ctx, env));
-  } else {
-    const env = JSON.parse(document.getElementById('env').innerHTML);
-    loadState(ctx, env);
-  }
+export default async function initialState(ctx) {
+  const env = await window.__init__;
+  ctx.socket.connect();
+  loadState(ctx, env);
 }

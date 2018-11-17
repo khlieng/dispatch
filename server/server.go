@@ -172,7 +172,7 @@ func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		state := d.handleAuth(w, r, true, true)
+		state := d.handleAuth(w, r, false, false)
 		if state == nil {
 			log.Println("[Auth] No state")
 			fail(w, http.StatusInternalServerError)
@@ -180,8 +180,8 @@ func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		d.upgradeWS(w, r, state)
-	} else if strings.HasPrefix(r.URL.Path, "/data") {
-		state := d.handleAuth(w, r, false, false)
+	} else if strings.HasPrefix(r.URL.Path, "/init") {
+		state := d.handleAuth(w, r, true, true)
 		data := getIndexData(r, "/", state)
 
 		writeJSON(w, r, data)

@@ -47,13 +47,11 @@ func newH2PushAsset(name string) h2PushAsset {
 var (
 	files []*File
 
-	indexStylesheet      string
-	indexScripts         []string
-	inlineScript         string
-	inlineScriptSha256   string
-	inlineScriptSW       string
-	inlineScriptSWSha256 string
-	serviceWorker        []byte
+	indexStylesheet    string
+	indexScripts       []string
+	inlineScript       string
+	inlineScriptSha256 string
+	serviceWorker      []byte
 
 	h2PushAssets      []h2PushAsset
 	h2PushCookieValue string
@@ -82,17 +80,12 @@ func (d *Dispatch) initFileServer() {
 		bootloader := decompressedAsset(findAssetName("boot*.js"))
 		runtime := decompressedAsset(findAssetName("runtime*.js"))
 
-		inlineScript = string(runtime)
-		inlineScriptSW = string(bootloader) + string(runtime)
+		inlineScript = string(bootloader) + string(runtime)
 
 		hash := sha256.New()
-		hash.Write(runtime)
-		inlineScriptSha256 = base64.StdEncoding.EncodeToString(hash.Sum(nil))
-
-		hash.Reset()
 		hash.Write(bootloader)
 		hash.Write(runtime)
-		inlineScriptSWSha256 = base64.StdEncoding.EncodeToString(hash.Sum(nil))
+		inlineScriptSha256 = base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
 		indexStylesheet = findAssetName("main*.css")
 		indexScripts = []string{
@@ -148,15 +141,15 @@ func (d *Dispatch) initFileServer() {
 
 		serviceWorker = decompressedAsset("sw.js")
 		hash.Reset()
-		IndexTemplate(hash, nil, indexStylesheet, inlineScriptSW, indexScripts, true)
+		IndexTemplate(hash, indexStylesheet, inlineScript, indexScripts)
 		indexHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
 		serviceWorker = append(serviceWorker, []byte(`
 workbox.precaching.precacheAndRoute([{
 	revision: '`+indexHash+`',
-	url: '/?sw'
+	url: '/'
 }]);
-workbox.routing.registerNavigationRoute('/?sw');`)...)
+workbox.routing.registerNavigationRoute('/');`)...)
 
 		if viper.GetBool("https.hsts.enabled") && viper.GetBool("https.enabled") {
 			hstsHeader = "max-age=" + viper.GetString("https.hsts.max_age")
@@ -283,8 +276,6 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	_, sw := r.URL.Query()["sw"]
-
 	if cspEnabled {
 		var wsSrc string
 		if r.TLS != nil {
@@ -293,14 +284,9 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 			wsSrc = "ws://" + r.Host
 		}
 
-		inlineSha := inlineScriptSha256
-		if sw {
-			inlineSha = inlineScriptSWSha256
-		}
-
 		csp := []string{
 			"default-src 'none'",
-			"script-src 'self' 'sha256-" + inlineSha + "'",
+			"script-src 'self' 'sha256-" + inlineScriptSha256 + "'",
 			"style-src 'self' 'unsafe-inline'",
 			"font-src 'self'",
 			"img-src 'self'",
@@ -323,21 +309,14 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Strict-Transport-Security", hstsHeader)
 	}
 
-	var data *indexData
-	inline := inlineScriptSW
-	if !sw {
-		data = getIndexData(r, r.URL.EscapedPath(), d.handleAuth(w, r, false, true))
-		inline = inlineScript
-	}
-
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w.Header().Set("Content-Encoding", "gzip")
 
 		gzw := getGzipWriter(w)
-		IndexTemplate(gzw, data, indexStylesheet, inline, indexScripts, sw)
+		IndexTemplate(gzw, indexStylesheet, inlineScript, indexScripts)
 		putGzipWriter(gzw)
 	} else {
-		IndexTemplate(w, data, indexStylesheet, inline, indexScripts, sw)
+		IndexTemplate(w, indexStylesheet, inlineScript, indexScripts)
 	}
 }
 

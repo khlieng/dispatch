@@ -1,6 +1,4 @@
-<%! data *indexData, cssPath string, inlineScript string, scripts []string, sw bool %>
-
-<%% import "github.com/mailru/easyjson" %%>
+<%! cssPath string, inlineScript string, scripts []string %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,9 +11,7 @@
   <title>Dispatch</title>
   <meta name="description" content="Web-based IRC client.">
 
-  <% if sw { %>
-  <link rel="preload" href="/data" as="fetch" crossorigin>
-  <% } %>
+  <link rel="preload" href="/init" as="fetch" crossorigin>
 
   <script>
   <%== inlineScript %>
@@ -36,10 +32,6 @@
 
 <body>
   <div id="root"></div>
-
-  <% if data != nil { %>
-  <script id="env" type="application/json"><% easyjson.MarshalToWriter(data, w) %></script>
-  <% } %>
 
   <% for _, script := range scripts { %>
   <script src="<%== script %>"></script>
