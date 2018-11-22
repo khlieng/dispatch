@@ -3,6 +3,7 @@ import { VariableSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import debounce from 'lodash/debounce';
 import { getScrollPos, saveScrollPos } from 'utils/scrollPosition';
+import { windowHeight } from 'utils/size';
 import Message from './Message';
 
 const fetchThreshold = 600;
@@ -125,9 +126,14 @@ export default class MessageBox extends PureComponent {
       if (scroll) {
         this.list.current.scrollToItem(messages.length + 1);
       } else if (messages.length > 0) {
-        this.initialScrollTop = 0;
+        let totalHeight = 14;
         for (let i = 0; i < messages.length; i++) {
-          this.initialScrollTop += messages[i].height;
+          totalHeight += messages[i].height;
+        }
+
+        const messageBoxHeight = windowHeight() - 100;
+        if (totalHeight > messageBoxHeight) {
+          this.initialScrollTop = totalHeight - messageBoxHeight;
         }
       }
     }
@@ -137,7 +143,7 @@ export default class MessageBox extends PureComponent {
     if (this.bottom) {
       saveScrollPos(this.scrollKey, -1);
     } else {
-      saveScrollPos(this.scrollKey, this.outer.current.scrollTop);
+      saveScrollPos(this.scrollKey, this.scrollTop);
     }
   };
 
@@ -167,6 +173,7 @@ export default class MessageBox extends PureComponent {
 
     const { clientHeight, scrollHeight } = this.outer.current;
 
+    this.scrollTop = scrollOffset;
     this.bottom = scrollOffset + clientHeight >= scrollHeight - 20;
   };
 
