@@ -27,18 +27,6 @@ export default class MessageBox extends PureComponent {
     this.loadScrollPos();
   }
 
-  componentDidMount() {
-    const scrollToBottom = this.bottom;
-
-    window.requestAnimationFrame(() => {
-      const { messages } = this.props;
-
-      if (scrollToBottom && messages.length > 0) {
-        this.list.current.scrollToItem(messages.length + 1);
-      }
-    });
-  }
-
   componentDidUpdate(prevProps) {
     if (prevProps.tab !== this.props.tab) {
       this.loadScrollPos(true);
@@ -123,6 +111,8 @@ export default class MessageBox extends PureComponent {
 
   loadScrollPos = scroll => {
     const pos = getScrollPos(this.updateScrollKey());
+    const { messages } = this.props;
+
     if (pos >= 0) {
       this.bottom = false;
       if (scroll) {
@@ -133,7 +123,12 @@ export default class MessageBox extends PureComponent {
     } else {
       this.bottom = true;
       if (scroll) {
-        this.list.current.scrollToItem(this.props.messages.length + 1);
+        this.list.current.scrollToItem(messages.length + 1);
+      } else if (messages.length > 0) {
+        this.initialScrollTop = 0;
+        for (let i = 0; i < messages.length; i++) {
+          this.initialScrollTop += messages[i].height;
+        }
       }
     }
   };
