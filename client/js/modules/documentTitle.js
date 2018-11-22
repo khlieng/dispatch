@@ -8,16 +8,20 @@ export default function documentTitle({ store }) {
     let title;
 
     if (router.route === 'chat') {
-      const { name } = router.params;
+      const { server, name } = router.params;
       if (name) {
-        title = `${name} @ ${serverName}`;
+        title = `${name} @ ${serverName || server}`;
       } else {
-        title = serverName;
+        title = serverName || server;
       }
     } else {
       title = capitalize(router.route);
     }
 
-    document.title = `${title} | Dispatch`;
+    if (title) {
+      document.title = `${title} | Dispatch`;
+    } else {
+      document.title = 'Dispatch';
+    }
   });
 }
