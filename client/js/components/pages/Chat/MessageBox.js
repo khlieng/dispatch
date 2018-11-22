@@ -10,7 +10,7 @@ const fetchThreshold = 600;
 // The amount of time in ms that needs to pass without any
 // scroll events happening before adding messages to the top,
 // this is done to prevent the scroll from jumping all over the place
-const scrollbackDebounce = 100;
+const scrollbackDebounce = 150;
 
 export default class MessageBox extends PureComponent {
   list = createRef();
