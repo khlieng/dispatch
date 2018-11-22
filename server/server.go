@@ -181,10 +181,17 @@ func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		d.upgradeWS(w, r, state)
 	} else if strings.HasPrefix(r.URL.Path, "/init") {
+		referer, err := url.Parse(r.Header.Get("Referer"))
+		if err != nil {
+			fail(w, http.StatusInternalServerError)
+			return
+		}
+
 		state := d.handleAuth(w, r, true, true)
-		data := getIndexData(r, "/", state)
+		data := getIndexData(r, referer.EscapedPath(), state)
 
 		writeJSON(w, r, data)
+
 	} else {
 		d.serveFiles(w, r)
 	}
