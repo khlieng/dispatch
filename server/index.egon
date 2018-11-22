@@ -24,7 +24,7 @@
   <link rel="preload" href="/font/RobotoMono-Bold.woff2" as="font" type="font/woff2" crossorigin>
 
   <% if cssPath != "" { %>
-  <link href="<%== cssPath %>" rel="stylesheet">
+  <link href="/<%== cssPath %>" rel="stylesheet">
   <% } %>
 
   <link rel="manifest" href="/manifest.json">
@@ -34,7 +34,7 @@
   <div id="root"></div>
 
   <% for _, script := range scripts { %>
-  <script src="<%== script %>"></script>
+  <script src="/<%== script %>"></script>
   <% } %>
 
   <noscript>This page needs JavaScript enabled to function.</noscript>

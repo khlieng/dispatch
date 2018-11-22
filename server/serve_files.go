@@ -120,7 +120,7 @@ func (d *Dispatch) initFileServer() {
 			}
 
 			file := &File{
-				Path:         assetName,
+				Path:         "/" + assetName,
 				Asset:        asset,
 				ContentType:  contentTypes[filepath.Ext(assetName)],
 				CacheControl: longCacheControl,
@@ -235,7 +235,7 @@ func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, file := range files {
-		if strings.HasSuffix(r.URL.Path, file.Path) {
+		if r.URL.Path == file.Path {
 			d.serveFile(w, r, file)
 			return
 		}
