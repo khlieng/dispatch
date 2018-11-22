@@ -7,6 +7,7 @@ import FileInput from 'components/ui/FileInput';
 const Settings = ({
   settings,
   installable,
+  version,
   setSetting,
   onCertChange,
   onKeyChange,
@@ -71,6 +72,13 @@ const Settings = ({
             {error ? <p className="error">{error}</p> : null}
           </div>
         </div>
+        {version && (
+          <div className="settings-version">
+            <p>{version.tag}</p>
+            <p>Commit: {version.commit}</p>
+            <p>Build Date: {version.date}</p>
+          </div>
+        )}
       </div>
     </div>
   );

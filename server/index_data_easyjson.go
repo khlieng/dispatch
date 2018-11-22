@@ -99,6 +99,10 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 			}
 		case "hexIP":
 			out.HexIP = bool(in.Bool())
+		case "version":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Version).UnmarshalJSON(data))
+			}
 		case "settings":
 			if in.IsNull() {
 				in.Skip()
@@ -107,7 +111,9 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 				if out.Settings == nil {
 					out.Settings = new(storage.ClientSettings)
 				}
-				easyjson7e607aefDecodeGithubComKhliengDispatchStorage1(in, &*out.Settings)
+				if data := in.Raw(); in.Ok() {
+					in.AddError((*out.Settings).UnmarshalJSON(data))
+				}
 			}
 		case "users":
 			if in.IsNull() {
@@ -209,6 +215,16 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 		}
 		out.Bool(bool(in.HexIP))
 	}
+	if true {
+		const prefix string = ",\"version\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Raw((in.Version).MarshalJSON())
+	}
 	if in.Settings != nil {
 		const prefix string = ",\"settings\":"
 		if first {
@@ -217,7 +233,7 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 		} else {
 			out.RawString(prefix)
 		}
-		easyjson7e607aefEncodeGithubComKhliengDispatchStorage1(out, *in.Settings)
+		out.Raw((*in.Settings).MarshalJSON())
 	}
 	if in.Users != nil {
 		const prefix string = ",\"users\":"
@@ -264,53 +280,6 @@ func (v *indexData) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *indexData) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson7e607aefDecodeGithubComKhliengDispatchServer(l, v)
-}
-func easyjson7e607aefDecodeGithubComKhliengDispatchStorage1(in *jlexer.Lexer, out *storage.ClientSettings) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "coloredNicks":
-			out.ColoredNicks = bool(in.Bool())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson7e607aefEncodeGithubComKhliengDispatchStorage1(out *jwriter.Writer, in storage.ClientSettings) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	if in.ColoredNicks {
-		const prefix string = ",\"coloredNicks\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Bool(bool(in.ColoredNicks))
-	}
-	out.RawByte('}')
 }
 func easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in *jlexer.Lexer, out *storage.Channel) {
 	isTopLevel := in.IsStart()
@@ -383,7 +352,102 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchStorage(out *jwriter.Writer, 
 	}
 	out.RawByte('}')
 }
-func easyjson7e607aefDecodeGithubComKhliengDispatchServer1(in *jlexer.Lexer, out *connectDefaults) {
+func easyjson7e607aefDecodeGithubComKhliengDispatchServer1(in *jlexer.Lexer, out *dispatchVersion) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "tag":
+			out.Tag = string(in.String())
+		case "commit":
+			out.Commit = string(in.String())
+		case "date":
+			out.Date = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson7e607aefEncodeGithubComKhliengDispatchServer1(out *jwriter.Writer, in dispatchVersion) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if in.Tag != "" {
+		const prefix string = ",\"tag\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Tag))
+	}
+	if in.Commit != "" {
+		const prefix string = ",\"commit\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Commit))
+	}
+	if in.Date != "" {
+		const prefix string = ",\"date\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Date))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v dispatchVersion) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson7e607aefEncodeGithubComKhliengDispatchServer1(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v dispatchVersion) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson7e607aefEncodeGithubComKhliengDispatchServer1(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *dispatchVersion) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson7e607aefDecodeGithubComKhliengDispatchServer1(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *dispatchVersion) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson7e607aefDecodeGithubComKhliengDispatchServer1(l, v)
+}
+func easyjson7e607aefDecodeGithubComKhliengDispatchServer2(in *jlexer.Lexer, out *connectDefaults) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -449,7 +513,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer1(in *jlexer.Lexer, out
 		in.Consumed()
 	}
 }
-func easyjson7e607aefEncodeGithubComKhliengDispatchServer1(out *jwriter.Writer, in connectDefaults) {
+func easyjson7e607aefEncodeGithubComKhliengDispatchServer2(out *jwriter.Writer, in connectDefaults) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -548,23 +612,23 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer1(out *jwriter.Writer, 
 // MarshalJSON supports json.Marshaler interface
 func (v connectDefaults) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson7e607aefEncodeGithubComKhliengDispatchServer1(&w, v)
+	easyjson7e607aefEncodeGithubComKhliengDispatchServer2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v connectDefaults) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson7e607aefEncodeGithubComKhliengDispatchServer1(w, v)
+	easyjson7e607aefEncodeGithubComKhliengDispatchServer2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *connectDefaults) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson7e607aefDecodeGithubComKhliengDispatchServer1(&r, v)
+	easyjson7e607aefDecodeGithubComKhliengDispatchServer2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *connectDefaults) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson7e607aefDecodeGithubComKhliengDispatchServer1(l, v)
+	easyjson7e607aefDecodeGithubComKhliengDispatchServer2(l, v)
 }

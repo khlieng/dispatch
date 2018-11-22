@@ -12,7 +12,8 @@ import connect from 'utils/connect';
 
 const mapState = createStructuredSelector({
   settings: getSettings,
-  installable: state => state.app.installable
+  installable: state => state.app.installable,
+  version: state => state.app.version
 });
 
 const mapDispatch = {

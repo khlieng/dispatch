@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/khlieng/dispatch/storage"
+	"github.com/khlieng/dispatch/version"
 	"github.com/spf13/viper"
 )
 
@@ -20,11 +21,18 @@ type connectDefaults struct {
 	ShowDetails bool
 }
 
+type dispatchVersion struct {
+	Tag    string
+	Commit string
+	Date   string
+}
+
 type indexData struct {
 	Defaults connectDefaults
 	Servers  []Server
 	Channels []*storage.Channel
 	HexIP    bool
+	Version  dispatchVersion
 
 	Settings *storage.ClientSettings
 
@@ -38,6 +46,11 @@ type indexData struct {
 func getIndexData(r *http.Request, path string, state *State) *indexData {
 	data := indexData{
 		HexIP: viper.GetBool("hexIP"),
+		Version: dispatchVersion{
+			Tag:    version.Tag,
+			Commit: version.Commit,
+			Date:   version.Date,
+		},
 	}
 
 	data.Defaults = connectDefaults{

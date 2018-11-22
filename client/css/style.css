@@ -812,6 +812,11 @@ input.message-input-nick.invalid {
   text-align: center;
 }
 
+.settings-version {
+  color: #999;
+  font-size: 12px;
+}
+
 .suspense-fallback {
   display: flex;
   align-items: center;

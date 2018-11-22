@@ -11,7 +11,12 @@ import { replace } from 'utils/router';
 
 function loadState({ store }, env) {
   store.dispatch(setConnectDefaults(env.defaults));
-  store.dispatch(appSet('hexIP', env.hexIP));
+  store.dispatch(
+    appSet({
+      hexIP: env.hexIP,
+      version: env.version
+    })
+  );
   store.dispatch(setSettings(env.settings, true));
 
   if (env.servers) {
