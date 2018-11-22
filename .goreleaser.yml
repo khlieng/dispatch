@@ -1,6 +1,6 @@
 builds:
   - ldflags:
-      - -s -w -X github.com/khlieng/dispatch/commands.version=v{{.Version}} -X github.com/khlieng/dispatch/commands.commit={{.ShortCommit}} -X github.com/khlieng/dispatch/commands.date={{.Date}}
+      - -s -w -X github.com/khlieng/dispatch/version.Tag=v{{.Version}} -X github.com/khlieng/dispatch/version.Commit={{.ShortCommit}} -X github.com/khlieng/dispatch/version.Date={{.Date}}
 
     env:
       - CGO_ENABLED=0

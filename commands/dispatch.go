@@ -13,14 +13,9 @@ import (
 	"github.com/khlieng/dispatch/storage"
 	"github.com/khlieng/dispatch/storage/bleve"
 	"github.com/khlieng/dispatch/storage/boltdb"
+	"github.com/khlieng/dispatch/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-)
-
-var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
 )
 
 const logo = `
@@ -42,7 +37,7 @@ var rootCmd = &cobra.Command{
 	Short: "Web-based IRC client in Go.",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if cmd.Use == "dispatch" {
-			fmt.Printf(logo, version, commit, date)
+			fmt.Printf(logo, version.Tag, version.Commit, version.Date)
 		}
 
 		storage.Initialize(viper.GetString("dir"))

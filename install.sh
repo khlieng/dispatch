@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-Import="github.com/khlieng/dispatch/commands"
+Import="github.com/khlieng/dispatch/version"
 
-Version=$(git describe --tags)
+Tag=$(git describe --tags)
 Commit=$(git rev-parse --short HEAD)
 Date=$(date +'%Y-%m-%dT%TZ')
 
-go install -ldflags "-s -w -X $Import.version=$Version -X $Import.commit=$Commit -X $Import.date=$Date"
+go install -ldflags "-s -w -X $Import.Tag=$Tag -X $Import.Commit=$Commit -X $Import.Date=$Date"
