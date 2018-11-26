@@ -36,6 +36,11 @@ var rootCmd = &cobra.Command{
 	Use:   "dispatch",
 	Short: "Web-based IRC client in Go.",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if v, _ := cmd.Flags().GetBool("version"); v {
+			printVersion()
+			os.Exit(0)
+		}
+
 		if cmd.Use == "dispatch" {
 			fmt.Printf(logo, version.Tag, version.Commit, version.Date)
 		}
@@ -96,12 +101,14 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(clearCmd)
 	rootCmd.AddCommand(configCmd)
+	rootCmd.AddCommand(versionCmd)
 
 	rootCmd.PersistentFlags().String("dir", storage.DefaultDirectory(), "directory to store config and data in")
 	rootCmd.PersistentFlags().Bool("reset-config", false, "reset to the default configuration, overwriting the current one")
 	rootCmd.Flags().StringP("address", "a", "", "interface to which the server will bind")
 	rootCmd.Flags().IntP("port", "p", 80, "port to listen on")
 	rootCmd.Flags().Bool("dev", false, "development mode")
+	rootCmd.Flags().BoolP("version", "v", false, "show version")
 
 	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
 	viper.BindPFlag("reset_config", rootCmd.PersistentFlags().Lookup("reset-config"))
