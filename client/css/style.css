@@ -815,6 +815,7 @@ input.message-input-nick.invalid {
 .settings-version {
   color: #999;
   font-size: 12px;
+  margin-bottom: 20px;
 }
 
 .suspense-fallback {
