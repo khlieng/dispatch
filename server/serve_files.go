@@ -23,7 +23,6 @@ const longCacheControl = "public, max-age=31536000, immutable"
 const disabledCacheControl = "no-cache, no-store, must-revalidate"
 
 type File struct {
-	Path         string
 	Asset        string
 	GzipAsset    []byte
 	Hash         string
@@ -45,7 +44,7 @@ func newH2PushAsset(name string) h2PushAsset {
 }
 
 var (
-	files []*File
+	files = map[string]*File{}
 
 	indexStylesheet    string
 	indexScripts       []string
@@ -120,7 +119,6 @@ func (d *Dispatch) initFileServer() {
 			}
 
 			file := &File{
-				Path:         "/" + assetName,
 				Asset:        asset,
 				ContentType:  contentTypes[filepath.Ext(assetName)],
 				CacheControl: longCacheControl,
@@ -136,7 +134,7 @@ func (d *Dispatch) initFileServer() {
 				file.GzipAsset = gzipAsset(data)
 			}
 
-			files = append(files, file)
+			files["/"+assetName] = file
 		}
 
 		serviceWorker = decompressedAsset("sw.js")
@@ -219,6 +217,11 @@ func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if file, ok := files[r.URL.Path]; ok {
+		d.serveFile(w, r, file)
+		return
+	}
+
 	if r.URL.Path == "/sw.js" {
 		w.Header().Set("Cache-Control", disabledCacheControl)
 		w.Header().Set("Content-Type", "text/javascript")
@@ -232,13 +235,6 @@ func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Length", strconv.Itoa(len(robots)))
 		w.Write(robots)
 		return
-	}
-
-	for _, file := range files {
-		if r.URL.Path == file.Path {
-			d.serveFile(w, r, file)
-			return
-		}
 	}
 
 	d.serveIndex(w, r)
