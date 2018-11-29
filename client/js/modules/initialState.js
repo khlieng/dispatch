@@ -25,25 +25,47 @@ function loadState({ store }, env) {
       data: env.servers
     });
 
-    if (!store.getState().router.route) {
-      const tab = Cookie.get('tab');
-      if (tab) {
-        const [server, name = null] = tab.split(/;(.+)/);
+    const { router } = store.getState();
+
+    if (!router.route || router.route === 'chat') {
+      const tabs = [];
+
+      if (router.route === 'chat') {
+        tabs.push(router.params);
+      }
+
+      const cookie = Cookie.get('tab');
+      if (cookie) {
+        const [server, name = null] = cookie.split(/;(.+)/);
+        tabs.push({
+          server,
+          name
+        });
+      }
+
+      let found = false;
+      let i = 0;
+
+      while (!found) {
+        const tab = tabs[i];
+        i++;
 
         if (
-          name &&
+          tab.name &&
           find(
             env.channels,
-            chan => chan.server === server && chan.name === name
+            chan => chan.server === tab.server && chan.name === tab.name
           )
         ) {
-          store.dispatch(select(server, name, true));
-        } else if (find(env.servers, srv => srv.host === server)) {
-          store.dispatch(select(server, null, true));
-        } else {
-          store.dispatch(updateSelection());
+          found = true;
+          store.dispatch(select(tab.server, tab.name, true));
+        } else if (find(env.servers, srv => srv.host === tab.server)) {
+          found = true;
+          store.dispatch(select(tab.server, null, true));
         }
-      } else {
+      }
+
+      if (!found) {
         store.dispatch(updateSelection());
       }
     }

@@ -64,7 +64,10 @@ export function updateSelection() {
 
     if (serverAddrs.length === 0) {
       dispatch(replace('/connect'));
-    } else if (history.length > 0) {
+    } else if (
+      history.length > 0 &&
+      history[history.length - 1] !== state.tab.selected
+    ) {
       const tab = history[history.length - 1];
       dispatch(select(tab.server, tab.name, true));
     } else if (servers[server]) {

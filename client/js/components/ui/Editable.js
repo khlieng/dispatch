@@ -17,11 +17,7 @@ export default class Editable extends PureComponent {
       // eslint-disable-next-line react/no-did-update-set-state
       this.updateInputWidth(this.props.value);
       this.inputEl.current.focus();
-    }
-  }
-
-  getSnapshotBeforeUpdate(prevProps) {
-    if (this.state.editing && prevProps.value !== this.props.value) {
+    } else if (this.state.editing && prevProps.value !== this.props.value) {
       this.updateInputWidth(this.props.value);
     }
   }
