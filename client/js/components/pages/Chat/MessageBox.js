@@ -133,7 +133,7 @@ export default class MessageBox extends PureComponent {
 
         const messageBoxHeight = windowHeight() - 100;
         if (totalHeight > messageBoxHeight) {
-          this.initialScrollTop = totalHeight - messageBoxHeight;
+          this.initialScrollTop = totalHeight;
         }
       }
     }
