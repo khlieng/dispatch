@@ -79,6 +79,7 @@ module.exports = {
       filename: '[name].[contenthash].css',
       chunkFilename: '[name].[contenthash].css'
     }),
+    new HashOutputPlugin(),
     new InjectManifest({
       swSrc: './js/sw.js',
       importWorkboxFrom: 'local',
@@ -90,8 +91,7 @@ module.exports = {
         /^boot.*\.js$/,
         /^runtime.*\.js$/
       ]
-    }),
-    new HashOutputPlugin()
+    })
   ],
   optimization: {
     minimizer: [

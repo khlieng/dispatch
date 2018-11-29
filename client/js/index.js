@@ -1,5 +1,6 @@
+import './hot';
 import React from 'react';
-import { createRoot } from 'react-dom';
+import { render } from 'react-dom';
 
 import Root from 'components/Root';
 import { appSet } from 'state/app';
@@ -23,7 +24,7 @@ const store = configureStore(socket);
 initRouter(routes, store);
 runModules({ store, socket });
 
-createRoot(document.getElementById('root')).render(<Root store={store} />);
+render(<Root store={store} />, document.getElementById('root'));
 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();

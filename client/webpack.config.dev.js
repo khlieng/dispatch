@@ -4,9 +4,12 @@ var postcssPresetEnv = require('postcss-preset-env');
 
 module.exports = {
   mode: 'development',
-  entry: ['webpack-hot-middleware/client', './js/index'],
+  entry: {
+    main: ['webpack-hot-middleware/client', './js/index'],
+    boot: './js/boot'
+  },
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     publicPath: '/'
   },
   resolve: {
@@ -28,7 +31,11 @@ module.exports = {
           fix: true
         }
       },
-      { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
+      {
+        test: /\.js$/,
+        use: ['babel-loader', 'react-hot-loader/webpack'],
+        exclude: /node_modules/
+      },
       {
         test: /\.css$/,
         use: [

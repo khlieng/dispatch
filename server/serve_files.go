@@ -74,7 +74,7 @@ var (
 
 func (d *Dispatch) initFileServer() {
 	if viper.GetBool("dev") {
-		indexScripts = []string{"bundle.js"}
+		indexScripts = []string{"boot.js", "main.js"}
 	} else {
 		bootloader := decompressedAsset(findAssetName("boot*.js"))
 		runtime := decompressedAsset(findAssetName("runtime*.js"))
