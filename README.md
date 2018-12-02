@@ -18,9 +18,9 @@ There is a few different ways of getting it:
 
 ### 1. Binary
 
-- **[Windows (x64)](https://github.com/khlieng/dispatch/releases/download/v0.5.4/dispatch_0.5.4_windows_x64.zip)**
-- **[macOS (x64)](https://github.com/khlieng/dispatch/releases/download/v0.5.4/dispatch_0.5.4_mac_x64.tar.gz)**
-- **[Linux (x64)](https://github.com/khlieng/dispatch/releases/download/v0.5.4/dispatch_0.5.4_linux_x64.tar.gz)**
+- **[Windows (x64)](https://release.khlieng.com/khlieng/dispatch/windows_x64)**
+- **[macOS (x64)](https://release.khlieng.com/khlieng/dispatch/mac_x64)**
+- **[Linux (x64)](https://release.khlieng.com/khlieng/dispatch/linux_x64)**
 - [Other versions](https://github.com/khlieng/dispatch/releases)
 
 ### 2. Go
