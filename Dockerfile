@@ -6,7 +6,7 @@ RUN apk add --update git make build-base && \
 
 WORKDIR /go/src/github.com/khlieng/dispatch
 COPY . /go/src/github.com/khlieng/dispatch
-RUN go build .
+RUN chmod +x install.sh && ./install.sh
 
 # Runtime
 FROM alpine
@@ -14,7 +14,7 @@ FROM alpine
 RUN apk add --update ca-certificates && \
     rm -rf /var/cache/apk/*
 
-COPY --from=build /go/src/github.com/khlieng/dispatch/dispatch /dispatch
+COPY --from=build /go/bin/dispatch /dispatch
 
 EXPOSE 80/tcp
 

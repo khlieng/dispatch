@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh -
 
 Import="github.com/khlieng/dispatch/version"
 
