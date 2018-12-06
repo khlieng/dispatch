@@ -1,6 +1,8 @@
+import get from 'lodash/get';
 import createReducer from 'utils/createReducer';
 import { push, replace, LOCATION_CHANGED } from 'utils/router';
 import * as actions from './actions';
+import { find } from '../utils';
 
 const initialState = {
   selected: {},
@@ -54,19 +56,35 @@ export function select(server, name, doReplace) {
   return navigate(`/${server}`);
 }
 
+export function tabExists(
+  { server, name },
+  { servers, channels, privateChats }
+) {
+  return (
+    (name && get(channels, [server, name])) ||
+    (!name && server && servers[server]) ||
+    (name && find(privateChats[server], nick => nick === name))
+  );
+}
+
 export function updateSelection() {
   return (dispatch, getState) => {
     const state = getState();
     const { history } = state.tab;
     const { servers } = state;
-    const { server } = state.tab.selected;
+    const { server, name } = state.tab.selected;
+
+    if (tabExists({ server, name }, state)) {
+      return;
+    }
+
     const serverAddrs = Object.keys(servers);
 
     if (serverAddrs.length === 0) {
       dispatch(replace('/connect'));
     } else if (
       history.length > 0 &&
-      history[history.length - 1] !== state.tab.selected
+      tabExists(history[history.length - 1], state)
     ) {
       const tab = history[history.length - 1];
       dispatch(select(tab.server, tab.name, true));

@@ -46,9 +46,11 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          joined: true,
           users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
         },
         chan2: {
+          joined: true,
           users: [{ mode: '', nick: 'nick2', renderName: 'nick2' }]
         }
       }
@@ -61,6 +63,7 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          joined: true,
           users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
         }
       }
@@ -81,9 +84,11 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          joined: true,
           users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
         },
         chan2: {
+          joined: true,
           users: []
         }
       }
@@ -105,12 +110,14 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          joined: true,
           users: [
             { mode: '', nick: 'nick3', renderName: 'nick3' },
             { mode: '', nick: 'nick2', renderName: 'nick2' }
           ]
         },
         chan2: {
+          joined: true,
           users: [{ mode: '', nick: 'nick2', renderName: 'nick2' }]
         }
       }
@@ -118,7 +125,8 @@ describe('channel reducer', () => {
   });
 
   it('handles SOCKET_USERS', () => {
-    const state = reducer(undefined, {
+    let state = reducer(undefined, socket_join('srv', 'chan1', 'nick1'));
+    state = reducer(state, {
       type: actions.socket.USERS,
       server: 'srv',
       channel: 'chan1',
@@ -128,6 +136,7 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          joined: true,
           users: [
             { mode: '', nick: 'user3', renderName: 'user3' },
             { mode: '', nick: 'user2', renderName: 'user2' },
@@ -141,18 +150,18 @@ describe('channel reducer', () => {
   });
 
   it('handles SOCKET_TOPIC', () => {
-    const state = reducer(undefined, {
+    let state = reducer(undefined, socket_join('srv', 'chan1', 'nick1'));
+    state = reducer(state, {
       type: actions.socket.TOPIC,
       server: 'srv',
       channel: 'chan1',
       topic: 'the topic'
     });
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       srv: {
         chan1: {
-          topic: 'the topic',
-          users: []
+          topic: 'the topic'
         }
       }
     });
@@ -165,7 +174,7 @@ describe('channel reducer', () => {
 
     state = reducer(state, socket_mode('srv', 'chan1', 'nick1', 'o', ''));
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       srv: {
         chan1: {
           users: [
@@ -183,7 +192,7 @@ describe('channel reducer', () => {
     state = reducer(state, socket_mode('srv', 'chan1', 'nick2', 'o', ''));
     state = reducer(state, socket_mode('srv', 'chan2', 'not_there', 'x', ''));
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       srv: {
         chan1: {
           users: [
@@ -210,11 +219,11 @@ describe('channel reducer', () => {
 
     expect(state).toEqual({
       srv: {
-        chan1: { topic: 'the topic', users: [] },
-        chan2: { users: [] }
+        chan1: { joined: true, topic: 'the topic', users: [] },
+        chan2: { joined: true, users: [] }
       },
       srv2: {
-        chan1: { users: [] }
+        chan1: { joined: true, users: [] }
       }
     });
   });

@@ -61,7 +61,7 @@ function init(state, server, channel) {
     state[server] = {};
   }
   if (channel && !state[server][channel]) {
-    state[server][channel] = { users: [] };
+    state[server][channel] = { users: [], joined: false };
   }
 }
 
@@ -124,6 +124,10 @@ export const getSelectedChannelUsers = createSelector(
 export default createReducer(
   {},
   {
+    [actions.JOIN](state, { server, channels }) {
+      channels.forEach(channel => init(state, server, channel));
+    },
+
     [actions.PART](state, { server, channels }) {
       channels.forEach(channel => delete state[server][channel]);
     },
@@ -131,6 +135,7 @@ export default createReducer(
     [actions.socket.JOIN](state, { server, channels, user }) {
       const channel = channels[0];
       init(state, server, channel);
+      state[server][channel].joined = true;
       state[server][channel].users.push(createUser(user));
     },
 
@@ -160,12 +165,10 @@ export default createReducer(
     },
 
     [actions.socket.USERS](state, { server, channel, users }) {
-      init(state, server, channel);
       state[server][channel].users = users.map(nick => loadUser(nick));
     },
 
     [actions.socket.TOPIC](state, { server, channel, topic }) {
-      init(state, server, channel);
       state[server][channel].topic = topic;
     },
 
@@ -191,6 +194,7 @@ export default createReducer(
       if (data) {
         data.forEach(({ server, name, topic }) => {
           init(state, server, name);
+          state[server][name].joined = true;
           state[server][name].topic = topic;
         });
       }
