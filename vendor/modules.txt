@@ -45,7 +45,7 @@ github.com/blevesearch/go-porterstemmer
 github.com/blevesearch/segment
 # github.com/boltdb/bolt v0.0.0-20180302180052-fd01fc79c553
 github.com/boltdb/bolt
-# github.com/couchbase/vellum v0.0.0-20180910213445-01d5c56e6095
+# github.com/couchbase/vellum v0.0.0-20181205055959-dd17fb852690
 github.com/couchbase/vellum
 github.com/couchbase/vellum/levenshtein
 github.com/couchbase/vellum/regexp
@@ -117,7 +117,7 @@ github.com/spf13/cobra
 github.com/spf13/jwalterweatherman
 # github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
-# github.com/spf13/viper v1.2.1
+# github.com/spf13/viper v1.3.0
 github.com/spf13/viper
 # github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2
 github.com/steveyen/gtreap
@@ -130,12 +130,12 @@ github.com/willf/bitset
 # github.com/xenolf/lego v1.2.1
 github.com/xenolf/lego/acme
 github.com/xenolf/lego/log
-# golang.org/x/crypto v0.0.0-20181127143415-eb0de9b17e85
+# golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9
 golang.org/x/crypto/ocsp
 golang.org/x/crypto/ed25519
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/ed25519/internal/edwards25519
-# golang.org/x/net v0.0.0-20181129055619-fae4c4e3ad76
+# golang.org/x/net v0.0.0-20181201002055-351d144fa1fc
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/ipv4
@@ -143,14 +143,14 @@ golang.org/x/net/ipv6
 golang.org/x/net/bpf
 golang.org/x/net/internal/iana
 golang.org/x/net/internal/socket
-# golang.org/x/sys v0.0.0-20181128092732-4ed8d59d0b35
+# golang.org/x/sys v0.0.0-20181206074257-70b957f3b65e
 golang.org/x/sys/unix
 # golang.org/x/text v0.3.0
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
-# gopkg.in/square/go-jose.v2 v2.1.9
+# gopkg.in/square/go-jose.v2 v2.2.1
 gopkg.in/square/go-jose.v2
 gopkg.in/square/go-jose.v2/cipher
 gopkg.in/square/go-jose.v2/json
-# gopkg.in/yaml.v2 v2.2.1
+# gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
