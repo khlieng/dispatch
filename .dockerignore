@@ -1,2 +1,5 @@
+dist
+dispatch
 client/dist
 client/node_modules
+client/yarn-error.log
