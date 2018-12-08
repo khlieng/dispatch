@@ -58,7 +58,7 @@ export default class MessageBox extends PureComponent {
     if (prevProps.messages[0] !== this.props.messages[0]) {
       const { messages, hasMoreMessages } = this.props;
 
-      if (prevProps.tab === this.props.tab) {
+      if (prevProps.tab === this.props.tab && prevProps.messages.length > 0) {
         const addedMessages = messages.length - prevProps.messages.length;
         let addedHeight = 0;
         for (let i = 0; i < addedMessages; i++) {
