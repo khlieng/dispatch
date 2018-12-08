@@ -1,4 +1,5 @@
 import get from 'lodash/get';
+import Cookie from 'js-cookie';
 import createReducer from 'utils/createReducer';
 import { push, replace, LOCATION_CHANGED } from 'utils/router';
 import * as actions from './actions';
@@ -67,17 +68,33 @@ export function tabExists(
   );
 }
 
-export function updateSelection() {
+function parseTabCookie() {
+  const cookie = Cookie.get('tab');
+  if (cookie) {
+    const [server, name = null] = cookie.split(/;(.+)/);
+    return { server, name };
+  }
+  return null;
+}
+
+export function updateSelection(tryCookie) {
   return (dispatch, getState) => {
     const state = getState();
-    const { history } = state.tab;
-    const { servers } = state;
-    const { server, name } = state.tab.selected;
 
-    if (tabExists({ server, name }, state)) {
+    if (tabExists(state.tab.selected, state)) {
       return;
     }
 
+    if (tryCookie) {
+      const tab = parseTabCookie();
+      if (tab && tabExists(tab, state)) {
+        return dispatch(select(tab.server, tab.name, true));
+      }
+    }
+
+    const { servers } = state;
+    const { history } = state.tab;
+    const { server } = state.tab.selected;
     const serverAddrs = Object.keys(servers);
 
     if (serverAddrs.length === 0) {
