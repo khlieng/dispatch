@@ -59,7 +59,3 @@ export function setConnected(connected) {
 export function setCharWidth(width) {
   return appSet('charWidth', width);
 }
-
-export function setConnectDefaults(defaults) {
-  return appSet('connectDefaults', defaults);
-}
