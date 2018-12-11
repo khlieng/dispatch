@@ -18,7 +18,7 @@ install:
   - nvm install 11.2.0
   - nvm use 11.2.0
   - npm install -g yarn
-  - yarn global add gulp@next
+  - yarn global add gulp
   - yarn
 
 script:
