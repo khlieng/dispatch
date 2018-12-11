@@ -4,6 +4,7 @@ package server
 
 import (
 	json "encoding/json"
+	config "github.com/khlieng/dispatch/config"
 	storage "github.com/khlieng/dispatch/storage"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
@@ -38,8 +39,14 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 		}
 		switch key {
 		case "defaults":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Defaults).UnmarshalJSON(data))
+			if in.IsNull() {
+				in.Skip()
+				out.Defaults = nil
+			} else {
+				if out.Defaults == nil {
+					out.Defaults = new(config.Defaults)
+				}
+				easyjson7e607aefDecodeGithubComKhliengDispatchConfig(in, &*out.Defaults)
 			}
 		case "servers":
 			if in.IsNull() {
@@ -153,7 +160,7 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 	out.RawByte('{')
 	first := true
 	_ = first
-	if true {
+	if in.Defaults != nil {
 		const prefix string = ",\"defaults\":"
 		if first {
 			first = false
@@ -161,7 +168,7 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 		} else {
 			out.RawString(prefix)
 		}
-		out.Raw((in.Defaults).MarshalJSON())
+		easyjson7e607aefEncodeGithubComKhliengDispatchConfig(out, *in.Defaults)
 	}
 	if len(in.Servers) != 0 {
 		const prefix string = ",\"servers\":"
@@ -352,6 +359,167 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchStorage(out *jwriter.Writer, 
 	}
 	out.RawByte('}')
 }
+func easyjson7e607aefDecodeGithubComKhliengDispatchConfig(in *jlexer.Lexer, out *config.Defaults) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "name":
+			out.Name = string(in.String())
+		case "host":
+			out.Host = string(in.String())
+		case "port":
+			out.Port = int(in.Int())
+		case "channels":
+			if in.IsNull() {
+				in.Skip()
+				out.Channels = nil
+			} else {
+				in.Delim('[')
+				if out.Channels == nil {
+					if !in.IsDelim(']') {
+						out.Channels = make([]string, 0, 4)
+					} else {
+						out.Channels = []string{}
+					}
+				} else {
+					out.Channels = (out.Channels)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v7 string
+					v7 = string(in.String())
+					out.Channels = append(out.Channels, v7)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "password":
+			out.Password = string(in.String())
+		case "ssl":
+			out.SSL = bool(in.Bool())
+		case "readOnly":
+			out.ReadOnly = bool(in.Bool())
+		case "showDetails":
+			out.ShowDetails = bool(in.Bool())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson7e607aefEncodeGithubComKhliengDispatchConfig(out *jwriter.Writer, in config.Defaults) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if in.Name != "" {
+		const prefix string = ",\"name\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Name))
+	}
+	if in.Host != "" {
+		const prefix string = ",\"host\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Host))
+	}
+	if in.Port != 0 {
+		const prefix string = ",\"port\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Port))
+	}
+	if len(in.Channels) != 0 {
+		const prefix string = ",\"channels\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		{
+			out.RawByte('[')
+			for v8, v9 := range in.Channels {
+				if v8 > 0 {
+					out.RawByte(',')
+				}
+				out.String(string(v9))
+			}
+			out.RawByte(']')
+		}
+	}
+	if in.Password != "" {
+		const prefix string = ",\"password\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Password))
+	}
+	if in.SSL {
+		const prefix string = ",\"ssl\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.SSL))
+	}
+	if in.ReadOnly {
+		const prefix string = ",\"readOnly\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.ReadOnly))
+	}
+	if in.ShowDetails {
+		const prefix string = ",\"showDetails\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.ShowDetails))
+	}
+	out.RawByte('}')
+}
 func easyjson7e607aefDecodeGithubComKhliengDispatchServer1(in *jlexer.Lexer, out *dispatchVersion) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
@@ -488,9 +656,9 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer2(in *jlexer.Lexer, out
 					out.Channels = (out.Channels)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v7 string
-					v7 = string(in.String())
-					out.Channels = append(out.Channels, v7)
+					var v10 string
+					v10 = string(in.String())
+					out.Channels = append(out.Channels, v10)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -557,11 +725,11 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer2(out *jwriter.Writer, 
 		}
 		{
 			out.RawByte('[')
-			for v8, v9 := range in.Channels {
-				if v8 > 0 {
+			for v11, v12 := range in.Channels {
+				if v11 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v9))
+				out.String(string(v12))
 			}
 			out.RawByte(']')
 		}

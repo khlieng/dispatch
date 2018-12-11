@@ -16,7 +16,6 @@ import (
 
 	"github.com/dsnet/compress/brotli"
 	"github.com/khlieng/dispatch/assets"
-	"github.com/spf13/viper"
 )
 
 const longCacheControl = "public, max-age=31536000, immutable"
@@ -73,7 +72,9 @@ var (
 )
 
 func (d *Dispatch) initFileServer() {
-	if viper.GetBool("dev") {
+	cfg := d.Config()
+
+	if cfg.Dev {
 		indexScripts = []string{"boot.js", "main.js"}
 	} else {
 		bootloader := decompressedAsset(findAssetName("boot*.js"))
@@ -149,13 +150,13 @@ workbox.precaching.precacheAndRoute([{
 }]);
 workbox.routing.registerNavigationRoute('/');`)...)
 
-		if viper.GetBool("https.hsts.enabled") && viper.GetBool("https.enabled") {
-			hstsHeader = "max-age=" + viper.GetString("https.hsts.max_age")
+		if cfg.HTTPS.HSTS.Enabled && cfg.HTTPS.Enabled {
+			hstsHeader = "max-age=" + cfg.HTTPS.HSTS.MaxAge
 
-			if viper.GetBool("https.hsts.include_subdomains") {
+			if cfg.HTTPS.HSTS.IncludeSubdomains {
 				hstsHeader += "; includeSubDomains"
 			}
-			if viper.GetBool("https.hsts.preload") {
+			if cfg.HTTPS.HSTS.Preload {
 				hstsHeader += "; preload"
 			}
 		}

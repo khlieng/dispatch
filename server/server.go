@@ -8,12 +8,13 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/khlieng/dispatch/config"
 	"github.com/khlieng/dispatch/pkg/letsencrypt"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
-	"github.com/spf13/viper"
 )
 
 var channelStore = storage.NewChannelStore()
@@ -25,8 +26,29 @@ type Dispatch struct {
 	GetMessageStore          func(*storage.User) (storage.MessageStore, error)
 	GetMessageSearchProvider func(*storage.User) (storage.MessageSearchProvider, error)
 
+	cfg      *config.Config
 	upgrader websocket.Upgrader
 	states   *stateStore
+	lock     sync.Mutex
+}
+
+func New(cfg *config.Config) *Dispatch {
+	return &Dispatch{
+		cfg: cfg,
+	}
+}
+
+func (d *Dispatch) Config() *config.Config {
+	d.lock.Lock()
+	cfg := d.cfg
+	d.lock.Unlock()
+	return cfg
+}
+
+func (d *Dispatch) SetConfig(cfg *config.Config) {
+	d.lock.Lock()
+	d.cfg = cfg
+	d.lock.Unlock()
 }
 
 func (d *Dispatch) Run() {
@@ -35,7 +57,7 @@ func (d *Dispatch) Run() {
 		WriteBufferSize: 1024,
 	}
 
-	if viper.GetBool("dev") {
+	if d.Config().Dev {
 		d.upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
@@ -105,16 +127,17 @@ func (d *Dispatch) loadUser(user *storage.User) {
 }
 
 func (d *Dispatch) startHTTP() {
-	addr := viper.GetString("address")
-	port := viper.GetString("port")
+	cfg := d.Config()
+	addr := cfg.Address
+	port := cfg.Port
 
-	if viper.GetBool("https.enabled") {
-		portHTTPS := viper.GetString("https.port")
-		redirect := viper.GetBool("https.redirect")
+	if cfg.HTTPS.Enabled {
+		portHTTPS := cfg.HTTPS.Port
+		redirect := cfg.HTTPS.Redirect
 
 		if redirect {
 			log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
-			go http.ListenAndServe(net.JoinHostPort(addr, port), createHTTPSRedirect(portHTTPS))
+			go http.ListenAndServe(net.JoinHostPort(addr, port), d.createHTTPSRedirect(portHTTPS))
 		}
 
 		server := &http.Server{
@@ -122,17 +145,17 @@ func (d *Dispatch) startHTTP() {
 			Handler: d,
 		}
 
-		if certExists() {
+		if d.certExists() {
 			log.Println("[HTTPS] Listening on port", portHTTPS)
-			server.ListenAndServeTLS(viper.GetString("https.cert"), viper.GetString("https.key"))
-		} else if domain := viper.GetString("letsencrypt.domain"); domain != "" {
+			server.ListenAndServeTLS(cfg.HTTPS.Cert, cfg.HTTPS.Key)
+		} else if domain := cfg.LetsEncrypt.Domain; domain != "" {
 			dir := storage.Path.LetsEncrypt()
-			email := viper.GetString("letsencrypt.email")
-			lePort := viper.GetString("letsencrypt.port")
+			email := cfg.LetsEncrypt.Email
+			lePort := cfg.LetsEncrypt.Port
 
-			if viper.GetBool("letsencrypt.proxy") && lePort != "" && (port != "80" || !redirect) {
+			if cfg.LetsEncrypt.Proxy && lePort != "" && (port != "80" || !redirect) {
 				log.Println("[HTTP] Listening on port 80 (Let's Encrypt Proxy))")
-				go http.ListenAndServe(net.JoinHostPort(addr, "80"), http.HandlerFunc(letsEncryptProxy))
+				go http.ListenAndServe(net.JoinHostPort(addr, "80"), http.HandlerFunc(d.letsEncryptProxy))
 			}
 
 			le, err := letsencrypt.Run(dir, domain, email, ":"+lePort)
@@ -150,7 +173,7 @@ func (d *Dispatch) startHTTP() {
 			log.Fatal("Could not locate SSL certificate or private key")
 		}
 	} else {
-		if viper.GetBool("dev") {
+		if cfg.Dev {
 			// The node dev server will proxy index page requests and
 			// websocket connections to this port
 			port = "1337"
@@ -174,10 +197,9 @@ func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		state := d.handleAuth(w, r, true, true)
-		data := getIndexData(r, referer.EscapedPath(), state)
+		data := d.getIndexData(r, referer.EscapedPath(), state)
 
 		writeJSON(w, r, data)
-
 	} else if strings.HasPrefix(r.URL.Path, "/ws") {
 		if !websocket.IsWebSocketUpgrade(r) {
 			fail(w, http.StatusBadRequest)
@@ -207,10 +229,10 @@ func (d *Dispatch) upgradeWS(w http.ResponseWriter, r *http.Request, state *Stat
 	newWSHandler(conn, state, r).run()
 }
 
-func createHTTPSRedirect(portHTTPS string) http.HandlerFunc {
+func (d *Dispatch) createHTTPSRedirect(portHTTPS string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/.well-known/acme-challenge") {
-			letsEncryptProxy(w, r)
+			d.letsEncryptProxy(w, r)
 			return
 		}
 
@@ -230,7 +252,7 @@ func createHTTPSRedirect(portHTTPS string) http.HandlerFunc {
 	})
 }
 
-func letsEncryptProxy(w http.ResponseWriter, r *http.Request) {
+func (d *Dispatch) letsEncryptProxy(w http.ResponseWriter, r *http.Request) {
 	host, _, err := net.SplitHostPort(r.Host)
 	if err != nil {
 		host = r.Host
@@ -238,7 +260,7 @@ func letsEncryptProxy(w http.ResponseWriter, r *http.Request) {
 
 	upstream := &url.URL{
 		Scheme: "http",
-		Host:   net.JoinHostPort(host, viper.GetString("letsencrypt.port")),
+		Host:   net.JoinHostPort(host, d.Config().LetsEncrypt.Port),
 	}
 
 	httputil.NewSingleHostReverseProxy(upstream).ServeHTTP(w, r)

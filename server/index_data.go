@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/khlieng/dispatch/config"
 	"github.com/khlieng/dispatch/storage"
 	"github.com/khlieng/dispatch/version"
-	"github.com/spf13/viper"
 )
 
 type connectDefaults struct {
@@ -28,7 +28,7 @@ type dispatchVersion struct {
 }
 
 type indexData struct {
-	Defaults connectDefaults
+	Defaults *config.Defaults
 	Servers  []Server
 	Channels []*storage.Channel
 	HexIP    bool
@@ -43,9 +43,12 @@ type indexData struct {
 	Messages *Messages
 }
 
-func getIndexData(r *http.Request, path string, state *State) *indexData {
+func (d *Dispatch) getIndexData(r *http.Request, path string, state *State) *indexData {
+	cfg := d.Config()
+
 	data := indexData{
-		HexIP: viper.GetBool("hexIP"),
+		Defaults: cfg.Defaults,
+		HexIP:    cfg.HexIP,
 		Version: dispatchVersion{
 			Tag:    version.Tag,
 			Commit: version.Commit,
@@ -53,15 +56,8 @@ func getIndexData(r *http.Request, path string, state *State) *indexData {
 		},
 	}
 
-	data.Defaults = connectDefaults{
-		Name:        viper.GetString("defaults.name"),
-		Host:        viper.GetString("defaults.host"),
-		Port:        viper.GetInt("defaults.port"),
-		Channels:    viper.GetStringSlice("defaults.channels"),
-		Password:    viper.GetString("defaults.password") != "",
-		SSL:         viper.GetBool("defaults.ssl"),
-		ReadOnly:    viper.GetBool("defaults.readonly"),
-		ShowDetails: viper.GetBool("defaults.show_details"),
+	if data.Defaults.Password != "" {
+		data.Defaults.Password = "******"
 	}
 
 	if state == nil {

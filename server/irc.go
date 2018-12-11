@@ -5,8 +5,6 @@ import (
 	"encoding/hex"
 	"net"
 
-	"github.com/spf13/viper"
-
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
 )
@@ -38,7 +36,9 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 		address = net.JoinHostPort(server.Host, server.Port)
 	}
 
-	if viper.GetBool("hexIP") {
+	cfg := state.srv.Config()
+
+	if cfg.HexIP {
 		i.Username = hex.EncodeToString(srcIP)
 	} else if i.Username == "" {
 		i.Username = server.Nick
@@ -49,16 +49,16 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 	}
 
 	if server.Password == "" &&
-		viper.GetString("defaults.password") != "" &&
-		address == viper.GetString("defaults.host") {
-		i.Password = viper.GetString("defaults.password")
+		cfg.Defaults.Password != "" &&
+		address == cfg.Defaults.Host {
+		i.Password = cfg.Defaults.Password
 	} else {
 		i.Password = server.Password
 	}
 
 	if i.TLS {
 		i.TLSConfig = &tls.Config{
-			InsecureSkipVerify: !viper.GetBool("verify_certificates"),
+			InsecureSkipVerify: !cfg.VerifyCertificates,
 		}
 
 		if cert := state.user.GetCertificate(); cert != nil {

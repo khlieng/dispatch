@@ -2,22 +2,19 @@ package server
 
 import (
 	"os"
-
-	"github.com/spf13/viper"
 )
 
-func certExists() bool {
-	cert := viper.GetString("https.cert")
-	key := viper.GetString("https.key")
+func (d *Dispatch) certExists() bool {
+	cfg := d.Config().HTTPS
 
-	if cert == "" || key == "" {
+	if cfg.Cert == "" || cfg.Key == "" {
 		return false
 	}
 
-	if _, err := os.Stat(cert); err != nil {
+	if _, err := os.Stat(cfg.Cert); err != nil {
 		return false
 	}
-	if _, err := os.Stat(key); err != nil {
+	if _, err := os.Stat(cfg.Key); err != nil {
 		return false
 	}
 

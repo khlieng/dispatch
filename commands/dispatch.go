@@ -5,10 +5,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/khlieng/dispatch/assets"
+	"github.com/khlieng/dispatch/config"
 	"github.com/khlieng/dispatch/server"
 	"github.com/khlieng/dispatch/storage"
 	"github.com/khlieng/dispatch/storage/bleve"
@@ -36,34 +35,18 @@ var rootCmd = &cobra.Command{
 	Use:   "dispatch",
 	Short: "Web-based IRC client in Go.",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if v, _ := cmd.Flags().GetBool("version"); v {
+		if viper.GetBool("version") {
 			printVersion()
 			os.Exit(0)
 		}
 
-		if cmd.Use == "dispatch" {
+		if cmd == cmd.Root() {
 			fmt.Printf(logo, version.Tag, version.Commit, version.Date)
 		}
 
 		storage.Initialize(viper.GetString("dir"))
 
-		initConfig(storage.Path.Config(), viper.GetBool("reset_config"))
-
-		viper.SetConfigName("config")
-		viper.AddConfigPath(storage.Path.Root())
-		viper.ReadInConfig()
-
-		viper.WatchConfig()
-
-		prev := time.Now()
-		viper.OnConfigChange(func(e fsnotify.Event) {
-			now := time.Now()
-			// fsnotify sometimes fires twice
-			if now.Sub(prev) > time.Second {
-				log.Println("New config loaded")
-				prev = now
-			}
-		})
+		initConfig(storage.Path.Config(), viper.GetBool("reset-config"))
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -78,19 +61,28 @@ var rootCmd = &cobra.Command{
 		}
 		defer db.Close()
 
-		srv := server.Dispatch{
-			Store:        db,
-			SessionStore: db,
+		cfg, cfgUpdated := config.LoadConfig()
+		dispatch := server.New(cfg)
 
-			GetMessageStore: func(user *storage.User) (storage.MessageStore, error) {
-				return boltdb.New(storage.Path.Log(user.Username))
-			},
-			GetMessageSearchProvider: func(user *storage.User) (storage.MessageSearchProvider, error) {
-				return bleve.New(storage.Path.Index(user.Username))
-			},
+		go func() {
+			for {
+				dispatch.SetConfig(<-cfgUpdated)
+				log.Println("New config loaded")
+			}
+		}()
+
+		dispatch.Store = db
+		dispatch.SessionStore = db
+
+		dispatch.GetMessageStore = func(user *storage.User) (storage.MessageStore, error) {
+			return boltdb.New(storage.Path.Log(user.Username))
 		}
 
-		srv.Run()
+		dispatch.GetMessageSearchProvider = func(user *storage.User) (storage.MessageSearchProvider, error) {
+			return bleve.New(storage.Path.Index(user.Username))
+		}
+
+		dispatch.Run()
 	},
 }
 
@@ -110,14 +102,11 @@ func init() {
 	rootCmd.Flags().Bool("dev", false, "development mode")
 	rootCmd.Flags().BoolP("version", "v", false, "show version")
 
-	viper.BindPFlag("dir", rootCmd.PersistentFlags().Lookup("dir"))
-	viper.BindPFlag("reset_config", rootCmd.PersistentFlags().Lookup("reset-config"))
-	viper.BindPFlag("address", rootCmd.Flags().Lookup("address"))
-	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
-	viper.BindPFlag("dev", rootCmd.Flags().Lookup("dev"))
+	viper.BindPFlags(rootCmd.PersistentFlags())
+	viper.BindPFlags(rootCmd.Flags())
 
 	viper.SetDefault("hexIP", false)
-	viper.SetDefault("verify_client_certificates", true)
+	viper.SetDefault("verify_certificates", true)
 }
 
 func initConfig(configPath string, overwrite bool) {
