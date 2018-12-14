@@ -5,7 +5,8 @@ import {
   messageHeight,
   linkify,
   timestamp,
-  isChannel
+  isChannel,
+  formatDate
 } from 'utils';
 import createReducer from 'utils/createReducer';
 import { getApp } from './app';
@@ -43,22 +44,71 @@ function init(state, server, tab) {
   }
 }
 
+let nextID = 0;
+
+function createDateMessage(date) {
+  const message = {
+    id: nextID,
+    type: 'date',
+    content: formatDate(date),
+    height: 40
+  };
+
+  nextID++;
+
+  return message;
+}
+
+function isSameDay(d1, d2) {
+  return (
+    d1.getDate() === d2.getDate() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getFullYear() === d2.getFullYear()
+  );
+}
+
+function reducerAddMessage(message, server, tab, state, prepend) {
+  const messages = state[server][tab];
+
+  if (messages.length > 0) {
+    if (prepend) {
+      const firstMessage = messages[0];
+      if (firstMessage.date && !isSameDay(firstMessage.date, message.date)) {
+        messages.unshift(createDateMessage(firstMessage.date));
+      }
+    } else {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.date && !isSameDay(lastMessage.date, message.date)) {
+        messages.push(createDateMessage(message.date));
+      }
+    }
+  }
+
+  if (prepend) {
+    messages.unshift(message);
+  } else {
+    messages.push(message);
+  }
+}
+
 export default createReducer(
   {},
   {
     [actions.ADD_MESSAGE](state, { server, tab, message }) {
       init(state, server, tab);
-      state[server][tab].push(message);
+      reducerAddMessage(message, server, tab, state);
     },
 
     [actions.ADD_MESSAGES](state, { server, tab, messages, prepend }) {
       if (prepend) {
         init(state, server, tab);
-        state[server][tab].unshift(...messages);
+        for (let i = messages.length - 1; i >= 0; i--) {
+          reducerAddMessage(messages[i], server, tab, state, true);
+        }
       } else {
         messages.forEach(message => {
           init(state, server, message.tab || tab);
-          state[server][message.tab || tab].push(message);
+          reducerAddMessage(message, server, message.tab || tab, state);
         });
       }
     },
@@ -78,6 +128,10 @@ export default createReducer(
       Object.keys(state).forEach(server =>
         Object.keys(state[server]).forEach(target =>
           state[server][target].forEach(message => {
+            if (message.type === 'date') {
+              return;
+            }
+
             message.height = messageHeight(
               message,
               wrapWidth,
@@ -100,14 +154,14 @@ export default createReducer(
   }
 );
 
-let nextID = 0;
-
 function initMessage(message, tab, state) {
   if (message.time) {
-    message.time = timestamp(new Date(message.time * 1000));
+    message.date = new Date(message.time * 1000);
   } else {
-    message.time = timestamp();
+    message.date = new Date();
   }
+
+  message.time = timestamp(message.date);
 
   if (!message.id) {
     message.id = nextID;

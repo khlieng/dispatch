@@ -2,6 +2,7 @@ import React, { PureComponent, createRef } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import debounce from 'lodash/debounce';
+import { formatDate, measureScrollBarWidth } from 'utils';
 import { getScrollPos, saveScrollPos } from 'utils/scrollPosition';
 import { windowHeight } from 'utils/size';
 import Message from './Message';
@@ -12,7 +13,10 @@ const fetchThreshold = 600;
 // this is done to prevent the scroll from jumping all over the place
 const scrollbackDebounce = 150;
 
+const scrollBarWidth = measureScrollBarWidth() + 'px';
+
 export default class MessageBox extends PureComponent {
+  state = { topDate: '' };
   list = createRef();
   outer = createRef();
 
@@ -177,6 +181,17 @@ export default class MessageBox extends PureComponent {
     this.bottom = scrollOffset + clientHeight >= scrollHeight - 20;
   };
 
+  handleItemsRendered = ({ visibleStartIndex }) => {
+    const startIndex = visibleStartIndex === 0 ? 0 : visibleStartIndex - 1;
+    const firstVisibleMessage = this.props.messages[startIndex];
+
+    if (firstVisibleMessage && firstVisibleMessage.date) {
+      this.setState({ topDate: formatDate(firstVisibleMessage.date) });
+    } else {
+      this.setState({ topDate: '' });
+    }
+  };
+
   handleMouseDown = () => {
     this.mouseDown = true;
   };
@@ -221,12 +236,27 @@ export default class MessageBox extends PureComponent {
   };
 
   render() {
+    const { messages, hideTopDate } = this.props;
+    const { topDate } = this.state;
+
+    const dateContainerStyle = {
+      right: scrollBarWidth
+    };
+
     return (
       <div
         className="messagebox"
         onMouseDown={this.handleMouseDown}
         onMouseUp={this.handleMouseUp}
       >
+        <div
+          className="messagebox-topdate-container"
+          style={dateContainerStyle}
+        >
+          {!hideTopDate && topDate && (
+            <span className="messagebox-topdate">{topDate}</span>
+          )}
+        </div>
         <AutoSizer>
           {({ width, height }) => (
             <List
@@ -234,12 +264,13 @@ export default class MessageBox extends PureComponent {
               outerRef={this.outer}
               width={width}
               height={height}
-              itemCount={this.props.messages.length + 2}
+              itemCount={messages.length + 2}
               itemKey={this.getItemKey}
               itemSize={this.getRowHeight}
               estimatedItemSize={32}
               initialScrollOffset={this.initialScrollTop}
               onScroll={this.handleScroll}
+              onItemsRendered={this.handleItemsRendered}
               className="messagebox-window"
               overscanCount={5}
             >

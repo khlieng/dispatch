@@ -97,6 +97,7 @@ export default class Chat extends Component {
           hasMoreMessages={hasMoreMessages}
           messages={messages}
           tab={tab}
+          hideTopDate={search.show}
           onAddMore={addFetchedMessages}
           onFetchMore={fetchMessages}
           onNickClick={this.handleNickClick}

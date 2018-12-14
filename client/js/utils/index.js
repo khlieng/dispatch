@@ -137,6 +137,9 @@ export function timestamp(date = new Date()) {
   return `${h}:${m}`;
 }
 
+const dateFmt = new Intl.DateTimeFormat(window.navigator.language);
+export const formatDate = dateFmt.format;
+
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 

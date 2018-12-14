@@ -595,8 +595,6 @@ input.chat-title {
   top: 50px;
   bottom: 50px;
   right: 0;
-  z-index: 1;
-  overflow: hidden;
 }
 
 .chat-channel .messagebox {
@@ -613,6 +611,24 @@ input.chat-title {
 .messagebox-window {
   overflow-x: hidden !important;
   overflow-y: scroll !important;
+}
+
+.messagebox-topdate-container {
+  position: absolute;
+  text-align: center;
+  left: 0;
+  height: 0;
+}
+
+.messagebox-topdate {
+  position: relative;
+  top: -12px;
+  background: #f0f0f0;
+  color: #999;
+  border-radius: 50vh;
+  padding: 0 5px;
+  font-size: 12px;
+  z-index: 2;
 }
 
 .message {
@@ -635,6 +651,18 @@ input.chat-title {
 
 .message-action {
   color: #ff6698;
+}
+
+.message-date {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+.message-date hr {
+  border: none;
+  border-bottom: 1px solid #ddd;
 }
 
 .message-time {
@@ -706,7 +734,7 @@ input.message-input-nick.invalid {
   width: 200px;
   border-left: 1px solid #ddd;
   background: #f0f0f0;
-  z-index: 2;
+  z-index: 1;
   transition: transform 0.2s;
 }
 

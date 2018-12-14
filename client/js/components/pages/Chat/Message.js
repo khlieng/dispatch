@@ -7,6 +7,15 @@ const Message = ({ message, coloredNick, style, onNickClick }) => {
     [`message-${message.type}`]: message.type
   });
 
+  if (message.type === 'date') {
+    return (
+      <div className={className} style={style}>
+        {message.content}
+        <hr />
+      </div>
+    );
+  }
+
   style = {
     ...style,
     paddingLeft: `${window.messageIndent + 15}px`,
