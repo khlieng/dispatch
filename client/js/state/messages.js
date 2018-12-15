@@ -67,28 +67,43 @@ function isSameDay(d1, d2) {
   );
 }
 
-function reducerAddMessage(message, server, tab, state, prepend) {
-  const messages = state[server][tab];
+function reducerPrependMessages(messages, server, tab, state) {
+  const msgs = [];
 
-  if (messages.length > 0) {
-    if (prepend) {
-      const firstMessage = messages[0];
-      if (firstMessage.date && !isSameDay(firstMessage.date, message.date)) {
-        messages.unshift(createDateMessage(firstMessage.date));
-      }
-    } else {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.date && !isSameDay(lastMessage.date, message.date)) {
-        messages.push(createDateMessage(message.date));
-      }
+  for (let i = 0; i < messages.length; i++) {
+    if (i > 0 && !isSameDay(messages[i - 1].date, messages[i].date)) {
+      msgs.push(createDateMessage(messages[i].date));
+    }
+    msgs.push(messages[i]);
+  }
+
+  const m = state[server][tab];
+
+  if (m.length > 0) {
+    const lastNewMessage = msgs[msgs.length - 1];
+    const firstMessage = m[0];
+    if (
+      firstMessage.date &&
+      !isSameDay(firstMessage.date, lastNewMessage.date)
+    ) {
+      msgs.push(createDateMessage(firstMessage.date));
     }
   }
 
-  if (prepend) {
-    messages.unshift(message);
-  } else {
-    messages.push(message);
+  m.unshift(...msgs);
+}
+
+function reducerAddMessage(message, server, tab, state) {
+  const messages = state[server][tab];
+
+  if (messages.length > 0) {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.date && !isSameDay(lastMessage.date, message.date)) {
+      messages.push(createDateMessage(message.date));
+    }
   }
+
+  messages.push(message);
 }
 
 export default createReducer(
@@ -102,12 +117,16 @@ export default createReducer(
     [actions.ADD_MESSAGES](state, { server, tab, messages, prepend }) {
       if (prepend) {
         init(state, server, tab);
-        for (let i = messages.length - 1; i >= 0; i--) {
-          reducerAddMessage(messages[i], server, tab, state, true);
-        }
+        reducerPrependMessages(messages, server, tab, state);
       } else {
+        if (!messages[0].tab) {
+          init(state, server, tab);
+        }
+
         messages.forEach(message => {
-          init(state, server, message.tab || tab);
+          if (message.tab) {
+            init(state, server, message.tab);
+          }
           reducerAddMessage(message, server, message.tab || tab, state);
         });
       }
@@ -171,6 +190,8 @@ function initMessage(message, tab, state) {
   if (tab.charAt(0) === '#') {
     message.channel = true;
   }
+
+  message.content = message.content || '';
 
   // Collapse multiple adjacent spaces into a single one
   message.content = message.content.replace(/\s\s+/g, ' ');
