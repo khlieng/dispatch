@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/khlieng/dispatch/version"
 	"github.com/spf13/cobra"
@@ -17,5 +18,5 @@ var versionCmd = &cobra.Command{
 }
 
 func printVersion() {
-	fmt.Printf("%s\nCommit: %s\nBuild Date: %s\n", version.Tag, version.Commit, version.Date)
+	fmt.Printf("%s\nCommit: %s\nBuild Date: %s\nRuntime: %s\n", version.Tag, version.Commit, version.Date, runtime.Version())
 }

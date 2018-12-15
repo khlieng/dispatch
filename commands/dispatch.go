@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/khlieng/dispatch/assets"
 	"github.com/khlieng/dispatch/config"
@@ -28,6 +29,7 @@ const logo = `
    %s
    Commit: %s
    Build Date: %s
+   Runtime: %s
 
 `
 
@@ -41,7 +43,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		if cmd == cmd.Root() {
-			fmt.Printf(logo, version.Tag, version.Commit, version.Date)
+			fmt.Printf(logo, version.Tag, version.Commit, version.Date, runtime.Version())
 		}
 
 		storage.Initialize(viper.GetString("dir"))
