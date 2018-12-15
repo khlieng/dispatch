@@ -92,6 +92,90 @@ describe('message reducer', () => {
     });
   });
 
+  it('adds date markers when prepending messages', () => {
+    let state = {
+      srv: {
+        '#chan1': [{ id: 0, date: new Date(1999, 0, 1) }]
+      }
+    };
+
+    state = reducer(state, {
+      type: actions.ADD_MESSAGES,
+      server: 'srv',
+      tab: '#chan1',
+      prepend: true,
+      messages: [
+        { id: 1, date: new Date(1990, 0, 2) },
+        { id: 2, date: new Date(1990, 0, 3) }
+      ]
+    });
+
+    expect(state).toMatchObject({
+      srv: {
+        '#chan1': [
+          { id: 1 },
+          { type: 'date' },
+          { id: 2 },
+          { type: 'date' },
+          { id: 0 }
+        ]
+      }
+    });
+  });
+
+  it('adds a date marker when adding a message', () => {
+    let state = {
+      srv: {
+        '#chan1': [{ id: 0, date: new Date(1999, 0, 1) }]
+      }
+    };
+
+    state = reducer(state, {
+      type: actions.ADD_MESSAGE,
+      server: 'srv',
+      tab: '#chan1',
+      message: { id: 1, date: new Date(1990, 0, 2) }
+    });
+
+    expect(state).toMatchObject({
+      srv: {
+        '#chan1': [{ id: 0 }, { type: 'date' }, { id: 1 }]
+      }
+    });
+  });
+
+  it('adds date markers when adding messages', () => {
+    let state = {
+      srv: {
+        '#chan1': [{ id: 0, date: new Date(1999, 0, 1) }]
+      }
+    };
+
+    state = reducer(state, {
+      type: actions.ADD_MESSAGES,
+      server: 'srv',
+      tab: '#chan1',
+      messages: [
+        { id: 1, date: new Date(1990, 0, 2) },
+        { id: 2, date: new Date(1990, 0, 3) },
+        { id: 3, date: new Date(1990, 0, 3) }
+      ]
+    });
+
+    expect(state).toMatchObject({
+      srv: {
+        '#chan1': [
+          { id: 0 },
+          { type: 'date' },
+          { id: 1 },
+          { type: 'date' },
+          { id: 2 },
+          { id: 3 }
+        ]
+      }
+    });
+  });
+
   it('adds messages to the correct tabs when broadcasting', () => {
     let state = {
       app: appReducer(undefined, { type: '' })
