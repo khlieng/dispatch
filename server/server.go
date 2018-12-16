@@ -5,16 +5,16 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/khlieng/dispatch/config"
-	"github.com/khlieng/dispatch/pkg/letsencrypt"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
+	"github.com/mholt/certmagic"
 )
 
 var channelStore = storage.NewChannelStore()
@@ -128,58 +128,87 @@ func (d *Dispatch) loadUser(user *storage.User) {
 
 func (d *Dispatch) startHTTP() {
 	cfg := d.Config()
-	addr := cfg.Address
+
 	port := cfg.Port
+	if cfg.Dev {
+		// The node dev server will proxy index page requests and
+		// websocket connections to this port
+		port = "1337"
+	}
+
+	httpSrv := &http.Server{
+		Addr: net.JoinHostPort(cfg.Address, port),
+	}
 
 	if cfg.HTTPS.Enabled {
-		portHTTPS := cfg.HTTPS.Port
-		redirect := cfg.HTTPS.Redirect
+		httpSrv.ReadTimeout = 5 * time.Second
+		httpSrv.WriteTimeout = 5 * time.Second
 
-		if redirect {
-			log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
-			go http.ListenAndServe(net.JoinHostPort(addr, port), d.createHTTPSRedirect(portHTTPS))
+		httpsSrv := &http.Server{
+			Addr:              net.JoinHostPort(cfg.Address, cfg.HTTPS.Port),
+			ReadHeaderTimeout: 5 * time.Second,
+			WriteTimeout:      10 * time.Second,
+			IdleTimeout:       120 * time.Second,
+			Handler:           d,
 		}
 
-		server := &http.Server{
-			Addr:    net.JoinHostPort(addr, portHTTPS),
-			Handler: d,
-		}
+		redirect := createHTTPSRedirect(cfg.HTTPS.Port)
 
 		if d.certExists() {
-			log.Println("[HTTPS] Listening on port", portHTTPS)
-			server.ListenAndServeTLS(cfg.HTTPS.Cert, cfg.HTTPS.Key)
-		} else if domain := cfg.LetsEncrypt.Domain; domain != "" {
-			dir := storage.Path.LetsEncrypt()
-			email := cfg.LetsEncrypt.Email
-			lePort := cfg.LetsEncrypt.Port
+			httpSrv.Handler = redirect
+			log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
+			go httpSrv.ListenAndServe()
 
-			if cfg.LetsEncrypt.Proxy && lePort != "" && (port != "80" || !redirect) {
-				log.Println("[HTTP] Listening on port 80 (Let's Encrypt Proxy))")
-				go http.ListenAndServe(net.JoinHostPort(addr, "80"), http.HandlerFunc(d.letsEncryptProxy))
+			log.Println("[HTTPS] Listening on port", cfg.HTTPS.Port)
+			log.Fatal(httpsSrv.ListenAndServeTLS(cfg.HTTPS.Cert, cfg.HTTPS.Key))
+		} else {
+			cache := certmagic.NewCache(certmagic.FileStorage{
+				Path: storage.Path.LetsEncrypt(),
+			})
+
+			magic := certmagic.NewWithCache(cache, certmagic.Config{
+				Agreed:     true,
+				Email:      cfg.LetsEncrypt.Email,
+				MustStaple: true,
+			})
+
+			domains := []string{cfg.LetsEncrypt.Domain}
+			if cfg.LetsEncrypt.Domain == "" {
+				domains = []string{}
+				magic.OnDemand = &certmagic.OnDemandConfig{MaxObtain: 3}
 			}
 
-			le, err := letsencrypt.Run(dir, domain, email, ":"+lePort)
+			err := magic.Manage(domains)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			server.TLSConfig = &tls.Config{
-				GetCertificate: le.GetCertificate,
+			tlsConfig := magic.TLSConfig()
+			tlsConfig.MinVersion = tls.VersionTLS12
+			tlsConfig.CipherSuites = getCipherSuites()
+			tlsConfig.CurvePreferences = []tls.CurveID{
+				tls.X25519,
+				tls.CurveP256,
 			}
+			tlsConfig.PreferServerCipherSuites = true
+			httpsSrv.TLSConfig = tlsConfig
 
-			log.Println("[HTTPS] Listening on port", portHTTPS)
-			log.Fatal(server.ListenAndServeTLS("", ""))
-		} else {
-			log.Fatal("Could not locate SSL certificate or private key")
+			httpSrv.Handler = magic.HTTPChallengeHandler(redirect)
+			log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
+			go httpSrv.ListenAndServe()
+
+			log.Println("[HTTPS] Listening on port", cfg.HTTPS.Port)
+			log.Fatal(httpsSrv.ListenAndServeTLS("", ""))
 		}
 	} else {
-		if cfg.Dev {
-			// The node dev server will proxy index page requests and
-			// websocket connections to this port
-			port = "1337"
-		}
+		httpSrv.ReadHeaderTimeout = 5 * time.Second
+		httpSrv.WriteTimeout = 10 * time.Second
+		httpSrv.IdleTimeout = 120 * time.Second
+		httpSrv.Handler = d
+
+		log.Println(httpSrv.Addr)
 		log.Println("[HTTP] Listening on port", port)
-		log.Fatal(http.ListenAndServe(net.JoinHostPort(addr, port), d))
+		log.Fatal(httpSrv.ListenAndServe())
 	}
 }
 
@@ -229,13 +258,8 @@ func (d *Dispatch) upgradeWS(w http.ResponseWriter, r *http.Request, state *Stat
 	newWSHandler(conn, state, r).run()
 }
 
-func (d *Dispatch) createHTTPSRedirect(portHTTPS string) http.HandlerFunc {
+func createHTTPSRedirect(portHTTPS string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/.well-known/acme-challenge") {
-			d.letsEncryptProxy(w, r)
-			return
-		}
-
 		host, _, err := net.SplitHostPort(r.Host)
 		if err != nil {
 			host = r.Host
@@ -247,23 +271,10 @@ func (d *Dispatch) createHTTPSRedirect(portHTTPS string) http.HandlerFunc {
 			Path:   r.RequestURI,
 		}
 
+		w.Header().Set("Connection", "close")
 		w.Header().Set("Location", u.String())
 		w.WriteHeader(http.StatusMovedPermanently)
 	})
-}
-
-func (d *Dispatch) letsEncryptProxy(w http.ResponseWriter, r *http.Request) {
-	host, _, err := net.SplitHostPort(r.Host)
-	if err != nil {
-		host = r.Host
-	}
-
-	upstream := &url.URL{
-		Scheme: "http",
-		Host:   net.JoinHostPort(host, d.Config().LetsEncrypt.Port),
-	}
-
-	httputil.NewSingleHostReverseProxy(upstream).ServeHTTP(w, r)
 }
 
 func fail(w http.ResponseWriter, code int) {

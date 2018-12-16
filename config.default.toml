@@ -22,25 +22,19 @@ readonly = false
 show_details = false
 
 [https]
-enabled = false
+enabled = true
 port = 443
-# Redirect all http traffic to https
-redirect = true
 # Path to your cert and private key if you are not using
 # the Let's Encrypt integration
 cert = ""
 key = ""
 
 [letsencrypt]
-# Your domain or subdomain
+# Your domain or subdomain, if not set a certificate will be
+# fetched for whatever domain dispatch gets accessed through
 domain = ""
 # An email address lets you recover your accounts private key
 email = ""
-# The port Let's Encrypt listens on, comment this out to let it bind
-# to port 80 as needed, doing so means dispatch itself cannot use port 80
-port = 5001
-# Have dispatch proxy traffic from port 80 to the Let's Encrypt port
-proxy = true
 
 # Not implemented
 [auth]

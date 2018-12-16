@@ -98,7 +98,7 @@ The libraries this project is built with.
 - [Bleve](https://github.com/blevesearch/bleve)
 - [Cobra](https://github.com/spf13/cobra)
 - [Viper](https://github.com/spf13/viper)
-- [Lego](https://github.com/xenolf/lego)
+- [CertMagic](https://github.com/mholt/certmagic)
 
 ### Client
 

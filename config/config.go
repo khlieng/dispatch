@@ -31,12 +31,11 @@ type Defaults struct {
 }
 
 type HTTPS struct {
-	Enabled  bool
-	Port     string
-	Redirect bool
-	Cert     string
-	Key      string
-	HSTS     *HSTS
+	Enabled bool
+	Port    string
+	Cert    string
+	Key     string
+	HSTS    *HSTS
 }
 
 type HSTS struct {
@@ -49,8 +48,6 @@ type HSTS struct {
 type LetsEncrypt struct {
 	Domain string
 	Email  string
-	Port   string
-	Proxy  bool
 }
 
 func LoadConfig() (*Config, chan *Config) {
