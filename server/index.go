@@ -1,5 +1,12 @@
-<%! cssPath string, inlineScript string, scripts []string %>
+package server
 
+type indexTemplateData struct {
+	InlineScript string
+	CSSPath      string
+	Scripts      []string
+}
+
+const indexTemplate = `
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,9 +20,9 @@
 
   <link rel="preload" href="/init" as="fetch" crossorigin>
 
-  <script>
-  <%== inlineScript %>
-  </script>
+	{{if .InlineScript}}
+  <script>{{.InlineScript}}</script>
+	{{end}}
 
   <link rel="preload" href="/font/fontello.woff2?48901973" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/font/RobotoMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -23,9 +30,9 @@
   <link rel="preload" href="/font/Montserrat-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/font/RobotoMono-Bold.woff2" as="font" type="font/woff2" crossorigin>
 
-  <% if cssPath != "" { %>
-  <link href="/<%== cssPath %>" rel="stylesheet">
-  <% } %>
+  {{if .CSSPath}}
+  <link href="/{{.CSSPath}}" rel="stylesheet">
+  {{end}}
 
   <link rel="manifest" href="/manifest.json">
 </head>
@@ -33,11 +40,11 @@
 <body>
   <div id="root"></div>
 
-  <% for _, script := range scripts { %>
-  <script src="/<%== script %>"></script>
-  <% } %>
+  {{range .Scripts}}
+  <script src="/{{.}}"></script>
+  {{end}}
 
   <noscript>This page needs JavaScript enabled to function.</noscript>
 </body>
 
-</html>
+</html>`

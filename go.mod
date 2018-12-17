@@ -47,10 +47,11 @@ require (
 	github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 // indirect
 	github.com/stretchr/testify v1.2.2
 	github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2 // indirect
+	github.com/tdewolff/minify/v2 v2.3.8
 	github.com/tecbot/gorocksdb v0.0.0-20181010114359-8752a9433481 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/willf/bitset v1.1.9 // indirect
-	github.com/xenolf/lego v1.2.2-0.20181211001449-b05b54d1f69a
+	github.com/xenolf/lego v1.2.2-0.20181211001449-b05b54d1f69a // indirect
 	golang.org/x/net v0.0.0-20181213202711-891ebc4b82d6
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
 	golang.org/x/sys v0.0.0-20181213200352-4d1cda033e06 // indirect

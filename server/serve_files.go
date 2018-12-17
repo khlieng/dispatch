@@ -12,18 +12,23 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/dsnet/compress/brotli"
 	"github.com/khlieng/dispatch/assets"
+	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/html"
 )
 
 const longCacheControl = "public, max-age=31536000, immutable"
 const disabledCacheControl = "no-cache, no-store, must-revalidate"
 
 type File struct {
-	Asset        string
-	GzipAsset    []byte
+	Data         []byte
+	Length       string
+	GzipData     []byte
+	GzipLength   string
 	Hash         string
 	ContentType  string
 	CacheControl string
@@ -45,9 +50,8 @@ func newH2PushAsset(name string) h2PushAsset {
 var (
 	files = map[string]*File{}
 
-	indexStylesheet    string
-	indexScripts       []string
-	inlineScript       string
+	indexPage          []byte
+	indexPageLen       string
 	inlineScriptSha256 string
 	serviceWorker      []byte
 
@@ -75,20 +79,22 @@ func (d *Dispatch) initFileServer() {
 	cfg := d.Config()
 
 	if cfg.Dev {
-		indexScripts = []string{"boot.js", "main.js"}
+		renderIndexPage(indexTemplateData{
+			Scripts: []string{"boot.js", "main.js"},
+		})
 	} else {
 		bootloader := decompressedAsset(findAssetName("boot*.js"))
 		runtime := decompressedAsset(findAssetName("runtime*.js"))
 
-		inlineScript = string(bootloader) + string(runtime)
+		inlineScript := string(bootloader) + string(runtime)
 
 		hash := sha256.New()
 		hash.Write(bootloader)
 		hash.Write(runtime)
 		inlineScriptSha256 = base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
-		indexStylesheet = findAssetName("main*.css")
-		indexScripts = []string{
+		indexStylesheet := findAssetName("main*.css")
+		indexScripts := []string{
 			findAssetName("vendors*.js"),
 			findAssetName("main*.js"),
 		}
@@ -120,27 +126,33 @@ func (d *Dispatch) initFileServer() {
 			}
 
 			file := &File{
-				Asset:        asset,
 				ContentType:  contentTypes[filepath.Ext(assetName)],
 				CacheControl: longCacheControl,
 				Compressed:   strings.HasSuffix(asset, ".br"),
 			}
 
-			if file.Compressed {
-				data, err := assets.Asset(file.Asset)
-				if err != nil {
-					log.Fatal(err)
-				}
+			data, err := assets.Asset(asset)
+			fatalErr(err)
+			file.Data = data
+			file.Length = strconv.Itoa(len(data))
 
-				file.GzipAsset = gzipAsset(data)
+			if file.Compressed {
+				file.GzipData = gzipAsset(data)
+				file.GzipLength = strconv.Itoa(len(file.GzipData))
 			}
 
 			files["/"+assetName] = file
 		}
 
+		renderIndexPage(indexTemplateData{
+			CSSPath:      indexStylesheet,
+			InlineScript: inlineScript,
+			Scripts:      indexScripts,
+		})
+
 		serviceWorker = decompressedAsset("sw.js")
 		hash.Reset()
-		IndexTemplate(hash, indexStylesheet, inlineScript, indexScripts)
+		hash.Write(indexPage)
 		indexHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
 		serviceWorker = append(serviceWorker, []byte(`
@@ -165,6 +177,27 @@ workbox.routing.registerNavigationRoute('/');`)...)
 	}
 }
 
+func renderIndexPage(data indexTemplateData) {
+	tmpl, err := template.New("").Parse(indexTemplate)
+	fatalErr(err)
+
+	m := minify.New()
+	m.AddFunc("text/html", html.Minify)
+
+	buf := &bytes.Buffer{}
+	gzw, err := gzip.NewWriterLevel(buf, gzip.BestCompression)
+	fatalErr(err)
+	mw := m.Writer("text/html", gzw)
+
+	fatalErr(tmpl.Execute(mw, data))
+
+	fatalErr(mw.Close())
+	fatalErr(gzw.Close())
+
+	indexPage = buf.Bytes()
+	indexPageLen = strconv.Itoa(len(indexPage))
+}
+
 func findAssetName(glob string) string {
 	for _, assetName := range assets.AssetNames() {
 		assetName = strings.TrimSuffix(assetName, ".br")
@@ -178,9 +211,7 @@ func findAssetName(glob string) string {
 
 func decompressAsset(data []byte) []byte {
 	br, err := brotli.NewReader(bytes.NewReader(data), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	fatalErr(err)
 
 	buf := &bytes.Buffer{}
 	io.Copy(buf, br)
@@ -189,23 +220,17 @@ func decompressAsset(data []byte) []byte {
 
 func decompressedAsset(name string) []byte {
 	asset, err := assets.Asset(name + ".br")
-	if err != nil {
-		log.Fatal(err)
-	}
+	fatalErr(err)
 	return decompressAsset(asset)
 }
 
 func gzipAsset(data []byte) []byte {
 	br, err := brotli.NewReader(bytes.NewReader(data), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	fatalErr(err)
 
 	buf := &bytes.Buffer{}
 	gzw, err := gzip.NewWriterLevel(buf, gzip.BestCompression)
-	if err != nil {
-		log.Fatal(err)
-	}
+	fatalErr(err)
 
 	io.Copy(gzw, br)
 	gzw.Close()
@@ -215,30 +240,20 @@ func gzipAsset(data []byte) []byte {
 func (d *Dispatch) serveFiles(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		d.serveIndex(w, r)
-		return
-	}
-
-	if file, ok := files[r.URL.Path]; ok {
+	} else if file, ok := files[r.URL.Path]; ok {
 		d.serveFile(w, r, file)
-		return
-	}
-
-	if r.URL.Path == "/sw.js" {
+	} else if r.URL.Path == "/sw.js" {
 		w.Header().Set("Cache-Control", disabledCacheControl)
 		w.Header().Set("Content-Type", "text/javascript")
 		w.Header().Set("Content-Length", strconv.Itoa(len(serviceWorker)))
 		w.Write(serviceWorker)
-		return
-	}
-
-	if r.URL.Path == "/robots.txt" {
+	} else if r.URL.Path == "/robots.txt" {
 		w.Header().Set("Content-Type", "text/plain")
 		w.Header().Set("Content-Length", strconv.Itoa(len(robots)))
 		w.Write(robots)
-		return
+	} else {
+		d.serveIndex(w, r)
 	}
-
-	d.serveIndex(w, r)
 }
 
 func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
@@ -310,12 +325,10 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w.Header().Set("Content-Encoding", "gzip")
-
-		gzw := getGzipWriter(w)
-		IndexTemplate(gzw, indexStylesheet, inlineScript, indexScripts)
-		putGzipWriter(gzw)
+		w.Header().Set("Content-Length", indexPageLen)
+		w.Write(indexPage)
 	} else {
-		IndexTemplate(w, indexStylesheet, inlineScript, indexScripts)
+		serveDecompressed(w, indexPage)
 	}
 }
 
@@ -331,38 +344,39 @@ func setPushCookie(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d *Dispatch) serveFile(w http.ResponseWriter, r *http.Request, file *File) {
-	data, err := assets.Asset(file.Asset)
+	w.Header().Set("Cache-Control", file.CacheControl)
+	w.Header().Set("Content-Type", file.ContentType)
+
+	if file.Compressed && strings.Contains(r.Header.Get("Accept-Encoding"), "br") {
+		w.Header().Set("Content-Encoding", "br")
+		w.Header().Set("Content-Length", file.Length)
+		w.Write(file.Data)
+	} else if file.Compressed && strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Length", file.GzipLength)
+		w.Write(file.GzipData)
+	} else if !file.Compressed {
+		w.Header().Set("Content-Length", file.Length)
+		w.Write(file.Data)
+	} else {
+		serveDecompressed(w, file.GzipData)
+	}
+}
+
+func serveDecompressed(w http.ResponseWriter, asset []byte) {
+	gzr, err := gzip.NewReader(bytes.NewReader(asset))
+	buf, err := ioutil.ReadAll(gzr)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
-	if file.CacheControl != "" {
-		w.Header().Set("Cache-Control", file.CacheControl)
-	}
+	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+	w.Write(buf)
+}
 
-	w.Header().Set("Content-Type", file.ContentType)
-
-	if file.Compressed && strings.Contains(r.Header.Get("Accept-Encoding"), "br") {
-		w.Header().Set("Content-Encoding", "br")
-		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-		w.Write(data)
-	} else if file.Compressed && strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-		w.Header().Set("Content-Encoding", "gzip")
-		w.Header().Set("Content-Length", strconv.Itoa(len(file.GzipAsset)))
-		w.Write(file.GzipAsset)
-	} else if !file.Compressed {
-		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-		w.Write(data)
-	} else {
-		gzr, err := gzip.NewReader(bytes.NewReader(file.GzipAsset))
-		buf, err := ioutil.ReadAll(gzr)
-		if err != nil {
-			http.Error(w, "", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
-		w.Write(buf)
+func fatalErr(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
 }
