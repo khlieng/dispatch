@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/khlieng/dispatch/config"
+	"github.com/khlieng/dispatch/pkg/netutil"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
 	"github.com/mholt/certmagic"
@@ -152,7 +153,7 @@ func (d *Dispatch) startHTTP() {
 			Handler:           d,
 		}
 
-		redirect := createHTTPSRedirect(cfg.HTTPS.Port)
+		redirect := createHTTPSRedirect(cfg.HTTPS.Port, d)
 
 		if d.certExists() {
 			httpSrv.Handler = redirect
@@ -206,7 +207,6 @@ func (d *Dispatch) startHTTP() {
 		httpSrv.IdleTimeout = 120 * time.Second
 		httpSrv.Handler = d
 
-		log.Println(httpSrv.Addr)
 		log.Println("[HTTP] Listening on port", port)
 		log.Fatal(httpSrv.ListenAndServe())
 	}
@@ -258,11 +258,16 @@ func (d *Dispatch) upgradeWS(w http.ResponseWriter, r *http.Request, state *Stat
 	newWSHandler(conn, state, r).run()
 }
 
-func createHTTPSRedirect(portHTTPS string) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func createHTTPSRedirect(portHTTPS string, fallback http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		host, _, err := net.SplitHostPort(r.Host)
 		if err != nil {
 			host = r.Host
+		}
+
+		if netutil.IsPrivate(host) {
+			fallback.ServeHTTP(w, r)
+			return
 		}
 
 		u := url.URL{
@@ -274,7 +279,7 @@ func createHTTPSRedirect(portHTTPS string) http.HandlerFunc {
 		w.Header().Set("Connection", "close")
 		w.Header().Set("Location", u.String())
 		w.WriteHeader(http.StatusMovedPermanently)
-	})
+	}
 }
 
 func fail(w http.ResponseWriter, code int) {
