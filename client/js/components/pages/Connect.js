@@ -195,7 +195,7 @@ export default withFormik({
   },
   handleSubmit: (values, { props }) => {
     const { connect, select, join } = props;
-    const channels = values.channels.split(',');
+    const channels = values.channels ? values.channels.split(',') : [];
     delete values.channels;
 
     values.port = `${values.port}`;
