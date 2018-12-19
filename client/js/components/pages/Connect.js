@@ -37,10 +37,37 @@ class Connect extends Component {
     return (
       <div>
         {!hexIP && <TextInput name="username" />}
-        <TextInput name="password" type="password" />
-        <TextInput name="realname" />
+        <TextInput name="password" type="password" noTrim />
+        <TextInput name="realname" noTrim />
       </div>
     );
+  };
+
+  transformPort = port => {
+    if (!port) {
+      return this.props.values.tls ? 6697 : 6667;
+    }
+    return port;
+  };
+
+  transformChannels = channels => {
+    const comma = channels[channels.length - 1] === ',';
+
+    channels = channels
+      .split(',')
+      .map(channel => {
+        channel = channel.trim();
+        if (channel) {
+          if (isValidChannel(channel, false) && channel[0] !== '#') {
+            channel = `#${channel}`;
+          }
+        }
+        return channel;
+      })
+      .filter(s => s)
+      .join(',');
+
+    return comma ? channels + ',' : channels;
   };
 
   render() {
@@ -70,10 +97,15 @@ class Connect extends Component {
       form = (
         <Form className="connect-form">
           <h1>Connect</h1>
-          <TextInput name="name" autoCapitalize="words" />
+          <TextInput name="name" autoCapitalize="words" noTrim />
           <div className="connect-form-address">
             <TextInput name="host" noError />
-            <TextInput name="port" type="number" noError />
+            <TextInput
+              name="port"
+              type="number"
+              blurTransform={this.transformPort}
+              noError
+            />
             <Checkbox
               name="tls"
               label="SSL"
@@ -84,7 +116,7 @@ class Connect extends Component {
           <Error name="host" />
           <Error name="port" />
           <TextInput name="nick" />
-          <TextInput name="channels" />
+          <TextInput name="channels" transform={this.transformChannels} />
           {this.state.showOptionals && this.renderOptionals()}
           <i className="icon-ellipsis" onClick={this.handleShowClick} />
           <Button type="submit">Connect</Button>
@@ -120,16 +152,10 @@ export default withFormik({
       username: '',
       password: defaults.password ? '      ' : '',
       realname: '',
-      tls: defaults.ssl
+      tls: defaults.ssl || false
     };
   },
   validate: values => {
-    Object.keys(values).forEach(k => {
-      if (typeof values[k] === 'string') {
-        values[k] = values[k].trim();
-      }
-    });
-
     const errors = {};
 
     if (!values.host) {
@@ -138,9 +164,7 @@ export default withFormik({
       errors.host = 'Invalid host';
     }
 
-    if (!values.port) {
-      values.port = values.tls ? 6697 : 6667;
-    } else if (!isInt(values.port, 1, 65535)) {
+    if (!isInt(values.port, 1, 65535)) {
       errors.port = 'Invalid port';
     }
 
@@ -154,23 +178,18 @@ export default withFormik({
       errors.username = 'Invalid username';
     }
 
-    values.channels = values.channels
-      .split(',')
-      .map(channel => {
-        channel = channel.trim();
-        if (channel) {
-          if (isValidChannel(channel, false)) {
-            if (channel[0] !== '#') {
-              channel = `#${channel}`;
-            }
-          } else {
-            errors.channels = 'Invalid channel(s)';
-          }
-        }
-        return channel;
-      })
-      .filter(s => s)
-      .join(',');
+    const channels = values.channels.split(',');
+    for (let i = channels.length - 1; i >= 0; i--) {
+      if (i === channels.length - 1 && channels[i] === '') {
+        /* eslint-disable-next-line no-continue */
+        continue;
+      }
+
+      if (!isValidChannel(channels[i])) {
+        errors.channels = 'Invalid channel(s)';
+        break;
+      }
+    }
 
     return errors;
   },

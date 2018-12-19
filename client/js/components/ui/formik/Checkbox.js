@@ -5,22 +5,19 @@ import Checkbox from 'components/ui/Checkbox';
 const FormikCheckbox = ({ name, onChange, ...props }) => (
   <FastField
     name={name}
-    render={({ field, form }) => {
-      return (
-        <Checkbox
-          name={name}
-          checked={field.value}
-          onChange={e => {
-            form.setFieldTouched(name, true);
-            field.onChange(e);
-            if (onChange) {
-              onChange(e);
-            }
-          }}
-          {...props}
-        />
-      );
-    }}
+    render={({ field }) => (
+      <Checkbox
+        name={name}
+        checked={field.value}
+        onChange={e => {
+          field.onChange(e);
+          if (onChange) {
+            onChange(e);
+          }
+        }}
+        {...props}
+      />
+    )}
   />
 );
 
