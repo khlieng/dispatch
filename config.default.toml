@@ -68,3 +68,7 @@ enabled = false
 max_age = 31536000
 include_subdomains = false
 preload = false
+
+# Add your own HTTP headers to the index page
+[headers]
+# X-Example = "Rainbows"

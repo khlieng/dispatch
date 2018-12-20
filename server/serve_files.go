@@ -323,6 +323,10 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Strict-Transport-Security", hstsHeader)
 	}
 
+	for k, v := range d.Config().Headers {
+		w.Header().Set(k, v)
+	}
+
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Set("Content-Length", indexPageLen)

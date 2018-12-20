@@ -14,6 +14,7 @@ type Config struct {
 	Dev                bool
 	HexIP              bool
 	VerifyCertificates bool `mapstructure:"verify_certificates"`
+	Headers            map[string]string
 	Defaults           *Defaults
 	HTTPS              *HTTPS
 	LetsEncrypt        *LetsEncrypt
