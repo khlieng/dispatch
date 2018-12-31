@@ -75,10 +75,12 @@ export default function handleSocket({
     },
 
     nick({ server, oldNick, newNick }) {
-      const channels = findChannels(getState(), server, oldNick);
-      dispatch(
-        broadcast(`${oldNick} changed nick to ${newNick}`, server, channels)
-      );
+      if (oldNick) {
+        const channels = findChannels(getState(), server, oldNick);
+        dispatch(
+          broadcast(`${oldNick} changed nick to ${newNick}`, server, channels)
+        );
+      }
     },
 
     topic({ server, channel, topic, nick }) {

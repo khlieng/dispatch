@@ -163,7 +163,7 @@ func (d *Dispatch) startHTTP() {
 			log.Println("[HTTPS] Listening on port", cfg.HTTPS.Port)
 			log.Fatal(httpsSrv.ListenAndServeTLS(cfg.HTTPS.Cert, cfg.HTTPS.Key))
 		} else {
-			cache := certmagic.NewCache(certmagic.FileStorage{
+			cache := certmagic.NewCache(&certmagic.FileStorage{
 				Path: storage.Path.LetsEncrypt(),
 			})
 
