@@ -1,21 +1,17 @@
 package server
 
 import (
-	"crypto/tls"
 	"log"
-	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/khlieng/dispatch/config"
-	"github.com/khlieng/dispatch/pkg/netutil"
+	"github.com/khlieng/dispatch/pkg/https"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
-	"github.com/mholt/certmagic"
 )
 
 var channelStore = storage.NewChannelStore()
@@ -137,79 +133,26 @@ func (d *Dispatch) startHTTP() {
 		port = "1337"
 	}
 
-	httpSrv := &http.Server{
-		Addr: net.JoinHostPort(cfg.Address, port),
-	}
-
 	if cfg.HTTPS.Enabled {
-		httpSrv.ReadTimeout = 5 * time.Second
-		httpSrv.WriteTimeout = 5 * time.Second
-
-		httpsSrv := &http.Server{
-			Addr:              net.JoinHostPort(cfg.Address, cfg.HTTPS.Port),
-			ReadHeaderTimeout: 5 * time.Second,
-			WriteTimeout:      10 * time.Second,
-			IdleTimeout:       120 * time.Second,
-			Handler:           d,
-		}
-
-		redirect := createHTTPSRedirect(cfg.HTTPS.Port, d)
-
-		if d.certExists() {
-			httpSrv.Handler = redirect
-			log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
-			go httpSrv.ListenAndServe()
-
-			log.Println("[HTTPS] Listening on port", cfg.HTTPS.Port)
-			log.Fatal(httpsSrv.ListenAndServeTLS(cfg.HTTPS.Cert, cfg.HTTPS.Key))
-		} else {
-			cache := certmagic.NewCache(&certmagic.FileStorage{
-				Path: storage.Path.LetsEncrypt(),
-			})
-
-			magic := certmagic.NewWithCache(cache, certmagic.Config{
-				Agreed:     true,
-				Email:      cfg.LetsEncrypt.Email,
-				MustStaple: true,
-			})
-
-			domains := []string{cfg.LetsEncrypt.Domain}
-			if cfg.LetsEncrypt.Domain == "" {
-				domains = []string{}
-				magic.OnDemand = &certmagic.OnDemandConfig{MaxObtain: 3}
-			}
-
-			err := magic.Manage(domains)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			tlsConfig := magic.TLSConfig()
-			tlsConfig.MinVersion = tls.VersionTLS12
-			tlsConfig.CipherSuites = getCipherSuites()
-			tlsConfig.CurvePreferences = []tls.CurveID{
-				tls.X25519,
-				tls.CurveP256,
-			}
-			tlsConfig.PreferServerCipherSuites = true
-			httpsSrv.TLSConfig = tlsConfig
-
-			httpSrv.Handler = magic.HTTPChallengeHandler(redirect)
-			log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
-			go httpSrv.ListenAndServe()
-
-			log.Println("[HTTPS] Listening on port", cfg.HTTPS.Port)
-			log.Fatal(httpsSrv.ListenAndServeTLS("", ""))
-		}
+		log.Println("[HTTP] Listening on port", port, "(HTTPS Redirect)")
+		log.Println("[HTTPS] Listening on port", cfg.HTTPS.Port)
 	} else {
-		httpSrv.ReadHeaderTimeout = 5 * time.Second
-		httpSrv.WriteTimeout = 10 * time.Second
-		httpSrv.IdleTimeout = 120 * time.Second
-		httpSrv.Handler = d
-
 		log.Println("[HTTP] Listening on port", port)
-		log.Fatal(httpSrv.ListenAndServe())
 	}
+
+	log.Fatal(https.Serve(d, https.Config{
+		Addr:      cfg.Address,
+		PortHTTP:  port,
+		PortHTTPS: cfg.HTTPS.Port,
+		HTTPOnly:  !cfg.HTTPS.Enabled,
+
+		StoragePath: storage.Path.LetsEncrypt(),
+		Domain:      cfg.LetsEncrypt.Domain,
+		Email:       cfg.LetsEncrypt.Email,
+
+		Cert: cfg.HTTPS.Cert,
+		Key:  cfg.HTTPS.Key,
+	}))
 }
 
 func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -256,30 +199,6 @@ func (d *Dispatch) upgradeWS(w http.ResponseWriter, r *http.Request, state *Stat
 	}
 
 	newWSHandler(conn, state, r).run()
-}
-
-func createHTTPSRedirect(portHTTPS string, fallback http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		host, _, err := net.SplitHostPort(r.Host)
-		if err != nil {
-			host = r.Host
-		}
-
-		if netutil.IsPrivate(host) {
-			fallback.ServeHTTP(w, r)
-			return
-		}
-
-		u := url.URL{
-			Scheme: "https",
-			Host:   net.JoinHostPort(host, portHTTPS),
-			Path:   r.RequestURI,
-		}
-
-		w.Header().Set("Connection", "close")
-		w.Header().Set("Location", u.String())
-		w.WriteHeader(http.StatusMovedPermanently)
-	}
 }
 
 func fail(w http.ResponseWriter, code int) {
