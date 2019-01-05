@@ -7,6 +7,7 @@ import {
   addMessage,
   addMessages
 } from 'state/messages';
+import { openModal } from 'state/modals';
 import { reconnect } from 'state/servers';
 import { select } from 'state/tab';
 import { find, normalizeChannel } from 'utils';
@@ -123,15 +124,17 @@ export default function handleSocket({
     },
 
     connection_update({ server, errorType }) {
-      if (
-        errorType === 'verify' &&
-        window.confirm(
-          'The server is using a self-signed certificate, continue anyway?'
-        )
-      ) {
+      if (errorType === 'verify') {
         dispatch(
-          reconnect(server, {
-            skipVerify: true
+          openModal('confirm', {
+            question:
+              'The server is using a self-signed certificate, continue anyway?',
+            onConfirm: () =>
+              dispatch(
+                reconnect(server, {
+                  skipVerify: true
+                })
+              )
           })
         );
       }

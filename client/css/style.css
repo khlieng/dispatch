@@ -57,6 +57,18 @@ button:active {
   background: #6bb758;
 }
 
+.button-normal {
+  background: #222;
+}
+
+.button-normal:hover {
+  background: #111;
+}
+
+.button-normal:active {
+  background: #222;
+}
+
 label {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -853,6 +865,62 @@ input.message-input-nick.invalid {
   font: 700 64px 'Montserrat', sans-serif;
   height: 100%;
   color: #ddd;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.33);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.modal-overlay-opening {
+  opacity: 1;
+}
+
+.modal-overlay-closing {
+  opacity: 0;
+}
+
+.modal {
+  max-width: 600px;
+  padding: 15px;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  outline: none;
+  margin: 15px;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  transform: translateY(-20px);
+  transition: transform 0.2s;
+}
+
+.modal-opening {
+  transform: translateY(0);
+}
+
+.modal-closing {
+  transform: translateY(-20px);
+}
+
+.modal p {
+  margin-bottom: 5px;
+}
+
+.modal button {
+  width: 120px;
+}
+
+.modal button {
+  margin: 0 5px;
+  margin-top: 10px;
 }
 
 @media (max-width: 600px) {

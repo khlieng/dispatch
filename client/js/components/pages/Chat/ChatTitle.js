@@ -26,10 +26,7 @@ const ChatTitle = ({
   let serverError = null;
   if (!tab.name && status.error) {
     serverError = (
-      <span className="chat-topic error">
-        Error:
-        {status.error}
-      </span>
+      <span className="chat-topic error">Error: {status.error}</span>
     );
   }
 

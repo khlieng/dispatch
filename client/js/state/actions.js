@@ -19,6 +19,9 @@ export const FETCH_MESSAGES = 'FETCH_MESSAGES';
 export const RAW = 'RAW';
 export const UPDATE_MESSAGE_HEIGHT = 'UPDATE_MESSAGE_HEIGHT';
 
+export const OPEN_MODAL = 'OPEN_MODAL';
+export const CLOSE_MODAL = 'CLOSE_MODAL';
+
 export const CLOSE_PRIVATE_CHAT = 'CLOSE_PRIVATE_CHAT';
 export const OPEN_PRIVATE_CHAT = 'OPEN_PRIVATE_CHAT';
 

@@ -2,6 +2,7 @@ import { createStructuredSelector } from 'reselect';
 import App from 'components/App';
 import { getConnected } from 'state/app';
 import { getSortedChannels } from 'state/channels';
+import { getHasOpenModals } from 'state/modals';
 import { getPrivateChats } from 'state/privateChats';
 import { getServers } from 'state/servers';
 import { getSelectedTab, select } from 'state/tab';
@@ -16,7 +17,8 @@ const mapState = createStructuredSelector({
   servers: getServers,
   showTabList: getShowTabList,
   tab: getSelectedTab,
-  newVersionAvailable: state => state.app.newVersionAvailable
+  newVersionAvailable: state => state.app.newVersionAvailable,
+  hasOpenModals: getHasOpenModals
 });
 
 const mapDispatch = { push, select, hideMenu };

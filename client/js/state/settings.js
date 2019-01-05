@@ -1,4 +1,3 @@
-import assign from 'lodash/assign';
 import createReducer from 'utils/createReducer';
 import * as actions from './actions';
 
@@ -41,7 +40,7 @@ export default createReducer(
 
     [actions.SETTINGS_SET](state, { key, value, settings }) {
       if (settings) {
-        assign(state, settings);
+        Object.assign(state, settings);
       } else {
         state[key] = value;
       }

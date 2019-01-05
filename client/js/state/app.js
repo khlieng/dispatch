@@ -1,4 +1,3 @@
-import assign from 'lodash/assign';
 import createReducer from 'utils/createReducer';
 import * as actions from './actions';
 
@@ -31,7 +30,7 @@ const initialState = {
 export default createReducer(initialState, {
   [actions.APP_SET](state, { key, value }) {
     if (typeof key === 'object') {
-      assign(state, key);
+      Object.assign(state, key);
     } else {
       state[key] = value;
     }
