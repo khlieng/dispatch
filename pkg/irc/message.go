@@ -151,11 +151,14 @@ func splitParam(param string) (string, string) {
 	return parts[0], ""
 }
 
+var unescapeTagReplacer = strings.NewReplacer(
+	"\\:", ";",
+	"\\s", " ",
+	"\\\\", "\\",
+	"\\r", "\r",
+	"\\n", "\n",
+)
+
 func unescapeTag(s string) string {
-	s = strings.Replace(s, "\\:", ";", -1)
-	s = strings.Replace(s, "\\s", " ", -1)
-	s = strings.Replace(s, "\\\\", "\\", -1)
-	s = strings.Replace(s, "\\r", "\r", -1)
-	s = strings.Replace(s, "\\n", "\n", -1)
-	return s
+	return unescapeTagReplacer.Replace(s)
 }
