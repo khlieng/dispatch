@@ -2,6 +2,7 @@ package irc
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -151,7 +152,8 @@ func (c *Client) connect() error {
 
 	c.connected = true
 	c.connChange(true, nil)
-	c.reader = bufio.NewReader(c.conn)
+	c.scan = bufio.NewScanner(c.conn)
+	c.scan.Buffer(c.recvBuf, cap(c.recvBuf))
 
 	c.register()
 
@@ -185,8 +187,7 @@ func (c *Client) recv() {
 	defer c.sendRecv.Done()
 
 	for {
-		line, err := c.reader.ReadString('\n')
-		if err != nil {
+		if !c.scan.Scan() {
 			select {
 			case <-c.quit:
 				return
@@ -203,7 +204,12 @@ func (c *Client) recv() {
 			}
 		}
 
-		msg := parseMessage(line)
+		b := bytes.Trim(c.scan.Bytes(), " ")
+		if len(b) == 0 {
+			continue
+		}
+
+		msg := ParseMessage(string(b))
 		if msg == nil {
 			close(c.quit)
 			c.connChange(false, ErrBadProtocol)

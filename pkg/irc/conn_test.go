@@ -129,19 +129,21 @@ func TestRecv(t *testing.T) {
 	buf.WriteString("CMD\r\n")
 	buf.WriteString("PING :test\r\n")
 	buf.WriteString("001 foo\r\n")
-	c.reader = bufio.NewReader(buf)
+	c.scan = bufio.NewScanner(buf)
 
 	c.sendRecv.Add(1)
 	go c.recv()
 
 	assert.Equal(t, "PONG :test\r\n", <-conn.hook)
 	assert.Equal(t, &Message{Command: "CMD"}, <-c.Messages)
+	assert.Equal(t, &Message{Command: Ping, Params: []string{"test"}}, <-c.Messages)
+	assert.Equal(t, &Message{Command: ReplyWelcome, Params: []string{"foo"}}, <-c.Messages)
 }
 
 func TestRecvTriggersReconnect(t *testing.T) {
 	c := testClient()
 	c.conn = &mockConn{}
-	c.reader = bufio.NewReader(bytes.NewBufferString("001 bob\r\n"))
+	c.scan = bufio.NewScanner(bytes.NewBufferString("001 bob\r\n"))
 	done := make(chan struct{})
 	ok := false
 	go func() {

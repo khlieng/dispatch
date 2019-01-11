@@ -30,7 +30,8 @@ type Client struct {
 	connected  bool
 	registered bool
 	dialer     *net.Dialer
-	reader     *bufio.Reader
+	recvBuf    []byte
+	scan       *bufio.Scanner
 	backoff    *backoff.Backoff
 	out        chan string
 
@@ -51,6 +52,7 @@ func NewClient(nick, username string) *Client {
 		out:               make(chan string, 32),
 		quit:              make(chan struct{}),
 		reconnect:         make(chan struct{}),
+		recvBuf:           make([]byte, 0, 4096),
 		backoff: &backoff.Backoff{
 			Jitter: true,
 		},

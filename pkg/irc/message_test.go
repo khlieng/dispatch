@@ -12,7 +12,7 @@ func TestParseMessage(t *testing.T) {
 		expected *Message
 	}{
 		{
-			":user CMD #chan :some message\r\n",
+			":user CMD #chan :some message",
 			&Message{
 				Prefix:  "user",
 				Nick:    "user",
@@ -20,7 +20,7 @@ func TestParseMessage(t *testing.T) {
 				Params:  []string{"#chan", "some message"},
 			},
 		}, {
-			":nick!user@host.com CMD a b\r\n",
+			":nick!user@host.com CMD a b",
 			&Message{
 				Prefix:  "nick!user@host.com",
 				Nick:    "nick",
@@ -28,80 +28,80 @@ func TestParseMessage(t *testing.T) {
 				Params:  []string{"a", "b"},
 			},
 		}, {
-			"CMD a b :\r\n",
+			"CMD a b :",
 			&Message{
 				Command: "CMD",
 				Params:  []string{"a", "b", ""},
 			},
 		}, {
-			"CMD a b\r\n",
+			"CMD a b",
 			&Message{
 				Command: "CMD",
 				Params:  []string{"a", "b"},
 			},
 		}, {
-			"CMD\r\n",
+			"CMD",
 			&Message{
 				Command: "CMD",
 			},
 		}, {
-			"CMD :tests and stuff\r\n",
+			"CMD :tests and stuff",
 			&Message{
 				Command: "CMD",
 				Params:  []string{"tests and stuff"},
 			},
 		}, {
-			":nick@host.com CMD\r\n",
+			":nick@host.com CMD",
 			&Message{
 				Prefix:  "nick@host.com",
 				Nick:    "nick",
 				Command: "CMD",
 			},
 		}, {
-			":ni@ck!user!name@host!.com CMD\r\n",
+			":ni@ck!user!name@host!.com  CMD",
 			&Message{
 				Prefix:  "ni@ck!user!name@host!.com",
 				Nick:    "ni@ck",
 				Command: "CMD",
 			},
 		}, {
-			"CMD #cake pie  \r\n",
+			"CMD #cake pie  ",
 			&Message{
 				Command: "CMD",
 				Params:  []string{"#cake", "pie"},
 			},
 		}, {
-			" CMD #cake pie\r\n",
+			" CMD #cake pie",
 			&Message{
 				Command: "CMD",
 				Params:  []string{"#cake", "pie"},
 			},
 		}, {
-			"CMD #cake ::pie\r\n",
+			"CMD #cake ::pie",
 			&Message{
 				Command: "CMD",
 				Params:  []string{"#cake", ":pie"},
 			},
 		}, {
-			"CMD #cake :  pie\r\n",
+			"CMD #cake :  pie",
 			&Message{
 				Command: "CMD",
 				Params:  []string{"#cake", "  pie"},
 			},
 		}, {
-			"CMD #cake :pie :P <3\r\n",
+			"CMD #cake :pie :P <3",
 			&Message{
 				Command: "CMD",
 				Params:  []string{"#cake", "pie :P <3"},
 			},
 		}, {
-			"CMD   #cake  :pie!\r\n",
+			"CMD   #cake  :pie!",
 			&Message{
 				Command: "CMD",
 				Params:  []string{"#cake", "pie!"},
 			},
 		}, {
-			"@x=y CMD\r\n",
+			"@x=y CMD",
 			&Message{
 				Tags: map[string]string{
 					"x": "y",
@@ -109,7 +109,7 @@ func TestParseMessage(t *testing.T) {
 				Command: "CMD",
 			},
 		}, {
-			"@x=y :nick!user@host.com CMD\r\n",
+			"@x=y :nick!user@host.com CMD",
 			&Message{
 				Tags: map[string]string{
 					"x": "y",
@@ -119,7 +119,7 @@ func TestParseMessage(t *testing.T) {
 				Command: "CMD",
 			},
 		}, {
-			"@x=y :nick!user@host.com CMD :pie and cake\r\n",
+			"@x=y  :nick!user@host.com    CMD :pie and cake",
 			&Message{
 				Tags: map[string]string{
 					"x": "y",
@@ -130,7 +130,19 @@ func TestParseMessage(t *testing.T) {
 				Params:  []string{"pie and cake"},
 			},
 		}, {
-			"@x=y;a=b CMD\r\n",
+			"@x=y  :nick!user@host.com    CMD beans  rainbows :pie and cake",
+			&Message{
+				Tags: map[string]string{
+					"x": "y",
+				},
+				Prefix:  "nick!user@host.com",
+				Nick:    "nick",
+				Command: "CMD",
+				Params:  []string{"beans", "rainbows", "pie and cake"},
+			},
+		},
+		{
+			"@x=y;a=b CMD",
 			&Message{
 				Tags: map[string]string{
 					"x": "y",
@@ -139,7 +151,7 @@ func TestParseMessage(t *testing.T) {
 				Command: "CMD",
 			},
 		}, {
-			"@x=y;a=\\\\\\:\\s\\r\\n CMD\r\n",
+			"@x=y;a=\\\\\\:\\s\\r\\n CMD",
 			&Message{
 				Tags: map[string]string{
 					"x": "y",
@@ -151,23 +163,29 @@ func TestParseMessage(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		assert.Equal(t, tc.expected, parseMessage(tc.input))
+		assert.Equal(t, tc.expected, ParseMessage(tc.input))
+	}
+}
+
+func BenchmarkParseMessage(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ParseMessage("@x=y  :nick!user@host.com    CMD beans  rainbows :pie and cake")
 	}
 }
 
 func TestLastParam(t *testing.T) {
-	assert.Equal(t, "some message", parseMessage(":user CMD #chan :some message\r\n").LastParam())
-	assert.Equal(t, "", parseMessage("NO_PARAMS").LastParam())
+	assert.Equal(t, "some message", ParseMessage(":user CMD #chan :some message").LastParam())
+	assert.Equal(t, "", ParseMessage("NO_PARAMS").LastParam())
 }
 
-func TestBadMessagePanic(t *testing.T) {
-	parseMessage("@\r\n")
-	parseMessage("@ :\r\n")
-	parseMessage("@  :\r\n")
-	parseMessage(":user\r\n")
-	parseMessage(":\r\n")
-	parseMessage(":")
-	parseMessage("")
+func TestBadMessage(t *testing.T) {
+	assert.Nil(t, ParseMessage("@"))
+	assert.Nil(t, ParseMessage("@ :"))
+	assert.Nil(t, ParseMessage("@  :"))
+	assert.Nil(t, ParseMessage("@   :"))
+	assert.Nil(t, ParseMessage(":user"))
+	assert.Nil(t, ParseMessage(":"))
+	assert.Nil(t, ParseMessage(""))
 }
 
 func TestParseISupport(t *testing.T) {

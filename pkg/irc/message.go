@@ -22,8 +22,7 @@ func (m *Message) LastParam() string {
 	return ""
 }
 
-func parseMessage(line string) *Message {
-	line = strings.Trim(line, "\r\n ")
+func ParseMessage(line string) *Message {
 	msg := Message{}
 
 	if strings.HasPrefix(line, "@") {
@@ -35,21 +34,24 @@ func parseMessage(line string) *Message {
 
 		if len(tags) > 0 {
 			msg.Tags = map[string]string{}
+
+			for _, tag := range tags {
+				key, val := splitParam(tag)
+				if key == "" {
+					continue
+				}
+
+				if val != "" {
+					msg.Tags[key] = unescapeTag(val)
+				} else {
+					msg.Tags[key] = ""
+				}
+			}
 		}
 
-		for _, tag := range tags {
-			key, val := splitParam(tag)
-			if key == "" {
-				continue
-			}
-
-			if val != "" {
-				msg.Tags[key] = unescapeTag(val)
-			} else {
-				msg.Tags[key] = ""
-			}
+		for line[next+1] == ' ' {
+			next++
 		}
-
 		line = line[next+1:]
 	}
 
@@ -73,7 +75,7 @@ func parseMessage(line string) *Message {
 
 	cmdEnd := len(line)
 	trailing := ""
-	if i := strings.Index(line, " :"); i > 0 {
+	if i := strings.Index(line, " :"); i >= 0 {
 		cmdEnd = i
 		trailing = line[i+2:]
 	}
