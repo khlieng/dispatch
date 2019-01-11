@@ -120,9 +120,6 @@ func (c *Client) tryConnect() {
 				return
 			}
 		} else {
-			c.backoff.Reset()
-
-			c.flushChannels()
 			return
 		}
 
@@ -194,11 +191,6 @@ func (c *Client) recv() {
 
 			default:
 				c.connChange(false, nil)
-
-				if !c.Registered() {
-					time.Sleep(15 * time.Second)
-				}
-
 				c.Reconnect()
 				return
 			}
@@ -233,6 +225,9 @@ func (c *Client) recv() {
 		case ReplyWelcome:
 			c.setNick(msg.Params[0])
 			c.setRegistered(true)
+			c.flushChannels()
+
+			c.backoff.Reset()
 			c.sendRecv.Add(1)
 			go c.send()
 
