@@ -151,6 +151,10 @@ func (c *Client) Away(message string) {
 	c.Write("AWAY :" + message)
 }
 
+func (c *Client) List() {
+	c.Write("LIST")
+}
+
 func (c *Client) writePass(password string) {
 	c.write("PASS " + password)
 }
