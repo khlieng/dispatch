@@ -140,9 +140,9 @@ func (i *iSupport) Get(key string) string {
 
 func (i *iSupport) GetInt(key string) int {
 	i.lock.Lock()
-	v := cast.ToInt(i.support[key])
+	v := i.support[key]
 	i.lock.Unlock()
-	return v
+	return cast.ToInt(v)
 }
 
 func splitParam(param string) (string, string) {
