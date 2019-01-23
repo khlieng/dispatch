@@ -236,28 +236,28 @@ type stateData struct {
 	lock sync.Mutex
 }
 
-func (s stateData) Get(key string) interface{} {
+func (s *stateData) Get(key string) interface{} {
 	s.lock.Lock()
 	v := s.m[key]
 	s.lock.Unlock()
 	return v
 }
 
-func (s stateData) Set(key string, value interface{}) {
+func (s *stateData) Set(key string, value interface{}) {
 	s.lock.Lock()
 	s.m[key] = value
 	s.lock.Unlock()
 }
 
-func (s stateData) String(key string) string {
+func (s *stateData) String(key string) string {
 	return s.Get(key).(string)
 }
 
-func (s stateData) Int(key string) int {
+func (s *stateData) Int(key string) int {
 	return s.Get(key).(int)
 }
 
-func (s stateData) Bool(key string) bool {
+func (s *stateData) Bool(key string) bool {
 	return s.Get(key).(bool)
 }
 
