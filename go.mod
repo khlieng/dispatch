@@ -8,7 +8,7 @@ require (
 	github.com/blevesearch/go-porterstemmer v0.0.0-20141230013033-23a2c8e5cf1f // indirect
 	github.com/blevesearch/segment v0.0.0-20160915185041-762005e7a34f // indirect
 	github.com/boltdb/bolt v0.0.0-20180302180052-fd01fc79c553
-	github.com/couchbase/vellum v0.0.0-20181205055959-dd17fb852690 // indirect
+	github.com/couchbase/vellum v0.0.0-20190111184608-e91b68ff3efe // indirect
 	github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/cznic/strutil v0.0.0-20181122101858-275e90344537 // indirect
@@ -31,31 +31,32 @@ require (
 	github.com/klauspost/cpuid v1.2.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
-	github.com/mholt/certmagic v0.0.0-20181219212511-a3b276a1b44e
-	github.com/miekg/dns v1.1.1 // indirect
+	github.com/mholt/certmagic v0.0.0-20190122014809-c1d472b46046
+	github.com/miekg/dns v1.1.3 // indirect
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mschoch/smat v0.0.0-20160514031455-90eadee771ae // indirect
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20170806203942-52369c62f446 // indirect
-	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
+	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
 	github.com/spf13/afero v1.2.0 // indirect
 	github.com/spf13/cast v1.3.0
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.1
 	github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 // indirect
-	github.com/stretchr/testify v1.2.2
+	github.com/stretchr/testify v1.3.0
 	github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2 // indirect
 	github.com/tdewolff/minify/v2 v2.3.8
 	github.com/tecbot/gorocksdb v0.0.0-20181010114359-8752a9433481 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/willf/bitset v1.1.9 // indirect
-	github.com/xenolf/lego v1.2.2-0.20181211001449-b05b54d1f69a // indirect
-	golang.org/x/net v0.0.0-20181220203305-927f97764cc3
+	github.com/xenolf/lego v2.0.1+incompatible // indirect
+	golang.org/x/crypto v0.0.0-20190122013713-64072686203f // indirect
+	golang.org/x/net v0.0.0-20190119204137-ed066c81e75e
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	golang.org/x/sys v0.0.0-20181228144115-9a3f9b0469bb // indirect
+	golang.org/x/sys v0.0.0-20190122071731-054c452bb702 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/square/go-jose.v2 v2.2.1 // indirect
+	gopkg.in/square/go-jose.v2 v2.2.2 // indirect
 )

@@ -7,6 +7,10 @@ const autolinker = new Autolinker({
 });
 
 export default function linkify(text) {
+  if (!text) {
+    return text;
+  }
+
   let matches = autolinker.parseText(text);
 
   if (matches.length === 0) {
