@@ -11,7 +11,14 @@ export default class TabList extends PureComponent {
   handleSettingsClick = () => this.props.push('/settings');
 
   render() {
-    const { tab, channels, servers, privateChats, showTabList } = this.props;
+    const {
+      tab,
+      channels,
+      servers,
+      privateChats,
+      showTabList,
+      openModal
+    } = this.props;
     const tabs = [];
 
     const className = classnames('tablist', {
@@ -32,6 +39,17 @@ export default class TabList extends PureComponent {
         />
       );
 
+      tabs.push(
+        <div
+          key={`${address}-chans}`}
+          className="tab-label"
+          onClick={() => openModal('channel', { server: address })}
+        >
+          <span>CHANNELS ({server.channels.length})</span>
+          <Button>+</Button>
+        </div>
+      );
+
       server.channels.forEach(name =>
         tabs.push(
           <TabListItem
@@ -48,7 +66,8 @@ export default class TabList extends PureComponent {
       if (privateChats[address] && privateChats[address].length > 0) {
         tabs.push(
           <div key={`${address}-pm}`} className="tab-label">
-            Private messages
+            <span>DIRECT MESSAGES ({privateChats[address].length})</span>
+            {/*<Button>+</Button>*/}
           </div>
         );
 

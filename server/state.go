@@ -13,10 +13,15 @@ import (
 )
 
 const (
+	// AnonymousUserExpiration is the time to wait before removing an anonymous
+	// user that has no irc or websocket connections
 	AnonymousUserExpiration = 1 * time.Minute
 )
 
+// State is the live state of a single user
 type State struct {
+	stateData
+
 	irc             map[string]*irc.Client
 	connectionState map[string]irc.ConnectionState
 	ircLock         sync.Mutex
@@ -33,6 +38,7 @@ type State struct {
 
 func NewState(user *storage.User, srv *Dispatch) *State {
 	return &State{
+		stateData:       stateData{m: map[string]interface{}{}},
 		irc:             make(map[string]*irc.Client),
 		connectionState: make(map[string]irc.ConnectionState),
 		ws:              make(map[string]*wsConn),
@@ -223,6 +229,36 @@ func (s *State) run() {
 			}
 		}
 	}
+}
+
+type stateData struct {
+	m    map[string]interface{}
+	lock sync.Mutex
+}
+
+func (s stateData) Get(key string) interface{} {
+	s.lock.Lock()
+	v := s.m[key]
+	s.lock.Unlock()
+	return v
+}
+
+func (s stateData) Set(key string, value interface{}) {
+	s.lock.Lock()
+	s.m[key] = value
+	s.lock.Unlock()
+}
+
+func (s stateData) String(key string) string {
+	return s.Get(key).(string)
+}
+
+func (s stateData) Int(key string) int {
+	return s.Get(key).(int)
+}
+
+func (s stateData) Bool(key string) bool {
+	return s.Get(key).(bool)
 }
 
 type stateStore struct {

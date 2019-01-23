@@ -3001,7 +3001,298 @@ func (v *ClientCert) UnmarshalJSON(data []byte) error {
 func (v *ClientCert) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson42239ddeDecodeGithubComKhliengDispatchServer26(l, v)
 }
-func easyjson42239ddeDecodeGithubComKhliengDispatchServer27(in *jlexer.Lexer, out *Away) {
+func easyjson42239ddeDecodeGithubComKhliengDispatchServer27(in *jlexer.Lexer, out *ChannelSearchResult) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "results":
+			if in.IsNull() {
+				in.Skip()
+				out.Results = nil
+			} else {
+				in.Delim('[')
+				if out.Results == nil {
+					if !in.IsDelim(']') {
+						out.Results = make([]*storage.ChannelListItem, 0, 8)
+					} else {
+						out.Results = []*storage.ChannelListItem{}
+					}
+				} else {
+					out.Results = (out.Results)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v22 *storage.ChannelListItem
+					if in.IsNull() {
+						in.Skip()
+						v22 = nil
+					} else {
+						if v22 == nil {
+							v22 = new(storage.ChannelListItem)
+						}
+						easyjson42239ddeDecodeGithubComKhliengDispatchStorage1(in, &*v22)
+					}
+					out.Results = append(out.Results, v22)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "start":
+			out.Start = int(in.Int())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson42239ddeEncodeGithubComKhliengDispatchServer27(out *jwriter.Writer, in ChannelSearchResult) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if len(in.Results) != 0 {
+		const prefix string = ",\"results\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		{
+			out.RawByte('[')
+			for v23, v24 := range in.Results {
+				if v23 > 0 {
+					out.RawByte(',')
+				}
+				if v24 == nil {
+					out.RawString("null")
+				} else {
+					easyjson42239ddeEncodeGithubComKhliengDispatchStorage1(out, *v24)
+				}
+			}
+			out.RawByte(']')
+		}
+	}
+	if in.Start != 0 {
+		const prefix string = ",\"start\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Start))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v ChannelSearchResult) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson42239ddeEncodeGithubComKhliengDispatchServer27(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v ChannelSearchResult) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson42239ddeEncodeGithubComKhliengDispatchServer27(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *ChannelSearchResult) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson42239ddeDecodeGithubComKhliengDispatchServer27(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *ChannelSearchResult) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson42239ddeDecodeGithubComKhliengDispatchServer27(l, v)
+}
+func easyjson42239ddeDecodeGithubComKhliengDispatchStorage1(in *jlexer.Lexer, out *storage.ChannelListItem) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "name":
+			out.Name = string(in.String())
+		case "userCount":
+			out.UserCount = int(in.Int())
+		case "topic":
+			out.Topic = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson42239ddeEncodeGithubComKhliengDispatchStorage1(out *jwriter.Writer, in storage.ChannelListItem) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if in.Name != "" {
+		const prefix string = ",\"name\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Name))
+	}
+	if in.UserCount != 0 {
+		const prefix string = ",\"userCount\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.UserCount))
+	}
+	if in.Topic != "" {
+		const prefix string = ",\"topic\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Topic))
+	}
+	out.RawByte('}')
+}
+func easyjson42239ddeDecodeGithubComKhliengDispatchServer28(in *jlexer.Lexer, out *ChannelSearch) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "server":
+			out.Server = string(in.String())
+		case "q":
+			out.Q = string(in.String())
+		case "start":
+			out.Start = int(in.Int())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson42239ddeEncodeGithubComKhliengDispatchServer28(out *jwriter.Writer, in ChannelSearch) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if in.Server != "" {
+		const prefix string = ",\"server\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Server))
+	}
+	if in.Q != "" {
+		const prefix string = ",\"q\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Q))
+	}
+	if in.Start != 0 {
+		const prefix string = ",\"start\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Start))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v ChannelSearch) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson42239ddeEncodeGithubComKhliengDispatchServer28(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v ChannelSearch) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson42239ddeEncodeGithubComKhliengDispatchServer28(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *ChannelSearch) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson42239ddeDecodeGithubComKhliengDispatchServer28(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *ChannelSearch) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson42239ddeDecodeGithubComKhliengDispatchServer28(l, v)
+}
+func easyjson42239ddeDecodeGithubComKhliengDispatchServer29(in *jlexer.Lexer, out *Away) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -3034,7 +3325,7 @@ func easyjson42239ddeDecodeGithubComKhliengDispatchServer27(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjson42239ddeEncodeGithubComKhliengDispatchServer27(out *jwriter.Writer, in Away) {
+func easyjson42239ddeEncodeGithubComKhliengDispatchServer29(out *jwriter.Writer, in Away) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -3064,23 +3355,23 @@ func easyjson42239ddeEncodeGithubComKhliengDispatchServer27(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v Away) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson42239ddeEncodeGithubComKhliengDispatchServer27(&w, v)
+	easyjson42239ddeEncodeGithubComKhliengDispatchServer29(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Away) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson42239ddeEncodeGithubComKhliengDispatchServer27(w, v)
+	easyjson42239ddeEncodeGithubComKhliengDispatchServer29(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Away) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson42239ddeDecodeGithubComKhliengDispatchServer27(&r, v)
+	easyjson42239ddeDecodeGithubComKhliengDispatchServer29(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Away) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson42239ddeDecodeGithubComKhliengDispatchServer27(l, v)
+	easyjson42239ddeDecodeGithubComKhliengDispatchServer29(l, v)
 }

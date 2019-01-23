@@ -15,6 +15,7 @@ import (
 )
 
 var channelStore = storage.NewChannelStore()
+var channelIndexes = storage.NewChannelIndexManager()
 
 type Dispatch struct {
 	Store        storage.Store

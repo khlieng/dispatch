@@ -1,8 +1,10 @@
 import React, { useCallback } from 'react';
 import Modal from 'react-modal';
-import { createSelector } from 'reselect';
+import { createStructuredSelector } from 'reselect';
+import get from 'lodash/get';
 import { getModals, closeModal } from 'state/modals';
 import connect from 'utils/connect';
+import { bindActionCreators } from 'redux';
 
 Modal.setAppElement('#root');
 
@@ -47,14 +49,22 @@ export default function withModal({ name, ...modalProps }) {
       );
     };
 
-    const mapState = createSelector(
-      getModals,
-      modals => modals[name] || { payload: {} }
-    );
-
-    const mapDispatch = dispatch => ({
-      onRequestClose: () => dispatch(closeModal(name))
+    const mapState = createStructuredSelector({
+      isOpen: state => get(getModals(state), [name, 'isOpen'], false),
+      payload: state => get(getModals(state), [name, 'payload'], {}),
+      ...modalProps.state
     });
+
+    const mapDispatch = dispatch => {
+      let actions = { onRequestClose: () => dispatch(closeModal(name)) };
+      if (modalProps.actions) {
+        return {
+          ...actions,
+          ...bindActionCreators(modalProps.actions, dispatch)
+        };
+      }
+      return actions;
+    };
 
     return connect(
       mapState,

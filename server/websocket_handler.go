@@ -97,6 +97,8 @@ func (h *wsHandler) connect(b []byte) {
 	var data Server
 	data.UnmarshalJSON(b)
 
+	data.Host = strings.ToLower(data.Host)
+
 	if _, ok := h.state.getIRC(data.Host); !ok {
 		log.Println(h.addr, "[IRC] Add server", data.Host)
 
@@ -281,6 +283,29 @@ func (h *wsHandler) setSettings(b []byte) {
 	}
 }
 
+func (h *wsHandler) channelSearch(b []byte) {
+	var data ChannelSearch
+	data.UnmarshalJSON(b)
+
+	index, needsUpdate := channelIndexes.Get(data.Server)
+	if index != nil {
+		n := 10
+		if data.Start > 0 {
+			n = 50
+		}
+
+		h.state.sendJSON("channel_search", ChannelSearchResult{
+			Results: index.SearchN(data.Q, data.Start, n),
+			Start:   data.Start,
+		})
+	}
+
+	if i, ok := h.state.getIRC(data.Server); ok && needsUpdate {
+		h.state.Set("update_chanlist_"+data.Server, true)
+		i.List()
+	}
+}
+
 func (h *wsHandler) initHandlers() {
 	h.handlers = map[string]func([]byte){
 		"connect":         h.connect,
@@ -301,6 +326,7 @@ func (h *wsHandler) initHandlers() {
 		"fetch_messages":  h.fetchMessages,
 		"set_server_name": h.setServerName,
 		"settings_set":    h.setSettings,
+		"channel_search":  h.channelSearch,
 	}
 }
 

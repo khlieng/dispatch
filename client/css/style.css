@@ -237,7 +237,8 @@ i[class*=' icon-']:before {
   top: 0;
   bottom: 50px;
   width: 100%;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .tablist p {
@@ -245,6 +246,9 @@ i[class*=' icon-']:before {
   padding: 3px 15px;
   padding-right: 10px;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tablist p:last-child {
@@ -260,12 +264,6 @@ i[class*=' icon-']:before {
   border-left: 5px solid #6bb758;
 }
 
-.tab-content {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .tab-server {
   display: flex;
   align-items: center;
@@ -279,11 +277,29 @@ i[class*=' icon-']:before {
 }
 
 .tab-label {
-  margin-top: 10px;
+  margin: 5px;
   margin-left: 15px;
-  margin-bottom: 5px;
   font-size: 12px;
   color: #999;
+  display: flex;
+  align-items: center;
+  height: 25px;
+}
+
+.tab-label span {
+  flex: 1;
+}
+
+.tab-label button {
+  width: 24px;
+  height: 100%;
+  font-size: 20px;
+  background: none;
+  color: #999;
+}
+
+.tab-label button:hover {
+  color: #ccc;
 }
 
 .side-buttons {
@@ -859,11 +875,24 @@ input.message-input-nick.invalid {
 }
 
 .suspense-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font: 700 64px 'Montserrat', sans-serif;
-  height: 100%;
+  color: #ddd;
+}
+
+.suspense-modal-fallback {
+  position: fixed;
+  right: 15px;
+  bottom: 3px;
+  z-index: 1;
+  font: 700 64px 'Montserrat', sans-serif;
   color: #ddd;
 }
 
@@ -874,6 +903,7 @@ input.message-input-nick.invalid {
   right: 0;
   bottom: 0;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.33);
@@ -890,7 +920,8 @@ input.message-input-nick.invalid {
 }
 
 .modal {
-  max-width: 600px;
+  width: 600px;
+  min-width: 0;
   padding: 15px;
   background: #f0f0f0;
   border: 1px solid #ddd;
@@ -921,6 +952,82 @@ input.message-input-nick.invalid {
 .modal button {
   margin: 0 5px;
   margin-top: 10px;
+}
+
+.modal-channel {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 120px);
+  padding: 0;
+}
+
+.modal-channel input {
+  flex: 1;
+  padding: 15px;
+}
+
+.modal-channel-button-join {
+  margin: 0 !important;
+  width: 50px !important;
+  height: 24px;
+  font-size: 12px;
+}
+
+.modal-channel-input-wrap {
+  display: flex;
+}
+
+.modal-channel-close {
+  padding: 15px;
+  background: #fff;
+  color: #999;
+  cursor: pointer;
+}
+
+.modal-channel-close:hover {
+  color: #222;
+}
+
+.modal-channel-result {
+  margin: 15px;
+  text-align: left;
+}
+
+.modal-channel-result-header {
+  display: flex;
+  align-items: center;
+}
+
+.modal-channel-topic {
+  font-size: 12px;
+  font-family: Roboto Mono, monospace;
+  color: #444;
+}
+
+.modal-channel-name {
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.modal-channel-users {
+  font-size: 16px;
+  color: #444;
+  margin: 0 15px;
+  flex: 1;
+}
+
+.modal-channel-users i {
+  margin-right: 3px;
+}
+
+.modal-channel-results {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.modal-channel-button-more {
+  margin-bottom: 15px !important;
 }
 
 @media (max-width: 600px) {
@@ -991,5 +1098,16 @@ input.message-input-nick.invalid {
 
   .button-install {
     margin-left: 50px;
+  }
+
+  .modal-channel {
+    margin: 0;
+    width: auto;
+    height: auto;
+    position: fixed;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
   }
 }

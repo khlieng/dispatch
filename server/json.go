@@ -192,3 +192,14 @@ type Error struct {
 	Server  string
 	Message string
 }
+
+type ChannelSearch struct {
+	Server string
+	Q      string
+	Start  int
+}
+
+type ChannelSearchResult struct {
+	Results []*storage.ChannelListItem
+	Start   int
+}

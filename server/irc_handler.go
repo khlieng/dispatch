@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -23,6 +24,7 @@ type ircHandler struct {
 	whois       WhoisReply
 	userBuffers map[string][]string
 	motdBuffer  MOTD
+	listBuffer  storage.ChannelListIndex
 
 	handlers map[string]func(*irc.Message)
 }
@@ -183,6 +185,12 @@ func (i *ircHandler) info(msg *irc.Message) {
 			New:    msg.Params[0],
 		})
 
+		_, needsUpdate := channelIndexes.Get(i.client.Host)
+		if needsUpdate {
+			i.listBuffer = storage.NewMapChannelListIndex()
+			i.client.List()
+		}
+
 		go i.state.user.SetNick(msg.Params[0], i.client.Host)
 	}
 
@@ -281,6 +289,34 @@ func (i *ircHandler) motdEnd(msg *irc.Message) {
 	i.motdBuffer = MOTD{}
 }
 
+func (i *ircHandler) list(msg *irc.Message) {
+	if i.listBuffer == nil && i.state.Bool("update_chanlist_"+i.client.Host) {
+		i.listBuffer = storage.NewMapChannelListIndex()
+	}
+
+	if i.listBuffer != nil {
+		c, _ := strconv.Atoi(msg.Params[2])
+		i.listBuffer.Add(&storage.ChannelListItem{
+			Name:      msg.Params[1],
+			UserCount: c,
+			Topic:     msg.LastParam(),
+		})
+	}
+}
+
+func (i *ircHandler) listEnd(msg *irc.Message) {
+	if i.listBuffer != nil {
+		i.state.Set("update_chanlist_"+i.client.Host, false)
+
+		go func(idx storage.ChannelListIndex) {
+			idx.Finish()
+			channelIndexes.Set(i.client.Host, idx)
+		}(i.listBuffer)
+
+		i.listBuffer = nil
+	}
+}
+
 func (i *ircHandler) badNick(msg *irc.Message) {
 	i.state.sendJSON("nick_fail", NickFail{
 		Server: i.client.Host,
@@ -321,6 +357,8 @@ func (i *ircHandler) initHandlers() {
 		irc.ReplyMotdStart:       i.motdStart,
 		irc.ReplyMotd:            i.motd,
 		irc.ReplyEndOfMotd:       i.motdEnd,
+		irc.ReplyList:            i.list,
+		irc.ReplyListEnd:         i.listEnd,
 		irc.ErrErroneousNickname: i.badNick,
 	}
 }

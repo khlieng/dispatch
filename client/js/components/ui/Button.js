@@ -1,7 +1,12 @@
 import React from 'react';
+import cn from 'classnames';
 
-const Button = ({ children, category, ...props }) => (
-  <button className={`button-${category}`} type="button" {...props}>
+const Button = ({ children, category, className, ...props }) => (
+  <button
+    className={cn(`button-${category}`, className)}
+    type="button"
+    {...props}
+  >
     {children}
   </button>
 );

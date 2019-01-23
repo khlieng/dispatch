@@ -6,6 +6,8 @@ export const KICK = 'KICK';
 export const PART = 'PART';
 export const SET_TOPIC = 'SET_TOPIC';
 
+export const CHANNEL_SEARCH = 'CHANNEL_SEARCH';
+
 export const INPUT_HISTORY_ADD = 'INPUT_HISTORY_ADD';
 export const INPUT_HISTORY_DECREMENT = 'INPUT_HISTORY_DECREMENT';
 export const INPUT_HISTORY_INCREMENT = 'INPUT_HISTORY_INCREMENT';
@@ -64,6 +66,7 @@ export const socket = createSocketActions([
   'cert_fail',
   'cert_success',
   'channels',
+  'channel_search',
   'connection_update',
   'join',
   'message',

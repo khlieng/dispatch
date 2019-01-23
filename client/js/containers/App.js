@@ -2,7 +2,7 @@ import { createStructuredSelector } from 'reselect';
 import App from 'components/App';
 import { getConnected } from 'state/app';
 import { getSortedChannels } from 'state/channels';
-import { getHasOpenModals } from 'state/modals';
+import { openModal, getHasOpenModals } from 'state/modals';
 import { getPrivateChats } from 'state/privateChats';
 import { getServers } from 'state/servers';
 import { getSelectedTab, select } from 'state/tab';
@@ -21,7 +21,7 @@ const mapState = createStructuredSelector({
   hasOpenModals: getHasOpenModals
 });
 
-const mapDispatch = { push, select, hideMenu };
+const mapDispatch = { push, select, hideMenu, openModal };
 
 export default connect(
   mapState,

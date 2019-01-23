@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import app from './app';
 import channels from './channels';
+import channelSearch from './channelSearch';
 import input from './input';
 import messages from './messages';
 import modals from './modals';
@@ -19,6 +20,7 @@ export default function createReducer(router) {
     router,
     app,
     channels,
+    channelSearch,
     input,
     messages,
     modals,

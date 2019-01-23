@@ -19,6 +19,7 @@ const App = ({
   select,
   push,
   hideMenu,
+  openModal,
   newVersionAvailable,
   hasOpenModals
 }) => {
@@ -59,10 +60,10 @@ const App = ({
           showTabList={showTabList}
           select={select}
           push={push}
+          openModal={openModal}
         />
         <div className={mainClass}>
           <Suspense fallback={<div className="suspense-fallback">...</div>}>
-            {renderModals && <Modals />}
             <Route name="chat">
               <Chat />
             </Route>
@@ -72,6 +73,11 @@ const App = ({
             <Route name="settings">
               <Settings />
             </Route>
+          </Suspense>
+          <Suspense
+            fallback={<div className="suspense-modal-fallback">...</div>}
+          >
+            {renderModals && <Modals />}
           </Suspense>
         </div>
       </div>
