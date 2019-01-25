@@ -100,6 +100,7 @@ func (c chanList) Swap(i, j int) {
 }
 
 const ChannelListUpdateInterval = time.Hour * 24
+const ChannelListUpdateTimeout = time.Minute * 5
 
 type ChannelIndexManager struct {
 	indexes map[string]*managedChannelIndex
@@ -127,11 +128,13 @@ func (m *ChannelIndexManager) Get(server string) (ChannelListIndex, bool) {
 		m.indexes[server] = &managedChannelIndex{
 			updating: true,
 		}
+		go m.timeoutUpdate(server)
 		return nil, true
 	}
 
 	if !idx.updating && time.Since(idx.updatedAt) > ChannelListUpdateInterval {
 		idx.updating = true
+		go m.timeoutUpdate(server)
 		return idx.index, true
 	}
 
@@ -143,6 +146,16 @@ func (m *ChannelIndexManager) Set(server string, index ChannelListIndex) {
 	m.indexes[server] = &managedChannelIndex{
 		index:     index,
 		updatedAt: time.Now(),
+	}
+	m.lock.Unlock()
+}
+
+func (m *ChannelIndexManager) timeoutUpdate(server string) {
+	time.Sleep(ChannelListUpdateTimeout)
+
+	m.lock.Lock()
+	if m.indexes[server].updating {
+		m.indexes[server].updating = false
 	}
 	m.lock.Unlock()
 }
