@@ -93,10 +93,10 @@ func (d *Dispatch) initFileServer() {
 		hash.Write(runtime)
 		inlineScriptSha256 = base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
-		indexStylesheet := findAssetName("main*.css")
+		indexStylesheet := "/" + findAssetName("main*.css")
 		indexScripts := []string{
-			findAssetName("vendors*.js"),
-			findAssetName("main*.js"),
+			"/" + findAssetName("vendors*.js"),
+			"/" + findAssetName("main*.js"),
 		}
 
 		h2PushAssets = []h2PushAsset{
@@ -145,7 +145,7 @@ func (d *Dispatch) initFileServer() {
 		}
 
 		renderIndexPage(indexTemplateData{
-			CSSPath:      indexStylesheet,
+			Stylesheet:   indexStylesheet,
 			InlineScript: inlineScript,
 			Scripts:      indexScripts,
 		})
