@@ -46,10 +46,12 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          name: 'chan1',
           joined: true,
           users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
         },
         chan2: {
+          name: 'chan2',
           joined: true,
           users: [{ mode: '', nick: 'nick2', renderName: 'nick2' }]
         }
@@ -63,6 +65,7 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          name: 'chan1',
           joined: true,
           users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
         }
@@ -84,10 +87,12 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          name: 'chan1',
           joined: true,
           users: [{ mode: '', nick: 'nick1', renderName: 'nick1' }]
         },
         chan2: {
+          name: 'chan2',
           joined: true,
           users: []
         }
@@ -110,6 +115,7 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          name: 'chan1',
           joined: true,
           users: [
             { mode: '', nick: 'nick3', renderName: 'nick3' },
@@ -117,6 +123,7 @@ describe('channel reducer', () => {
           ]
         },
         chan2: {
+          name: 'chan2',
           joined: true,
           users: [{ mode: '', nick: 'nick2', renderName: 'nick2' }]
         }
@@ -136,6 +143,7 @@ describe('channel reducer', () => {
     expect(state).toEqual({
       srv: {
         chan1: {
+          name: 'chan1',
           joined: true,
           users: [
             { mode: '', nick: 'user3', renderName: 'user3' },
@@ -219,11 +227,11 @@ describe('channel reducer', () => {
 
     expect(state).toEqual({
       srv: {
-        chan1: { joined: true, topic: 'the topic', users: [] },
-        chan2: { joined: true, users: [] }
+        chan1: { name: 'chan1', joined: true, topic: 'the topic', users: [] },
+        chan2: { name: 'chan2', joined: true, users: [] }
       },
       srv2: {
-        chan1: { joined: true, users: [] }
+        chan1: { name: 'chan1', joined: true, users: [] }
       }
     });
   });
