@@ -10,7 +10,7 @@ import {
 import { openModal } from 'state/modals';
 import { reconnect } from 'state/servers';
 import { select } from 'state/tab';
-import { find, normalizeChannel } from 'utils';
+import { find } from 'utils';
 
 function withReason(message, reason) {
   return message + (reason ? ` (${reason})` : '');
@@ -46,22 +46,7 @@ export default function handleSocket({
     },
 
     join({ user, server, channels }) {
-      const state = getState();
-      const tab = state.tab.selected;
-      const [joinedChannel] = channels;
-      if (tab.server && tab.name) {
-        const { nick } = state.servers[tab.server];
-        if (
-          tab.server === server &&
-          nick === user &&
-          tab.name !== joinedChannel &&
-          normalizeChannel(tab.name) === normalizeChannel(joinedChannel)
-        ) {
-          dispatch(select(server, joinedChannel));
-        }
-      }
-
-      dispatch(inform(`${user} joined the channel`, server, joinedChannel));
+      dispatch(inform(`${user} joined the channel`, server, channels[0]));
     },
 
     part({ user, server, channel, reason }) {
@@ -123,6 +108,10 @@ export default function handleSocket({
       dispatch(addMessage(message, tab.server, tab.name));
     },
 
+    error({ server, target, message }) {
+      dispatch(addMessage({ content: message, type: 'error' }, server, target));
+    },
+
     connection_update({ server, errorType }) {
       if (errorType === 'verify') {
         dispatch(
@@ -145,6 +134,16 @@ export default function handleSocket({
     }
   };
 
+  const afterHandlers = {
+    channel_forward(forward) {
+      const { selected } = getState().tab;
+
+      if (selected.server === forward.server && selected.name === forward.old) {
+        dispatch(select(forward.server, forward.new, true));
+      }
+    }
+  };
+
   socket.onMessage((type, data) => {
     let action;
     if (Array.isArray(data)) {
@@ -162,5 +161,9 @@ export default function handleSocket({
     }
 
     dispatch(action);
+
+    if (type in afterHandlers) {
+      afterHandlers[type](data);
+    }
   });
 }

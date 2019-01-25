@@ -149,6 +149,10 @@ i[class*=' icon-']:before {
   color: #f6546a !important;
 }
 
+.disabled {
+  color: #999 !important;
+}
+
 .textinput {
   display: block;
   position: relative;

@@ -3,6 +3,7 @@ package server
 import (
 	"crypto/tls"
 	"encoding/hex"
+	"fmt"
 	"net"
 
 	"github.com/khlieng/dispatch/pkg/irc"
@@ -19,7 +20,10 @@ func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
 			})
 		}
 
-		state.printError("Nickname", nick, "is already in use, using", newNick, "instead")
+		state.sendJSON("error", IRCError{
+			Server:  i.Host,
+			Message: fmt.Sprintf("Nickname %s is already in use, using %s instead", nick, newNick),
+		})
 
 		return newNick
 	}

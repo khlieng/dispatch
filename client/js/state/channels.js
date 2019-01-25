@@ -140,6 +140,11 @@ export default createReducer(
       state[server][channel].users.push(createUser(user));
     },
 
+    [actions.socket.CHANNEL_FORWARD](state, action) {
+      init(state, action.server, action.new);
+      delete state[action.server][action.old];
+    },
+
     [actions.socket.PART](state, { server, channel, user }) {
       if (state[server][channel]) {
         removeUser(state[server][channel].users, user);
@@ -230,16 +235,27 @@ export function join(channels, server) {
 }
 
 export function part(channels, server) {
-  return dispatch => {
-    dispatch({
+  return (dispatch, getState) => {
+    const action = {
       type: actions.PART,
       channels,
-      server,
-      socket: {
+      server
+    };
+
+    const state = getState().channels[server];
+    const joined = channels.filter(c => state[c] && state[c].joined);
+
+    if (joined.length > 0) {
+      action.socket = {
         type: 'part',
-        data: { channels, server }
-      }
-    });
+        data: {
+          channels: joined,
+          server
+        }
+      };
+    }
+
+    dispatch(action);
     dispatch(updateSelection());
   };
 }

@@ -193,6 +193,12 @@ type Error struct {
 	Message string
 }
 
+type IRCError struct {
+	Server  string
+	Target  string
+	Message string
+}
+
 type ChannelSearch struct {
 	Server string
 	Q      string
@@ -202,4 +208,10 @@ type ChannelSearch struct {
 type ChannelSearchResult struct {
 	Results []*storage.ChannelListItem
 	Start   int
+}
+
+type ChannelForward struct {
+	Server string
+	Old    string
+	New    string
 }

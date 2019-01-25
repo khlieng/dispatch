@@ -140,6 +140,12 @@ export default createReducer(
       channels.forEach(channel => delete state[server][channel]);
     },
 
+    [actions.socket.CHANNEL_FORWARD](state, { server, old }) {
+      if (state[server]) {
+        delete state[server][old];
+      }
+    },
+
     [actions.UPDATE_MESSAGE_HEIGHT](
       state,
       { wrapWidth, charWidth, windowWidth }

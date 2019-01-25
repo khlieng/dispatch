@@ -39,4 +39,5 @@ const (
 	ReplyEndOfMotd       = "376"
 	ErrErroneousNickname = "432"
 	ErrNicknameInUse     = "433"
+	ErrForward           = "470"
 )

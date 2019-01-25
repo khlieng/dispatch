@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import classnames from 'classnames';
 import Button from 'components/ui/Button';
-import TabListItem from './TabListItem';
+import TabListItem from 'containers/TabListItem';
 
 export default class TabList extends PureComponent {
   handleTabClick = (server, target) => this.props.select(server, target);

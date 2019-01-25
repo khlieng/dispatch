@@ -5,8 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"fmt"
-
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
@@ -132,13 +130,6 @@ func (s *State) sendJSON(t string, v interface{}) {
 	s.broadcast <- WSResponse{t, v}
 }
 
-func (s *State) sendError(err error, server string) {
-	s.sendJSON("error", Error{
-		Server:  server,
-		Message: err.Error(),
-	})
-}
-
 func (s *State) sendLastMessages(server, channel string, count int) {
 	messages, hasMore, err := s.user.GetLastMessages(server, channel, count)
 	if err == nil && len(messages) > 0 {
@@ -172,19 +163,6 @@ func (s *State) sendMessages(server, channel string, count int, fromID string) {
 
 		s.sendJSON("messages", res)
 	}
-}
-
-func (s *State) print(a ...interface{}) {
-	s.sendJSON("print", Message{
-		Content: fmt.Sprintln(a...),
-	})
-}
-
-func (s *State) printError(a ...interface{}) {
-	s.sendJSON("print", Message{
-		Content: fmt.Sprintln(a...),
-		Type:    "error",
-	})
 }
 
 func (s *State) resetExpirationIfEmpty() {

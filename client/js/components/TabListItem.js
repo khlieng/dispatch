@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import classnames from 'classnames';
 
 const TabListItem = ({
@@ -7,12 +7,15 @@ const TabListItem = ({
   server,
   selected,
   connected,
+  joined,
+  error,
   onClick
 }) => {
   const className = classnames({
     'tab-server': !target,
     success: !target && connected,
-    error: !target && !connected,
+    error: (!target && !connected) || (!joined && error),
+    disabled: !!target && !error && joined === false,
     selected
   });
 
@@ -23,4 +26,4 @@ const TabListItem = ({
   );
 };
 
-export default memo(TabListItem);
+export default TabListItem;

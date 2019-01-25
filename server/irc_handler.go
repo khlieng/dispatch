@@ -15,6 +15,7 @@ import (
 
 var excludedErrors = []string{
 	irc.ErrNicknameInUse,
+	irc.ErrForward,
 }
 
 type ircHandler struct {
@@ -68,7 +69,21 @@ func (i *ircHandler) run() {
 
 func (i *ircHandler) dispatchMessage(msg *irc.Message) {
 	if msg.Command[0] == '4' && !isExcludedError(msg.Command) {
-		i.state.printError(formatIRCError(msg))
+		err := IRCError{
+			Server:  i.client.Host,
+			Message: msg.LastParam(),
+		}
+
+		if len(msg.Params) > 2 {
+			for i := 1; i < len(msg.Params); i++ {
+				if isChannel(msg.Params[i]) {
+					err.Target = msg.Params[i]
+					break
+				}
+			}
+		}
+
+		i.state.sendJSON("error", err)
 	}
 
 	if handler, ok := i.handlers[msg.Command]; ok {
@@ -323,8 +338,21 @@ func (i *ircHandler) badNick(msg *irc.Message) {
 	})
 }
 
+func (i *ircHandler) forward(msg *irc.Message) {
+	if len(msg.Params) > 2 {
+		i.state.sendJSON("channel_forward", ChannelForward{
+			Server: i.client.Host,
+			Old:    msg.Params[1],
+			New:    msg.Params[2],
+		})
+	}
+}
+
 func (i *ircHandler) error(msg *irc.Message) {
-	i.state.printError(msg.LastParam())
+	i.state.sendJSON("error", IRCError{
+		Server:  i.client.Host,
+		Message: msg.LastParam(),
+	})
 }
 
 func (i *ircHandler) initHandlers() {
@@ -360,6 +388,7 @@ func (i *ircHandler) initHandlers() {
 		irc.ReplyList:            i.list,
 		irc.ReplyListEnd:         i.listEnd,
 		irc.ErrErroneousNickname: i.badNick,
+		irc.ErrForward:           i.forward,
 	}
 }
 
