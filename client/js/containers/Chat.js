@@ -22,6 +22,7 @@ import {
   fetchMessages,
   addFetchedMessages
 } from 'state/messages';
+import { openModal } from 'state/modals';
 import { openPrivateChat, closePrivateChat } from 'state/privateChats';
 import { getSearch, searchMessages, toggleSearch } from 'state/search';
 import {
@@ -58,6 +59,7 @@ const mapDispatch = dispatch => ({
       closePrivateChat,
       disconnect,
       fetchMessages,
+      openModal,
       openPrivateChat,
       part,
       runCommand,

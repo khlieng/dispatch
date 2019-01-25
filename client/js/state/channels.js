@@ -61,7 +61,7 @@ function init(state, server, channel) {
     state[server] = {};
   }
   if (channel && !state[server][channel]) {
-    state[server][channel] = { users: [], joined: false };
+    state[server][channel] = { name: channel, users: [], joined: false };
   }
 }
 
@@ -135,6 +135,7 @@ export default createReducer(
     [actions.socket.JOIN](state, { server, channels, user }) {
       const channel = channels[0];
       init(state, server, channel);
+      state[server][channel].name = channel;
       state[server][channel].joined = true;
       state[server][channel].users.push(createUser(user));
     },

@@ -114,7 +114,10 @@ const AddChannel = ({ search, payload: { server }, onClose, ...props }) => {
           onKeyDown={handleKey}
           onChange={handleSearch}
         />
-        <i className="icon-cancel modal-channel-close" onClick={onClose} />
+        <i
+          className="icon-cancel modal-close modal-channel-close"
+          onClick={onClose}
+        />
       </div>
       <div ref={resultsEl} className="modal-channel-results">
         {search.results.map(channel => (

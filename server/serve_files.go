@@ -80,7 +80,7 @@ func (d *Dispatch) initFileServer() {
 
 	if cfg.Dev {
 		renderIndexPage(indexTemplateData{
-			Scripts: []string{"boot.js", "main.js"},
+			Scripts: []string{"/boot.js", "/main.js"},
 		})
 	} else {
 		bootloader := decompressedAsset(findAssetName("boot*.js"))

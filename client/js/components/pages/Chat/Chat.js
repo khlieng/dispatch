@@ -65,6 +65,7 @@ export default class Chat extends Component {
       addFetchedMessages,
       fetchMessages,
       inputActions,
+      openModal,
       runCommand,
       sendMessage,
       toggleSearch,
@@ -86,6 +87,7 @@ export default class Chat extends Component {
           status={status}
           tab={tab}
           title={title}
+          openModal={openModal}
           onCloseClick={this.handleCloseClick}
           onTitleChange={this.handleTitleChange}
           onToggleSearch={toggleSearch}

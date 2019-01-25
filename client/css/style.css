@@ -19,6 +19,15 @@ h6 {
   font-family: Montserrat, sans-serif;
 }
 
+a {
+  text-decoration: none;
+  color: #0066ff;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
 input {
   font: 16px Roboto Mono, monospace;
   border: none;
@@ -504,18 +513,22 @@ input::-webkit-inner-spin-button {
   display: none;
 }
 
+.editable-wrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.editable-wrap-editable {
+  cursor: pointer;
+}
+
 .chat-title {
-  margin-left: 10px;
-  padding: 0 5px;
+  margin-left: 15px;
   font: 24px Montserrat, sans-serif;
   font-weight: 700;
   color: #222;
-  white-space: nowrap;
   line-height: 50px;
-}
-
-.chat-server .chat-title {
-  cursor: pointer;
 }
 
 input.chat-title {
@@ -526,7 +539,7 @@ input.chat-title {
 .chat-topic-wrap {
   flex: 1;
   position: relative;
-  margin: 0 15px;
+  margin-left: 15px;
 }
 
 .chat-topic {
@@ -535,18 +548,10 @@ input.chat-title {
   top: 3px;
   font-size: 16px;
   color: #999;
+  cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.chat-topic a {
-  color: #999;
-  text-decoration: none;
-}
-
-.chat-topic a:hover {
-  text-decoration: underline;
 }
 
 .userlist-bar {
@@ -705,15 +710,6 @@ input.chat-title {
   cursor: pointer;
 }
 
-.message a {
-  text-decoration: none;
-  color: #0066ff;
-}
-
-.message a:hover {
-  text-decoration: underline;
-}
-
 .message-input-wrap {
   position: absolute;
   left: 0;
@@ -751,7 +747,7 @@ input.message-input-nick.invalid {
   flex: 1;
   width: 100%;
   height: 100%;
-  padding: 0 15px;
+  padding: 0 10px;
 }
 
 .userlist {
@@ -954,6 +950,27 @@ input.message-input-nick.invalid {
   margin-top: 10px;
 }
 
+.modal-header {
+  display: flex;
+}
+
+.modal-header h2 {
+  flex: 1;
+}
+
+.modal-close {
+  color: #999;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: #222;
+}
+
+.modal-content {
+  margin-top: 15px;
+}
+
 .modal-channel {
   display: flex;
   flex-direction: column;
@@ -980,12 +997,6 @@ input.message-input-nick.invalid {
 .modal-channel-close {
   padding: 15px;
   background: #fff;
-  color: #999;
-  cursor: pointer;
-}
-
-.modal-channel-close:hover {
-  color: #222;
 }
 
 .modal-channel-result {
@@ -1057,8 +1068,12 @@ input.message-input-nick.invalid {
     margin-left: 0;
   }
 
-  .chat-topic {
-    font-size: 12px;
+  .chat-title-bar .editable-wrap {
+    flex: 1;
+  }
+
+  .chat-topic-wrap {
+    display: none;
   }
 
   .userlist-bar {

@@ -1,4 +1,5 @@
 import React, { PureComponent, createRef } from 'react';
+import cn from 'classnames';
 import { stringWidth } from 'utils';
 
 export default class Editable extends PureComponent {
@@ -75,7 +76,7 @@ export default class Editable extends PureComponent {
   };
 
   render() {
-    const { children, className, value } = this.props;
+    const { children, className, editable, value } = this.props;
 
     const style = {
       width: this.state.width,
@@ -86,7 +87,7 @@ export default class Editable extends PureComponent {
     return this.state.editing ? (
       <input
         ref={this.inputEl}
-        className={className}
+        className={`editable-wrap ${className}`}
         type="text"
         value={value}
         onBlur={this.handleBlur}
@@ -97,7 +98,14 @@ export default class Editable extends PureComponent {
         spellCheck={false}
       />
     ) : (
-      <div onClick={this.startEditing}>{children}</div>
+      <div
+        className={cn('editable-wrap', {
+          'editable-wrap-editable': editable
+        })}
+        onClick={this.startEditing}
+      >
+        {children}
+      </div>
     );
   }
 }

@@ -2,13 +2,14 @@ import React, { memo } from 'react';
 import Navicon from 'containers/Navicon';
 import Editable from 'components/ui/Editable';
 import { isValidServerName } from 'state/servers';
-import { isChannel, linkify } from 'utils';
+import { isChannel } from 'utils';
 
 const ChatTitle = ({
   status,
   title,
   tab,
   channel,
+  openModal,
   onTitleChange,
   onToggleSearch,
   onToggleUserList,
@@ -44,9 +45,19 @@ const ChatTitle = ({
           <span className="chat-title">{title}</span>
         </Editable>
         <div className="chat-topic-wrap">
-          <span className="chat-topic">
-            {channel && linkify(channel.topic)}
-          </span>
+          {channel && channel.topic && (
+            <span
+              className="chat-topic"
+              onClick={() =>
+                openModal('topic', {
+                  topic: channel.topic,
+                  channel: channel.name
+                })
+              }
+            >
+              {channel.topic}
+            </span>
+          )}
           {serverError}
         </div>
         <i className="icon-search" title="Search" onClick={onToggleSearch} />
