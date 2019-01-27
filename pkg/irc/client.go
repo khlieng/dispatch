@@ -11,20 +11,20 @@ import (
 )
 
 type Client struct {
-	Server            string
-	Host              string
-	TLS               bool
-	TLSConfig         *tls.Config
-	Password          string
-	Username          string
-	Realname          string
+	Server          string
+	Host            string
+	TLS             bool
+	TLSConfig       *tls.Config
+	Password        string
+	Username        string
+	Realname        string
+	HandleNickInUse func(string) string
+
 	Messages          chan *Message
 	ConnectionChanged chan ConnectionState
-	HandleNickInUse   func(string) string
-
-	nick     string
-	channels []string
-	Support  *iSupport
+	Features          *Features
+	nick              string
+	channels          []string
 
 	conn       net.Conn
 	connected  bool
@@ -44,7 +44,7 @@ type Client struct {
 func NewClient(nick, username string) *Client {
 	return &Client{
 		nick:              nick,
-		Support:           newISupport(),
+		Features:          NewFeatures(),
 		Username:          username,
 		Realname:          nick,
 		Messages:          make(chan *Message, 32),

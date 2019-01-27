@@ -21,7 +21,13 @@ type WSResponse struct {
 
 type Server struct {
 	*storage.Server
-	Status ConnectionUpdate
+	Status   ConnectionUpdate
+	Features map[string]interface{}
+}
+
+type Features struct {
+	Server   string
+	Features map[string]interface{}
 }
 
 type ServerName struct {

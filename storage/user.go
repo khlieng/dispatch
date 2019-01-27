@@ -137,12 +137,16 @@ type Server struct {
 	Realname string
 }
 
+func (u *User) GetServer(address string) (*Server, error) {
+	return u.store.GetServer(u, address)
+}
+
 func (u *User) GetServers() ([]*Server, error) {
 	return u.store.GetServers(u)
 }
 
 func (u *User) AddServer(server *Server) error {
-	return u.store.AddServer(u, server)
+	return u.store.SaveServer(u, server)
 }
 
 func (u *User) RemoveServer(address string) error {
@@ -150,13 +154,24 @@ func (u *User) RemoveServer(address string) error {
 }
 
 func (u *User) SetNick(nick, address string) error {
-	return u.store.SetNick(u, nick, address)
+	server, err := u.GetServer(address)
+	if err != nil {
+		return err
+	}
+	server.Nick = nick
+	return u.AddServer(server)
 }
 
 func (u *User) SetServerName(name, address string) error {
-	return u.store.SetServerName(u, name, address)
+	server, err := u.GetServer(address)
+	if err != nil {
+		return err
+	}
+	server.Name = name
+	return u.AddServer(server)
 }
 
+// TODO: Remove topic from disk schema
 type Channel struct {
 	Server string
 	Name   string

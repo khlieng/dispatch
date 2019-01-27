@@ -216,6 +216,22 @@ func (i *ircHandler) info(msg *irc.Message) {
 	})
 }
 
+func (i *ircHandler) features(msg *irc.Message) {
+	i.state.sendJSON("features", Features{
+		Server:   i.client.Host,
+		Features: i.client.Features.Map(),
+	})
+
+	if name := i.client.Features.String("NETWORK"); name != "" {
+		go func() {
+			server, err := i.state.user.GetServer(i.client.Host)
+			if err == nil && server.Name == "" {
+				i.state.user.SetServerName(name, server.Host)
+			}
+		}()
+	}
+}
+
 func (i *ircHandler) whoisUser(msg *irc.Message) {
 	i.whois.Nick = msg.Params[1]
 	i.whois.Username = msg.Params[2]
@@ -369,6 +385,7 @@ func (i *ircHandler) initHandlers() {
 		irc.ReplyWelcome:         i.info,
 		irc.ReplyYourHost:        i.info,
 		irc.ReplyCreated:         i.info,
+		irc.ReplyISupport:        i.features,
 		irc.ReplyLUserClient:     i.info,
 		irc.ReplyLUserOp:         i.info,
 		irc.ReplyLUserUnknown:    i.info,

@@ -232,7 +232,7 @@ func (c *Client) recv() {
 			go c.send()
 
 		case ReplyISupport:
-			c.Support.parse(msg.Params)
+			c.Features.Parse(msg.Params)
 
 		case ErrNicknameInUse:
 			if c.HandleNickInUse != nil {

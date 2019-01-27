@@ -79,6 +79,7 @@ export default createCommandMiddleware(COMMAND, {
   topic({ dispatch, getState, server, channel }, ...newTopic) {
     if (newTopic.length > 0) {
       dispatch(setTopic(newTopic.join(' '), channel, server));
+      return;
     } else if (channel) {
       const { topic } = getState().channels[server][channel];
       if (topic) {

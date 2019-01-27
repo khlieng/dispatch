@@ -2,9 +2,6 @@ package irc
 
 import (
 	"strings"
-	"sync"
-
-	"github.com/spf13/cast"
 )
 
 type Message struct {
@@ -94,55 +91,6 @@ func ParseMessage(line string) *Message {
 	}
 
 	return &msg
-}
-
-type iSupport struct {
-	support map[string]string
-	lock    sync.Mutex
-}
-
-func newISupport() *iSupport {
-	return &iSupport{
-		support: map[string]string{},
-	}
-}
-
-func (i *iSupport) parse(params []string) {
-	i.lock.Lock()
-	for _, param := range params[1 : len(params)-1] {
-		key, val := splitParam(param)
-		if key == "" {
-			continue
-		}
-
-		if key[0] == '-' {
-			delete(i.support, key[1:])
-		} else {
-			i.support[key] = val
-		}
-	}
-	i.lock.Unlock()
-}
-
-func (i *iSupport) Has(key string) bool {
-	i.lock.Lock()
-	_, has := i.support[key]
-	i.lock.Unlock()
-	return has
-}
-
-func (i *iSupport) Get(key string) string {
-	i.lock.Lock()
-	v := i.support[key]
-	i.lock.Unlock()
-	return v
-}
-
-func (i *iSupport) GetInt(key string) int {
-	i.lock.Lock()
-	v := i.support[key]
-	i.lock.Unlock()
-	return cast.ToInt(v)
 }
 
 func splitParam(param string) (string, string) {

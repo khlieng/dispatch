@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import classnames from 'classnames';
+import get from 'lodash/get';
 import Button from 'components/ui/Button';
 import TabListItem from 'containers/TabListItem';
 
@@ -39,13 +40,22 @@ export default class TabList extends PureComponent {
         />
       );
 
+      let chanLabel;
+      const chanLimit =
+        get(srv.features, ['CHANLIMIT', '#'], 0) || srv.features.MAXCHANNELS;
+      if (chanLimit > 0) {
+        chanLabel = `CHANNELS (${server.channels.length}/${chanLimit})`;
+      } else {
+        chanLabel = `CHANNELS (${server.channels.length})`;
+      }
+
       tabs.push(
         <div
           key={`${address}-chans}`}
           className="tab-label"
           onClick={() => openModal('channel', { server: address })}
         >
-          <span>CHANNELS ({server.channels.length})</span>
+          <span>{chanLabel}</span>
           <Button>+</Button>
         </div>
       );

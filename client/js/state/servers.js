@@ -45,7 +45,8 @@ export default createReducer(
           status: {
             connected: false,
             error: null
-          }
+          },
+          features: {}
         };
       }
     },
@@ -79,8 +80,8 @@ export default createReducer(
 
     [actions.socket.SERVERS](state, { data }) {
       if (data) {
-        data.forEach(({ host, name, nick, status }) => {
-          state[host] = { name, nick, status, editedNick: null };
+        data.forEach(({ host, name = host, nick, status, features = {} }) => {
+          state[host] = { name, nick, status, features, editedNick: null };
         });
       }
     },
@@ -89,6 +90,17 @@ export default createReducer(
       if (state[server]) {
         state[server].status.connected = connected;
         state[server].status.error = error;
+      }
+    },
+
+    [actions.socket.FEATURES](state, { server, features }) {
+      const srv = state[server];
+      if (srv) {
+        srv.features = features;
+
+        if (features.NETWORK && srv.name === server) {
+          srv.name = features.NETWORK;
+        }
       }
     }
   }

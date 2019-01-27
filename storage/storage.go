@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"os"
 
 	"github.com/khlieng/dispatch/pkg/session"
@@ -13,16 +14,19 @@ func Initialize(dir string) {
 	os.MkdirAll(Path.Root(), 0700)
 }
 
+var (
+	ErrNotFound = errors.New("no item found")
+)
+
 type Store interface {
 	GetUsers() ([]*User, error)
 	SaveUser(user *User) error
 	DeleteUser(user *User) error
 
+	GetServer(user *User, host string) (*Server, error)
 	GetServers(user *User) ([]*Server, error)
-	AddServer(user *User, server *Server) error
+	SaveServer(user *User, server *Server) error
 	RemoveServer(user *User, host string) error
-	SetNick(user *User, nick, host string) error
-	SetServerName(user *User, name, host string) error
 
 	GetChannels(user *User) ([]*Channel, error)
 	AddChannel(user *User, channel *Channel) error

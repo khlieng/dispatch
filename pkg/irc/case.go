@@ -14,7 +14,7 @@ const (
 )
 
 func (c *Client) Casefold(s string) string {
-	mapping := c.Support.Get("CASEMAPPING")
+	mapping := c.Features.String("CASEMAPPING")
 	if mapping == "" {
 		mapping = RFC1459
 	}
@@ -22,7 +22,7 @@ func (c *Client) Casefold(s string) string {
 }
 
 func (c *Client) EqualFold(s1, s2 string) bool {
-	mapping := c.Support.Get("CASEMAPPING")
+	mapping := c.Features.String("CASEMAPPING")
 	if mapping == "" {
 		mapping = RFC1459
 	}

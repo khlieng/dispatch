@@ -70,6 +70,7 @@ export const socket = createSocketActions([
   'channel_search',
   'connection_update',
   'error',
+  'features',
   'join',
   'message',
   'mode',

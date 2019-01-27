@@ -77,10 +77,16 @@ func (d *Dispatch) getIndexData(r *http.Request, path string, state *State) *ind
 		server.Username = ""
 		server.Realname = ""
 
-		data.Servers = append(data.Servers, Server{
+		s := Server{
 			Server: server,
 			Status: newConnectionUpdate(server.Host, connections[server.Host]),
-		})
+		}
+
+		if i, ok := state.irc[server.Host]; ok {
+			s.Features = i.Features.Map()
+		}
+
+		data.Servers = append(data.Servers, s)
 	}
 
 	channels, err := state.user.GetChannels()

@@ -16,7 +16,8 @@ describe('server reducer', () => {
         status: {
           connected: false,
           error: null
-        }
+        },
+        features: {}
       }
     });
 
@@ -30,7 +31,8 @@ describe('server reducer', () => {
         status: {
           connected: false,
           error: null
-        }
+        },
+        features: {}
       }
     });
 
@@ -47,7 +49,8 @@ describe('server reducer', () => {
         status: {
           connected: false,
           error: null
-        }
+        },
+        features: {}
       },
       '127.0.0.2': {
         name: 'srv',
@@ -56,7 +59,8 @@ describe('server reducer', () => {
         status: {
           connected: false,
           error: null
-        }
+        },
+        features: {}
       }
     });
   });
@@ -216,7 +220,8 @@ describe('server reducer', () => {
         editedNick: null,
         status: {
           connected: true
-        }
+        },
+        features: {}
       },
       '127.0.0.2': {
         name: 'stuffz',
@@ -224,7 +229,8 @@ describe('server reducer', () => {
         editedNick: null,
         status: {
           connected: false
-        }
+        },
+        features: {}
       }
     });
   });
@@ -247,7 +253,8 @@ describe('server reducer', () => {
         editedNick: null,
         status: {
           connected: true
-        }
+        },
+        features: {}
       }
     });
 
@@ -266,7 +273,8 @@ describe('server reducer', () => {
         status: {
           connected: false,
           error: 'Bad stuff happened'
-        }
+        },
+        features: {}
       }
     });
   });

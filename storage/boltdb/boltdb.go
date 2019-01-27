@@ -109,6 +109,26 @@ func (s *BoltStore) DeleteUser(user *storage.User) error {
 	})
 }
 
+func (s *BoltStore) GetServer(user *storage.User, address string) (*storage.Server, error) {
+	var server *storage.Server
+
+	err := s.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketServers)
+		id := serverID(user, address)
+
+		v := b.Get(id)
+		if v == nil {
+			return storage.ErrNotFound
+		} else {
+			server = &storage.Server{}
+			server.Unmarshal(v)
+			return nil
+		}
+	})
+
+	return server, err
+}
+
 func (s *BoltStore) GetServers(user *storage.User) ([]*storage.Server, error) {
 	var servers []*storage.Server
 
@@ -127,7 +147,7 @@ func (s *BoltStore) GetServers(user *storage.User) ([]*storage.Server, error) {
 	return servers, nil
 }
 
-func (s *BoltStore) AddServer(user *storage.User, server *storage.Server) error {
+func (s *BoltStore) SaveServer(user *storage.User, server *storage.Server) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketServers)
 		data, _ := server.Marshal(nil)
