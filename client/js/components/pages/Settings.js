@@ -17,14 +17,11 @@ const Settings = ({
   const status = settings.uploadingCert ? 'Uploading...' : 'Upload';
   const error = settings.certError;
 
-  const handleInstallClick = useCallback(
-    async () => {
-      installable.prompt();
-      await installable.userChoice;
-      onInstall();
-    },
-    [installable]
-  );
+  const handleInstallClick = useCallback(async () => {
+    installable.prompt();
+    await installable.userChoice;
+    onInstall();
+  }, [installable]);
 
   return (
     <div className="settings-container">

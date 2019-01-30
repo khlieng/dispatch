@@ -4,14 +4,11 @@ import SearchResult from './SearchResult';
 const Search = ({ search, onSearch }) => {
   const inputEl = useRef();
 
-  useEffect(
-    () => {
-      if (search.show) {
-        inputEl.current.focus();
-      }
-    },
-    [search.show]
-  );
+  useEffect(() => {
+    if (search.show) {
+      inputEl.current.focus();
+    }
+  }, [search.show]);
 
   const style = {
     display: search.show ? 'block' : 'none'

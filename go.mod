@@ -31,9 +31,9 @@ require (
 	github.com/klauspost/cpuid v1.2.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
-	github.com/mholt/certmagic v0.0.0-20190122014809-c1d472b46046
+	github.com/mholt/certmagic v0.0.0-20190129005340-d9ab603e9bf3
 	github.com/miekg/dns v1.1.3 // indirect
-	github.com/mitchellh/go-homedir v1.0.0
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mschoch/smat v0.0.0-20160514031455-90eadee771ae // indirect
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
@@ -42,7 +42,6 @@ require (
 	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
 	github.com/spf13/afero v1.2.0 // indirect
-	github.com/spf13/cast v1.3.0
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.1
 	github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 // indirect
@@ -52,11 +51,11 @@ require (
 	github.com/tecbot/gorocksdb v0.0.0-20181010114359-8752a9433481 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/willf/bitset v1.1.9 // indirect
-	github.com/xenolf/lego v2.0.1+incompatible // indirect
-	golang.org/x/crypto v0.0.0-20190122013713-64072686203f // indirect
-	golang.org/x/net v0.0.0-20190119204137-ed066c81e75e
+	github.com/xenolf/lego v2.1.0+incompatible // indirect
+	golang.org/x/crypto v0.0.0-20190129210102-ccddf3741a0c // indirect
+	golang.org/x/net v0.0.0-20190125091013-d26f9f9a57f3
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	golang.org/x/sys v0.0.0-20190122071731-054c452bb702 // indirect
+	golang.org/x/sys v0.0.0-20190129075346-302c3dd5f1cc // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/square/go-jose.v2 v2.2.2 // indirect
 )
