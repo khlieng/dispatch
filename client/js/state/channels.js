@@ -97,8 +97,8 @@ export const getSortedChannels = createSelector(
     sortBy(
       Object.keys(channels).map(server => ({
         address: server,
-        channels: sortBy(Object.keys(channels[server]), channel =>
-          channel.toLowerCase()
+        channels: sortBy(channels[server], channel =>
+          channel.name.toLowerCase()
         )
       })),
       server => server.address.toLowerCase()

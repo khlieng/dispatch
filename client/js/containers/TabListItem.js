@@ -4,9 +4,6 @@ import TabListItem from 'components/TabListItem';
 import connect from 'utils/connect';
 
 const mapState = createStructuredSelector({
-  joined: (state, { server, target }) =>
-    get(state, ['channels', server, target, 'joined']),
-
   error: (state, { server, target }) => {
     const messages = get(state, ['messages', server, target]);
 

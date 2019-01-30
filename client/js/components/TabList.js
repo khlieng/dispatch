@@ -3,6 +3,7 @@ import classnames from 'classnames';
 import get from 'lodash/get';
 import Button from 'components/ui/Button';
 import TabListItem from 'containers/TabListItem';
+import { count } from 'utils';
 
 export default class TabList extends PureComponent {
   handleTabClick = (server, target) => this.props.select(server, target);
@@ -40,13 +41,19 @@ export default class TabList extends PureComponent {
         />
       );
 
-      let chanLabel;
+      const chanCount = count(server.channels, c => c.joined);
       const chanLimit =
         get(srv.features, ['CHANLIMIT', '#'], 0) || srv.features.MAXCHANNELS;
+
+      let chanLabel;
       if (chanLimit > 0) {
-        chanLabel = `CHANNELS (${server.channels.length}/${chanLimit})`;
-      } else {
-        chanLabel = `CHANNELS (${server.channels.length})`;
+        chanLabel = (
+          <span>
+            <span className="success">{chanCount}</span>/{chanLimit}
+          </span>
+        );
+      } else if (chanCount > 0) {
+        chanLabel = <span className="success">{chanCount}</span>;
       }
 
       tabs.push(
@@ -55,18 +62,19 @@ export default class TabList extends PureComponent {
           className="tab-label"
           onClick={() => openModal('channel', { server: address })}
         >
-          <span>{chanLabel}</span>
-          <Button>+</Button>
+          <span>CHANNELS {chanLabel}</span>
+          <Button title="Join Channel">+</Button>
         </div>
       );
 
-      server.channels.forEach(name =>
+      server.channels.forEach(({ name, joined }) =>
         tabs.push(
           <TabListItem
             key={address + name}
             server={address}
             target={name}
             content={name}
+            joined={joined}
             selected={tab.server === address && tab.name === name}
             onClick={this.handleTabClick}
           />
@@ -76,7 +84,12 @@ export default class TabList extends PureComponent {
       if (privateChats[address] && privateChats[address].length > 0) {
         tabs.push(
           <div key={`${address}-pm}`} className="tab-label">
-            <span>DIRECT MESSAGES ({privateChats[address].length})</span>
+            <span>
+              DIRECT MESSAGES{' '}
+              <span style={{ color: '#6bb758' }}>
+                {privateChats[address].length}
+              </span>
+            </span>
             {/*<Button>+</Button>*/}
           </div>
         );

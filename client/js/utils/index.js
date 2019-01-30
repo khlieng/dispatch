@@ -170,7 +170,7 @@ export function measureScrollBarWidth() {
 }
 
 export function findIndex(arr, pred) {
-  if (!arr) {
+  if (!Array.isArray(arr) || typeof pred !== 'function') {
     return -1;
   }
 
@@ -189,4 +189,18 @@ export function find(arr, pred) {
     return arr[i];
   }
   return null;
+}
+
+export function count(arr, pred) {
+  if (!Array.isArray(arr) || typeof pred !== 'function') {
+    return 0;
+  }
+
+  let c = 0;
+  for (let i = 0; i < arr.length; i++) {
+    if (pred(arr[i])) {
+      c++;
+    }
+  }
+  return c;
 }
