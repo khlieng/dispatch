@@ -278,10 +278,10 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 			for _, asset := range h2PushAssets {
 				if len(cookie.Value) >= i+len(asset.hash) &&
 					asset.hash != cookie.Value[i:i+len(asset.hash)] {
-					i += len(asset.hash)
 					pusher.Push(asset.path, options)
 					pushed = true
 				}
+				i += len(asset.hash)
 			}
 
 			if pushed {
