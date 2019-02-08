@@ -79,7 +79,7 @@ export function setCert(fileName, cert) {
   return {
     type: actions.SET_CERT,
     fileName,
-    cert: cert
+    cert
   };
 }
 
@@ -87,7 +87,7 @@ export function setKey(fileName, key) {
   return {
     type: actions.SET_KEY,
     fileName,
-    key: key
+    key
   };
 }
 

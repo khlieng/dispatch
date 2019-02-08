@@ -56,7 +56,7 @@ export default function withModal({ name, ...modalProps }) {
     });
 
     const mapDispatch = dispatch => {
-      let actions = { onRequestClose: () => dispatch(closeModal(name)) };
+      const actions = { onRequestClose: () => dispatch(closeModal(name)) };
       if (modalProps.actions) {
         return {
           ...actions,

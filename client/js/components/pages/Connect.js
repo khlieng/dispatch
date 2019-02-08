@@ -67,7 +67,7 @@ class Connect extends Component {
       .filter(s => s)
       .join(',');
 
-    return comma ? channels + ',' : channels;
+    return comma ? `${channels  },` : channels;
   };
 
   render() {

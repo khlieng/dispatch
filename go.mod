@@ -20,7 +20,6 @@ require (
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/glycerine/go-unsnap-stream v0.0.0-20181221182339-f9677308dec2 // indirect
 	github.com/glycerine/goconvey v0.0.0-20180728074245-46e3a41ad493 // indirect
-	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/gorilla/websocket v1.4.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -31,31 +30,26 @@ require (
 	github.com/klauspost/cpuid v1.2.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20180823135443-60711f1a8329
-	github.com/mholt/certmagic v0.0.0-20190129005340-d9ab603e9bf3
-	github.com/miekg/dns v1.1.3 // indirect
+	github.com/mholt/certmagic v0.0.0-20190204191230-f92e85346d81
+	github.com/miekg/dns v1.1.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mschoch/smat v0.0.0-20160514031455-90eadee771ae // indirect
-	github.com/onsi/ginkgo v1.7.0 // indirect
-	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20170806203942-52369c62f446 // indirect
 	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
-	github.com/spf13/afero v1.2.0 // indirect
+	github.com/spf13/afero v1.2.1 // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.1
 	github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 // indirect
 	github.com/stretchr/testify v1.3.0
-	github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2 // indirect
+	github.com/syndtr/goleveldb v0.0.0-20190203031304-2f17a3356c66 // indirect
 	github.com/tdewolff/minify/v2 v2.3.8
 	github.com/tecbot/gorocksdb v0.0.0-20181010114359-8752a9433481 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/willf/bitset v1.1.9 // indirect
-	github.com/xenolf/lego v2.1.0+incompatible // indirect
-	golang.org/x/crypto v0.0.0-20190129210102-ccddf3741a0c // indirect
-	golang.org/x/net v0.0.0-20190125091013-d26f9f9a57f3
-	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	golang.org/x/sys v0.0.0-20190129075346-302c3dd5f1cc // indirect
+	golang.org/x/crypto v0.0.0-20190131182504-b8fe1690c613 // indirect
+	golang.org/x/net v0.0.0-20190206173232-65e2d4e15006
+	golang.org/x/sys v0.0.0-20190204203706-41f3e6584952 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/square/go-jose.v2 v2.2.2 // indirect
 )

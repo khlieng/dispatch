@@ -90,7 +90,7 @@ export default class TabList extends PureComponent {
                 {privateChats[address].length}
               </span>
             </span>
-            {/*<Button>+</Button>*/}
+            {/* <Button>+</Button> */}
           </div>
         );
 

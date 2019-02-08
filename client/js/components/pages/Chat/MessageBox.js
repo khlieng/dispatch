@@ -13,11 +13,13 @@ const fetchThreshold = 600;
 // this is done to prevent the scroll from jumping all over the place
 const scrollbackDebounce = 150;
 
-const scrollBarWidth = measureScrollBarWidth() + 'px';
+const scrollBarWidth = `${measureScrollBarWidth()  }px`;
 
 export default class MessageBox extends PureComponent {
   state = { topDate: '' };
+
   list = createRef();
+
   outer = createRef();
 
   addMore = debounce(() => {
@@ -91,7 +93,7 @@ export default class MessageBox extends PureComponent {
         return 100;
       }
       return 7;
-    } else if (index === messages.length + 1) {
+    } if (index === messages.length + 1) {
       return 7;
     }
     return messages[index - 1].height;
@@ -102,7 +104,7 @@ export default class MessageBox extends PureComponent {
 
     if (index === 0) {
       return 'top';
-    } else if (index === messages.length + 1) {
+    } if (index === messages.length + 1) {
       return 'bottom';
     }
     return messages[index - 1].id;
@@ -218,7 +220,7 @@ export default class MessageBox extends PureComponent {
         );
       }
       return null;
-    } else if (index === messages.length + 1) {
+    } if (index === messages.length + 1) {
       return null;
     }
 

@@ -28,7 +28,7 @@ export default class UserList extends PureComponent {
 
     if (index === 0) {
       return 12;
-    } else if (index === users.length + 1) {
+    } if (index === users.length + 1) {
       return 10;
     }
     return 24;
@@ -39,7 +39,7 @@ export default class UserList extends PureComponent {
 
     if (index === 0) {
       return 'top';
-    } else if (index === users.length + 1) {
+    } if (index === users.length + 1) {
       return 'bottom';
     }
     return index;
