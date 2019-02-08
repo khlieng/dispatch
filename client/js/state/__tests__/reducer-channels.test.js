@@ -330,18 +330,35 @@ describe('getSortedChannels', () => {
           'bob.com': {},
           '127.0.0.1': {
             '#chan1': {
+              name: '#chan1',
               users: [],
               topic: 'cake'
             },
-            '#pie': {},
-            '##apples': {}
+            '#pie': {
+              name: '#pie'
+            },
+            '##apples': {
+              name: '##apples'
+            }
           }
         }
       })
     ).toEqual([
       {
         address: '127.0.0.1',
-        channels: ['##apples', '#chan1', '#pie']
+        channels: [
+          {
+            name: '##apples'
+          },
+          {
+            name: '#chan1',
+            users: [],
+            topic: 'cake'
+          },
+          {
+            name: '#pie'
+          }
+        ]
       },
       {
         address: 'bob.com',
