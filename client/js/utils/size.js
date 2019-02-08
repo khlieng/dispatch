@@ -1,4 +1,5 @@
-let width; let height;
+let width;
+let height;
 const listeners = [];
 
 function update() {

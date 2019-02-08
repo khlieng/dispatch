@@ -13,7 +13,18 @@ const fetchThreshold = 600;
 // this is done to prevent the scroll from jumping all over the place
 const scrollbackDebounce = 150;
 
-const scrollBarWidth = `${measureScrollBarWidth()  }px`;
+const scrollBarWidth = `${measureScrollBarWidth()}px`;
+
+const hasSameLastMessage = (m1, m2) => {
+  if (m1.length === 0 || m2.length === 0) {
+    if (m1.length === 0 && m2.length === 0) {
+      return true;
+    }
+    return false;
+  }
+
+  return m1[m1.length - 1].id === m2[m2.length - 1].id;
+};
 
 export default class MessageBox extends PureComponent {
   state = { topDate: '' };
@@ -35,6 +46,8 @@ export default class MessageBox extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
+    const { messages } = this.props;
+
     if (prevProps.tab !== this.props.tab) {
       this.loadScrollPos(true);
     }
@@ -42,8 +55,11 @@ export default class MessageBox extends PureComponent {
     if (this.nextScrollTop > 0) {
       this.list.current.scrollTo(this.nextScrollTop);
       this.nextScrollTop = 0;
-    } else if (this.bottom) {
-      this.list.current.scrollToItem(this.props.messages.length + 1);
+    } else if (
+      this.bottom &&
+      !hasSameLastMessage(messages, prevProps.messages)
+    ) {
+      this.list.current.scrollToItem(messages.length + 1);
     }
   }
 
@@ -93,7 +109,8 @@ export default class MessageBox extends PureComponent {
         return 100;
       }
       return 7;
-    } if (index === messages.length + 1) {
+    }
+    if (index === messages.length + 1) {
       return 7;
     }
     return messages[index - 1].height;
@@ -104,7 +121,8 @@ export default class MessageBox extends PureComponent {
 
     if (index === 0) {
       return 'top';
-    } if (index === messages.length + 1) {
+    }
+    if (index === messages.length + 1) {
       return 'bottom';
     }
     return messages[index - 1].id;
@@ -220,7 +238,8 @@ export default class MessageBox extends PureComponent {
         );
       }
       return null;
-    } if (index === messages.length + 1) {
+    }
+    if (index === messages.length + 1) {
       return null;
     }
 

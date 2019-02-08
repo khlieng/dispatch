@@ -24,8 +24,8 @@ function registerValidSW(swUrl, config) {
                 config.onUpdate(registration);
               }
             } else if (config && config.onSuccess) {
-                config.onSuccess(registration);
-              }
+              config.onSuccess(registration);
+            }
           }
         };
       };
