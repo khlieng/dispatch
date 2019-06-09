@@ -47,7 +47,7 @@ func (d *Dispatch) getIndexData(r *http.Request, path string, state *State) *ind
 	cfg := d.Config()
 
 	data := indexData{
-		Defaults: cfg.Defaults,
+		Defaults: &cfg.Defaults,
 		HexIP:    cfg.HexIP,
 		Version: dispatchVersion{
 			Tag:    version.Tag,
