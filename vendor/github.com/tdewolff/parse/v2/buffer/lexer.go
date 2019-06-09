@@ -154,5 +154,5 @@ func (z *Lexer) Offset() int {
 
 // Bytes returns the underlying buffer.
 func (z *Lexer) Bytes() []byte {
-	return z.buf
+	return z.buf[:len(z.buf)-1]
 }

@@ -59,18 +59,17 @@ func Serve(handler http.Handler, cfg Config) error {
 				errCh <- httpsSrv.ListenAndServeTLS(cfg.Cert, cfg.Key)
 			}()
 		} else {
-			var cache *certmagic.Cache
 			if cfg.StoragePath != "" {
-				cache = certmagic.NewCache(&certmagic.FileStorage{
+				certmagic.Default.Storage = &certmagic.FileStorage{
 					Path: cfg.StoragePath,
-				})
+				}
 			}
 
-			magic := certmagic.NewWithCache(cache, certmagic.Config{
-				Agreed:     true,
-				Email:      cfg.Email,
-				MustStaple: true,
-			})
+			certmagic.Default.Agreed = true
+			certmagic.Default.Email = cfg.Email
+			certmagic.Default.MustStaple = true
+
+			magic := certmagic.NewDefault()
 
 			domains := []string{cfg.Domain}
 			if cfg.Domain == "" {

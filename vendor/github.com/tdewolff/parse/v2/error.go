@@ -26,7 +26,7 @@ func NewError(msg string, r io.Reader, offset int) *Error {
 	}
 }
 
-// NewErrorLexer creates a new error from a *buffer.Lexer
+// NewErrorLexer creates a new error from an active Lexer.
 func NewErrorLexer(msg string, l *buffer.Lexer) *Error {
 	r := buffer.NewReader(l.Bytes())
 	offset := l.Offset()
@@ -37,7 +37,7 @@ func NewErrorLexer(msg string, l *buffer.Lexer) *Error {
 // Context is the entire line at which the error occurred.
 func (e *Error) Position() (int, int, string) {
 	if e.line == 0 {
-		e.line, e.column, e.context, _ = Position(e.r, e.Offset)
+		e.line, e.column, e.context = Position(e.r, e.Offset)
 	}
 	return e.line, e.column, e.context
 }

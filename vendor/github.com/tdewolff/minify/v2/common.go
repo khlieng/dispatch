@@ -130,6 +130,8 @@ func Decimal(num []byte, prec int) []byte {
 		end = dot + 1 + prec
 		inc := num[end] >= '5'
 		if inc || num[end-1] == '0' {
+			// process either an increase from a lesser significant decimal (>= 5)
+			// or remove trailing zeros after the dot, or both
 			for i := end - 1; i > start; i-- {
 				if i == dot {
 					end--
@@ -139,6 +141,7 @@ func Decimal(num []byte, prec int) []byte {
 							end--
 						} else {
 							num[i] = '0'
+							break
 						}
 					} else {
 						num[i]++
@@ -147,6 +150,8 @@ func Decimal(num []byte, prec int) []byte {
 					}
 				} else if i > dot && num[i] == '0' {
 					end--
+				} else {
+					break
 				}
 			}
 		}
@@ -377,6 +382,7 @@ func Number(num []byte, prec int) []byte {
 								end--
 							} else {
 								num[i] = '0'
+								break
 							}
 						} else {
 							num[i]++
@@ -385,6 +391,8 @@ func Number(num []byte, prec int) []byte {
 						}
 					} else if i > dot && num[i] == '0' {
 						end--
+					} else {
+						break
 					}
 				}
 			}

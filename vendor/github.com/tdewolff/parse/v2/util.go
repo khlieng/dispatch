@@ -23,7 +23,8 @@ func EqualFold(s, targetLower []byte) bool {
 		return false
 	}
 	for i, c := range targetLower {
-		if s[i] != c && (c < 'A' && c > 'Z' || s[i]+('a'-'A') != c) {
+		d := s[i]
+		if d != c && (d < 'A' || d > 'Z' || d+('a'-'A') != c) {
 			return false
 		}
 	}

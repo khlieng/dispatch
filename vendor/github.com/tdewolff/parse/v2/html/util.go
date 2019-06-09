@@ -52,7 +52,7 @@ var charTable = [256]bool{
 }
 
 // EscapeAttrVal returns the escaped attribute value bytes without quotes.
-func EscapeAttrVal(buf *[]byte, orig, b []byte) []byte {
+func EscapeAttrVal(buf *[]byte, orig, b []byte, isXML bool) []byte {
 	singles := 0
 	doubles := 0
 	unquoted := true
@@ -80,7 +80,7 @@ func EscapeAttrVal(buf *[]byte, orig, b []byte) []byte {
 			}
 		}
 	}
-	if unquoted {
+	if unquoted && !isXML {
 		return b
 	} else if !entities && len(orig) == len(b)+2 && (singles == 0 && orig[0] == '\'' || doubles == 0 && orig[0] == '"') {
 		return orig
@@ -89,14 +89,14 @@ func EscapeAttrVal(buf *[]byte, orig, b []byte) []byte {
 	n := len(b) + 2
 	var quote byte
 	var escapedQuote []byte
-	if doubles > singles {
-		n += singles * 4
-		quote = '\''
-		escapedQuote = singleQuoteEntityBytes
-	} else {
+	if singles >= doubles || isXML {
 		n += doubles * 4
 		quote = '"'
 		escapedQuote = doubleQuoteEntityBytes
+	} else {
+		n += singles * 4
+		quote = '\''
+		escapedQuote = singleQuoteEntityBytes
 	}
 	if n > cap(*buf) {
 		*buf = make([]byte, 0, n) // maximum size, not actual size

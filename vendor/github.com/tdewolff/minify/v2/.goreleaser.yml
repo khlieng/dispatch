@@ -14,16 +14,15 @@ builds:
           - openbsd
       goarch:
           - amd64
-archive:
+archives:
+  - id: minify
     format: tar.gz
     format_overrides:
         - goos: windows
           format: zip
     name_template: "{{.Binary}}_{{.Version}}_{{.Os}}_{{.Arch}}"
     files:
-        - README.md
+        - cmd/minify/README.md
         - LICENSE.md
-snapshot:
-    name_template: "devel"
 release:
     disable: true
