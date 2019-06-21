@@ -2,7 +2,6 @@ language: go
 
 go:
   - 1.x
-  - 1.12beta1
   - tip
 
 os:
@@ -16,8 +15,8 @@ matrix:
 install:
   - go get github.com/jteeuwen/go-bindata/...
   - cd client
-  - nvm install 11.2.0
-  - nvm use 11.2.0
+  - nvm install 12.4.0
+  - nvm use 12.4.0
   - npm install -g yarn
   - yarn global add gulp
   - yarn
