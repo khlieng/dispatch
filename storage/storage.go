@@ -5,13 +5,22 @@ import (
 	"os"
 
 	"github.com/khlieng/dispatch/pkg/session"
+	"github.com/spf13/viper"
 )
 
-var Path directory
+var DataPath directory
+var ConfigPath directory
 
-func Initialize(dir string) {
-	Path = directory(dir)
-	os.MkdirAll(Path.Root(), 0700)
+func Initialize() {
+	if viper.GetString("dir") != DefaultDirectory() {
+		DataPath = directory(viper.GetString("dir"))
+		ConfigPath = directory(viper.GetString("dir"))
+	} else {
+		DataPath = directory(viper.GetString("data"))
+		ConfigPath = directory(viper.GetString("conf"))
+	}
+	os.MkdirAll(DataPath.Root(), 0700)
+	os.MkdirAll(ConfigPath.Root(), 0700)
 }
 
 var (

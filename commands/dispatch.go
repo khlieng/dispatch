@@ -46,18 +46,18 @@ var rootCmd = &cobra.Command{
 			fmt.Printf(logo, version.Tag, version.Commit, version.Date, runtime.Version())
 		}
 
-		storage.Initialize(viper.GetString("dir"))
+		storage.Initialize()
 
-		initConfig(storage.Path.Config(), viper.GetBool("reset-config"))
+		initConfig(storage.ConfigPath.Config(), viper.GetBool("reset-config"))
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if viper.GetBool("dev") {
 			log.Println("Running in development mode, access client at http://localhost:3000")
 		}
-		log.Println("Storing data at", storage.Path.Root())
+		log.Println("Storing data at", storage.DataPath.Root())
 
-		db, err := boltdb.New(storage.Path.Database())
+		db, err := boltdb.New(storage.DataPath.Database())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -77,11 +77,11 @@ var rootCmd = &cobra.Command{
 		dispatch.SessionStore = db
 
 		dispatch.GetMessageStore = func(user *storage.User) (storage.MessageStore, error) {
-			return boltdb.New(storage.Path.Log(user.Username))
+			return boltdb.New(storage.DataPath.Log(user.Username))
 		}
 
 		dispatch.GetMessageSearchProvider = func(user *storage.User) (storage.MessageSearchProvider, error) {
-			return bleve.New(storage.Path.Index(user.Username))
+			return bleve.New(storage.DataPath.Index(user.Username))
 		}
 
 		dispatch.Run()
@@ -97,6 +97,8 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(versionCmd)
 
+	rootCmd.PersistentFlags().String("data", storage.DefaultDirectory(), "directory to store data in")
+	rootCmd.PersistentFlags().String("conf", storage.DefaultDirectory(), "directory to store configuration in")
 	rootCmd.PersistentFlags().String("dir", storage.DefaultDirectory(), "directory to store config and data in")
 	rootCmd.PersistentFlags().Bool("reset-config", false, "reset to the default configuration, overwriting the current one")
 	rootCmd.Flags().StringP("address", "a", "", "interface to which the server will bind")

@@ -3,8 +3,8 @@ package config
 import (
 	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/khlieng/dispatch/storage"
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
@@ -53,7 +53,7 @@ type LetsEncrypt struct {
 
 func LoadConfig() (*Config, chan *Config) {
 	viper.SetConfigName("config")
-	viper.AddConfigPath(storage.Path.Root())
+	viper.AddConfigPath(storage.ConfigPath.Root())
 	viper.ReadInConfig()
 
 	config := &Config{}

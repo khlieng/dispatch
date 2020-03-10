@@ -147,7 +147,7 @@ func (d *Dispatch) startHTTP() {
 		PortHTTPS: cfg.HTTPS.Port,
 		HTTPOnly:  !cfg.HTTPS.Enabled,
 
-		StoragePath: storage.Path.LetsEncrypt(),
+		StoragePath: storage.ConfigPath.LetsEncrypt(),
 		Domain:      cfg.LetsEncrypt.Domain,
 		Email:       cfg.LetsEncrypt.Email,
 
