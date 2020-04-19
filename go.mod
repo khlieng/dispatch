@@ -1,5 +1,7 @@
 module github.com/khlieng/dispatch
 
+go 1.14
+
 require (
 	github.com/RoaringBitmap/roaring v0.4.17 // indirect
 	github.com/blevesearch/bleve v0.0.0-20180525174403-1d6d47ed3ad9
