@@ -32,7 +32,7 @@ func NewUser(store Store) (*User, error) {
 		return nil, err
 	}
 
-	err = os.MkdirAll(Path.User(user.Username), 0700)
+	err = os.MkdirAll(DataPath.User(user.Username), 0700)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (u *User) Remove() {
 	if u.messageIndex != nil {
 		u.messageIndex.Close()
 	}
-	os.RemoveAll(Path.User(u.Username))
+	os.RemoveAll(DataPath.User(u.Username))
 }
 
 func (u *User) GetLastIP() []byte {
