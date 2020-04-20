@@ -51,7 +51,6 @@ docker run -p <http port>:80 -p <https port>:443 -v <path>:/data khlieng/dispatc
 ### Server
 
 ```bash
-cd $GOPATH/src/github.com/khlieng/dispatch
 go install
 ```
 
@@ -63,8 +62,8 @@ Fetch the dependencies:
 
 ```bash
 GO111MODULE=off go get github.com/jteeuwen/go-bindata/...
-yarn global add gulp@next
-cd $GOPATH/src/github.com/khlieng/dispatch/client
+yarn global add gulp
+cd client
 yarn
 ```
 
