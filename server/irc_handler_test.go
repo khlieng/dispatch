@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	storage.Initialize(tempdir)
+	storage.Initialize(tempdir, "", "")
 
 	db, err := boltdb.New(storage.Path.Database())
 	if err != nil {

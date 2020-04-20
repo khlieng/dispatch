@@ -3,7 +3,7 @@ package storage
 import (
 	"path/filepath"
 
-	"github.com/mitchellh/go-homedir"
+	homedir "github.com/mitchellh/go-homedir"
 )
 
 func DefaultDirectory() string {
@@ -11,18 +11,25 @@ func DefaultDirectory() string {
 	return filepath.Join(home, ".dispatch")
 }
 
-type directory string
+type directory struct {
+	dataRoot   string
+	configRoot string
+}
 
-func (d directory) Root() string {
-	return string(d)
+func (d directory) DataRoot() string {
+	return d.dataRoot
+}
+
+func (d directory) ConfigRoot() string {
+	return d.configRoot
 }
 
 func (d directory) LetsEncrypt() string {
-	return filepath.Join(d.Root(), "letsencrypt")
+	return filepath.Join(d.ConfigRoot(), "letsencrypt")
 }
 
 func (d directory) Users() string {
-	return filepath.Join(d.Root(), "users")
+	return filepath.Join(d.DataRoot(), "users")
 }
 
 func (d directory) User(username string) string {
@@ -46,9 +53,9 @@ func (d directory) Key(username string) string {
 }
 
 func (d directory) Config() string {
-	return filepath.Join(d.Root(), "config.toml")
+	return filepath.Join(d.ConfigRoot(), "config.toml")
 }
 
 func (d directory) Database() string {
-	return filepath.Join(d.Root(), "dispatch.db")
+	return filepath.Join(d.DataRoot(), "dispatch.db")
 }

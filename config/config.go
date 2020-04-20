@@ -53,7 +53,7 @@ type LetsEncrypt struct {
 
 func LoadConfig() (*Config, chan *Config) {
 	viper.SetConfigName("config")
-	viper.AddConfigPath(storage.ConfigPath.Root())
+	viper.AddConfigPath(storage.Path.ConfigRoot())
 	viper.ReadInConfig()
 
 	config := &Config{}

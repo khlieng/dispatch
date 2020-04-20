@@ -28,12 +28,12 @@ func (u *User) SetCertificate(certPEM, keyPEM []byte) error {
 	u.certificate = &cert
 	u.lock.Unlock()
 
-	err = ioutil.WriteFile(ConfigPath.Certificate(u.Username), certPEM, 0600)
+	err = ioutil.WriteFile(Path.Certificate(u.Username), certPEM, 0600)
 	if err != nil {
 		return ErrCouldNotSaveCert
 	}
 
-	err = ioutil.WriteFile(ConfigPath.Key(u.Username), keyPEM, 0600)
+	err = ioutil.WriteFile(Path.Key(u.Username), keyPEM, 0600)
 	if err != nil {
 		return ErrCouldNotSaveCert
 	}
@@ -42,12 +42,12 @@ func (u *User) SetCertificate(certPEM, keyPEM []byte) error {
 }
 
 func (u *User) loadCertificate() error {
-	certPEM, err := ioutil.ReadFile(ConfigPath.Certificate(u.Username))
+	certPEM, err := ioutil.ReadFile(Path.Certificate(u.Username))
 	if err != nil {
 		return err
 	}
 
-	keyPEM, err := ioutil.ReadFile(ConfigPath.Key(u.Username))
+	keyPEM, err := ioutil.ReadFile(Path.Key(u.Username))
 	if err != nil {
 		return err
 	}

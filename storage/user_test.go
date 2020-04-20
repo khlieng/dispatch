@@ -19,7 +19,7 @@ func tempdir() string {
 }
 
 func TestUser(t *testing.T) {
-	storage.Initialize(tempdir())
+	storage.Initialize(tempdir(), "", "")
 
 	db, err := boltdb.New(storage.Path.Database())
 	assert.Nil(t, err)
@@ -103,7 +103,7 @@ func TestUser(t *testing.T) {
 }
 
 func TestMessages(t *testing.T) {
-	storage.Initialize(tempdir())
+	storage.Initialize(tempdir(), "", "")
 
 	db, err := boltdb.New(storage.Path.Database())
 	assert.Nil(t, err)

@@ -46,18 +46,18 @@ var rootCmd = &cobra.Command{
 			fmt.Printf(logo, version.Tag, version.Commit, version.Date, runtime.Version())
 		}
 
-		storage.Initialize()
+		storage.Initialize(viper.GetString("dir"), viper.GetString("data"), viper.GetString("conf"))
 
-		initConfig(storage.ConfigPath.Config(), viper.GetBool("reset-config"))
+		initConfig(storage.Path.Config(), viper.GetBool("reset-config"))
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if viper.GetBool("dev") {
 			log.Println("Running in development mode, access client at http://localhost:3000")
 		}
-		log.Println("Storing data at", storage.DataPath.Root())
+		log.Println("Storing data at", storage.Path.DataRoot())
 
-		db, err := boltdb.New(storage.DataPath.Database())
+		db, err := boltdb.New(storage.Path.Database())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -77,11 +77,11 @@ var rootCmd = &cobra.Command{
 		dispatch.SessionStore = db
 
 		dispatch.GetMessageStore = func(user *storage.User) (storage.MessageStore, error) {
-			return boltdb.New(storage.DataPath.Log(user.Username))
+			return boltdb.New(storage.Path.Log(user.Username))
 		}
 
 		dispatch.GetMessageSearchProvider = func(user *storage.User) (storage.MessageSearchProvider, error) {
-			return bleve.New(storage.DataPath.Index(user.Username))
+			return bleve.New(storage.Path.Index(user.Username))
 		}
 
 		dispatch.Run()

@@ -16,7 +16,7 @@ var (
 		Short: "Edit config file",
 		Run: func(cmd *cobra.Command, args []string) {
 			if editor := findEditor(); editor != "" {
-				process := exec.Command(editor, storage.ConfigPath.Config())
+				process := exec.Command(editor, storage.Path.Config())
 				process.Stdin = os.Stdin
 				process.Stdout = os.Stdout
 				process.Stderr = os.Stderr
