@@ -62,7 +62,7 @@ This requires [Node.js](https://nodejs.org) and [yarn](https://yarnpkg.com).
 Fetch the dependencies:
 
 ```bash
-go get github.com/jteeuwen/go-bindata/...
+GO111MODULE=off go get github.com/jteeuwen/go-bindata/...
 yarn global add gulp@next
 cd $GOPATH/src/github.com/khlieng/dispatch/client
 yarn

@@ -13,7 +13,7 @@ matrix:
     - go: tip
 
 install:
-  - go get github.com/jteeuwen/go-bindata/...
+  - GO111MODULE=off go get github.com/jteeuwen/go-bindata/...
   - cd client
   - nvm install 12.4.0
   - nvm use 12.4.0
