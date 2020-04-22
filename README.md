@@ -93,7 +93,7 @@ The libraries this project is built with.
 
 ### Server
 
-- [Bolt](https://github.com/boltdb/bolt)
+- [Bolt](https://github.com/etcd-io/bbolt)
 - [Bleve](https://github.com/blevesearch/bleve)
 - [Cobra](https://github.com/spf13/cobra)
 - [Viper](https://github.com/spf13/viper)

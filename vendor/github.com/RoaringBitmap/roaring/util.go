@@ -112,7 +112,7 @@ func highbits(x uint32) uint16 {
 	return uint16(x >> 16)
 }
 func lowbits(x uint32) uint16 {
-	return uint16(x & 0xFFFF)
+	return uint16(x & maxLowBit)
 }
 
 const maxLowBit = 0xFFFF
@@ -297,27 +297,6 @@ func maxOfUint16(a, b uint16) uint16 {
 }
 
 func minOfUint16(a, b uint16) uint16 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func maxUint16(a, b uint16) uint16 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func minUint16(a, b uint16) uint16 {
 	if a < b {
 		return a
 	}

@@ -18,13 +18,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"sync/atomic"
 	"time"
 
 	"github.com/RoaringBitmap/roaring"
 	"github.com/blevesearch/bleve/index/scorch/mergeplan"
 	"github.com/blevesearch/bleve/index/scorch/segment"
-	"github.com/blevesearch/bleve/index/scorch/segment/zap"
 )
 
 func (s *Scorch) mergerLoop() {
@@ -46,12 +46,12 @@ OUTER:
 
 		default:
 			// check to see if there is a new snapshot to persist
-			s.rootLock.RLock()
+			s.rootLock.Lock()
 			ourSnapshot := s.root
 			ourSnapshot.AddRef()
 			atomic.StoreUint64(&s.iStats.mergeSnapshotSize, uint64(ourSnapshot.Size()))
 			atomic.StoreUint64(&s.iStats.mergeEpoch, ourSnapshot.epoch)
-			s.rootLock.RUnlock()
+			s.rootLock.Unlock()
 
 			if ourSnapshot.epoch != lastEpochMergePlanned {
 				startTime := time.Now()
@@ -60,7 +60,7 @@ OUTER:
 				err := s.planMergeAtSnapshot(ourSnapshot, mergePlannerOptions)
 				if err != nil {
 					atomic.StoreUint64(&s.iStats.mergeEpoch, 0)
-					if err == ErrClosed {
+					if err == segment.ErrClosed {
 						// index has been closed
 						_ = ourSnapshot.DecRef()
 						break OUTER
@@ -130,18 +130,18 @@ func (s *Scorch) parseMergePlannerOptions() (*mergeplan.MergePlanOptions,
 
 func (s *Scorch) planMergeAtSnapshot(ourSnapshot *IndexSnapshot,
 	options *mergeplan.MergePlanOptions) error {
-	// build list of zap segments in this snapshot
-	var onlyZapSnapshots []mergeplan.Segment
+	// build list of persisted segments in this snapshot
+	var onlyPersistedSnapshots []mergeplan.Segment
 	for _, segmentSnapshot := range ourSnapshot.segment {
-		if _, ok := segmentSnapshot.segment.(*zap.Segment); ok {
-			onlyZapSnapshots = append(onlyZapSnapshots, segmentSnapshot)
+		if _, ok := segmentSnapshot.segment.(segment.PersistedSegment); ok {
+			onlyPersistedSnapshots = append(onlyPersistedSnapshots, segmentSnapshot)
 		}
 	}
 
 	atomic.AddUint64(&s.stats.TotFileMergePlan, 1)
 
 	// give this list to the planner
-	resultMergePlan, err := mergeplan.Plan(onlyZapSnapshots, options)
+	resultMergePlan, err := mergeplan.Plan(onlyPersistedSnapshots, options)
 	if err != nil {
 		atomic.AddUint64(&s.stats.TotFileMergePlanErr, 1)
 		return fmt.Errorf("merge planning err: %v", err)
@@ -151,13 +151,13 @@ func (s *Scorch) planMergeAtSnapshot(ourSnapshot *IndexSnapshot,
 		atomic.AddUint64(&s.stats.TotFileMergePlanNone, 1)
 		return nil
 	}
-
 	atomic.AddUint64(&s.stats.TotFileMergePlanOk, 1)
 
 	atomic.AddUint64(&s.stats.TotFileMergePlanTasks, uint64(len(resultMergePlan.Tasks)))
 
 	// process tasks in serial for now
-	var notifications []chan *IndexSnapshot
+	var filenames []string
+
 	for _, task := range resultMergePlan.Tasks {
 		if len(task.Segments) == 0 {
 			atomic.AddUint64(&s.stats.TotFileMergePlanTasksSegmentsEmpty, 1)
@@ -168,26 +168,32 @@ func (s *Scorch) planMergeAtSnapshot(ourSnapshot *IndexSnapshot,
 
 		oldMap := make(map[uint64]*SegmentSnapshot)
 		newSegmentID := atomic.AddUint64(&s.nextSegmentID, 1)
-		segmentsToMerge := make([]*zap.Segment, 0, len(task.Segments))
+		segmentsToMerge := make([]segment.Segment, 0, len(task.Segments))
 		docsToDrop := make([]*roaring.Bitmap, 0, len(task.Segments))
 
 		for _, planSegment := range task.Segments {
 			if segSnapshot, ok := planSegment.(*SegmentSnapshot); ok {
 				oldMap[segSnapshot.id] = segSnapshot
-				if zapSeg, ok := segSnapshot.segment.(*zap.Segment); ok {
+				if persistedSeg, ok := segSnapshot.segment.(segment.PersistedSegment); ok {
 					if segSnapshot.LiveSize() == 0 {
 						atomic.AddUint64(&s.stats.TotFileMergeSegmentsEmpty, 1)
 						oldMap[segSnapshot.id] = nil
 					} else {
-						segmentsToMerge = append(segmentsToMerge, zapSeg)
+						segmentsToMerge = append(segmentsToMerge, segSnapshot.segment)
 						docsToDrop = append(docsToDrop, segSnapshot.deleted)
 					}
+					// track the files getting merged for unsetting the
+					// removal ineligibility. This helps to unflip files
+					// even with fast merger, slow persister work flows.
+					path := persistedSeg.Path()
+					filenames = append(filenames,
+						strings.TrimPrefix(path, s.path+string(os.PathSeparator)))
 				}
 			}
 		}
 
 		var oldNewDocNums map[uint64][]uint64
-		var segment segment.Segment
+		var seg segment.Segment
 		if len(segmentsToMerge) > 0 {
 			filename := zapFileName(newSegmentID)
 			s.markIneligibleForRemoval(filename)
@@ -196,9 +202,9 @@ func (s *Scorch) planMergeAtSnapshot(ourSnapshot *IndexSnapshot,
 			fileMergeZapStartTime := time.Now()
 
 			atomic.AddUint64(&s.stats.TotFileMergeZapBeg, 1)
-			newDocNums, nBytes, err := zap.Merge(segmentsToMerge, docsToDrop, path, DefaultChunkFactor)
+			newDocNums, _, err := s.segPlugin.Merge(segmentsToMerge, docsToDrop, path,
+				s.closeCh, s)
 			atomic.AddUint64(&s.stats.TotFileMergeZapEnd, 1)
-			atomic.AddUint64(&s.stats.TotFileMergeWrittenBytes, nBytes)
 
 			fileMergeZapTime := uint64(time.Since(fileMergeZapStartTime))
 			atomic.AddUint64(&s.stats.TotFileMergeZapTime, fileMergeZapTime)
@@ -209,10 +215,13 @@ func (s *Scorch) planMergeAtSnapshot(ourSnapshot *IndexSnapshot,
 			if err != nil {
 				s.unmarkIneligibleForRemoval(filename)
 				atomic.AddUint64(&s.stats.TotFileMergePlanTasksErr, 1)
+				if err == segment.ErrClosed {
+					return err
+				}
 				return fmt.Errorf("merging failed: %v", err)
 			}
 
-			segment, err = zap.Open(path)
+			seg, err = s.segPlugin.Open(path)
 			if err != nil {
 				s.unmarkIneligibleForRemoval(filename)
 				atomic.AddUint64(&s.stats.TotFileMergePlanTasksErr, 1)
@@ -230,33 +239,41 @@ func (s *Scorch) planMergeAtSnapshot(ourSnapshot *IndexSnapshot,
 			id:            newSegmentID,
 			old:           oldMap,
 			oldNewDocNums: oldNewDocNums,
-			new:           segment,
-			notify:        make(chan *IndexSnapshot, 1),
+			new:           seg,
+			notify:        make(chan *IndexSnapshot),
 		}
-		notifications = append(notifications, sm.notify)
 
 		// give it to the introducer
 		select {
 		case <-s.closeCh:
-			_ = segment.Close()
-			return ErrClosed
+			_ = seg.Close()
+			return segment.ErrClosed
 		case s.merges <- sm:
 			atomic.AddUint64(&s.stats.TotFileMergeIntroductions, 1)
+		}
+
+		introStartTime := time.Now()
+		// it is safe to blockingly wait for the merge introduction
+		// here as the introducer is bound to handle the notify channel.
+		newSnapshot := <-sm.notify
+		introTime := uint64(time.Since(introStartTime))
+		atomic.AddUint64(&s.stats.TotFileMergeZapIntroductionTime, introTime)
+		if atomic.LoadUint64(&s.stats.MaxFileMergeZapIntroductionTime) < introTime {
+			atomic.StoreUint64(&s.stats.MaxFileMergeZapIntroductionTime, introTime)
+		}
+		atomic.AddUint64(&s.stats.TotFileMergeIntroductionsDone, 1)
+		if newSnapshot != nil {
+			_ = newSnapshot.DecRef()
 		}
 
 		atomic.AddUint64(&s.stats.TotFileMergePlanTasksDone, 1)
 	}
 
-	for _, notification := range notifications {
-		select {
-		case <-s.closeCh:
-			return ErrClosed
-		case newSnapshot := <-notification:
-			atomic.AddUint64(&s.stats.TotFileMergeIntroductionsDone, 1)
-			if newSnapshot != nil {
-				_ = newSnapshot.DecRef()
-			}
-		}
+	// once all the newly merged segment introductions are done,
+	// its safe to unflip the removal ineligibility for the replaced
+	// older segments
+	for _, f := range filenames {
+		s.unmarkIneligibleForRemoval(f)
 	}
 
 	return nil
@@ -274,8 +291,8 @@ type segmentMerge struct {
 // persisted segment, and synchronously introduce that new segment
 // into the root
 func (s *Scorch) mergeSegmentBases(snapshot *IndexSnapshot,
-	sbs []*zap.SegmentBase, sbsDrops []*roaring.Bitmap, sbsIndexes []int,
-	chunkFactor uint32) (*IndexSnapshot, uint64, error) {
+	sbs []segment.Segment, sbsDrops []*roaring.Bitmap,
+	sbsIndexes []int) (*IndexSnapshot, uint64, error) {
 	atomic.AddUint64(&s.stats.TotMemMergeBeg, 1)
 
 	memMergeZapStartTime := time.Now()
@@ -287,7 +304,7 @@ func (s *Scorch) mergeSegmentBases(snapshot *IndexSnapshot,
 	path := s.path + string(os.PathSeparator) + filename
 
 	newDocNums, _, err :=
-		zap.MergeSegmentBases(sbs, sbsDrops, path, chunkFactor)
+		s.segPlugin.Merge(sbs, sbsDrops, path, s.closeCh, s)
 
 	atomic.AddUint64(&s.stats.TotMemMergeZapEnd, 1)
 
@@ -302,22 +319,22 @@ func (s *Scorch) mergeSegmentBases(snapshot *IndexSnapshot,
 		return nil, 0, err
 	}
 
-	segment, err := zap.Open(path)
+	seg, err := s.segPlugin.Open(path)
 	if err != nil {
 		atomic.AddUint64(&s.stats.TotMemMergeErr, 1)
 		return nil, 0, err
 	}
 
 	// update persisted stats
-	atomic.AddUint64(&s.stats.TotPersistedItems, segment.Count())
+	atomic.AddUint64(&s.stats.TotPersistedItems, seg.Count())
 	atomic.AddUint64(&s.stats.TotPersistedSegments, 1)
 
 	sm := &segmentMerge{
 		id:            newSegmentID,
 		old:           make(map[uint64]*SegmentSnapshot),
 		oldNewDocNums: make(map[uint64][]uint64),
-		new:           segment,
-		notify:        make(chan *IndexSnapshot, 1),
+		new:           seg,
+		notify:        make(chan *IndexSnapshot),
 	}
 
 	for i, idx := range sbsIndexes {
@@ -328,17 +345,20 @@ func (s *Scorch) mergeSegmentBases(snapshot *IndexSnapshot,
 
 	select { // send to introducer
 	case <-s.closeCh:
-		_ = segment.DecRef()
-		return nil, 0, ErrClosed
+		_ = seg.DecRef()
+		return nil, 0, segment.ErrClosed
 	case s.merges <- sm:
 	}
 
-	select { // wait for introduction to complete
-	case <-s.closeCh:
-		return nil, 0, ErrClosed
-	case newSnapshot := <-sm.notify:
+	// blockingly wait for the introduction to complete
+	newSnapshot := <-sm.notify
+	if newSnapshot != nil {
 		atomic.AddUint64(&s.stats.TotMemMergeSegments, uint64(len(sbs)))
 		atomic.AddUint64(&s.stats.TotMemMergeDone, 1)
-		return newSnapshot, newSegmentID, nil
 	}
+	return newSnapshot, newSegmentID, nil
+}
+
+func (s *Scorch) ReportBytesWritten(bytesWritten uint64) {
+	atomic.AddUint64(&s.stats.TotFileMergeWrittenBytes, bytesWritten)
 }

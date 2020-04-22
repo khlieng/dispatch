@@ -15,9 +15,14 @@
 package segment
 
 import (
+	"fmt"
+
 	"github.com/RoaringBitmap/roaring"
 	"github.com/blevesearch/bleve/index"
+	"github.com/couchbase/vellum"
 )
+
+var ErrClosed = fmt.Errorf("index closed")
 
 // DocumentFieldValueVisitor defines a callback to be visited for each
 // stored field value.  The return value determines if the visitor
@@ -45,15 +50,27 @@ type Segment interface {
 	DecRef() error
 }
 
+type UnpersistedSegment interface {
+	Segment
+	Persist(path string) error
+}
+
+type PersistedSegment interface {
+	Segment
+	Path() string
+}
+
 type TermDictionary interface {
 	PostingsList(term []byte, except *roaring.Bitmap, prealloc PostingsList) (PostingsList, error)
 
 	Iterator() DictionaryIterator
 	PrefixIterator(prefix string) DictionaryIterator
 	RangeIterator(start, end string) DictionaryIterator
-	RegexpIterator(regex string) DictionaryIterator
-	FuzzyIterator(term string, fuzziness int) DictionaryIterator
+	AutomatonIterator(a vellum.Automaton,
+		startKeyInclusive, endKeyExclusive []byte) DictionaryIterator
 	OnlyIterator(onlyTerms [][]byte, includeCount bool) DictionaryIterator
+
+	Contains(key []byte) (bool, error)
 }
 
 type DictionaryIterator interface {
@@ -87,6 +104,12 @@ type PostingsIterator interface {
 	Advance(docNum uint64) (Posting, error)
 
 	Size() int
+}
+
+type OptimizablePostingsIterator interface {
+	ActualBitmap() *roaring.Bitmap
+	DocNum1Hit() (uint64, bool)
+	ReplaceActual(*roaring.Bitmap)
 }
 
 type Posting interface {
@@ -123,4 +146,8 @@ type DocumentFieldTermVisitable interface {
 }
 
 type DocVisitState interface {
+}
+
+type StatsReporter interface {
+	ReportBytesWritten(bytesWritten uint64)
 }

@@ -1,7 +1,7 @@
-# github.com/RoaringBitmap/roaring v0.4.17
+# github.com/RoaringBitmap/roaring v0.4.23
 ## explicit
 github.com/RoaringBitmap/roaring
-# github.com/blevesearch/bleve v0.0.0-20180525174403-1d6d47ed3ad9
+# github.com/blevesearch/bleve v1.0.7
 ## explicit
 github.com/blevesearch/bleve
 github.com/blevesearch/bleve/analysis
@@ -21,7 +21,6 @@ github.com/blevesearch/bleve/index
 github.com/blevesearch/bleve/index/scorch
 github.com/blevesearch/bleve/index/scorch/mergeplan
 github.com/blevesearch/bleve/index/scorch/segment
-github.com/blevesearch/bleve/index/scorch/segment/zap
 github.com/blevesearch/bleve/index/store
 github.com/blevesearch/bleve/index/store/boltdb
 github.com/blevesearch/bleve/index/store/gtreap
@@ -41,21 +40,22 @@ github.com/blevesearch/bleve/search/query
 github.com/blevesearch/bleve/search/scorer
 github.com/blevesearch/bleve/search/searcher
 github.com/blevesearch/bleve/size
-# github.com/blevesearch/blevex v0.0.0-20180227211930-4b158bb555a3
-## explicit
-# github.com/blevesearch/go-porterstemmer v1.0.2
-## explicit
+# github.com/blevesearch/go-porterstemmer v1.0.3
 github.com/blevesearch/go-porterstemmer
-# github.com/blevesearch/segment v0.0.0-20160915185041-762005e7a34f
-## explicit
+# github.com/blevesearch/mmap-go v1.0.2
+github.com/blevesearch/mmap-go
+# github.com/blevesearch/segment v0.9.0
 github.com/blevesearch/segment
-# github.com/boltdb/bolt v0.0.0-20180302180052-fd01fc79c553
-## explicit
-github.com/boltdb/bolt
+# github.com/blevesearch/snowballstem v0.9.0
+github.com/blevesearch/snowballstem
+github.com/blevesearch/snowballstem/english
+# github.com/blevesearch/zap/v11 v11.0.7
+github.com/blevesearch/zap/v11
+# github.com/blevesearch/zap/v12 v12.0.7
+github.com/blevesearch/zap/v12
 # github.com/cenkalti/backoff v2.1.1+incompatible
 github.com/cenkalti/backoff
-# github.com/couchbase/vellum v0.0.0-20190606010143-5f4edc22838b
-## explicit
+# github.com/couchbase/vellum v1.0.1
 github.com/couchbase/vellum
 github.com/couchbase/vellum/levenshtein
 github.com/couchbase/vellum/regexp
@@ -73,9 +73,6 @@ github.com/davecgh/go-spew/spew
 github.com/dsnet/compress/brotli
 github.com/dsnet/compress/internal
 github.com/dsnet/compress/internal/errors
-# github.com/edsrzf/mmap-go v1.0.0
-## explicit
-github.com/edsrzf/mmap-go
 # github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51
 ## explicit
 # github.com/facebookgo/stack v0.0.0-20160209184415-751773369052
@@ -85,10 +82,9 @@ github.com/edsrzf/mmap-go
 # github.com/fsnotify/fsnotify v1.4.7
 ## explicit
 github.com/fsnotify/fsnotify
-# github.com/glycerine/go-unsnap-stream v0.0.0-20181221182339-f9677308dec2
-github.com/glycerine/go-unsnap-stream
-# github.com/glycerine/goconvey v0.0.0-20190410193231-58a59202ab31
+# github.com/glycerine/go-unsnap-stream v0.0.0-20190901134440-81cf024a9e0a
 ## explicit
+github.com/glycerine/go-unsnap-stream
 # github.com/go-acme/lego v2.6.0+incompatible
 ## explicit
 github.com/go-acme/lego/acme
@@ -107,12 +103,11 @@ github.com/go-acme/lego/lego
 github.com/go-acme/lego/log
 github.com/go-acme/lego/platform/wait
 github.com/go-acme/lego/registration
-# github.com/golang/protobuf v1.3.1
+# github.com/golang/protobuf v1.4.0
+## explicit
 github.com/golang/protobuf/proto
 # github.com/golang/snappy v0.0.1
 github.com/golang/snappy
-# github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c
-## explicit
 # github.com/gorilla/websocket v1.4.0
 ## explicit
 github.com/gorilla/websocket
@@ -160,7 +155,7 @@ github.com/miekg/dns
 github.com/mitchellh/go-homedir
 # github.com/mitchellh/mapstructure v1.1.2
 github.com/mitchellh/mapstructure
-# github.com/mschoch/smat v0.0.0-20160514031455-90eadee771ae
+# github.com/mschoch/smat v0.2.0
 github.com/mschoch/smat
 # github.com/onsi/ginkgo v1.8.0
 ## explicit
@@ -175,35 +170,29 @@ github.com/philhofer/fwd
 github.com/pmezard/go-difflib/difflib
 # github.com/remyoudompheng/bigfft v0.0.0-20190512091148-babf20351dd7
 ## explicit
-# github.com/smartystreets/assertions v1.0.0
-## explicit
-# github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
-## explicit
 # github.com/spf13/afero v1.2.2
 ## explicit
 github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/spf13/cast v1.3.0
 github.com/spf13/cast
-# github.com/spf13/cobra v0.0.5
+# github.com/spf13/cobra v1.0.0
 ## explicit
 github.com/spf13/cobra
 # github.com/spf13/jwalterweatherman v1.1.0
 ## explicit
 github.com/spf13/jwalterweatherman
-# github.com/spf13/pflag v1.0.3
+# github.com/spf13/pflag v1.0.5
+## explicit
 github.com/spf13/pflag
 # github.com/spf13/viper v1.4.0
 ## explicit
 github.com/spf13/viper
-# github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2
-## explicit
+# github.com/steveyen/gtreap v0.1.0
 github.com/steveyen/gtreap
-# github.com/stretchr/testify v1.3.0
+# github.com/stretchr/testify v1.4.0
 ## explicit
 github.com/stretchr/testify/assert
-# github.com/syndtr/goleveldb v1.0.0
-## explicit
 # github.com/tdewolff/minify/v2 v2.5.0
 ## explicit
 github.com/tdewolff/minify/v2
@@ -213,12 +202,16 @@ github.com/tdewolff/parse/v2
 github.com/tdewolff/parse/v2/buffer
 github.com/tdewolff/parse/v2/html
 github.com/tdewolff/parse/v2/strconv
-# github.com/tecbot/gorocksdb v0.0.0-20190519120508-025c3cf4ffb4
+# github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c
 ## explicit
-# github.com/tinylib/msgp v1.1.0
+# github.com/tinylib/msgp v1.1.2
+## explicit
 github.com/tinylib/msgp/msgp
 # github.com/willf/bitset v1.1.10
 github.com/willf/bitset
+# go.etcd.io/bbolt v1.3.4
+## explicit
+go.etcd.io/bbolt
 # golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
 ## explicit
 golang.org/x/crypto/ed25519
@@ -237,7 +230,7 @@ golang.org/x/net/ipv4
 golang.org/x/net/ipv6
 # golang.org/x/sync v0.0.0-20190423024810-112230192c58
 ## explicit
-# golang.org/x/sys v0.0.0-20190608050228-5b15430b70e3
+# golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f
 ## explicit
 golang.org/x/sys/unix
 golang.org/x/sys/windows
@@ -247,6 +240,34 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
+# google.golang.org/protobuf v1.21.0
+google.golang.org/protobuf/encoding/prototext
+google.golang.org/protobuf/encoding/protowire
+google.golang.org/protobuf/internal/descfmt
+google.golang.org/protobuf/internal/descopts
+google.golang.org/protobuf/internal/detrand
+google.golang.org/protobuf/internal/encoding/defval
+google.golang.org/protobuf/internal/encoding/messageset
+google.golang.org/protobuf/internal/encoding/tag
+google.golang.org/protobuf/internal/encoding/text
+google.golang.org/protobuf/internal/errors
+google.golang.org/protobuf/internal/fieldnum
+google.golang.org/protobuf/internal/fieldsort
+google.golang.org/protobuf/internal/filedesc
+google.golang.org/protobuf/internal/filetype
+google.golang.org/protobuf/internal/flags
+google.golang.org/protobuf/internal/genname
+google.golang.org/protobuf/internal/impl
+google.golang.org/protobuf/internal/mapsort
+google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/set
+google.golang.org/protobuf/internal/strs
+google.golang.org/protobuf/internal/version
+google.golang.org/protobuf/proto
+google.golang.org/protobuf/reflect/protoreflect
+google.golang.org/protobuf/reflect/protoregistry
+google.golang.org/protobuf/runtime/protoiface
+google.golang.org/protobuf/runtime/protoimpl
 # gopkg.in/square/go-jose.v2 v2.3.1
 ## explicit
 gopkg.in/square/go-jose.v2

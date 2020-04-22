@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"strconv"
 
-	"github.com/boltdb/bolt"
+	bolt "go.etcd.io/bbolt"
 
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"

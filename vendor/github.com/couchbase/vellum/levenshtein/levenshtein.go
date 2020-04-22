@@ -1,4 +1,4 @@
-//  Copyright (c) 2017 Couchbase, Inc.
+//  Copyright (c) 2018 Couchbase, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,77 +14,51 @@
 
 package levenshtein
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // StateLimit is the maximum number of states allowed
 const StateLimit = 10000
 
 // ErrTooManyStates is returned if you attempt to build a Levenshtein
 // automaton which requires too many states.
-var ErrTooManyStates = fmt.Errorf("dfa contains more than %d states", StateLimit)
+var ErrTooManyStates = fmt.Errorf("dfa contains more than %d states",
+	StateLimit)
 
-// Levenshtein implements the vellum.Automaton interface for matching
-// terms within the specified Levenshtein edit-distance of the queried
-// term.  This automaton recognizes utf-8 encoded bytes and computes
-// the edit distance on the result code-points, not on the raw bytes.
-type Levenshtein struct {
-	prog *dynamicLevenshtein
-	dfa  *dfa
+// LevenshteinAutomatonBuilder wraps a precomputed
+// datastructure that allows to produce small (but not minimal) DFA.
+type LevenshteinAutomatonBuilder struct {
+	pDfa *ParametricDFA
 }
 
-// New creates a new Levenshtein automaton for the specified
-// query string and edit distance.
-func New(query string, distance int) (*Levenshtein, error) {
-	lev := &dynamicLevenshtein{
-		query:    query,
-		distance: uint(distance),
-	}
-	dfabuilder := newDfaBuilder(lev)
-	dfa, err := dfabuilder.build()
+// NewLevenshteinAutomatonBuilder creates a
+// reusable, threadsafe Levenshtein automaton builder.
+// `maxDistance` - maximum distance considered by the automaton.
+// `transposition` - assign a distance of 1 for transposition
+//
+// Building this automaton builder is computationally intensive.
+// While it takes only a few milliseconds for `d=2`, it grows
+// exponentially with `d`. It is only reasonable to `d <= 5`.
+func NewLevenshteinAutomatonBuilder(maxDistance uint8,
+	transposition bool) (*LevenshteinAutomatonBuilder, error) {
+	lnfa := newLevenshtein(maxDistance, transposition)
+
+	pdfa, err := fromNfa(lnfa)
 	if err != nil {
 		return nil, err
 	}
-	return &Levenshtein{
-		prog: lev,
-		dfa:  dfa,
-	}, nil
+
+	return &LevenshteinAutomatonBuilder{pDfa: pdfa}, nil
 }
 
-// Start returns the start state of this automaton.
-func (l *Levenshtein) Start() int {
-	return 1
+// BuildDfa builds the levenshtein automaton for serving
+// queries with a given edit distance.
+func (lab *LevenshteinAutomatonBuilder) BuildDfa(query string,
+	fuzziness uint8) (*DFA, error) {
+	return lab.pDfa.buildDfa(query, fuzziness, false)
 }
 
-// IsMatch returns if the specified state is a matching state.
-func (l *Levenshtein) IsMatch(s int) bool {
-	if s < len(l.dfa.states) {
-		return l.dfa.states[s].match
-	}
-	return false
-}
-
-// CanMatch returns if the specified state can ever transition to a matching
-// state.
-func (l *Levenshtein) CanMatch(s int) bool {
-	if s < len(l.dfa.states) && s > 0 {
-		return true
-	}
-	return false
-}
-
-// WillAlwaysMatch returns if the specified state will always end in a
-// matching state.
-func (l *Levenshtein) WillAlwaysMatch(s int) bool {
-	return false
-}
-
-// Accept returns the new state, resulting from the transite byte b
-// when currently in the state s.
-func (l *Levenshtein) Accept(s int, b byte) int {
-	if s < len(l.dfa.states) {
-		return l.dfa.states[s].next[b]
-	}
-	return 0
+// MaxDistance returns the MaxEdit distance supported by the
+// LevenshteinAutomatonBuilder builder.
+func (lab *LevenshteinAutomatonBuilder) MaxDistance() uint8 {
+	return lab.pDfa.maxDistance
 }

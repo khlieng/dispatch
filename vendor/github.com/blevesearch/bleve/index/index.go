@@ -98,16 +98,31 @@ type IndexReader interface {
 	Close() error
 }
 
+// The Regexp interface defines the subset of the regexp.Regexp API
+// methods that are used by bleve indexes, allowing callers to pass in
+// alternate implementations.
+type Regexp interface {
+	FindStringIndex(s string) (loc []int)
+
+	LiteralPrefix() (prefix string, complete bool)
+
+	String() string
+}
+
 type IndexReaderRegexp interface {
-	FieldDictRegexp(field string, regex []byte) (FieldDict, error)
+	FieldDictRegexp(field string, regex string) (FieldDict, error)
 }
 
 type IndexReaderFuzzy interface {
-	FieldDictFuzzy(field string, term []byte, fuzziness int) (FieldDict, error)
+	FieldDictFuzzy(field string, term string, fuzziness int, prefix string) (FieldDict, error)
 }
 
 type IndexReaderOnly interface {
 	FieldDictOnly(field string, onlyTerms [][]byte, includeCount bool) (FieldDict, error)
+}
+
+type IndexReaderContains interface {
+	FieldDictContains(field string) (FieldDictContains, error)
 }
 
 // FieldTerms contains the terms used by a document, keyed by field
@@ -219,6 +234,10 @@ type FieldDict interface {
 	Close() error
 }
 
+type FieldDictContains interface {
+	Contains(key []byte) (bool, error)
+}
+
 // DocIDReader is the interface exposing enumeration of documents identifiers.
 // Close the reader to release associated resources.
 type DocIDReader interface {
@@ -237,9 +256,12 @@ type DocIDReader interface {
 	Close() error
 }
 
+type BatchCallback func(error)
+
 type Batch struct {
-	IndexOps    map[string]*document.Document
-	InternalOps map[string][]byte
+	IndexOps          map[string]*document.Document
+	InternalOps       map[string][]byte
+	persistedCallback BatchCallback
 }
 
 func NewBatch() *Batch {
@@ -265,6 +287,14 @@ func (b *Batch) DeleteInternal(key []byte) {
 	b.InternalOps[string(key)] = nil
 }
 
+func (b *Batch) SetPersistedCallback(f BatchCallback) {
+	b.persistedCallback = f
+}
+
+func (b *Batch) PersistedCallback() BatchCallback {
+	return b.persistedCallback
+}
+
 func (b *Batch) String() string {
 	rv := fmt.Sprintf("Batch (%d ops, %d internal ops)\n", len(b.IndexOps), len(b.InternalOps))
 	for k, v := range b.IndexOps {
@@ -287,6 +317,27 @@ func (b *Batch) String() string {
 func (b *Batch) Reset() {
 	b.IndexOps = make(map[string]*document.Document)
 	b.InternalOps = make(map[string][]byte)
+	b.persistedCallback = nil
+}
+
+func (b *Batch) Merge(o *Batch) {
+	for k, v := range o.IndexOps {
+		b.IndexOps[k] = v
+	}
+	for k, v := range o.InternalOps {
+		b.InternalOps[k] = v
+	}
+}
+
+func (b *Batch) TotalDocSize() int {
+	var s int
+	for k, v := range b.IndexOps {
+		if v != nil {
+			s += v.Size() + size.SizeOfString
+		}
+		s += len(k)
+	}
+	return s
 }
 
 // Optimizable represents an optional interface that implementable by
@@ -298,11 +349,19 @@ type Optimizable interface {
 	Optimize(kind string, octx OptimizableContext) (OptimizableContext, error)
 }
 
+// Represents a result of optimization -- see the Finish() method.
+type Optimized interface{}
+
 type OptimizableContext interface {
 	// Once all the optimzable resources have been provided the same
 	// OptimizableContext instance, the optimization preparations are
 	// finished or completed via the Finish() method.
-	Finish() error
+	//
+	// Depending on the optimization being performed, the Finish()
+	// method might return a non-nil Optimized instance.  For example,
+	// the Optimized instance might represent an optimized
+	// TermFieldReader instance.
+	Finish() (Optimized, error)
 }
 
 type DocValueReader interface {

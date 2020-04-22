@@ -29,43 +29,6 @@ var TermSeparator byte = 0xff
 
 var TermSeparatorSplitSlice = []byte{TermSeparator}
 
-type SegmentDictionarySnapshot struct {
-	s *SegmentSnapshot
-	d segment.TermDictionary
-}
-
-func (s *SegmentDictionarySnapshot) PostingsList(term []byte, except *roaring.Bitmap,
-	prealloc segment.PostingsList) (segment.PostingsList, error) {
-	// TODO: if except is non-nil, perhaps need to OR it with s.s.deleted?
-	return s.d.PostingsList(term, s.s.deleted, prealloc)
-}
-
-func (s *SegmentDictionarySnapshot) Iterator() segment.DictionaryIterator {
-	return s.d.Iterator()
-}
-
-func (s *SegmentDictionarySnapshot) PrefixIterator(prefix string) segment.DictionaryIterator {
-	return s.d.PrefixIterator(prefix)
-}
-
-func (s *SegmentDictionarySnapshot) RangeIterator(start, end string) segment.DictionaryIterator {
-	return s.d.RangeIterator(start, end)
-}
-
-func (s *SegmentDictionarySnapshot) RegexpIterator(regex string) segment.DictionaryIterator {
-	return s.d.RegexpIterator(regex)
-}
-
-func (s *SegmentDictionarySnapshot) FuzzyIterator(term string,
-	fuzziness int) segment.DictionaryIterator {
-	return s.d.FuzzyIterator(term, fuzziness)
-}
-
-func (s *SegmentDictionarySnapshot) OnlyIterator(onlyTerms [][]byte,
-	includeCount bool) segment.DictionaryIterator {
-	return s.d.OnlyIterator(onlyTerms, includeCount)
-}
-
 type SegmentSnapshot struct {
 	id      uint64
 	segment segment.Segment
@@ -115,17 +78,6 @@ func (s *SegmentSnapshot) Count() uint64 {
 	return rv
 }
 
-func (s *SegmentSnapshot) Dictionary(field string) (segment.TermDictionary, error) {
-	d, err := s.segment.Dictionary(field)
-	if err != nil {
-		return nil, err
-	}
-	return &SegmentDictionarySnapshot{
-		s: s,
-		d: d,
-	}, nil
-}
-
 func (s *SegmentSnapshot) DocNumbers(docIDs []string) (*roaring.Bitmap, error) {
 	rv, err := s.segment.DocNumbers(docIDs)
 	if err != nil {
@@ -137,7 +89,7 @@ func (s *SegmentSnapshot) DocNumbers(docIDs []string) (*roaring.Bitmap, error) {
 	return rv, nil
 }
 
-// DocNumbersLive returns bitsit containing doc numbers for all live docs
+// DocNumbersLive returns a bitmap containing doc numbers for all live docs
 func (s *SegmentSnapshot) DocNumbersLive() *roaring.Bitmap {
 	rv := roaring.NewBitmap()
 	rv.AddRange(0, s.segment.Count())
@@ -161,14 +113,29 @@ func (s *SegmentSnapshot) Size() (rv int) {
 }
 
 type cachedFieldDocs struct {
+	m       sync.Mutex
 	readyCh chan struct{}     // closed when the cachedFieldDocs.docs is ready to be used.
 	err     error             // Non-nil if there was an error when preparing this cachedFieldDocs.
 	docs    map[uint64][]byte // Keyed by localDocNum, value is a list of terms delimited by 0xFF.
 	size    uint64
 }
 
+func (cfd *cachedFieldDocs) Size() int {
+	var rv int
+	cfd.m.Lock()
+	for _, entry := range cfd.docs {
+		rv += 8 /* size of uint64 */ + len(entry)
+	}
+	cfd.m.Unlock()
+	return rv
+}
+
 func (cfd *cachedFieldDocs) prepareField(field string, ss *SegmentSnapshot) {
-	defer close(cfd.readyCh)
+	cfd.m.Lock()
+	defer func() {
+		close(cfd.readyCh)
+		cfd.m.Unlock()
+	}()
 
 	cfd.size += uint64(size.SizeOfUint64) /* size field */
 	dict, err := ss.segment.Dictionary(field)
@@ -216,9 +183,9 @@ func (cfd *cachedFieldDocs) prepareField(field string, ss *SegmentSnapshot) {
 }
 
 type cachedDocs struct {
+	size  uint64
 	m     sync.Mutex                  // As the cache is asynchronously prepared, need a lock
 	cache map[string]*cachedFieldDocs // Keyed by field
-	size  uint64
 }
 
 func (c *cachedDocs) prepareFields(wantedFields []string, ss *SegmentSnapshot) error {
@@ -279,9 +246,7 @@ func (c *cachedDocs) updateSizeLOCKED() {
 	for k, v := range c.cache { // cachedFieldDocs
 		sizeInBytes += len(k)
 		if v != nil {
-			for _, entry := range v.docs { // docs
-				sizeInBytes += 8 /* size of uint64 */ + len(entry)
-			}
+			sizeInBytes += v.Size()
 		}
 	}
 	atomic.StoreUint64(&c.size, uint64(sizeInBytes))

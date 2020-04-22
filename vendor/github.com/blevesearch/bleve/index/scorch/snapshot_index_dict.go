@@ -22,6 +22,7 @@ import (
 )
 
 type segmentDictCursor struct {
+	dict segment.TermDictionary
 	itr  segment.DictionaryIterator
 	curr index.DictEntry
 }
@@ -52,7 +53,7 @@ func (i *IndexSnapshotFieldDict) Pop() interface{} {
 }
 
 func (i *IndexSnapshotFieldDict) Next() (*index.DictEntry, error) {
-	if len(i.cursors) <= 0 {
+	if len(i.cursors) == 0 {
 		return nil, nil
 	}
 	i.entry = i.cursors[0].curr
@@ -90,4 +91,18 @@ func (i *IndexSnapshotFieldDict) Next() (*index.DictEntry, error) {
 
 func (i *IndexSnapshotFieldDict) Close() error {
 	return nil
+}
+
+func (i *IndexSnapshotFieldDict) Contains(key []byte) (bool, error) {
+	if len(i.cursors) == 0 {
+		return false, nil
+	}
+
+	for _, cursor := range i.cursors {
+		if found, _ := cursor.dict.Contains(key); found {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

@@ -17,6 +17,7 @@ package segment
 import (
 	"github.com/RoaringBitmap/roaring"
 	"github.com/blevesearch/bleve/index"
+	"github.com/couchbase/vellum"
 )
 
 type EmptySegment struct{}
@@ -80,12 +81,8 @@ func (e *EmptyDictionary) RangeIterator(start, end string) DictionaryIterator {
 	return &EmptyDictionaryIterator{}
 }
 
-func (e *EmptyDictionary) RegexpIterator(start string) DictionaryIterator {
-	return &EmptyDictionaryIterator{}
-}
-
-func (e *EmptyDictionary) FuzzyIterator(term string,
-	fuzziness int) DictionaryIterator {
+func (e *EmptyDictionary) AutomatonIterator(a vellum.Automaton,
+	startKeyInclusive, endKeyExclusive []byte) DictionaryIterator {
 	return &EmptyDictionaryIterator{}
 }
 
@@ -94,14 +91,18 @@ func (e *EmptyDictionary) OnlyIterator(onlyTerms [][]byte,
 	return &EmptyDictionaryIterator{}
 }
 
+func (e *EmptyDictionary) Contains(key []byte) (bool, error) {
+	return false, nil
+}
+
 type EmptyDictionaryIterator struct{}
 
 func (e *EmptyDictionaryIterator) Next() (*index.DictEntry, error) {
 	return nil, nil
 }
 
-func (e *EmptyPostingsIterator) Advance(uint64) (Posting, error) {
-	return nil, nil
+func (e *EmptyDictionaryIterator) Contains(key []byte) (bool, error) {
+	return false, nil
 }
 
 type EmptyPostingsList struct{}
@@ -125,6 +126,12 @@ func (e *EmptyPostingsIterator) Next() (Posting, error) {
 	return nil, nil
 }
 
+func (e *EmptyPostingsIterator) Advance(uint64) (Posting, error) {
+	return nil, nil
+}
+
 func (e *EmptyPostingsIterator) Size() int {
 	return 0
 }
+
+var AnEmptyPostingsIterator = &EmptyPostingsIterator{}
