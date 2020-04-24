@@ -5,6 +5,7 @@ import Button from 'components/ui/Button';
 import { join } from 'state/channels';
 import { select } from 'state/tab';
 import { searchChannels } from 'state/channelSearch';
+import { linkify } from 'utils';
 
 const Channel = memo(({ server, name, topic, userCount, joined, ...props }) => {
   const handleJoinClick = useCallback(() => props.join([name], server), []);
@@ -31,7 +32,7 @@ const Channel = memo(({ server, name, topic, userCount, joined, ...props }) => {
           </Button>
         )}
       </div>
-      <p className="modal-channel-topic">{topic}</p>
+      <p className="modal-channel-topic">{linkify(topic)}</p>
     </div>
   );
 });
