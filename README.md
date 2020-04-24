@@ -62,7 +62,7 @@ Fetch the dependencies:
 
 ```bash
 GO111MODULE=off go get github.com/jteeuwen/go-bindata/...
-yarn global add gulp
+yarn global add gulp-cli
 cd client
 yarn
 ```
