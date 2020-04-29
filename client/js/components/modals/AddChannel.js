@@ -1,5 +1,6 @@
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
 import get from 'lodash/get';
+import { FiUsers, FiX } from 'react-icons/fi';
 import withModal from 'components/modals/withModal';
 import Button from 'components/ui/Button';
 import { join } from 'state/channels';
@@ -16,10 +17,8 @@ const Channel = memo(({ server, name, topic, userCount, joined, ...props }) => {
         <h2 className="modal-channel-name" onClick={handleJoinClick}>
           {name}
         </h2>
-        <span className="modal-channel-users">
-          <i className="icon-user" />
-          {userCount}
-        </span>
+        <FiUsers />
+        <span className="modal-channel-users">{userCount}</span>
         {joined ? (
           <span style={{ color: '#6bb758' }}>Joined</span>
         ) : (
@@ -115,8 +114,9 @@ const AddChannel = ({ search, payload: { server }, onClose, ...props }) => {
           onKeyDown={handleKey}
           onChange={handleSearch}
         />
-        <i
-          className="icon-cancel modal-close modal-channel-close"
+        <Button
+          icon={FiX}
+          className="modal-close modal-channel-close"
           onClick={onClose}
         />
       </div>

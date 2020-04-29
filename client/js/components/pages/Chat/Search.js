@@ -1,4 +1,5 @@
 import React, { memo, useRef, useEffect } from 'react';
+import { FiSearch } from 'react-icons/fi';
 import SearchResult from './SearchResult';
 
 const Search = ({ search, onSearch }) => {
@@ -22,7 +23,7 @@ const Search = ({ search, onSearch }) => {
   return (
     <div className="search" style={style}>
       <div className="search-input-wrap">
-        <i className="icon-search" />
+        <FiSearch className="search-input-icon" />
         <input
           ref={inputEl}
           className="search-input"

@@ -1,5 +1,7 @@
 import React, { memo } from 'react';
+import { FiUsers, FiSearch, FiX } from 'react-icons/fi';
 import Navicon from 'containers/Navicon';
+import Button from 'components/ui/Button';
 import Editable from 'components/ui/Editable';
 import { isValidServerName } from 'state/servers';
 import { isChannel } from 'utils';
@@ -60,19 +62,19 @@ const ChatTitle = ({
           )}
           {serverError}
         </div>
-        <i className="icon-search" title="Search" onClick={onToggleSearch} />
-        <i
-          className="icon-cancel button-leave"
-          title={closeTitle}
-          onClick={onCloseClick}
+        {tab.name && (
+          <Button icon={FiSearch} title="Search" onClick={onToggleSearch} />
+        )}
+        <Button icon={FiX} title={closeTitle} onClick={onCloseClick} />
+        <Button
+          icon={FiUsers}
+          className="button-userlist"
+          onClick={onToggleUserList}
         />
-        <i className="icon-user button-userlist" onClick={onToggleUserList} />
       </div>
       <div className="userlist-bar">
-        <i className="icon-user" />
-        <span className="chat-usercount">
-          {channel && channel.users.length}
-        </span>
+        <FiUsers />
+        {channel && channel.users.length}
       </div>
     </div>
   );

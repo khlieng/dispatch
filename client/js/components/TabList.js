@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import classnames from 'classnames';
 import get from 'lodash/get';
+import { FiPlus, FiUser, FiSettings } from 'react-icons/fi';
 import Button from 'components/ui/Button';
 import TabListItem from 'containers/TabListItem';
 import { count } from 'utils';
@@ -113,9 +114,9 @@ export default class TabList extends PureComponent {
       <div className={className}>
         <div className="tab-container">{tabs}</div>
         <div className="side-buttons">
-          <Button onClick={this.handleConnectClick}>+</Button>
-          <i className="icon-user" />
-          <i className="icon-cog" onClick={this.handleSettingsClick} />
+          <Button icon={FiPlus} onClick={this.handleConnectClick} />
+          <Button icon={FiUser} />
+          <Button icon={FiSettings} onClick={this.handleSettingsClick} />
         </div>
       </div>
     );

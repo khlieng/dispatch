@@ -7,6 +7,7 @@ import Checkbox from 'components/ui/formik/Checkbox';
 import TextInput from 'components/ui/TextInput';
 import Error from 'components/ui/formik/Error';
 import { isValidNick, isValidChannel, isValidUsername, isInt } from 'utils';
+import { FiMoreHorizontal } from 'react-icons/fi';
 
 const getSortedDefaultChannels = createSelector(
   defaults => defaults.channels,
@@ -118,7 +119,11 @@ class Connect extends Component {
           <TextInput name="nick" />
           <TextInput name="channels" transform={this.transformChannels} />
           {this.state.showOptionals && this.renderOptionals()}
-          <i className="icon-ellipsis" onClick={this.handleShowClick} />
+          <Button
+            className="connect-form-button-optionals"
+            icon={FiMoreHorizontal}
+            onClick={this.handleShowClick}
+          />
           <Button type="submit">Connect</Button>
         </Form>
       );

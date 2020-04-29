@@ -1,4 +1,6 @@
 import React from 'react';
+import { FiX } from 'react-icons/fi';
+import Button from 'components/ui/Button';
 import withModal from 'components/modals/withModal';
 import { linkify } from 'utils';
 
@@ -7,7 +9,7 @@ const Topic = ({ payload: { topic, channel }, onClose }) => {
     <>
       <div className="modal-header">
         <h2>Topic in {channel}</h2>
-        <i className="icon-cancel modal-close" onClick={onClose} />
+        <Button icon={FiX} className="modal-close" onClick={onClose} />
       </div>
       <p className="modal-content">{linkify(topic)}</p>
     </>

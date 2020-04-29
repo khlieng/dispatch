@@ -11,7 +11,6 @@ import routes from './routes';
 import runModules from './modules';
 import { register } from './serviceWorker';
 import '../css/fonts.css';
-import '../css/fontello.css';
 import '../css/style.css';
 
 const production = process.env.NODE_ENV === 'production';

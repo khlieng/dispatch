@@ -70,6 +70,7 @@
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-hot-loader": "^4.9.0",
+    "react-icons": "^3.7.0",
     "react-modal": "^3.8.1",
     "react-redux": "^7.0.3",
     "react-virtualized-auto-sizer": "^1.0.2",
