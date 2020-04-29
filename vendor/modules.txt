@@ -53,8 +53,12 @@ github.com/blevesearch/snowballstem/english
 github.com/blevesearch/zap/v11
 # github.com/blevesearch/zap/v12 v12.0.7
 github.com/blevesearch/zap/v12
-# github.com/cenkalti/backoff v2.1.1+incompatible
-github.com/cenkalti/backoff
+# github.com/caddyserver/certmagic v0.10.12
+## explicit
+github.com/caddyserver/certmagic
+# github.com/cenkalti/backoff/v4 v4.0.2
+## explicit
+github.com/cenkalti/backoff/v4
 # github.com/couchbase/vellum v1.0.1
 github.com/couchbase/vellum
 github.com/couchbase/vellum/levenshtein
@@ -79,36 +83,36 @@ github.com/dsnet/compress/internal/errors
 ## explicit
 # github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870
 ## explicit
-# github.com/fsnotify/fsnotify v1.4.7
+# github.com/fsnotify/fsnotify v1.4.9
 ## explicit
 github.com/fsnotify/fsnotify
 # github.com/glycerine/go-unsnap-stream v0.0.0-20190901134440-81cf024a9e0a
 ## explicit
 github.com/glycerine/go-unsnap-stream
-# github.com/go-acme/lego v2.6.0+incompatible
+# github.com/go-acme/lego/v3 v3.6.0
 ## explicit
-github.com/go-acme/lego/acme
-github.com/go-acme/lego/acme/api
-github.com/go-acme/lego/acme/api/internal/nonces
-github.com/go-acme/lego/acme/api/internal/secure
-github.com/go-acme/lego/acme/api/internal/sender
-github.com/go-acme/lego/certcrypto
-github.com/go-acme/lego/certificate
-github.com/go-acme/lego/challenge
-github.com/go-acme/lego/challenge/dns01
-github.com/go-acme/lego/challenge/http01
-github.com/go-acme/lego/challenge/resolver
-github.com/go-acme/lego/challenge/tlsalpn01
-github.com/go-acme/lego/lego
-github.com/go-acme/lego/log
-github.com/go-acme/lego/platform/wait
-github.com/go-acme/lego/registration
+github.com/go-acme/lego/v3/acme
+github.com/go-acme/lego/v3/acme/api
+github.com/go-acme/lego/v3/acme/api/internal/nonces
+github.com/go-acme/lego/v3/acme/api/internal/secure
+github.com/go-acme/lego/v3/acme/api/internal/sender
+github.com/go-acme/lego/v3/certcrypto
+github.com/go-acme/lego/v3/certificate
+github.com/go-acme/lego/v3/challenge
+github.com/go-acme/lego/v3/challenge/dns01
+github.com/go-acme/lego/v3/challenge/http01
+github.com/go-acme/lego/v3/challenge/resolver
+github.com/go-acme/lego/v3/challenge/tlsalpn01
+github.com/go-acme/lego/v3/lego
+github.com/go-acme/lego/v3/log
+github.com/go-acme/lego/v3/platform/wait
+github.com/go-acme/lego/v3/registration
 # github.com/golang/protobuf v1.4.0
 ## explicit
 github.com/golang/protobuf/proto
 # github.com/golang/snappy v0.0.1
 github.com/golang/snappy
-# github.com/gorilla/websocket v1.4.0
+# github.com/gorilla/websocket v1.4.2
 ## explicit
 github.com/gorilla/websocket
 # github.com/hashicorp/hcl v1.0.0
@@ -126,34 +130,31 @@ github.com/hashicorp/hcl/json/token
 github.com/inconshreveable/mousetrap
 # github.com/jmhodges/levigo v1.0.0
 ## explicit
-# github.com/jpillora/backoff v0.0.0-20180909062703-3050d21c67d7
+# github.com/jpillora/backoff v1.0.0
 ## explicit
 github.com/jpillora/backoff
 # github.com/kjk/betterguid v0.0.0-20170621091430-c442874ba63a
 ## explicit
 github.com/kjk/betterguid
-# github.com/klauspost/cpuid v1.2.1
+# github.com/klauspost/cpuid v1.2.3
 ## explicit
 github.com/klauspost/cpuid
 # github.com/magiconair/properties v1.8.1
-## explicit
 github.com/magiconair/properties
-# github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983
+# github.com/mailru/easyjson v0.7.1
 ## explicit
 github.com/mailru/easyjson
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
-# github.com/mholt/certmagic v0.5.1
-## explicit
-github.com/mholt/certmagic
-# github.com/miekg/dns v1.1.13
+# github.com/miekg/dns v1.1.29
 ## explicit
 github.com/miekg/dns
 # github.com/mitchellh/go-homedir v1.1.0
 ## explicit
 github.com/mitchellh/go-homedir
-# github.com/mitchellh/mapstructure v1.1.2
+# github.com/mitchellh/mapstructure v1.3.0
+## explicit
 github.com/mitchellh/mapstructure
 # github.com/mschoch/smat v0.2.0
 github.com/mschoch/smat
@@ -161,7 +162,7 @@ github.com/mschoch/smat
 ## explicit
 # github.com/onsi/gomega v1.5.0
 ## explicit
-# github.com/pelletier/go-toml v1.4.0
+# github.com/pelletier/go-toml v1.7.0
 ## explicit
 github.com/pelletier/go-toml
 # github.com/philhofer/fwd v1.0.0
@@ -174,7 +175,8 @@ github.com/pmezard/go-difflib/difflib
 ## explicit
 github.com/spf13/afero
 github.com/spf13/afero/mem
-# github.com/spf13/cast v1.3.0
+# github.com/spf13/cast v1.3.1
+## explicit
 github.com/spf13/cast
 # github.com/spf13/cobra v1.0.0
 ## explicit
@@ -185,19 +187,21 @@ github.com/spf13/jwalterweatherman
 # github.com/spf13/pflag v1.0.5
 ## explicit
 github.com/spf13/pflag
-# github.com/spf13/viper v1.4.0
+# github.com/spf13/viper v1.6.3
 ## explicit
 github.com/spf13/viper
 # github.com/steveyen/gtreap v0.1.0
 github.com/steveyen/gtreap
-# github.com/stretchr/testify v1.4.0
+# github.com/stretchr/testify v1.5.1
 ## explicit
 github.com/stretchr/testify/assert
-# github.com/tdewolff/minify/v2 v2.5.0
+# github.com/subosito/gotenv v1.2.0
+github.com/subosito/gotenv
+# github.com/tdewolff/minify/v2 v2.7.4
 ## explicit
 github.com/tdewolff/minify/v2
 github.com/tdewolff/minify/v2/html
-# github.com/tdewolff/parse/v2 v2.3.7
+# github.com/tdewolff/parse/v2 v2.4.2
 github.com/tdewolff/parse/v2
 github.com/tdewolff/parse/v2/buffer
 github.com/tdewolff/parse/v2/html
@@ -212,13 +216,13 @@ github.com/willf/bitset
 # go.etcd.io/bbolt v1.3.4
 ## explicit
 go.etcd.io/bbolt
-# golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
+# golang.org/x/crypto v0.0.0-20200427165652-729f1e841bcc
 ## explicit
 golang.org/x/crypto/ed25519
 golang.org/x/crypto/ed25519/internal/edwards25519
 golang.org/x/crypto/ocsp
 golang.org/x/crypto/pbkdf2
-# golang.org/x/net v0.0.0-20190607181551-461777fb6f67
+# golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0
 ## explicit
 golang.org/x/net/bpf
 golang.org/x/net/html
@@ -228,14 +232,11 @@ golang.org/x/net/internal/iana
 golang.org/x/net/internal/socket
 golang.org/x/net/ipv4
 golang.org/x/net/ipv6
-# golang.org/x/sync v0.0.0-20190423024810-112230192c58
-## explicit
-# golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f
+# golang.org/x/sys v0.0.0-20200428200454-593003d681fa
 ## explicit
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.2
-## explicit
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
@@ -268,10 +269,13 @@ google.golang.org/protobuf/reflect/protoreflect
 google.golang.org/protobuf/reflect/protoregistry
 google.golang.org/protobuf/runtime/protoiface
 google.golang.org/protobuf/runtime/protoimpl
-# gopkg.in/square/go-jose.v2 v2.3.1
+# gopkg.in/ini.v1 v1.55.0
+## explicit
+gopkg.in/ini.v1
+# gopkg.in/square/go-jose.v2 v2.5.0
 ## explicit
 gopkg.in/square/go-jose.v2
 gopkg.in/square/go-jose.v2/cipher
 gopkg.in/square/go-jose.v2/json
-# gopkg.in/yaml.v2 v2.2.2
+# gopkg.in/yaml.v2 v2.2.8
 gopkg.in/yaml.v2

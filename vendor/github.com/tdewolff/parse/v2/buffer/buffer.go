@@ -5,7 +5,7 @@ The `Reader` and `Writer` types implement the `io.Reader` and `io.Writer` respec
 The `Lexer` type is useful for building lexers because it keeps track of the start and end position of a byte selection, and shifts the bytes whenever a valid token is found.
 The `StreamLexer` does the same, but keeps a buffer pool so that it reads a limited amount at a time, allowing to parse from streaming sources.
 */
-package buffer // import "github.com/tdewolff/parse/buffer"
+package buffer
 
 // defaultBufSize specifies the default initial length of internal buffers.
 var defaultBufSize = 4096

@@ -2,14 +2,15 @@ package https
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
 	"time"
 
+	"github.com/caddyserver/certmagic"
 	"github.com/khlieng/dispatch/pkg/netutil"
 	"github.com/klauspost/cpuid"
-	"github.com/mholt/certmagic"
 )
 
 type Config struct {
@@ -65,24 +66,29 @@ func Serve(handler http.Handler, cfg Config) error {
 				}
 			}
 
-			certmagic.Default.Agreed = true
-			certmagic.Default.Email = cfg.Email
 			certmagic.Default.MustStaple = true
 
 			magic := certmagic.NewDefault()
 
+			acme := certmagic.NewACMEManager(magic, certmagic.ACMEManager{
+				Agreed: true,
+				Email:  cfg.Email,
+			})
+
+			magic.Issuer = acme
+
 			domains := []string{cfg.Domain}
 			if cfg.Domain == "" {
 				domains = []string{}
-				magic.OnDemand = &certmagic.OnDemandConfig{MaxObtain: 3}
+				magic.OnDemand = maxObtain(3)
 			}
 
-			err := magic.Manage(domains)
+			err := magic.ManageSync(domains)
 			if err != nil {
 				return err
 			}
 
-			httpSrv.Handler = magic.HTTPChallengeHandler(redirect)
+			httpSrv.Handler = acme.HTTPChallengeHandler(redirect)
 			httpsSrv.TLSConfig = TLSConfig(magic.TLSConfig())
 
 			go func() {
@@ -166,4 +172,25 @@ func defaultCipherSuites() []uint16 {
 		tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 		tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 		tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256}
+}
+
+func maxObtain(limit int) *certmagic.OnDemandConfig {
+	requested := []string{}
+
+	return &certmagic.OnDemandConfig{
+		DecisionFunc: func(name string) error {
+			for _, n := range requested {
+				if name == n {
+					return nil
+				}
+			}
+
+			if len(requested) == limit {
+				return fmt.Errorf("OnDemand cert limit reached")
+			}
+
+			requested = append(requested, name)
+			return nil
+		},
+	}
 }
