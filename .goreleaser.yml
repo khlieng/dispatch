@@ -19,17 +19,17 @@ builds:
       - 6
       - 7
 
-archive:
-  files:
-    - none*
+archives:
+  - files:
+      - none*
 
-  format_overrides:
-    - goos: windows
-      format: zip
+    format_overrides:
+      - goos: windows
+        format: zip
 
-  replacements:
-    amd64: x64
-    darwin: mac
+    replacements:
+      amd64: x64
+      darwin: mac
 
 checksum:
   name_template: "checksums.txt"
