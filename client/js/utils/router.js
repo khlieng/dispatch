@@ -69,7 +69,7 @@ function match(routes, location) {
       for (let j = 0; j < keys.length; j++) {
         params[keys[j]] = decodeURIComponent(params[keys[j]]);
       }
-      return locationChanged(routes[i].name, params, decode(location));
+      return locationChanged(routes[i].name, params, decode({ ...location }));
     }
   }
   return null;
