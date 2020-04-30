@@ -17,7 +17,4 @@ const mapDispatch = {
   select
 };
 
-export default connect(
-  mapState,
-  mapDispatch
-)(Connect);
+export default connect(mapState, mapDispatch)(Connect);

@@ -13,9 +13,13 @@
     "no-param-reassign": 0,
     "no-plusplus": 0,
     "no-restricted-globals": 1,
+    "no-underscore-dangle": 1,
     "react/destructuring-assignment": 0,
     "react/jsx-filename-extension": 0,
-    "react/prop-types": 0
+    "react/jsx-props-no-spreading": 0,
+    "react/prop-types": 0,
+    "react/state-in-constructor": 0,
+    "react/static-property-placement": 0
   },
   "settings": {
     "import/resolver": {

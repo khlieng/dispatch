@@ -28,7 +28,6 @@ const indexTemplate = `
   <script src="{{.}}" defer></script>
   {{end}}
 
-  <link rel="preload" href="/font/fontello.woff2?48901973" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/font/RobotoMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/font/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/font/Montserrat-Bold.woff2" as="font" type="font/woff2" crossorigin>

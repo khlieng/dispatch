@@ -12,7 +12,7 @@ var br = require('brotli');
 var del = require('del');
 
 function brotli(opts) {
-  return through.obj(function(file, enc, callback) {
+  return through.obj(function (file, enc, callback) {
     if (file.isNull()) {
       return callback(null, file);
     }
@@ -40,7 +40,7 @@ function js(cb) {
 
   process.env['NODE_ENV'] = 'production';
 
-  compiler.run(function(err, stats) {
+  compiler.run(function (err, stats) {
     if (err) throw new gutil.PluginError('webpack', err);
 
     gutil.log(
@@ -104,13 +104,13 @@ function serve() {
   app.use(
     '*',
     proxy('localhost:1337', {
-      proxyReqPathResolver: function(req) {
+      proxyReqPathResolver: function (req) {
         return req.originalUrl;
       }
     })
   );
 
-  app.listen(3000, function(err) {
+  app.listen(3000, function (err) {
     if (err) {
       console.log(err);
       return;
@@ -120,9 +120,13 @@ function serve() {
   });
 }
 
-const assets = gulp.parallel(js, config, public);
-
-const build = gulp.series(clean, assets, compress, cleanup, bindata);
+const build = gulp.series(
+  clean,
+  gulp.parallel(js, config),
+  compress,
+  cleanup,
+  bindata
+);
 
 const dev = gulp.series(
   clean,

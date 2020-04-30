@@ -23,7 +23,4 @@ const mapState = createStructuredSelector({
 
 const mapDispatch = { push, select, hideMenu, openModal };
 
-export default connect(
-  mapState,
-  mapDispatch
-)(App);
+export default connect(mapState, mapDispatch)(App);

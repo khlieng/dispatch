@@ -6,7 +6,4 @@ const mapDispatch = {
   onClick: toggleMenu
 };
 
-export default connect(
-  null,
-  mapDispatch
-)(Navicon);
+export default connect(null, mapDispatch)(Navicon);

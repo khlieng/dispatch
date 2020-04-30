@@ -1,7 +1,5 @@
-import createHistory from 'history/createBrowserHistory';
+import history from 'history/browser';
 import UrlPattern from 'url-pattern';
-
-const history = createHistory();
 
 export const LOCATION_CHANGED = 'ROUTER_LOCATION_CHANGED';
 export const PUSH = 'ROUTER_PUSH';
@@ -97,7 +95,7 @@ export default function initRouter(routes, store) {
     matched = { location: {} };
   }
 
-  history.listen(location => {
+  history.listen(({ location }) => {
     const nextMatch = match(patterns, location);
     if (
       nextMatch &&

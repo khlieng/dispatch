@@ -81,7 +81,12 @@ export default function handleSocket({
     },
 
     motd({ content, server }) {
-      dispatch(addMessages(content.map(line => ({ content: line })), server));
+      dispatch(
+        addMessages(
+          content.map(line => ({ content: line })),
+          server
+        )
+      );
     },
 
     whois(data) {

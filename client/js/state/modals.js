@@ -4,19 +4,16 @@ import * as actions from './actions';
 
 export const getModals = state => state.modals;
 
-export const getHasOpenModals = createSelector(
-  getModals,
-  modals => {
-    const keys = Object.keys(modals);
+export const getHasOpenModals = createSelector(getModals, modals => {
+  const keys = Object.keys(modals);
 
-    for (let i = 0; i < keys.length; i++) {
-      if (modals[keys[i]].isOpen) {
-        return true;
-      }
+  for (let i = 0; i < keys.length; i++) {
+    if (modals[keys[i]].isOpen) {
+      return true;
     }
-    return false;
   }
-);
+  return false;
+});
 
 export default createReducer(
   {},

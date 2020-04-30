@@ -5,6 +5,7 @@ var cssnano = require('cssnano');
 var TerserPlugin = require('terser-webpack-plugin');
 var { InjectManifest } = require('workbox-webpack-plugin');
 var HashOutputPlugin = require('webpack-plugin-hash-output');
+var CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'production',
@@ -80,16 +81,21 @@ module.exports = {
       chunkFilename: '[name].[contenthash].css'
     }),
     new HashOutputPlugin(),
+    new CopyPlugin(['public']),
     new InjectManifest({
       swSrc: './js/sw.js',
-      importWorkboxFrom: 'local',
-      globDirectory: './public',
-      globPatterns: ['*', 'font/*.woff2'],
+      additionalManifestEntries: [
+        {
+          url: '/',
+          revision: '__INDEX_REVISON__'
+        }
+      ],
       exclude: [
         /\.map$/,
         /^manifest.*\.js(?:on)?$/,
         /^boot.*\.js$/,
-        /^runtime.*\.js$/
+        /^runtime.*\.js$/,
+        /\.txt$/
       ]
     })
   ],
@@ -98,9 +104,7 @@ module.exports = {
       new TerserPlugin({
         terserOptions: {
           safari10: true
-        },
-        cache: true,
-        parallel: true
+        }
       })
     ],
     splitChunks: {

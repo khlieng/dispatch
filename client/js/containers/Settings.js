@@ -24,7 +24,4 @@ const mapDispatch = {
   onInstall: () => appSet('installable', null)
 };
 
-export default connect(
-  mapState,
-  mapDispatch
-)(Settings);
+export default connect(mapState, mapDispatch)(Settings);

@@ -155,12 +155,7 @@ func (d *Dispatch) initFileServer() {
 		hash.Write(indexPage)
 		indexHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
-		serviceWorker = append(serviceWorker, []byte(`
-workbox.precaching.precacheAndRoute([{
-	revision: '`+indexHash+`',
-	url: '/'
-}]);
-workbox.routing.registerNavigationRoute('/');`)...)
+		serviceWorker = bytes.Replace(serviceWorker, []byte("__INDEX_REVISON__"), []byte(indexHash), 1)
 
 		if cfg.HTTPS.HSTS.Enabled && cfg.HTTPS.Enabled {
 			hstsHeader = "max-age=" + cfg.HTTPS.HSTS.MaxAge

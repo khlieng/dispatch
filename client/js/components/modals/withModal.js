@@ -66,9 +66,6 @@ export default function withModal({ name, ...modalProps }) {
       return actions;
     };
 
-    return connect(
-      mapState,
-      mapDispatch
-    )(ReduxModal);
+    return connect(mapState, mapDispatch)(ReduxModal);
   };
 }

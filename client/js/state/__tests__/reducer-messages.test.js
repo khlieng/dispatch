@@ -82,7 +82,10 @@ describe('message reducer', () => {
       server: 'srv',
       tab: '#chan1',
       prepend: true,
-      messages: [{ id: 1, date: new Date() }, { id: 2, date: new Date() }]
+      messages: [
+        { id: 1, date: new Date() },
+        { id: 2, date: new Date() }
+      ]
     });
 
     expect(state).toMatchObject({
