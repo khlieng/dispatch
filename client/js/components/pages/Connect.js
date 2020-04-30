@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { Form, withFormik } from 'formik';
-import Navicon from 'containers/Navicon';
+import Navicon from 'components/ui/Navicon';
 import Button from 'components/ui/Button';
 import Checkbox from 'components/ui/formik/Checkbox';
 import TextInput from 'components/ui/TextInput';

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import Navicon from 'containers/Navicon';
+import Navicon from 'components/ui/Navicon';
 import Button from 'components/ui/Button';
 import Checkbox from 'components/ui/Checkbox';
 import FileInput from 'components/ui/FileInput';
@@ -29,7 +29,10 @@ const Settings = ({
         <Navicon />
         <h1>Settings</h1>
         {installable && (
-          <Button className="button-install" onClick={handleInstallClick}>
+          <Button
+            className="settings-button button-install"
+            onClick={handleInstallClick}
+          >
             <h2>Install</h2>
           </Button>
         )}

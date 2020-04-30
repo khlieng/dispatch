@@ -479,9 +479,7 @@ input::-webkit-inner-spin-button {
 
 .navicon {
   display: none;
-  padding: 0 15px;
-  line-height: 50px;
-  font-size: 20px;
+  width: 50px;
   cursor: pointer;
 }
 
@@ -495,7 +493,7 @@ input::-webkit-inner-spin-button {
   display: none;
 }
 
-.chat-title-bar .icon-button {
+.chat-title-bar .icon-button:not(.navicon) {
   color: #999;
 }
 
@@ -808,7 +806,7 @@ input.message-input-nick.invalid {
   color: #222;
 }
 
-.settings button {
+.settings-button {
   width: 200px;
 }
 
@@ -852,8 +850,8 @@ input.message-input-nick.invalid {
     margin-right: 0;
   }
 
-  .settings-button {
-    margin-top: 10px;
+  .settings-file:last-of-type {
+    margin-bottom: 10px;
   }
 }
 
@@ -1059,7 +1057,7 @@ input.message-input-nick.invalid {
   }
 
   .navicon {
-    display: inline-block;
+    display: block;
   }
 
   .main-container.off-canvas {

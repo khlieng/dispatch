@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { FiUsers, FiSearch, FiX } from 'react-icons/fi';
-import Navicon from 'containers/Navicon';
+import Navicon from 'components/ui/Navicon';
 import Button from 'components/ui/Button';
 import Editable from 'components/ui/Editable';
 import { isValidServerName } from 'state/servers';
