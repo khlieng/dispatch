@@ -12,9 +12,11 @@ import (
 
 var (
 	configCmd = &cobra.Command{
-		Use:   "config",
+		Use:   "config [editor]",
 		Short: "Edit config file",
 		Run: func(cmd *cobra.Command, args []string) {
+			editors = append(args, editors...)
+
 			if editor := findEditor(); editor != "" {
 				process := exec.Command(editor, storage.Path.Config())
 				process.Stdin = os.Stdin
@@ -27,7 +29,7 @@ var (
 		},
 	}
 
-	editors = []string{"nano", "notepad", "vi", "emacs"}
+	editors = []string{"nano", "code", "vi", "emacs", "notepad"}
 )
 
 func findEditor() string {
