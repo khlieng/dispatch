@@ -119,6 +119,7 @@ func (c *Client) Join(channels ...string) {
 
 func (c *Client) Part(channels ...string) {
 	c.Write("PART " + strings.Join(channels, ","))
+	c.removeChannels(channels...)
 }
 
 func (c *Client) Topic(channel string, topic ...string) {
@@ -180,6 +181,18 @@ func (c *Client) register() {
 func (c *Client) addChannel(channel string) {
 	c.lock.Lock()
 	c.channels = append(c.channels, channel)
+	c.lock.Unlock()
+}
+
+func (c *Client) removeChannels(channels ...string) {
+	c.lock.Lock()
+	for _, removeCh := range channels {
+		for i, ch := range c.channels {
+			if c.EqualFold(removeCh, ch) {
+				c.channels = append(c.channels[:i], c.channels[i+1:]...)
+			}
+		}
+	}
 	c.lock.Unlock()
 }
 

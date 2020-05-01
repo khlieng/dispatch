@@ -162,6 +162,8 @@ func TestFlushChannels(t *testing.T) {
 	c.flushChannels()
 	assert.Equal(t, <-out, "JOIN #chan1\r\n")
 	c.addChannel("#chan2")
+	c.addChannel("#chan4")
+	c.removeChannels("#chan4")
 	c.addChannel("#chan3")
 	c.flushChannels()
 	assert.Equal(t, <-out, "JOIN #chan2,#chan3\r\n")
