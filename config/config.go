@@ -3,8 +3,8 @@ package config
 import (
 	"time"
 
-	"github.com/khlieng/dispatch/storage"
 	"github.com/fsnotify/fsnotify"
+	"github.com/khlieng/dispatch/storage"
 	"github.com/spf13/viper"
 )
 
@@ -18,6 +18,7 @@ type Config struct {
 	Defaults           Defaults
 	HTTPS              HTTPS
 	LetsEncrypt        LetsEncrypt
+	Auth               Auth
 }
 
 type Defaults struct {
@@ -49,6 +50,18 @@ type HSTS struct {
 type LetsEncrypt struct {
 	Domain string
 	Email  string
+}
+
+type Auth struct {
+	Anonymous    bool
+	Login        bool
+	Registration bool
+	Providers    map[string]Provider
+}
+
+type Provider struct {
+	Key    string
+	Secret string
 }
 
 func LoadConfig() (*Config, chan *Config) {

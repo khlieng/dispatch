@@ -46,19 +46,19 @@ login = true
 # Enable username/password registration
 registration = true
 
-[auth.github]
+[auth.providers.github]
 key = ""
 secret = ""
 
-[auth.facebook]
+[auth.providers.facebook]
 key = ""
 secret = ""
 
-[auth.google]
+[auth.providers.google]
 key = ""
 secret = ""
 
-[auth.twitter]
+[auth.providers.twitter]
 key = ""
 secret = ""
 
