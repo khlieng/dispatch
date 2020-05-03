@@ -61,7 +61,7 @@ export default class TabList extends PureComponent {
         <div
           key={`${address}-chans}`}
           className="tab-label"
-          onClick={() => openModal('channel', { server: address })}
+          onClick={() => openModal('channel', address)}
         >
           <span>CHANNELS {chanLabel}</span>
           <Button title="Join Channel">+</Button>

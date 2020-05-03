@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import Route from 'containers/Route';
 import AppInfo from 'components/AppInfo';
 import TabList from 'components/TabList';
@@ -28,6 +28,11 @@ const App = ({
     setRenderModals(true);
   }
 
+  const [starting, setStarting] = useState(true);
+  useEffect(() => {
+    setTimeout(() => setStarting(false), 1000);
+  }, []);
+
   const mainClass = cn('main-container', {
     'off-canvas': showTabList
   });
@@ -40,7 +45,7 @@ const App = ({
 
   return (
     <div className="wrap" onClick={handleClick}>
-      {!connected && (
+      {!starting && !connected && (
         <AppInfo type="error">
           Connection lost, attempting to reconnect...
         </AppInfo>

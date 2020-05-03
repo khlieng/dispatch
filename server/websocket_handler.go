@@ -295,8 +295,8 @@ func (h *wsHandler) channelSearch(b []byte) {
 		}
 
 		h.state.sendJSON("channel_search", ChannelSearchResult{
-			Results: index.SearchN(data.Q, data.Start, n),
-			Start:   data.Start,
+			ChannelSearch: data,
+			Results:       index.SearchN(data.Q, data.Start, n),
 		})
 	}
 

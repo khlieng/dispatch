@@ -3,11 +3,12 @@ import * as actions from 'state/actions';
 
 const initialState = {
   results: [],
-  end: false
+  end: false,
+  topCache: {}
 };
 
 export default createReducer(initialState, {
-  [actions.socket.CHANNEL_SEARCH](state, { results, start }) {
+  [actions.socket.CHANNEL_SEARCH](state, { results, start, server, q }) {
     if (results) {
       state.end = false;
 
@@ -15,15 +16,20 @@ export default createReducer(initialState, {
         state.results.push(...results);
       } else {
         state.results = results;
+
+        if (!q) {
+          state.topCache[server] = results;
+        }
       }
     } else {
       state.end = true;
     }
   },
 
-  [actions.OPEN_MODAL](state, { name }) {
+  [actions.OPEN_MODAL](state, { name, payload }) {
     if (name === 'channel') {
-      return initialState;
+      state.results = state.topCache[payload] || [];
+      state.end = false;
     }
   }
 });

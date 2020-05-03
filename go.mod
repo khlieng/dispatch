@@ -23,7 +23,7 @@ require (
 	github.com/jpillora/backoff v1.0.0
 	github.com/kjk/betterguid v0.0.0-20170621091430-c442874ba63a
 	github.com/klauspost/cpuid v1.2.3
-	github.com/mailru/easyjson v0.7.1
+	github.com/mailru/easyjson v0.7.2-0.20200424172602-f0a000e7a8e0
 	github.com/miekg/dns v1.1.29 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.0 // indirect

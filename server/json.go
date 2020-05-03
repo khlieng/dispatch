@@ -212,8 +212,8 @@ type ChannelSearch struct {
 }
 
 type ChannelSearchResult struct {
+	ChannelSearch
 	Results []*storage.ChannelListItem
-	Start   int
 }
 
 type ChannelForward struct {

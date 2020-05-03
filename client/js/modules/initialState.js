@@ -1,5 +1,6 @@
 import { socket as socketActions } from 'state/actions';
-import { getWrapWidth, appSet } from 'state/app';
+import { getConnected, getWrapWidth, appSet } from 'state/app';
+import { searchChannels } from 'state/channelSearch';
 import { addMessages } from 'state/messages';
 import { setSettings } from 'state/settings';
 import { when } from 'utils/observe';
@@ -12,6 +13,13 @@ function loadState({ store }, env) {
       type: socketActions.SERVERS,
       data: env.servers
     });
+
+    when(store, getConnected, () =>
+      // Cache top channels for each server
+      env.servers.forEach(({ host }) =>
+        store.dispatch(searchChannels(host, ''))
+      )
+    );
   }
 
   if (env.channels) {

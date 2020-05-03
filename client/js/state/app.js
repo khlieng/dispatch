@@ -9,7 +9,7 @@ export const getWindowWidth = state => state.app.windowWidth;
 export const getConnectDefaults = state => state.app.connectDefaults;
 
 const initialState = {
-  connected: true,
+  connected: false,
   wrapWidth: 0,
   charWidth: 0,
   windowWidth: 0,

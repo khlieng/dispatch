@@ -28,7 +28,7 @@ func easyjson9e1087fdDecodeGithubComKhliengDispatchStorage(in *jlexer.Lexer, out
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -54,12 +54,8 @@ func easyjson9e1087fdEncodeGithubComKhliengDispatchStorage(out *jwriter.Writer, 
 	_ = first
 	if in.ColoredNicks {
 		const prefix string = ",\"coloredNicks\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Bool(bool(in.ColoredNicks))
 	}
 	out.RawByte('}')

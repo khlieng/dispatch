@@ -50,12 +50,7 @@ const ChatTitle = ({
           {channel && channel.topic && (
             <span
               className="chat-topic"
-              onClick={() =>
-                openModal('topic', {
-                  topic: channel.topic,
-                  channel: channel.name
-                })
-              }
+              onClick={() => openModal('topic', channel.name)}
             >
               {channel.topic}
             </span>

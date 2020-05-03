@@ -30,7 +30,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -46,7 +46,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 				if out.Defaults == nil {
 					out.Defaults = new(config.Defaults)
 				}
-				easyjson7e607aefDecodeGithubComKhliengDispatchConfig(in, &*out.Defaults)
+				easyjson7e607aefDecodeGithubComKhliengDispatchConfig(in, out.Defaults)
 			}
 		case "servers":
 			if in.IsNull() {
@@ -56,7 +56,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 				in.Delim('[')
 				if out.Servers == nil {
 					if !in.IsDelim(']') {
-						out.Servers = make([]Server, 0, 1)
+						out.Servers = make([]Server, 0, 0)
 					} else {
 						out.Servers = []Server{}
 					}
@@ -97,7 +97,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 						if v2 == nil {
 							v2 = new(storage.Channel)
 						}
-						easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in, &*v2)
+						easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in, v2)
 					}
 					out.Channels = append(out.Channels, v2)
 					in.WantComma()
@@ -162,12 +162,8 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 	_ = first
 	if in.Defaults != nil {
 		const prefix string = ",\"defaults\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		easyjson7e607aefEncodeGithubComKhliengDispatchConfig(out, *in.Defaults)
 	}
 	if len(in.Servers) != 0 {
@@ -299,7 +295,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in *jlexer.Lexer, out
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -329,12 +325,8 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchStorage(out *jwriter.Writer, 
 	_ = first
 	if in.Server != "" {
 		const prefix string = ",\"server\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(in.Server))
 	}
 	if in.Name != "" {
@@ -370,7 +362,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchConfig(in *jlexer.Lexer, out 
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -431,12 +423,8 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchConfig(out *jwriter.Writer, i
 	_ = first
 	if in.Name != "" {
 		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(in.Name))
 	}
 	if in.Host != "" {
@@ -531,7 +519,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer1(in *jlexer.Lexer, out
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -561,12 +549,8 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer1(out *jwriter.Writer, 
 	_ = first
 	if in.Tag != "" {
 		const prefix string = ",\"tag\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(in.Tag))
 	}
 	if in.Commit != "" {
@@ -626,7 +610,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer2(in *jlexer.Lexer, out
 	}
 	in.Delim('{')
 	for !in.IsDelim('}') {
-		key := in.UnsafeString()
+		key := in.UnsafeFieldName(false)
 		in.WantColon()
 		if in.IsNull() {
 			in.Skip()
@@ -687,12 +671,8 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer2(out *jwriter.Writer, 
 	_ = first
 	if in.Name != "" {
 		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.String(string(in.Name))
 	}
 	if in.Host != "" {
