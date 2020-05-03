@@ -3,7 +3,13 @@ package irc
 import (
 	"bufio"
 	"crypto/tls"
+	"encoding/binary"
+	"fmt"
+	"io"
+	"math"
 	"net"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -21,8 +27,12 @@ type Client struct {
 	Realname        string
 	HandleNickInUse func(string) string
 
+	DownloadFolder string
+	Autoget        bool
+
 	Messages          chan *Message
 	ConnectionChanged chan ConnectionState
+	Progress          chan DownloadProgress
 	Features          *Features
 	nick              string
 	channels          []string
@@ -50,6 +60,7 @@ func NewClient(nick, username string) *Client {
 		Realname:          nick,
 		Messages:          make(chan *Message, 32),
 		ConnectionChanged: make(chan ConnectionState, 16),
+		Progress:          make(chan DownloadProgress, 16),
 		out:               make(chan string, 32),
 		quit:              make(chan struct{}),
 		reconnect:         make(chan struct{}),
@@ -206,4 +217,150 @@ func (c *Client) flushChannels() {
 		c.channels = []string{}
 	}
 	c.lock.Unlock()
+}
+
+func byteRead(totalBytes uint64) []byte {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, totalBytes)
+	return b
+}
+
+func round2(source float64) float64 {
+	return math.Round(100*source) / 100
+}
+
+const (
+	_ = 1.0 << (10 * iota)
+	kibibyte
+	mebibyte
+	gibibyte
+)
+
+func humanReadableByteCount(b float64, speed bool) string {
+	unit := ""
+	value := b
+
+	switch {
+	case b >= gibibyte:
+		unit = "GiB"
+		value = value / gibibyte
+	case b >= mebibyte:
+		unit = "MiB"
+		value = value / mebibyte
+	case b >= kibibyte:
+		unit = "KiB"
+		value = value / kibibyte
+	case b > 1 || b == 0:
+		unit = "bytes"
+	case b == 1:
+		unit = "byte"
+	}
+
+	if speed {
+		unit = unit + "/s"
+	}
+
+	stringValue := strings.TrimSuffix(
+		fmt.Sprintf("%.2f", value), ".00",
+	)
+
+	return fmt.Sprintf("%s %s", stringValue, unit)
+}
+
+func (c *Client) Download(pack *CTCP) {
+	if !c.Autoget {
+		// TODO: ask user if he/she wants to download the file
+		return
+	}
+	c.Progress <- DownloadProgress{
+		PercCompletion: 0,
+		File:           pack.File,
+	}
+	file, err := os.OpenFile(filepath.Join(c.DownloadFolder, pack.File), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		c.Progress <- DownloadProgress{
+			PercCompletion: -1,
+			File:           pack.File,
+			Error:          err,
+		}
+		return
+	}
+	defer file.Close()
+
+	con, err := net.Dial("tcp", fmt.Sprintf("%s:%d", pack.IP, pack.Port))
+
+	if err != nil {
+		c.Progress <- DownloadProgress{
+			PercCompletion: -1,
+			File:           pack.File,
+			Error:          err,
+		}
+		return
+	}
+
+	defer con.Close()
+
+	var avgSpeed float64
+	var prevTime int64 = -1
+	secondsElapsed := int64(0)
+	totalBytes := uint64(0)
+	buf := make([]byte, 0, 4*1024)
+	start := time.Now().UnixNano()
+	for {
+		n, err := con.Read(buf[:cap(buf)])
+		buf = buf[:n]
+		if n == 0 {
+			if err == nil {
+				continue
+			}
+			if err == io.EOF {
+				break
+			}
+		}
+
+		if _, err := file.Write(buf); err != nil {
+			c.Progress <- DownloadProgress{
+				PercCompletion: -1,
+				File:           pack.File,
+				Error:          err,
+			}
+			return
+		}
+
+		cycleBytes := uint64(len(buf))
+		totalBytes += cycleBytes
+		percentage := round2(100 * float64(totalBytes) / float64(pack.Length))
+
+		now := time.Now().UnixNano()
+		secondsElapsed = (now - start) / 1e9
+		avgSpeed = round2(float64(totalBytes) / (float64(secondsElapsed)))
+		speed := 0.0
+
+		if prevTime < 0 {
+			speed = avgSpeed
+		} else {
+			speed = round2(1e9 * float64(cycleBytes) / (float64(now - prevTime)))
+		}
+		secondsToGo := (float64(pack.Length) - float64(totalBytes)) / speed
+		prevTime = now
+		con.Write(byteRead(totalBytes))
+		c.Progress <- DownloadProgress{
+			InstSpeed:      humanReadableByteCount(speed, true),
+			AvgSpeed:       humanReadableByteCount(avgSpeed, true),
+			PercCompletion: percentage,
+			BytesRemaining: humanReadableByteCount(float64(pack.Length-totalBytes), false),
+			BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
+			SecondsElapsed: secondsElapsed,
+			SecondsToGo:    secondsToGo,
+			File:           pack.File,
+		}
+	}
+	con.Write(byteRead(totalBytes))
+	c.Progress <- DownloadProgress{
+		AvgSpeed:       humanReadableByteCount(avgSpeed, true),
+		PercCompletion: 100,
+		BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
+		SecondsElapsed: secondsElapsed,
+		File:           pack.File,
+	}
 }

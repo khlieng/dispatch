@@ -239,6 +239,11 @@ func (c *Client) recv() {
 			if c.HandleNickInUse != nil {
 				go c.writeNick(c.HandleNickInUse(msg.Params[1]))
 			}
+
+		}
+
+		if ctcp := msg.ToCTCP(); ctcp != nil {
+			go c.Download(ctcp)
 		}
 
 		c.Messages <- msg

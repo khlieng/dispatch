@@ -63,6 +63,8 @@ func (i *ircHandler) run() {
 			} else if state.Connected {
 				i.log("Connected")
 			}
+		case progress := <-i.client.Progress:
+			i.state.sendJSON("progress", progress.ToJSON())
 		}
 	}
 }

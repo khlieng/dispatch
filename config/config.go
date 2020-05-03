@@ -13,7 +13,9 @@ type Config struct {
 	Port               string
 	Dev                bool
 	HexIP              bool
-	VerifyCertificates bool `mapstructure:"verify_certificates"`
+	VerifyCertificates bool   `mapstructure:"verify_certificates"`
+	DownloadFolder     string `mapstructure:"download_folder"`
+	Autoget            bool
 	Headers            map[string]string
 	Defaults           Defaults
 	HTTPS              HTTPS
