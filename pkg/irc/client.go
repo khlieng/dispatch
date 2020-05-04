@@ -6,6 +6,7 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/jpillora/backoff"
 )
@@ -54,6 +55,8 @@ func NewClient(nick, username string) *Client {
 		reconnect:         make(chan struct{}),
 		recvBuf:           make([]byte, 0, 4096),
 		backoff: &backoff.Backoff{
+			Min:    500 * time.Millisecond,
+			Max:    30 * time.Second,
 			Jitter: true,
 		},
 	}

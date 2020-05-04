@@ -79,6 +79,7 @@ func (c *Client) run() {
 			c.sendRecv.Wait()
 			c.reconnect = make(chan struct{})
 
+			time.Sleep(c.backoff.Duration())
 			c.tryConnect()
 		}
 	}
