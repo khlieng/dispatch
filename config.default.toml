@@ -7,7 +7,7 @@ verify_certificates = true
 
 # Defaults for the client connect form
 [defaults]
-name = "Freenode"
+name = "freenode"
 host = "chat.freenode.net"
 port = 6697
 channels = [
