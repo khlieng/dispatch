@@ -38,6 +38,7 @@ const indexTemplate = `
   {{end}}
 
   <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon_192.png">
 </head>
 
 <body>
