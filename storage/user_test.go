@@ -28,7 +28,7 @@ func TestUser(t *testing.T) {
 	assert.Nil(t, err)
 
 	srv := &storage.Server{
-		Name: "Freenode",
+		Name: "freenode",
 		Host: "irc.freenode.net",
 		Nick: "test",
 	}
