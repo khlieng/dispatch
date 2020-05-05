@@ -90,13 +90,7 @@ module.exports = {
           revision: '__INDEX_REVISON__'
         }
       ],
-      exclude: [
-        /\.map$/,
-        /^manifest.*\.js(?:on)?$/,
-        /^boot.*\.js$/,
-        /^runtime.*\.js$/,
-        /\.txt$/
-      ]
+      exclude: [/\.map$/, /^boot.*\.js$/, /^runtime.*\.js$/, /\.txt$/]
     })
   ],
   optimization: {
