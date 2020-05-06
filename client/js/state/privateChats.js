@@ -30,6 +30,16 @@ export default createReducer(
       }
     },
 
+    [actions.PRIVATE_CHATS](state, { privateChats }) {
+      privateChats.forEach(({ server, name }) => {
+        if (!state[server]) {
+          state[server] = [];
+        }
+
+        state[server].push(name);
+      });
+    },
+
     [actions.socket.PM](state, action) {
       if (action.from.indexOf('.') === -1) {
         open(state, action.server, action.from);
@@ -46,7 +56,11 @@ export function openPrivateChat(server, nick) {
   return {
     type: actions.OPEN_PRIVATE_CHAT,
     server,
-    nick
+    nick,
+    socket: {
+      type: 'open_dm',
+      data: { server, name: nick }
+    }
   };
 }
 
@@ -55,7 +69,11 @@ export function closePrivateChat(server, nick) {
     dispatch({
       type: actions.CLOSE_PRIVATE_CHAT,
       server,
-      nick
+      nick,
+      socket: {
+        type: 'close_dm',
+        data: { server, name: nick }
+      }
     });
     dispatch(updateSelection());
   };

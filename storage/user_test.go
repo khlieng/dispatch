@@ -80,6 +80,16 @@ func TestUser(t *testing.T) {
 	channels, err = user.GetChannels()
 	assert.Len(t, channels, 0)
 
+	user.AddOpenDM(srv.Host, "cake")
+	openDMs, err := user.GetOpenDMs()
+	assert.Nil(t, err)
+	assert.Len(t, openDMs, 1)
+	err = user.RemoveOpenDM(srv.Host, "cake")
+	assert.Nil(t, err)
+	openDMs, err = user.GetOpenDMs()
+	assert.Nil(t, err)
+	assert.Len(t, openDMs, 0)
+
 	settings := user.GetClientSettings()
 	assert.NotNil(t, settings)
 	assert.Equal(t, storage.DefaultClientSettings(), settings)

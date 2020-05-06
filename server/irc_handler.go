@@ -169,17 +169,21 @@ func (i *ircHandler) message(msg *irc.Message) {
 		From:    msg.Nick,
 		Content: msg.LastParam(),
 	}
+	target := msg.Params[0]
 
-	if msg.Params[0] == i.client.GetNick() {
+	if target == i.client.GetNick() {
 		i.state.sendJSON("pm", message)
+		i.state.user.AddOpenDM(i.client.Host, message.From)
+
+		target = message.From
 	} else {
-		message.To = msg.Params[0]
+		message.To = target
 		i.state.sendJSON("message", message)
 	}
 
-	if msg.Params[0] != "*" {
+	if target != "*" {
 		go i.state.user.LogMessage(message.ID,
-			i.client.Host, msg.Nick, msg.Params[0], msg.LastParam())
+			i.client.Host, msg.Nick, target, msg.LastParam())
 	}
 }
 

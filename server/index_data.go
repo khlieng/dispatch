@@ -31,6 +31,7 @@ type indexData struct {
 	Defaults *config.Defaults
 	Servers  []Server
 	Channels []*storage.Channel
+	OpenDMs  []storage.Tab
 	HexIP    bool
 	Version  dispatchVersion
 
@@ -43,7 +44,7 @@ type indexData struct {
 	Messages *Messages
 }
 
-func (d *Dispatch) getIndexData(r *http.Request, path string, state *State) *indexData {
+func (d *Dispatch) getIndexData(r *http.Request, state *State) *indexData {
 	cfg := d.Config()
 
 	data := indexData{
@@ -98,35 +99,37 @@ func (d *Dispatch) getIndexData(r *http.Request, path string, state *State) *ind
 	}
 	data.Channels = channels
 
-	server, channel := getTabFromPath(path)
-	if isInChannel(channels, server, channel) {
-		data.addUsersAndMessages(server, channel, state)
-		return &data
+	openDMs, err := state.user.GetOpenDMs()
+	if err != nil {
+		return nil
 	}
+	data.OpenDMs = openDMs
 
-	server, channel = parseTabCookie(r, path)
-	if isInChannel(channels, server, channel) {
-		data.addUsersAndMessages(server, channel, state)
+	tab, err := tabFromRequest(r)
+	if err == nil && hasTab(channels, openDMs, tab.Server, tab.Name) {
+		data.addUsersAndMessages(tab.Server, tab.Name, state)
 	}
 
 	return &data
 }
 
-func (d *indexData) addUsersAndMessages(server, channel string, state *State) {
-	users := channelStore.GetUsers(server, channel)
-	if len(users) > 0 {
-		d.Users = &Userlist{
-			Server:  server,
-			Channel: channel,
-			Users:   users,
+func (d *indexData) addUsersAndMessages(server, name string, state *State) {
+	if isChannel(name) {
+		users := channelStore.GetUsers(server, name)
+		if len(users) > 0 {
+			d.Users = &Userlist{
+				Server:  server,
+				Channel: name,
+				Users:   users,
+			}
 		}
 	}
 
-	messages, hasMore, err := state.user.GetLastMessages(server, channel, 50)
+	messages, hasMore, err := state.user.GetLastMessages(server, name, 50)
 	if err == nil && len(messages) > 0 {
 		m := Messages{
 			Server:   server,
-			To:       channel,
+			To:       name,
 			Messages: messages,
 		}
 
@@ -138,10 +141,16 @@ func (d *indexData) addUsersAndMessages(server, channel string, state *State) {
 	}
 }
 
-func isInChannel(channels []*storage.Channel, server, channel string) bool {
-	if channel != "" {
+func hasTab(channels []*storage.Channel, openDMs []storage.Tab, server, name string) bool {
+	if name != "" {
 		for _, ch := range channels {
-			if server == ch.Server && channel == ch.Name {
+			if server == ch.Server && name == ch.Name {
+				return true
+			}
+		}
+
+		for _, tab := range openDMs {
+			if server == tab.Server && name == tab.Name {
 				return true
 			}
 		}
@@ -149,30 +158,52 @@ func isInChannel(channels []*storage.Channel, server, channel string) bool {
 	return false
 }
 
-func getTabFromPath(rawPath string) (string, string) {
-	path := strings.Split(strings.Trim(rawPath, "/"), "/")
-	if len(path) >= 2 {
-		name, err := url.PathUnescape(path[len(path)-1])
-		if err == nil && isChannel(name) {
-			return path[len(path)-2], name
-		}
-	}
-	return "", ""
-}
+func tabFromRequest(r *http.Request) (Tab, error) {
+	tab := Tab{}
 
-func parseTabCookie(r *http.Request, path string) (string, string) {
+	var path string
+	if strings.HasPrefix(r.URL.Path, "/ws") {
+		path = r.URL.EscapedPath()[3:]
+	} else {
+		referer, err := url.Parse(r.Referer())
+		if err != nil {
+			return tab, err
+		}
+
+		path = referer.EscapedPath()
+	}
+
 	if path == "/" {
 		cookie, err := r.Cookie("tab")
-		if err == nil {
-			v, err := url.PathUnescape(cookie.Value)
-			if err == nil {
-				tab := strings.SplitN(v, ";", 2)
+		if err != nil {
+			return tab, err
+		}
 
-				if len(tab) == 2 && isChannel(tab[1]) {
-					return tab[0], tab[1]
+		v, err := url.PathUnescape(cookie.Value)
+		if err != nil {
+			return tab, err
+		}
+
+		parts := strings.SplitN(v, ";", 2)
+		if len(parts) == 2 {
+			tab.Server = parts[0]
+			tab.Name = parts[1]
+		}
+	} else {
+		parts := strings.Split(strings.Trim(path, "/"), "/")
+		if len(parts) > 0 && len(parts) < 3 {
+			if len(parts) == 2 {
+				name, err := url.PathUnescape(parts[1])
+				if err != nil {
+					return tab, err
 				}
+
+				tab.Name = name
 			}
+
+			tab.Server = parts[0]
 		}
 	}
-	return "", ""
+
+	return tab, nil
 }

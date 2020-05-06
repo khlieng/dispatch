@@ -1,7 +1,7 @@
 import Cookie from 'js-cookie';
 import debounce from 'lodash/debounce';
 import { getSelectedTab } from 'state/tab';
-import { isChannel, stringifyTab } from 'utils';
+import { stringifyTab } from 'utils';
 import { observe } from 'utils/observe';
 
 const saveTab = debounce(
@@ -11,7 +11,7 @@ const saveTab = debounce(
 
 export default function storage({ store }) {
   observe(store, getSelectedTab, tab => {
-    if (isChannel(tab) || (tab.server && !tab.name)) {
+    if (tab.server) {
       saveTab(tab);
     }
   });

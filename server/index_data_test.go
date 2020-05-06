@@ -1,47 +1,60 @@
 package server
 
 import (
+	"net/http"
+	"net/url"
 	"testing"
 
+	"github.com/khlieng/dispatch/storage"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetTabFromPath(t *testing.T) {
 	cases := []struct {
-		input           string
-		expectedServer  string
-		expectedChannel string
+		input       *http.Request
+		expectedTab Tab
 	}{
 		{
-			"/chat.freenode.net/%23r%2Fstuff%2F/",
-			"chat.freenode.net",
-			"#r/stuff/",
+			&http.Request{
+				URL:    &url.URL{Path: "/init"},
+				Header: http.Header{"Referer": []string{"/chat.freenode.net/%23r%2Fstuff%2F"}},
+			},
+			Tab{storage.Tab{Server: "chat.freenode.net", Name: "#r/stuff/"}},
 		}, {
-			"/chat.freenode.net/%23r%2Fstuff%2F",
-			"chat.freenode.net",
-			"#r/stuff/",
+			&http.Request{
+				URL:    &url.URL{Path: "/init"},
+				Header: http.Header{"Referer": []string{"/chat.freenode.net/%23r%2Fstuff"}},
+			},
+			Tab{storage.Tab{Server: "chat.freenode.net", Name: "#r/stuff"}},
 		}, {
-			"/chat.freenode.net/%23r%2Fstuff",
-			"chat.freenode.net",
-			"#r/stuff",
+			&http.Request{
+				URL:    &url.URL{Path: "/init"},
+				Header: http.Header{"Referer": []string{"/chat.freenode.net/%23stuff"}},
+			},
+			Tab{storage.Tab{Server: "chat.freenode.net", Name: "#stuff"}},
 		}, {
-			"/chat.freenode.net/%23stuff",
-			"chat.freenode.net",
-			"#stuff",
+			&http.Request{
+				URL:    &url.URL{Path: "/init"},
+				Header: http.Header{"Referer": []string{"/chat.freenode.net/stuff"}},
+			},
+			Tab{storage.Tab{Server: "chat.freenode.net", Name: "stuff"}},
 		}, {
-			"/chat.freenode.net/%23stuff/cake",
-			"",
-			"",
+			&http.Request{
+				URL:    &url.URL{Path: "/init"},
+				Header: http.Header{"Referer": []string{"/data/chat.freenode.net/%23apples"}},
+			},
+			Tab{},
 		}, {
-			"/data/chat.freenode.net/%23apples",
-			"chat.freenode.net",
-			"#apples",
+			&http.Request{
+				URL: &url.URL{Path: "/ws/chat.freenode.net"},
+			},
+			Tab{storage.Tab{Server: "chat.freenode.net"}},
 		},
 	}
 
 	for _, tc := range cases {
-		server, channel := getTabFromPath(tc.input)
-		assert.Equal(t, tc.expectedServer, server)
-		assert.Equal(t, tc.expectedChannel, channel)
+		tab, err := tabFromRequest(tc.input)
+		assert.Nil(t, err)
+		assert.Equal(t, tc.expectedTab, tab)
 	}
 }

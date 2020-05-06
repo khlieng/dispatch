@@ -3,7 +3,6 @@ package server
 import (
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 	"sync"
 
@@ -163,14 +162,8 @@ func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Path == "/init" {
-		referer, err := url.Parse(r.Header.Get("Referer"))
-		if err != nil {
-			fail(w, http.StatusInternalServerError)
-			return
-		}
-
 		state := d.handleAuth(w, r, true, true)
-		data := d.getIndexData(r, referer.EscapedPath(), state)
+		data := d.getIndexData(r, state)
 
 		writeJSON(w, r, data)
 	} else if strings.HasPrefix(r.URL.Path, "/ws") {

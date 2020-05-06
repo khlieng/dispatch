@@ -38,6 +38,10 @@ type Store interface {
 	GetChannels(user *User) ([]*Channel, error)
 	AddChannel(user *User, channel *Channel) error
 	RemoveChannel(user *User, server, channel string) error
+
+	GetOpenDMs(user *User) ([]Tab, error)
+	AddOpenDM(user *User, server, nick string) error
+	RemoveOpenDM(user *User, server, nick string) error
 }
 
 type SessionStore interface {

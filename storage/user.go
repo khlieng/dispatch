@@ -190,6 +190,23 @@ func (u *User) RemoveChannel(server, channel string) error {
 	return u.store.RemoveChannel(u, server, channel)
 }
 
+type Tab struct {
+	Server string
+	Name   string
+}
+
+func (u *User) GetOpenDMs() ([]Tab, error) {
+	return u.store.GetOpenDMs(u)
+}
+
+func (u *User) AddOpenDM(server, nick string) error {
+	return u.store.AddOpenDM(u, server, nick)
+}
+
+func (u *User) RemoveOpenDM(server, nick string) error {
+	return u.store.RemoveOpenDM(u, server, nick)
+}
+
 type Message struct {
 	ID      string `json:"-" bleve:"-"`
 	Server  string `json:"-" bleve:"server"`

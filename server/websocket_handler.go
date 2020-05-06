@@ -68,17 +68,15 @@ func (h *wsHandler) init(r *http.Request) {
 		h.state.numIRC(), "IRC connections |",
 		h.state.numWS(), "WebSocket connections")
 
+	tab, err := tabFromRequest(r)
+
 	channels, err := h.state.user.GetChannels()
 	if err != nil {
 		log.Println(err)
 	}
-	path := r.URL.EscapedPath()
-	pathServer, pathChannel := getTabFromPath(path)
-	cookieServer, cookieChannel := parseTabCookie(r, path[3:])
 
 	for _, channel := range channels {
-		if (channel.Server == pathServer && channel.Name == pathChannel) ||
-			(channel.Server == cookieServer && channel.Name == cookieChannel) {
+		if channel.Server == tab.Server && channel.Name == tab.Name {
 			// Userlist and messages for this channel gets embedded in the index page
 			continue
 		}
@@ -90,6 +88,19 @@ func (h *wsHandler) init(r *http.Request) {
 		})
 
 		h.state.sendLastMessages(channel.Server, channel.Name, 50)
+	}
+
+	openDMs, err := h.state.user.GetOpenDMs()
+	if err != nil {
+		log.Println(err)
+	}
+
+	for _, openDM := range openDMs {
+		if openDM.Server == tab.Server && openDM.Name == tab.Name {
+			continue
+		}
+
+		h.state.sendLastMessages(openDM.Server, openDM.Name, 50)
 	}
 }
 
@@ -306,6 +317,21 @@ func (h *wsHandler) channelSearch(b []byte) {
 	}
 }
 
+func (h *wsHandler) openDM(b []byte) {
+	var data Tab
+	data.UnmarshalJSON(b)
+
+	h.state.sendLastMessages(data.Server, data.Name, 50)
+	h.state.user.AddOpenDM(data.Server, data.Name)
+}
+
+func (h *wsHandler) closeDM(b []byte) {
+	var data Tab
+	data.UnmarshalJSON(b)
+
+	h.state.user.RemoveOpenDM(data.Server, data.Name)
+}
+
 func (h *wsHandler) initHandlers() {
 	h.handlers = map[string]func([]byte){
 		"connect":         h.connect,
@@ -327,6 +353,8 @@ func (h *wsHandler) initHandlers() {
 		"set_server_name": h.setServerName,
 		"settings_set":    h.setSettings,
 		"channel_search":  h.channelSearch,
+		"open_dm":         h.openDM,
+		"close_dm":        h.closeDM,
 	}
 }
 

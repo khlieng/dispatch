@@ -29,6 +29,13 @@ function loadState({ store }, env) {
     });
   }
 
+  if (env.openDMs) {
+    store.dispatch({
+      type: 'PRIVATE_CHATS',
+      privateChats: env.openDMs
+    });
+  }
+
   if (env.users) {
     store.dispatch({
       type: socketActions.USERS,

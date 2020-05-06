@@ -15,6 +15,7 @@ var (
 	bucketUsers    = []byte("Users")
 	bucketServers  = []byte("Servers")
 	bucketChannels = []byte("Channels")
+	bucketOpenDMs  = []byte("OpenDMs")
 	bucketMessages = []byte("Messages")
 	bucketSessions = []byte("Sessions")
 )
@@ -34,6 +35,7 @@ func New(path string) (*BoltStore, error) {
 		tx.CreateBucketIfNotExists(bucketUsers)
 		tx.CreateBucketIfNotExists(bucketServers)
 		tx.CreateBucketIfNotExists(bucketChannels)
+		tx.CreateBucketIfNotExists(bucketOpenDMs)
 		tx.CreateBucketIfNotExists(bucketMessages)
 		tx.CreateBucketIfNotExists(bucketSessions)
 		return nil
@@ -168,6 +170,13 @@ func (s *BoltStore) RemoveServer(user *storage.User, address string) error {
 			b.Delete(k)
 		}
 
+		b = tx.Bucket(bucketOpenDMs)
+		c = b.Cursor()
+
+		for k, _ := c.Seek(serverID); bytes.HasPrefix(k, serverID); k, _ = c.Next() {
+			b.Delete(k)
+		}
+
 		return nil
 	})
 }
@@ -243,6 +252,42 @@ func (s *BoltStore) RemoveChannel(user *storage.User, server, channel string) er
 		id := channelID(user, server, channel)
 
 		return b.Delete(id)
+	})
+}
+
+func (s *BoltStore) GetOpenDMs(user *storage.User) ([]storage.Tab, error) {
+	var openDMs []storage.Tab
+
+	s.db.View(func(tx *bolt.Tx) error {
+		c := tx.Bucket(bucketOpenDMs).Cursor()
+
+		for k, _ := c.Seek(user.IDBytes); bytes.HasPrefix(k, user.IDBytes); k, _ = c.Next() {
+			tab := bytes.Split(k[8:], []byte{0})
+			openDMs = append(openDMs, storage.Tab{
+				Server: string(tab[0]),
+				Name:   string(tab[1]),
+			})
+		}
+
+		return nil
+	})
+
+	return openDMs, nil
+}
+
+func (s *BoltStore) AddOpenDM(user *storage.User, server, nick string) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketOpenDMs)
+
+		return b.Put(channelID(user, server, nick), nil)
+	})
+}
+
+func (s *BoltStore) RemoveOpenDM(user *storage.User, server, nick string) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketOpenDMs)
+
+		return b.Delete(channelID(user, server, nick))
 	})
 }
 

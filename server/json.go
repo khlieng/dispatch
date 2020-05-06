@@ -221,3 +221,7 @@ type ChannelForward struct {
 	Old    string
 	New    string
 }
+
+type Tab struct {
+	storage.Tab
+}
