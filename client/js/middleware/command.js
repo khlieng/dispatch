@@ -5,7 +5,7 @@ export const beforeHandler = '_before';
 export const notFoundHandler = 'commandNotFound';
 
 function createContext({ dispatch, getState }, { server, channel }) {
-  return { dispatch, getState, server, channel, isChannel: isChannel(channel) };
+  return { dispatch, getState, server, channel, inChannel: isChannel(channel) };
 }
 
 // TODO: Pull this out as convenience action

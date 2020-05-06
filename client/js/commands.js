@@ -1,9 +1,10 @@
 import { COMMAND } from 'state/actions';
 import { join, part, invite, kick, setTopic } from 'state/channels';
 import { sendMessage, raw } from 'state/messages';
+import { openPrivateChat } from 'state/privateChats';
 import { setNick, disconnect, whois, away } from 'state/servers';
 import { select } from 'state/tab';
-import { find } from 'utils';
+import { find, isChannel } from 'utils';
 import createCommandMiddleware, {
   beforeHandler,
   notFoundHandler
@@ -45,10 +46,10 @@ export default createCommandMiddleware(COMMAND, {
     }
   },
 
-  part({ dispatch, server, channel, isChannel }, partChannel) {
+  part({ dispatch, server, channel, inChannel }, partChannel) {
     if (partChannel) {
       dispatch(part([partChannel], server));
-    } else if (isChannel) {
+    } else if (inChannel) {
       dispatch(part([channel], server));
     } else {
       return error('This is not a channel');
@@ -98,6 +99,9 @@ export default createCommandMiddleware(COMMAND, {
     const msg = message.join(' ');
     if (msg !== '') {
       dispatch(sendMessage(message.join(' '), target, server));
+      if (!isChannel(target)) {
+        dispatch(openPrivateChat(server, target));
+      }
       dispatch(select(server, target));
     } else {
       return error('Messages can not be empty');
@@ -117,8 +121,8 @@ export default createCommandMiddleware(COMMAND, {
     }
   },
 
-  invite({ dispatch, server, channel, isChannel }, user, inviteChannel) {
-    if (!inviteChannel && !isChannel) {
+  invite({ dispatch, server, channel, inChannel }, user, inviteChannel) {
+    if (!inviteChannel && !inChannel) {
       return error('This is not a channel');
     }
 
@@ -131,8 +135,8 @@ export default createCommandMiddleware(COMMAND, {
     }
   },
 
-  kick({ dispatch, server, channel, isChannel }, user) {
-    if (!isChannel) {
+  kick({ dispatch, server, channel, inChannel }, user) {
+    if (!inChannel) {
       return error('This is not a channel');
     }
 
