@@ -56,6 +56,7 @@ const AddChannel = () => {
       dispatch(searchChannels(server, ''));
       setTimeout(() => inputEl.current.focus(), 0);
     } else {
+      prevSearch.current = '';
       setQ('');
     }
   }, [modal.isOpen]);
