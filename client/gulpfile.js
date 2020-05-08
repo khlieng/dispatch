@@ -1,6 +1,4 @@
-var path = require('path');
 var exec = require('child_process').exec;
-var url = require('url');
 
 var gulp = require('gulp');
 var gutil = require('gulp-util');
@@ -41,7 +39,9 @@ function js(cb) {
   process.env['NODE_ENV'] = 'production';
 
   compiler.run(function (err, stats) {
-    if (err) throw new gutil.PluginError('webpack', err);
+    if (err) {
+      throw new gutil.PluginError('webpack', err);
+    }
 
     gutil.log(
       '[webpack]',
@@ -50,7 +50,9 @@ function js(cb) {
       })
     );
 
-    if (stats.hasErrors()) process.exit(1);
+    if (stats.hasErrors()) {
+      process.exit(1);
+    }
 
     cb();
   });
