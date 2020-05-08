@@ -107,7 +107,7 @@ github.com/go-acme/lego/v3/lego
 github.com/go-acme/lego/v3/log
 github.com/go-acme/lego/v3/platform/wait
 github.com/go-acme/lego/v3/registration
-# github.com/golang/protobuf v1.4.0
+# github.com/golang/protobuf v1.4.1
 ## explicit
 github.com/golang/protobuf/proto
 # github.com/golang/snappy v0.0.1
@@ -138,7 +138,7 @@ github.com/jpillora/backoff
 # github.com/kjk/betterguid v0.0.0-20170621091430-c442874ba63a
 ## explicit
 github.com/kjk/betterguid
-# github.com/klauspost/cpuid v1.2.3
+# github.com/klauspost/cpuid v1.2.4
 ## explicit
 github.com/klauspost/cpuid
 # github.com/magiconair/properties v1.8.1
@@ -218,13 +218,13 @@ github.com/willf/bitset
 # go.etcd.io/bbolt v1.3.4
 ## explicit
 go.etcd.io/bbolt
-# golang.org/x/crypto v0.0.0-20200427165652-729f1e841bcc
+# golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
 ## explicit
 golang.org/x/crypto/ed25519
 golang.org/x/crypto/ed25519/internal/edwards25519
 golang.org/x/crypto/ocsp
 golang.org/x/crypto/pbkdf2
-# golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0
+# golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
 ## explicit
 golang.org/x/net/bpf
 golang.org/x/net/html
@@ -234,8 +234,9 @@ golang.org/x/net/internal/iana
 golang.org/x/net/internal/socket
 golang.org/x/net/ipv4
 golang.org/x/net/ipv6
-# golang.org/x/sys v0.0.0-20200428200454-593003d681fa
+# golang.org/x/sys v0.0.0-20200501145240-bc7a7d42d5c3
 ## explicit
+golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.2
@@ -243,7 +244,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# google.golang.org/protobuf v1.21.0
+# google.golang.org/protobuf v1.22.0
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
 google.golang.org/protobuf/internal/descfmt
@@ -274,7 +275,7 @@ google.golang.org/protobuf/runtime/protoimpl
 # gopkg.in/ini.v1 v1.55.0
 ## explicit
 gopkg.in/ini.v1
-# gopkg.in/square/go-jose.v2 v2.5.0
+# gopkg.in/square/go-jose.v2 v2.5.1
 ## explicit
 gopkg.in/square/go-jose.v2
 gopkg.in/square/go-jose.v2/cipher

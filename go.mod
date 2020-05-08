@@ -17,12 +17,12 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/glycerine/go-unsnap-stream v0.0.0-20190901134440-81cf024a9e0a // indirect
 	github.com/go-acme/lego/v3 v3.6.0 // indirect
-	github.com/golang/protobuf v1.4.0 // indirect
+	github.com/golang/protobuf v1.4.1 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/jpillora/backoff v1.0.0
 	github.com/kjk/betterguid v0.0.0-20170621091430-c442874ba63a
-	github.com/klauspost/cpuid v1.2.3
+	github.com/klauspost/cpuid v1.2.4
 	github.com/mailru/easyjson v0.7.2-0.20200424172602-f0a000e7a8e0
 	github.com/miekg/dns v1.1.29 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
@@ -42,9 +42,9 @@ require (
 	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
 	go.etcd.io/bbolt v1.3.4
-	golang.org/x/crypto v0.0.0-20200427165652-729f1e841bcc // indirect
-	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0
-	golang.org/x/sys v0.0.0-20200428200454-593003d681fa // indirect
+	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79 // indirect
+	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
+	golang.org/x/sys v0.0.0-20200501145240-bc7a7d42d5c3 // indirect
 	gopkg.in/ini.v1 v1.55.0 // indirect
-	gopkg.in/square/go-jose.v2 v2.5.0 // indirect
+	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 )
