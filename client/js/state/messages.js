@@ -140,6 +140,10 @@ export default createReducer(
       channels.forEach(channel => delete state[server][channel]);
     },
 
+    [actions.CLOSE_PRIVATE_CHAT](state, { server, nick }) {
+      delete state[server][nick];
+    },
+
     [actions.socket.CHANNEL_FORWARD](state, { server, old }) {
       if (state[server]) {
         delete state[server][old];

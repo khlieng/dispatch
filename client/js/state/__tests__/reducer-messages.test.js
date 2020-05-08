@@ -250,6 +250,33 @@ describe('message reducer', () => {
       }
     });
   });
+
+  it('deletes direct messages when closing a direct message tab', () => {
+    let state = {
+      srv: {
+        bob: [{ content: 'msg1' }, { content: 'msg2' }],
+        '#chan2': [{ content: 'msg' }]
+      },
+      srv2: {
+        '#chan1': [{ content: 'msg' }]
+      }
+    };
+
+    state = reducer(state, {
+      type: actions.CLOSE_PRIVATE_CHAT,
+      server: 'srv',
+      nick: 'bob'
+    });
+
+    expect(state).toEqual({
+      srv: {
+        '#chan2': [{ content: 'msg' }]
+      },
+      srv2: {
+        '#chan1': [{ content: 'msg' }]
+      }
+    });
+  });
 });
 
 describe('getMessageTab()', () => {

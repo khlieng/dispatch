@@ -1,5 +1,4 @@
 import sortBy from 'lodash/sortBy';
-import { findIndex } from 'utils';
 import createReducer from 'utils/createReducer';
 import { updateSelection } from './tab';
 import * as actions from './actions';
@@ -10,7 +9,7 @@ function open(state, server, nick) {
   if (!state[server]) {
     state[server] = [];
   }
-  if (findIndex(state[server], n => n === nick) === -1) {
+  if (!state[server].includes(nick)) {
     state[server].push(nick);
     state[server] = sortBy(state[server], v => v.toLowerCase());
   }
@@ -24,7 +23,7 @@ export default createReducer(
     },
 
     [actions.CLOSE_PRIVATE_CHAT](state, { server, nick }) {
-      const i = findIndex(state[server], n => n === nick);
+      const i = state[server]?.findIndex(n => n === nick);
       if (i !== -1) {
         state[server].splice(i, 1);
       }
@@ -53,13 +52,17 @@ export default createReducer(
 );
 
 export function openPrivateChat(server, nick) {
-  return {
-    type: actions.OPEN_PRIVATE_CHAT,
-    server,
-    nick,
-    socket: {
-      type: 'open_dm',
-      data: { server, name: nick }
+  return (dispatch, getState) => {
+    if (!getState().privateChats[server]?.includes(nick)) {
+      dispatch({
+        type: actions.OPEN_PRIVATE_CHAT,
+        server,
+        nick,
+        socket: {
+          type: 'open_dm',
+          data: { server, name: nick }
+        }
+      });
     }
   };
 }
