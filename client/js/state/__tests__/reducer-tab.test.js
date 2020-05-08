@@ -85,7 +85,7 @@ describe('tab reducer', () => {
   it('clears the tab when navigating to a non-tab page', () => {
     let state = reducer(undefined, setSelectedTab('srv', '#chan'));
 
-    state = reducer(state, locationChanged('settings'));
+    state = reducer(state, locationChanged('settings', {}, {}));
 
     expect(state).toEqual({
       selected: {},
@@ -96,10 +96,14 @@ describe('tab reducer', () => {
   it('selects the tab and adds it to history when navigating to a tab', () => {
     const state = reducer(
       undefined,
-      locationChanged('chat', {
-        server: 'srv',
-        name: '#chan'
-      })
+      locationChanged(
+        'chat',
+        {
+          server: 'srv',
+          name: '#chan'
+        },
+        {}
+      )
     );
 
     expect(state).toEqual({

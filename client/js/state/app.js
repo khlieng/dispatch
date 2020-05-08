@@ -15,7 +15,8 @@ const initialState = {
   windowWidth: 0,
   connectDefaults: {
     name: '',
-    address: '',
+    host: '',
+    port: '',
     channels: [],
     ssl: false,
     password: false,

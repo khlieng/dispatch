@@ -14,6 +14,26 @@ const getSortedDefaultChannels = createSelector(
   channels => channels.split(',').sort()
 );
 
+const transformChannels = channels => {
+  const comma = channels[channels.length - 1] === ',';
+
+  channels = channels
+    .split(',')
+    .map(channel => {
+      channel = channel.trim();
+      if (channel) {
+        if (isValidChannel(channel, false) && channel[0] !== '#') {
+          channel = `#${channel}`;
+        }
+      }
+      return channel;
+    })
+    .filter(s => s)
+    .join(',');
+
+  return comma ? `${channels},` : channels;
+};
+
 class Connect extends Component {
   state = {
     showOptionals: false
@@ -49,26 +69,6 @@ class Connect extends Component {
       return this.props.values.tls ? 6697 : 6667;
     }
     return port;
-  };
-
-  transformChannels = channels => {
-    const comma = channels[channels.length - 1] === ',';
-
-    channels = channels
-      .split(',')
-      .map(channel => {
-        channel = channel.trim();
-        if (channel) {
-          if (isValidChannel(channel, false) && channel[0] !== '#') {
-            channel = `#${channel}`;
-          }
-        }
-        return channel;
-      })
-      .filter(s => s)
-      .join(',');
-
-    return comma ? `${channels},` : channels;
   };
 
   render() {
@@ -117,7 +117,7 @@ class Connect extends Component {
           <Error name="host" />
           <Error name="port" />
           <TextInput name="nick" />
-          <TextInput name="channels" transform={this.transformChannels} />
+          <TextInput name="channels" transform={transformChannels} />
           {this.state.showOptionals && this.renderOptionals()}
           <Button
             className="connect-form-button-optionals"
@@ -140,24 +140,38 @@ class Connect extends Component {
 
 export default withFormik({
   enableReinitialize: true,
-  mapPropsToValues: ({ defaults }) => {
-    let port = 6667;
-    if (defaults.port) {
-      ({ port } = defaults);
+  mapPropsToValues: ({ defaults, query }) => {
+    let port = '6667';
+    if (query.port || defaults.port) {
+      port = query.port || defaults.port;
     } else if (defaults.ssl) {
-      port = 6697;
+      port = '6697';
+    }
+
+    let { channels } = query;
+    if (channels) {
+      channels = transformChannels(channels);
+    }
+
+    let ssl;
+    if (query.ssl === 'true') {
+      ssl = true;
+    } else if (query.ssl === 'false') {
+      ssl = false;
+    } else {
+      ssl = defaults.ssl || false;
     }
 
     return {
-      name: defaults.name,
-      host: defaults.host,
+      name: query.name || defaults.name,
+      host: query.host || defaults.host,
       port,
-      nick: '',
-      channels: defaults.channels.join(','),
-      username: '',
+      nick: query.nick || '',
+      channels: channels || defaults.channels.join(','),
+      username: query.username || '',
       password: defaults.password ? '      ' : '',
-      realname: '',
-      tls: defaults.ssl || false
+      realname: query.realname || '',
+      tls: ssl
     };
   },
   validate: values => {
@@ -202,6 +216,8 @@ export default withFormik({
     const { connect, select, join } = props;
     const channels = values.channels ? values.channels.split(',') : [];
     delete values.channels;
+
+    values.password = values.password.trim();
 
     values.port = `${values.port}`;
     connect(values);

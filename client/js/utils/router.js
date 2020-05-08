@@ -6,11 +6,21 @@ export const PUSH = 'ROUTER_PUSH';
 export const REPLACE = 'ROUTER_REPLACE';
 
 export function locationChanged(route, params, location) {
+  Object.keys(params).forEach(key => {
+    params[key] = decodeURIComponent(params[key]);
+  });
+
+  const query = {};
+  new URLSearchParams(location.search).forEach((value, key) => {
+    query[key] = value;
+  });
+
   return {
     type: LOCATION_CHANGED,
     route,
     params,
-    location
+    query,
+    path: decodeURIComponent(location.pathname)
   };
 }
 
@@ -28,13 +38,9 @@ export function replace(path) {
   };
 }
 
-export function routeReducer(state = {}, action) {
-  if (action.type === LOCATION_CHANGED) {
-    return {
-      route: action.route,
-      params: action.params,
-      location: action.location
-    };
+export function routeReducer(state = {}, { type, ...action }) {
+  if (type === LOCATION_CHANGED) {
+    return action;
   }
 
   return state;
@@ -44,7 +50,7 @@ export function routeMiddleware() {
   return next => action => {
     switch (action.type) {
       case PUSH:
-        history.push(action.path);
+        history.push(`${action.path}`);
         break;
       case REPLACE:
         history.replace(action.path);
@@ -55,24 +61,13 @@ export function routeMiddleware() {
   };
 }
 
-function decode(location) {
-  location.pathname = decodeURIComponent(location.pathname);
-  return location;
-}
-
 function match(routes, location) {
-  let params;
   for (let i = 0; i < routes.length; i++) {
-    params = routes[i].pattern.match(location.pathname);
+    const params = routes[i].pattern.match(location.pathname);
     if (params !== null) {
-      const keys = Object.keys(params);
-      for (let j = 0; j < keys.length; j++) {
-        params[keys[j]] = decodeURIComponent(params[keys[j]]);
-      }
-      return locationChanged(routes[i].name, params, decode({ ...location }));
+      return locationChanged(routes[i].name, params, location);
     }
   }
-  return null;
 }
 
 export default function initRouter(routes, store) {
@@ -91,16 +86,11 @@ export default function initRouter(routes, store) {
   let matched = match(patterns, history.location);
   if (matched) {
     store.dispatch(matched);
-  } else {
-    matched = { location: {} };
   }
 
   history.listen(({ location }) => {
     const nextMatch = match(patterns, location);
-    if (
-      nextMatch &&
-      nextMatch.location.pathname !== matched.location.pathname
-    ) {
+    if (nextMatch && nextMatch.path !== matched?.path) {
       matched = nextMatch;
       store.dispatch(matched);
     }

@@ -11,14 +11,8 @@ import (
 )
 
 type connectDefaults struct {
-	Name        string
-	Host        string
-	Port        int
-	Channels    []string
-	Password    bool
-	SSL         bool
-	ReadOnly    bool
-	ShowDetails bool
+	*config.Defaults
+	Password bool
 }
 
 type dispatchVersion struct {
@@ -28,7 +22,7 @@ type dispatchVersion struct {
 }
 
 type indexData struct {
-	Defaults *config.Defaults
+	Defaults connectDefaults
 	Servers  []Server
 	Channels []*storage.Channel
 	OpenDMs  []storage.Tab
@@ -48,7 +42,7 @@ func (d *Dispatch) getIndexData(r *http.Request, state *State) *indexData {
 	cfg := d.Config()
 
 	data := indexData{
-		Defaults: &cfg.Defaults,
+		Defaults: connectDefaults{Defaults: &cfg.Defaults},
 		HexIP:    cfg.HexIP,
 		Version: dispatchVersion{
 			Tag:    version.Tag,
@@ -57,9 +51,7 @@ func (d *Dispatch) getIndexData(r *http.Request, state *State) *indexData {
 		},
 	}
 
-	if data.Defaults.Password != "" {
-		data.Defaults.Password = "******"
-	}
+	data.Defaults.Password = cfg.Defaults.Password != ""
 
 	if state == nil {
 		data.Settings = storage.DefaultClientSettings()

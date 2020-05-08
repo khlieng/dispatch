@@ -8,7 +8,8 @@ import connect from 'utils/connect';
 
 const mapState = createStructuredSelector({
   defaults: getConnectDefaults,
-  hexIP: state => getApp(state).hexIP
+  hexIP: state => getApp(state).hexIP,
+  query: state => state.router.query
 });
 
 const mapDispatch = {

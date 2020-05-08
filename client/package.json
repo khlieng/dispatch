@@ -26,6 +26,7 @@
     "babel-loader": "^8.1.0",
     "brotli": "^1.3.1",
     "copy-webpack-plugin": "^5.1.1",
+    "cross-env": "^7.0.2",
     "css-loader": "^3.5.3",
     "cssnano": "^4.1.10",
     "del": "^5.1.0",
@@ -92,9 +93,9 @@
     "test": "jest",
     "test:verbose": "jest --verbose",
     "test:watch": "jest --watch",
-    "gen:install": "GO111MODULE=off go get -u github.com/andyleap/gencode github.com/mailru/easyjson/...",
+    "gen:install": "cross-env GO111MODULE=off go get -u github.com/andyleap/gencode github.com/mailru/easyjson/...",
     "gen:binary": "gencode go -package storage -schema ../storage/storage.schema -unsafe",
-    "gen:json": "easyjson -all -lower_camel_case -omit_empty ../server/json.go ../server/index_data.go && easyjson -lower_camel_case -omit_empty ../storage/user.go"
+    "gen:json": "cross-env GO111MODULE=off easyjson -all -lower_camel_case -omit_empty ../server/json.go ../server/index_data.go && cross-env GO111MODULE=off easyjson -lower_camel_case -omit_empty ../storage/user.go"
   },
   "jest": {
     "moduleNameMapper": {
