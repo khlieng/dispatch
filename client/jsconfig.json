@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./js"
+  },
+  "exclude": ["node_modules"]
+}
