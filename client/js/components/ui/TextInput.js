@@ -4,24 +4,6 @@ import classnames from 'classnames';
 import capitalize from 'lodash/capitalize';
 import Error from 'components/ui/formik/Error';
 
-const getValue = (e, trim) => {
-  let v = e.target.value;
-
-  if (trim) {
-    v = v.trim();
-  }
-
-  if (e.target.type === 'number') {
-    v = parseFloat(v);
-    /* eslint-disable-next-line no-self-compare */
-    if (v !== v) {
-      v = '';
-    }
-  }
-
-  return v;
-};
-
 export default class TextInput extends PureComponent {
   constructor(props) {
     super(props);
@@ -85,7 +67,12 @@ export default class TextInput extends PureComponent {
                 {...field}
                 {...props}
                 onChange={e => {
-                  let v = getValue(e, !noTrim);
+                  let v = e.target.value;
+
+                  if (!noTrim) {
+                    v = v.trim();
+                  }
+
                   if (transform) {
                     v = transform(v);
                   }
@@ -99,17 +86,17 @@ export default class TextInput extends PureComponent {
                   }
                 }}
                 onBlur={e => {
-                  if (blurTransform) {
-                    const v = blurTransform(getValue(e));
-
-                    if (v && v !== field.value) {
-                      form.setFieldValue(name, v, false);
-                    }
-                  }
-
                   field.onBlur(e);
                   if (props.onBlur) {
                     props.onBlur(e);
+                  }
+
+                  if (blurTransform) {
+                    const v = blurTransform(e.target.value);
+
+                    if (v && v !== field.value) {
+                      form.setFieldValue(name, v);
+                    }
                   }
                 }}
               />

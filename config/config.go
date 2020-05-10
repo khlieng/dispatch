@@ -24,7 +24,7 @@ type Config struct {
 type Defaults struct {
 	Name        string
 	Host        string
-	Port        int
+	Port        string
 	Channels    []string
 	Password    string
 	SSL         bool

@@ -121,6 +121,10 @@ export function isValidUsername(username) {
 }
 
 export function isInt(i, min, max) {
+  if (typeof i === 'string') {
+    i = parseInt(i, 10);
+  }
+
   if (i < min || i > max || Math.floor(i) !== i) {
     return false;
   }

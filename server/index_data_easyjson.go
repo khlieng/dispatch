@@ -560,7 +560,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer2(in *jlexer.Lexer, out
 		case "host":
 			out.Host = string(in.String())
 		case "port":
-			out.Port = int(in.Int())
+			out.Port = string(in.String())
 		case "channels":
 			if in.IsNull() {
 				in.Skip()
@@ -630,7 +630,7 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer2(out *jwriter.Writer, 
 		}
 		out.String(string(in.Host))
 	}
-	if in.Port != 0 {
+	if in.Port != "" {
 		const prefix string = ",\"port\":"
 		if first {
 			first = false
@@ -638,7 +638,7 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer2(out *jwriter.Writer, 
 		} else {
 			out.RawString(prefix)
 		}
-		out.Int(int(in.Port))
+		out.String(string(in.Port))
 	}
 	if len(in.Channels) != 0 {
 		const prefix string = ",\"channels\":"

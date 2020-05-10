@@ -41,10 +41,10 @@ class Connect extends Component {
 
   handleSSLChange = e => {
     const { values, setFieldValue } = this.props;
-    if (e.target.checked && values.port === 6667) {
-      setFieldValue('port', 6697, false);
-    } else if (!e.target.checked && values.port === 6697) {
-      setFieldValue('port', 6667, false);
+    if (e.target.checked && values.port === '6667') {
+      setFieldValue('port', '6697', false);
+    } else if (!e.target.checked && values.port === '6697') {
+      setFieldValue('port', '6667', false);
     }
   };
 
@@ -66,7 +66,7 @@ class Connect extends Component {
 
   transformPort = port => {
     if (!port) {
-      return this.props.values.tls ? 6697 : 6667;
+      return this.props.values.tls ? '6697' : '6667';
     }
     return port;
   };
