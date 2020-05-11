@@ -18,6 +18,7 @@ type ChannelListIndex interface {
 	Finish()
 	Search(q string) []*ChannelListItem
 	SearchN(q string, start, n int) []*ChannelListItem
+	len() int
 }
 
 type MapChannelListIndex struct {
@@ -72,6 +73,10 @@ func (idx *MapChannelListIndex) SearchN(q string, start, n int) []*ChannelListIt
 		return nil
 	}
 	return res[start:min(start+n, len(res))]
+}
+
+func (idx *MapChannelListIndex) len() int {
+	return len(idx.channels)
 }
 
 func min(x, y int) int {
@@ -142,12 +147,14 @@ func (m *ChannelIndexManager) Get(server string) (ChannelListIndex, bool) {
 }
 
 func (m *ChannelIndexManager) Set(server string, index ChannelListIndex) {
-	m.lock.Lock()
-	m.indexes[server] = &managedChannelIndex{
-		index:     index,
-		updatedAt: time.Now(),
+	if index.len() > 0 {
+		m.lock.Lock()
+		m.indexes[server] = &managedChannelIndex{
+			index:     index,
+			updatedAt: time.Now(),
+		}
+		m.lock.Unlock()
 	}
-	m.lock.Unlock()
 }
 
 func (m *ChannelIndexManager) timeoutUpdate(server string) {
