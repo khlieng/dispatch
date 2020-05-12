@@ -1,12 +1,7 @@
 package irc
 
 import (
-	"encoding/json"
-	"fmt"
-	"path"
-	"strconv"
 	"strings"
-	"unicode"
 )
 
 type Message struct {
@@ -17,26 +12,6 @@ type Message struct {
 	Params  []string
 }
 
-type DownloadProgress struct {
-	File           string  `json:"file"`
-	Error          error   `json:"error"`
-	BytesCompleted string  `json:"bytes_completed"`
-	BytesRemaining string  `json:"bytes_remaining"`
-	PercCompletion float64 `json:"perc_completion"`
-	AvgSpeed       string  `json:"avg_speed"`
-	InstSpeed      string  `json:"speed"`
-	SecondsElapsed int64   `json:"elapsed"`
-	SecondsToGo    float64 `json:"eta"`
-}
-
-// CTCP is used to parse a message into a CTCP message
-type CTCP struct {
-	File   string `json:"file"`
-	IP     string `json:"ip"`
-	Port   uint16 `json:"port"`
-	Length uint64 `json:"length"`
-}
-
 func (m *Message) LastParam() string {
 	if len(m.Params) > 0 {
 		return m.Params[len(m.Params)-1]
@@ -44,37 +19,31 @@ func (m *Message) LastParam() string {
 	return ""
 }
 
-// ToCTCP tries to parse the message parameters into a CTCP message
-func (m *Message) ToCTCP() *CTCP {
-	params := strings.Join(m.Params, " ")
-	if strings.Contains(params, "DCC SEND") {
-		// to be extra sure that there are non-printable characters
-		params = strings.TrimFunc(params, func(r rune) bool {
-			return !unicode.IsPrint(r)
-		})
-		parts := strings.Split(params, " ")
-		ip, err := strconv.Atoi(parts[4])
-		port, err := strconv.Atoi(parts[5])
-		length, err := strconv.Atoi(parts[6])
+type CTCP struct {
+	Command string
+	Params  string
+}
 
-		if err != nil {
+func (m *Message) ToCTCP() *CTCP {
+	lp := m.LastParam()
+
+	if len(lp) > 1 && lp[0] == 0x01 {
+		parts := strings.SplitN(strings.Trim(lp, "\x01"), " ", 2)
+		ctcp := CTCP{}
+
+		if parts[0] != "" {
+			ctcp.Command = parts[0]
+		} else {
 			return nil
 		}
 
-		ip3 := uint32ToIP(ip)
-
-		filename := path.Base(parts[3])
-		if filename == "/" || filename == "." {
-			filename = ""
+		if len(parts) == 2 {
+			ctcp.Params = parts[1]
 		}
 
-		return &CTCP{
-			File:   filename,
-			IP:     ip3,
-			Port:   uint16(port),
-			Length: uint64(length),
-		}
+		return &ctcp
 	}
+
 	return nil
 }
 
@@ -170,20 +139,4 @@ var unescapeTagReplacer = strings.NewReplacer(
 
 func unescapeTag(s string) string {
 	return unescapeTagReplacer.Replace(s)
-}
-
-func uint32ToIP(n int) string {
-	var byte1 = n & 255
-	var byte2 = ((n >> 8) & 255)
-	var byte3 = ((n >> 16) & 255)
-	var byte4 = ((n >> 24) & 255)
-	return fmt.Sprintf("%d.%d.%d.%d", byte4, byte3, byte2, byte1)
-}
-
-func (p DownloadProgress) ToJSON() string {
-	progress, err := json.Marshal(p)
-	if err != nil {
-		return ""
-	}
-	return string(progress)
 }
