@@ -61,7 +61,7 @@ func (c *Client) Download(pack *DCCSend) {
 		PercCompletion: 0,
 		File:           pack.File,
 	}
-	file, err := os.OpenFile(filepath.Join(c.DownloadFolder, pack.File), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(filepath.Join(c.DownloadFolder, pack.File), os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		c.Progress <- DownloadProgress{
 			PercCompletion: -1,
@@ -85,8 +85,8 @@ func (c *Client) Download(pack *DCCSend) {
 
 	defer con.Close()
 
-	var avgSpeed float64
-	var prevTime int64 = -1
+	var speed float64
+	var prevPerc float64
 	secondsElapsed := int64(0)
 	totalBytes := uint64(0)
 	buf := make([]byte, 0, 4*1024)
@@ -118,31 +118,25 @@ func (c *Client) Download(pack *DCCSend) {
 
 		now := time.Now().UnixNano()
 		secondsElapsed = (now - start) / 1e9
-		avgSpeed = round2(float64(totalBytes) / (float64(secondsElapsed)))
-		speed := 0.0
-
-		if prevTime < 0 {
-			speed = avgSpeed
-		} else {
-			speed = round2(1e9 * float64(cycleBytes) / (float64(now - prevTime)))
-		}
-		secondsToGo := (float64(pack.Length) - float64(totalBytes)) / speed
-		prevTime = now
+		speed = round2(float64(totalBytes) / (float64(secondsElapsed)))
+		secondsToGo := round2((float64(pack.Length) - float64(totalBytes)) / speed)
 		con.Write(byteRead(totalBytes))
-		c.Progress <- DownloadProgress{
-			InstSpeed:      humanReadableByteCount(speed, true),
-			AvgSpeed:       humanReadableByteCount(avgSpeed, true),
-			PercCompletion: percentage,
-			BytesRemaining: humanReadableByteCount(float64(pack.Length-totalBytes), false),
-			BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
-			SecondsElapsed: secondsElapsed,
-			SecondsToGo:    secondsToGo,
-			File:           pack.File,
+		if percentage-prevPerc >= 0.1 {
+			prevPerc = percentage
+			c.Progress <- DownloadProgress{
+				Speed:          humanReadableByteCount(speed, true),
+				PercCompletion: percentage,
+				BytesRemaining: humanReadableByteCount(float64(pack.Length-totalBytes), false),
+				BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
+				SecondsElapsed: secondsElapsed,
+				SecondsToGo:    secondsToGo,
+				File:           pack.File,
+			}
 		}
 	}
 	con.Write(byteRead(totalBytes))
 	c.Progress <- DownloadProgress{
-		AvgSpeed:       humanReadableByteCount(avgSpeed, true),
+		Speed:          humanReadableByteCount(speed, true),
 		PercCompletion: 100,
 		BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
 		SecondsElapsed: secondsElapsed,
@@ -156,8 +150,7 @@ type DownloadProgress struct {
 	BytesCompleted string  `json:"bytes_completed"`
 	BytesRemaining string  `json:"bytes_remaining"`
 	PercCompletion float64 `json:"perc_completion"`
-	AvgSpeed       string  `json:"avg_speed"`
-	InstSpeed      string  `json:"speed"`
+	Speed          string  `json:"speed"`
 	SecondsElapsed int64   `json:"elapsed"`
 	SecondsToGo    float64 `json:"eta"`
 }

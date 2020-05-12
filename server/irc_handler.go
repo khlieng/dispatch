@@ -64,7 +64,7 @@ func (i *ircHandler) run() {
 				i.log("Connected")
 			}
 		case progress := <-i.client.Progress:
-			i.state.sendJSON("progress", progress.ToJSON())
+			i.state.sendJSON("pm", Message{Server: i.client.Host, From: "@dcc", Content: progress.ToJSON()})
 		}
 	}
 }
