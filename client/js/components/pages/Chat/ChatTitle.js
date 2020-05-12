@@ -58,12 +58,23 @@ const ChatTitle = ({
           {serverError}
         </div>
         {tab.name && (
-          <Button icon={FiSearch} title="Search" onClick={onToggleSearch} />
+          <Button
+            icon={FiSearch}
+            title="Search"
+            aria-label="Search"
+            onClick={onToggleSearch}
+          />
         )}
-        <Button icon={FiX} title={closeTitle} onClick={onCloseClick} />
+        <Button
+          icon={FiX}
+          title={closeTitle}
+          aria-label={closeTitle}
+          onClick={onCloseClick}
+        />
         <Button
           icon={FiUsers}
           className="button-userlist"
+          aria-label="Users"
           onClick={onToggleUserList}
         />
       </div>

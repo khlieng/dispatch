@@ -114,9 +114,17 @@ export default class TabList extends PureComponent {
       <div className={className}>
         <div className="tab-container">{tabs}</div>
         <div className="side-buttons">
-          <Button icon={FiPlus} onClick={this.handleConnectClick} />
-          <Button icon={FiUser} />
-          <Button icon={FiSettings} onClick={this.handleSettingsClick} />
+          <Button
+            icon={FiPlus}
+            aria-label="Connect"
+            onClick={this.handleConnectClick}
+          />
+          <Button icon={FiUser} aria-label="User" />
+          <Button
+            icon={FiSettings}
+            aria-label="Settings"
+            onClick={this.handleSettingsClick}
+          />
         </div>
       </div>
     );

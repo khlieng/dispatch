@@ -1,9 +1,9 @@
 import React from 'react';
 import classnames from 'classnames';
 
-const Checkbox = ({ name, label, topLabel, ...props }) => (
+const Checkbox = ({ name, label, topLabel, classNameLabel, ...props }) => (
   <label
-    className={classnames('checkbox', {
+    className={classnames('checkbox', classNameLabel, {
       'top-label': topLabel
     })}
     htmlFor={name}

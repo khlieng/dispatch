@@ -180,7 +180,7 @@ i[class*=' icon-']:before {
   padding: 25px 15px 10px;
 }
 
-.textinput span {
+.textinput-label {
   position: absolute;
   top: 0;
   left: 0;
@@ -441,11 +441,15 @@ input::-webkit-inner-spin-button {
 .connect-form-address label {
   margin-top: 5px;
   font: 12px 'Montserrat', sans-serif;
-  padding: 10px;
+  padding: 10px 0;
   padding-bottom: 0;
   text-align: center;
   background: #fff;
   color: #777;
+}
+
+.connect-form-ssl {
+  padding: 10px !important;
 }
 
 .connect-form-button-optionals {

@@ -108,6 +108,7 @@ class Connect extends Component {
               noError
             />
             <Checkbox
+              classNameLabel="connect-form-ssl"
               name="tls"
               label="SSL"
               topLabel
@@ -122,6 +123,7 @@ class Connect extends Component {
           <Button
             className="connect-form-button-optionals"
             icon={FiMoreHorizontal}
+            aria-label="Show more"
             onClick={this.handleShowClick}
           />
           <Button type="submit">Connect</Button>

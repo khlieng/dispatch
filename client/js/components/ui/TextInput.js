@@ -58,6 +58,7 @@ export default class TextInput extends PureComponent {
                 className={field.value && 'value'}
                 type="text"
                 name={name}
+                id={name}
                 autoCapitalize="off"
                 autoCorrect="off"
                 autoComplete="off"
@@ -100,16 +101,17 @@ export default class TextInput extends PureComponent {
                   }
                 }}
               />
-              <span
-                className={classnames('textinput-1', {
+              <label
+                htmlFor={name}
+                className={classnames('textinput-label', 'textinput-1', {
                   value: field.value,
                   error: form.touched[name] && form.errors[name]
                 })}
               >
                 {label}
-              </span>
+              </label>
               <span
-                className={classnames('textinput-2', {
+                className={classnames('textinput-label', 'textinput-2', {
                   value: field.value,
                   error: form.touched[name] && form.errors[name]
                 })}
