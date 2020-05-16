@@ -8,6 +8,7 @@ import {
   isChannel,
   formatDate
 } from 'utils';
+import colorify from 'utils/colorify';
 import createReducer from 'utils/createReducer';
 import { getApp } from './app';
 import { getSelectedTab } from './tab';
@@ -224,7 +225,8 @@ function initMessage(message, tab, state) {
     6 * charWidth,
     windowWidth
   );
-  message.content = linkify(message.content);
+
+  message.content = colorify(linkify(message.content));
 
   return message;
 }
