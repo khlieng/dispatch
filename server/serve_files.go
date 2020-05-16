@@ -95,7 +95,7 @@ func (d *Dispatch) initFileServer() {
 
 		indexStylesheet := "/" + findAssetName("main*.css")
 		indexScripts := []string{
-			"/" + findAssetName("vendors*.js"),
+			"/" + findAssetName("vendors~main*.js"),
 			"/" + findAssetName("main*.js"),
 		}
 
@@ -103,6 +103,8 @@ func (d *Dispatch) initFileServer() {
 			newH2PushAsset(indexStylesheet),
 			newH2PushAsset(indexScripts[0]),
 			newH2PushAsset(indexScripts[1]),
+			newH2PushAsset("/" + findAssetName("vendors~connect*.js")),
+			newH2PushAsset("/" + findAssetName("connect*.js")),
 		}
 
 		for _, asset := range h2PushAssets {

@@ -6,7 +6,9 @@ import cn from 'classnames';
 
 const Modals = lazy(() => import('components/modals'));
 const Chat = lazy(() => import('containers/Chat'));
-const Connect = lazy(() => import('containers/Connect'));
+const Connect = lazy(() =>
+  import(/* webpackChunkName: "connect" */ 'containers/Connect')
+);
 const Settings = lazy(() => import('containers/Settings'));
 
 const App = ({
