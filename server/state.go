@@ -228,15 +228,24 @@ func (s *stateData) Set(key string, value interface{}) {
 }
 
 func (s *stateData) String(key string) string {
-	return s.Get(key).(string)
+	if v, ok := s.Get(key).(string); ok {
+		return v
+	}
+	return ""
 }
 
 func (s *stateData) Int(key string) int {
-	return s.Get(key).(int)
+	if v, ok := s.Get(key).(int); ok {
+		return v
+	}
+	return 0
 }
 
 func (s *stateData) Bool(key string) bool {
-	return s.Get(key).(bool)
+	if v, ok := s.Get(key).(bool); ok {
+		return v
+	}
+	return false
 }
 
 type stateStore struct {
