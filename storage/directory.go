@@ -56,6 +56,10 @@ func (d directory) Downloads(username string) string {
 	return filepath.Join(d.User(username), "downloads")
 }
 
+func (d directory) DownloadedFile(username string, file string) string {
+	return filepath.Join(d.Downloads(username), file)
+}
+
 func (d directory) Config() string {
 	return filepath.Join(d.ConfigRoot(), "config.toml")
 }

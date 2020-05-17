@@ -10,4 +10,8 @@ precacheAndRoute(self.__WB_MANIFEST, {
 });
 
 const handler = createHandlerBoundToURL('/');
-registerRoute(new NavigationRoute(handler));
+registerRoute(
+  new NavigationRoute(handler, {
+    denylist: [new RegExp('/downloads/')]
+  })
+);

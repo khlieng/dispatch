@@ -73,7 +73,6 @@ func (c *Client) Download(pack *DCCSend) {
 	defer file.Close()
 
 	con, err := net.Dial("tcp", fmt.Sprintf("%s:%d", pack.IP, pack.Port))
-
 	if err != nil {
 		c.Progress <- DownloadProgress{
 			PercCompletion: -1,
@@ -86,7 +85,7 @@ func (c *Client) Download(pack *DCCSend) {
 	defer con.Close()
 
 	var speed float64
-	var prevPerc float64
+	var prevUpdate time.Time
 	secondsElapsed := int64(0)
 	totalBytes := uint64(0)
 	buf := make([]byte, 0, 4*1024)
@@ -120,9 +119,12 @@ func (c *Client) Download(pack *DCCSend) {
 		secondsElapsed = (now - start) / 1e9
 		speed = round2(float64(totalBytes) / (float64(secondsElapsed)))
 		secondsToGo := round2((float64(pack.Length) - float64(totalBytes)) / speed)
+
 		con.Write(byteRead(totalBytes))
-		if percentage-prevPerc >= 0.1 {
-			prevPerc = percentage
+
+		if time.Since(prevUpdate) >= time.Second {
+			prevUpdate = time.Now()
+
 			c.Progress <- DownloadProgress{
 				Speed:          humanReadableByteCount(speed, true),
 				PercCompletion: percentage,
@@ -134,7 +136,9 @@ func (c *Client) Download(pack *DCCSend) {
 			}
 		}
 	}
+
 	con.Write(byteRead(totalBytes))
+
 	c.Progress <- DownloadProgress{
 		Speed:          humanReadableByteCount(speed, true),
 		PercCompletion: 100,

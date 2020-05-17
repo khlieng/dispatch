@@ -63,8 +63,23 @@ func (i *ircHandler) run() {
 			} else if state.Connected {
 				i.log("Connected")
 			}
+
 		case progress := <-i.client.Progress:
-			i.state.sendJSON("pm", Message{Server: i.client.Host, From: "@dcc", Content: progress.ToJSON()})
+			if progress.PercCompletion == 100 {
+				i.state.sendJSON("pm", Message{
+					Server: i.client.Host,
+					From:   "@dcc",
+					Content: fmt.Sprintf("%s://%s/downloads/%s/%s", i.state.String("scheme"),
+						i.state.String("host"), i.state.user.Username, progress.File),
+				})
+			} else {
+				i.state.sendJSON("pm", Message{
+					Server: i.client.Host,
+					From:   "@dcc",
+					Content: fmt.Sprintf("%s: %.2f%% %s remaining, %.2fs left", progress.File,
+						progress.PercCompletion, progress.BytesRemaining, progress.SecondsToGo),
+				})
+			}
 		}
 	}
 }
