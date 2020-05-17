@@ -5,7 +5,6 @@ port = 80
 hexIP = false
 verify_certificates = true
 
-download_folder = ""
 autoget = false
 
 # Defaults for the client connect form

@@ -70,7 +70,7 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 		}
 	}
 
-	i.DownloadFolder = cfg.DownloadFolder
+	i.DownloadFolder = storage.Path.Downloads(state.user.Username)
 	i.Autoget = cfg.Autoget
 
 	state.setIRC(server.Host, i)
