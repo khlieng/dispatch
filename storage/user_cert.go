@@ -42,17 +42,7 @@ func (u *User) SetCertificate(certPEM, keyPEM []byte) error {
 }
 
 func (u *User) loadCertificate() error {
-	certPEM, err := ioutil.ReadFile(Path.Certificate(u.Username))
-	if err != nil {
-		return err
-	}
-
-	keyPEM, err := ioutil.ReadFile(Path.Key(u.Username))
-	if err != nil {
-		return err
-	}
-
-	cert, err := tls.X509KeyPair(certPEM, keyPEM)
+	cert, err := tls.LoadX509KeyPair(Path.Certificate(u.Username), Path.Key(u.Username))
 	if err != nil {
 		return err
 	}
