@@ -24,17 +24,13 @@ const indexTemplate = `
   <script>{{.InlineScript}}</script>
   {{end}}
 
-  {{range .Scripts}}
-  <script src="{{.}}" defer></script>
-  {{end}}
-
   <link rel="preload" href="/font/RobotoMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/font/Montserrat-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/font/Montserrat-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/font/RobotoMono-Bold.woff2" as="font" type="font/woff2" crossorigin>
 
   {{if .Stylesheet}}
-  <link href="{{.Stylesheet}}" rel="stylesheet">
+  <link rel="stylesheet" href="{{.Stylesheet}}">
   {{end}}
 
   <link rel="manifest" href="/manifest.json">
@@ -44,6 +40,10 @@ const indexTemplate = `
 <body>
   <noscript>This page needs JavaScript enabled to function.</noscript>
   <div id="root"></div>
+
+  {{range .Scripts}}
+  <script src="{{.}}"></script>
+  {{end}}
 </body>
 
 </html>`
