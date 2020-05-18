@@ -18,7 +18,7 @@ import (
 type DCCSend struct {
 	File   string `json:"file"`
 	IP     string `json:"ip"`
-	Port   uint16 `json:"port"`
+	Port   string `json:"port"`
 	Length uint64 `json:"length"`
 }
 
@@ -27,14 +27,14 @@ func ParseDCCSend(ctcp *CTCP) *DCCSend {
 
 	if len(params) > 4 {
 		ip, err := strconv.Atoi(params[2])
-		port, err := strconv.Atoi(params[3])
-		length, err := strconv.Atoi(params[4])
-
 		if err != nil {
 			return nil
 		}
 
-		ip3 := uint32ToIP(ip)
+		length, err := strconv.ParseUint(params[4], 10, 64)
+		if err != nil {
+			return nil
+		}
 
 		filename := path.Base(params[1])
 		if filename == "/" || filename == "." {
@@ -43,9 +43,9 @@ func ParseDCCSend(ctcp *CTCP) *DCCSend {
 
 		return &DCCSend{
 			File:   filename,
-			IP:     ip3,
-			Port:   uint16(port),
-			Length: uint64(length),
+			IP:     intToIP(ip),
+			Port:   params[3],
+			Length: length,
 		}
 	}
 
@@ -57,94 +57,96 @@ func (c *Client) Download(pack *DCCSend) {
 		// TODO: ask user if he/she wants to download the file
 		return
 	}
+
 	c.Progress <- DownloadProgress{
-		PercCompletion: 0,
-		File:           pack.File,
+		File: pack.File,
 	}
+
 	file, err := os.OpenFile(filepath.Join(c.DownloadFolder, pack.File), os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		c.Progress <- DownloadProgress{
-			PercCompletion: -1,
-			File:           pack.File,
-			Error:          err,
-		}
+		c.downloadFailed(pack, err)
 		return
 	}
 	defer file.Close()
 
-	con, err := net.Dial("tcp", fmt.Sprintf("%s:%d", pack.IP, pack.Port))
+	conn, err := net.Dial("tcp", net.JoinHostPort(pack.IP, pack.Port))
 	if err != nil {
-		c.Progress <- DownloadProgress{
-			PercCompletion: -1,
-			File:           pack.File,
-			Error:          err,
-		}
+		c.downloadFailed(pack, err)
 		return
 	}
+	defer conn.Close()
 
-	defer con.Close()
-
-	var speed float64
-	var prevUpdate time.Time
-	secondsElapsed := int64(0)
 	totalBytes := uint64(0)
-	buf := make([]byte, 0, 4*1024)
-	start := time.Now().UnixNano()
+	accBytes := uint64(0)
+	averageSpeed := float64(0)
+	buf := make([]byte, 4*1024)
+	start := time.Now()
+	prevUpdate := start
+
 	for {
-		n, err := con.Read(buf[:cap(buf)])
-		buf = buf[:n]
-		if n == 0 {
-			if err == nil {
-				continue
+		n, err := conn.Read(buf)
+		if err != nil {
+			if err != io.EOF {
+				c.downloadFailed(pack, err)
+				return
 			}
-			if err == io.EOF {
+			if n == 0 {
 				break
 			}
 		}
 
-		if _, err := file.Write(buf); err != nil {
-			c.Progress <- DownloadProgress{
-				PercCompletion: -1,
-				File:           pack.File,
-				Error:          err,
-			}
+		if _, err := file.Write(buf[:n]); err != nil {
+			c.downloadFailed(pack, err)
 			return
 		}
 
-		cycleBytes := uint64(len(buf))
-		totalBytes += cycleBytes
-		percentage := round2(100 * float64(totalBytes) / float64(pack.Length))
+		accBytes += uint64(n)
+		totalBytes += uint64(n)
 
-		now := time.Now().UnixNano()
-		secondsElapsed = (now - start) / 1e9
-		speed = round2(float64(totalBytes) / (float64(secondsElapsed)))
-		secondsToGo := round2((float64(pack.Length) - float64(totalBytes)) / speed)
+		conn.Write(uint64Bytes(totalBytes))
 
-		con.Write(byteRead(totalBytes))
-
-		if time.Since(prevUpdate) >= time.Second {
+		if dt := time.Since(prevUpdate); dt >= time.Second {
 			prevUpdate = time.Now()
 
+			speed := float64(accBytes) / dt.Seconds()
+			if averageSpeed == 0 {
+				averageSpeed = speed
+			} else {
+				averageSpeed = 0.2*speed + 0.8*averageSpeed
+			}
+			accBytes = 0
+
+			bytesRemaining := float64(pack.Length - totalBytes)
+			percentage := 100 * (float64(totalBytes) / float64(pack.Length))
+
 			c.Progress <- DownloadProgress{
-				Speed:          humanReadableByteCount(speed, true),
+				Speed:          humanReadableByteCount(averageSpeed, true),
 				PercCompletion: percentage,
-				BytesRemaining: humanReadableByteCount(float64(pack.Length-totalBytes), false),
+				BytesRemaining: humanReadableByteCount(bytesRemaining, false),
 				BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
-				SecondsElapsed: secondsElapsed,
-				SecondsToGo:    secondsToGo,
+				SecondsElapsed: secondsSince(start),
+				SecondsToGo:    bytesRemaining / averageSpeed,
 				File:           pack.File,
 			}
 		}
 	}
 
-	con.Write(byteRead(totalBytes))
+	// TODO: is this needed?
+	conn.Write(uint64Bytes(totalBytes))
 
 	c.Progress <- DownloadProgress{
-		Speed:          humanReadableByteCount(speed, true),
 		PercCompletion: 100,
 		BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
-		SecondsElapsed: secondsElapsed,
+		SecondsElapsed: secondsSince(start),
 		File:           pack.File,
+	}
+}
+
+func (c *Client) downloadFailed(pack *DCCSend, err error) {
+	c.Progress <- DownloadProgress{
+		PercCompletion: -1,
+		File:           pack.File,
+		Error:          err,
 	}
 }
 
@@ -167,7 +169,7 @@ func (p DownloadProgress) ToJSON() string {
 	return string(progress)
 }
 
-func uint32ToIP(n int) string {
+func intToIP(n int) string {
 	var byte1 = n & 255
 	var byte2 = ((n >> 8) & 255)
 	var byte3 = ((n >> 16) & 255)
@@ -175,14 +177,14 @@ func uint32ToIP(n int) string {
 	return fmt.Sprintf("%d.%d.%d.%d", byte4, byte3, byte2, byte1)
 }
 
-func byteRead(totalBytes uint64) []byte {
+func uint64Bytes(i uint64) []byte {
 	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, totalBytes)
+	binary.BigEndian.PutUint64(b, i)
 	return b
 }
 
-func round2(source float64) float64 {
-	return math.Round(100*source) / 100
+func secondsSince(t time.Time) int64 {
+	return int64(math.Round(time.Since(t).Seconds()))
 }
 
 const (

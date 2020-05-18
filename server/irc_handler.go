@@ -65,20 +65,16 @@ func (i *ircHandler) run() {
 			}
 
 		case progress := <-i.client.Progress:
-			if progress.PercCompletion == 100 {
-				i.state.sendJSON("pm", Message{
-					Server: i.client.Host,
-					From:   "@dcc",
-					Content: fmt.Sprintf("%s://%s/downloads/%s/%s", i.state.String("scheme"),
-						i.state.String("host"), i.state.user.Username, progress.File),
-				})
+			if progress.Error != nil {
+				i.sendDCCInfo("%s: Download failed (%s)", progress.File, progress.Error)
+			} else if progress.PercCompletion == 100 {
+				i.sendDCCInfo("Download finished, get it here: %s://%s/downloads/%s/%s",
+					i.state.String("scheme"), i.state.String("host"), i.state.user.Username, progress.File)
+			} else if progress.PercCompletion == 0 {
+				i.sendDCCInfo("%s: Starting download", progress.File)
 			} else {
-				i.state.sendJSON("pm", Message{
-					Server: i.client.Host,
-					From:   "@dcc",
-					Content: fmt.Sprintf("%s: %.2f%% %s remaining, %.2fs left", progress.File,
-						progress.PercCompletion, progress.BytesRemaining, progress.SecondsToGo),
-				})
+				i.sendDCCInfo("%s: %.1f%%, %s, %s remaining, %.1fs left", progress.File,
+					progress.PercCompletion, progress.Speed, progress.BytesRemaining, progress.SecondsToGo)
 			}
 		}
 	}
@@ -433,6 +429,14 @@ func (i *ircHandler) initHandlers() {
 func (i *ircHandler) log(v ...interface{}) {
 	s := fmt.Sprintln(v...)
 	log.Println("[IRC]", i.state.user.ID, i.client.Host, s[:len(s)-1])
+}
+
+func (i *ircHandler) sendDCCInfo(message string, a ...interface{}) {
+	i.state.sendJSON("pm", Message{
+		Server:  i.client.Host,
+		From:    "@dcc",
+		Content: fmt.Sprintf(message, a...),
+	})
 }
 
 func parseMode(mode string) *Mode {
