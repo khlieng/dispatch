@@ -5,7 +5,7 @@
   "license": "MIT",
   "main": "index.js",
   "browserslist": [
-    "Edge >= 16",
+    "Edge >= 79",
     "Firefox >= 60",
     "Chrome >= 61",
     "Safari >= 10.1",
@@ -64,7 +64,6 @@
     "autolinker": "^3.14.1",
     "backo": "^1.1.0",
     "classnames": "^2.2.6",
-    "fontfaceobserver": "^2.0.9",
     "formik": "^2.1.4",
     "history": "^5.0.0-beta.8",
     "hsluv": "^0.1.0",

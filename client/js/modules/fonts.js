@@ -1,22 +1,15 @@
-import FontFaceObserver from 'fontfaceobserver';
 import { setCharWidth } from 'state/app';
 import { stringWidth } from 'utils';
 
-export default function fonts({ store }) {
+export default async function fonts({ store }) {
   let { charWidth } = localStorage;
   if (charWidth) {
     store.dispatch(setCharWidth(parseFloat(charWidth)));
+  } else {
+    await document.fonts.load('16px Roboto Mono');
+
+    charWidth = stringWidth(' ', '16px Roboto Mono');
+    store.dispatch(setCharWidth(charWidth));
+    localStorage.charWidth = charWidth;
   }
-
-  new FontFaceObserver('Roboto Mono').load().then(() => {
-    if (!charWidth) {
-      charWidth = stringWidth(' ', '16px Roboto Mono');
-      store.dispatch(setCharWidth(charWidth));
-      localStorage.charWidth = charWidth;
-    }
-  });
-
-  new FontFaceObserver('Montserrat').load();
-  new FontFaceObserver('Montserrat', { weight: 700 }).load();
-  new FontFaceObserver('Roboto Mono', { weight: 700 }).load();
 }
