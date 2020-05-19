@@ -248,7 +248,7 @@ export function fetchMessages() {
     }
 
     const tab = state.tab.selected;
-    if (isChannel(tab)) {
+    if (tab.name) {
       dispatch({
         type: actions.FETCH_MESSAGES,
         socket: {
