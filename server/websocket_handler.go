@@ -63,6 +63,12 @@ func (h *wsHandler) dispatchRequest(req WSRequest) {
 func (h *wsHandler) init(r *http.Request) {
 	h.state.setWS(h.addr.String(), h.ws)
 	h.state.user.SetLastIP(addrToIPBytes(h.addr))
+	if r.TLS != nil {
+		h.state.Set("scheme", "https")
+	} else {
+		h.state.Set("scheme", "http")
+	}
+	h.state.Set("host", r.Host)
 
 	log.Println(h.addr, "[State] User ID:", h.state.user.ID, "|",
 		h.state.numIRC(), "IRC connections |",

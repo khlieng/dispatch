@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -180,6 +181,33 @@ func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		d.upgradeWS(w, r, state)
+	} else if strings.HasPrefix(r.URL.Path, "/downloads") {
+		state := d.handleAuth(w, r, false, false)
+		if state == nil {
+			log.Println("[Auth] No state")
+			fail(w, http.StatusInternalServerError)
+			return
+		}
+
+		params := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+
+		if len(params) == 3 {
+			userID, err := strconv.ParseUint(params[1], 10, 64)
+			if err != nil {
+				fail(w, http.StatusBadRequest)
+			}
+
+			if userID != state.user.ID {
+				fail(w, http.StatusUnauthorized)
+			}
+
+			filename := params[2]
+
+			w.Header().Set("Content-Disposition", "attachment; filename="+filename)
+			http.ServeFile(w, r, storage.Path.DownloadedFile(state.user.Username, filename))
+		} else {
+			fail(w, http.StatusNotFound)
+		}
 	} else {
 		d.serveFiles(w, r)
 	}

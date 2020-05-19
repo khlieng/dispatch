@@ -37,6 +37,11 @@ func NewUser(store Store) (*User, error) {
 		return nil, err
 	}
 
+	err = os.Mkdir(Path.Downloads(user.Username), 0700)
+	if err != nil {
+		return nil, err
+	}
+
 	return user, nil
 }
 

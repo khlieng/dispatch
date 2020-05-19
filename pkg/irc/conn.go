@@ -223,6 +223,11 @@ func (c *Client) recv() {
 				c.setNick(msg.LastParam())
 			}
 
+		case Privmsg:
+			if ctcp := msg.ToCTCP(); ctcp != nil {
+				c.handleCTCP(ctcp)
+			}
+
 		case ReplyWelcome:
 			c.setNick(msg.Params[0])
 			c.setRegistered(true)
@@ -239,8 +244,20 @@ func (c *Client) recv() {
 			if c.HandleNickInUse != nil {
 				go c.writeNick(c.HandleNickInUse(msg.Params[1]))
 			}
+
 		}
 
 		c.Messages <- msg
+	}
+}
+
+func (c *Client) handleCTCP(ctcp *CTCP) {
+	switch ctcp.Command {
+	case "DCC":
+		if strings.HasPrefix(ctcp.Params, "SEND") {
+			if dccSend := ParseDCCSend(ctcp); dccSend != nil {
+				go c.Download(dccSend)
+			}
+		}
 	}
 }

@@ -19,6 +19,34 @@ func (m *Message) LastParam() string {
 	return ""
 }
 
+type CTCP struct {
+	Command string
+	Params  string
+}
+
+func (m *Message) ToCTCP() *CTCP {
+	lp := m.LastParam()
+
+	if len(lp) > 1 && lp[0] == 0x01 {
+		parts := strings.SplitN(strings.Trim(lp, "\x01"), " ", 2)
+		ctcp := CTCP{}
+
+		if parts[0] != "" {
+			ctcp.Command = parts[0]
+		} else {
+			return nil
+		}
+
+		if len(parts) == 2 {
+			ctcp.Params = parts[1]
+		}
+
+		return &ctcp
+	}
+
+	return nil
+}
+
 func ParseMessage(line string) *Message {
 	msg := Message{}
 

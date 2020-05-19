@@ -5,6 +5,8 @@ port = 80
 hexIP = false
 verify_certificates = true
 
+autoget = false
+
 # Defaults for the client connect form
 [defaults]
 name = "freenode"
