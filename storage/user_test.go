@@ -100,9 +100,15 @@ func TestUser(t *testing.T) {
 	assert.Equal(t, settings, user.GetClientSettings())
 	assert.NotEqual(t, settings, storage.DefaultClientSettings())
 
+	user.AddOpenDM(srv.Host, "cake")
+
 	user.Remove()
 	_, err = os.Stat(storage.Path.User(user.Username))
 	assert.True(t, os.IsNotExist(err))
+
+	openDMs, err = user.GetOpenDMs()
+	assert.Nil(t, err)
+	assert.Len(t, openDMs, 0)
 
 	users, err = storage.LoadUsers(db)
 	assert.Nil(t, err)
