@@ -10,6 +10,8 @@
 - Persistent connections
 - Multiple servers and users
 - Automatic HTTPS through Let's Encrypt
+- Single binary with no dependencies
+- DCC downloads
 - Client certificates
 
 ## Usage

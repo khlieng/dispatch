@@ -4,7 +4,7 @@ port = 80
 # Hex encode the users IP and use it as the ident
 hexIP = false
 verify_certificates = true
-
+# Automatically download files from DCC SENDs
 autoget = false
 
 # Defaults for the client connect form
@@ -13,8 +13,7 @@ name = "freenode"
 host = "chat.freenode.net"
 port = 6697
 channels = [
-  "#dispatch",
-  "#go-nuts"
+  "#dispatch"
 ]
 password = ""
 ssl = true
