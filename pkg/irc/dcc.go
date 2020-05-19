@@ -131,9 +131,6 @@ func (c *Client) Download(pack *DCCSend) {
 		}
 	}
 
-	// TODO: is this needed?
-	conn.Write(uint64Bytes(totalBytes))
-
 	c.Progress <- DownloadProgress{
 		PercCompletion: 100,
 		BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
