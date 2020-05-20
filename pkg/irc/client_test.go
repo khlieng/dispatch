@@ -128,6 +128,12 @@ func TestNotice(t *testing.T) {
 	assert.Equal(t, "NOTICE user :the message\r\n", <-out)
 }
 
+func TestReplyCTCP(t *testing.T) {
+	c, out := testClientSend()
+	c.ReplyCTCP("user", "PING", "PONG")
+	assert.Equal(t, "NOTICE user :\x01PING PONG\x01\r\n", <-out)
+}
+
 func TestWhois(t *testing.T) {
 	c, out := testClientSend()
 	c.Whois("user")

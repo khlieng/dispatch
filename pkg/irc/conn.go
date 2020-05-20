@@ -225,7 +225,7 @@ func (c *Client) recv() {
 
 		case Privmsg:
 			if ctcp := msg.ToCTCP(); ctcp != nil {
-				c.handleCTCP(ctcp)
+				c.handleCTCP(ctcp, msg)
 			}
 
 		case ReplyWelcome:
@@ -248,16 +248,5 @@ func (c *Client) recv() {
 		}
 
 		c.Messages <- msg
-	}
-}
-
-func (c *Client) handleCTCP(ctcp *CTCP) {
-	switch ctcp.Command {
-	case "DCC":
-		if strings.HasPrefix(ctcp.Params, "SEND") {
-			if dccSend := ParseDCCSend(ctcp); dccSend != nil {
-				go c.Download(dccSend)
-			}
-		}
 	}
 }

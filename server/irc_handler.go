@@ -176,6 +176,10 @@ func (i *ircHandler) mode(msg *irc.Message) {
 }
 
 func (i *ircHandler) message(msg *irc.Message) {
+	if ctcp := msg.ToCTCP(); ctcp != nil && ctcp.Command != "ACTION" {
+		return
+	}
+
 	message := Message{
 		ID:      betterguid.New(),
 		Server:  i.client.Host,

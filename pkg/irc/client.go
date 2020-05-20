@@ -21,6 +21,11 @@ type Client struct {
 	Realname        string
 	HandleNickInUse func(string) string
 
+	// Version is the reply to VERSION and FINGER CTCP messages
+	Version string
+	// Source is the reply to SOURCE CTCP messages
+	Source string
+
 	DownloadFolder string
 	Autoget        bool
 
@@ -53,8 +58,8 @@ func NewClient(nick, username string) *Client {
 		Username:          username,
 		Realname:          nick,
 		Messages:          make(chan *Message, 32),
-		ConnectionChanged: make(chan ConnectionState, 16),
-		Progress:          make(chan DownloadProgress, 16),
+		ConnectionChanged: make(chan ConnectionState, 4),
+		Progress:          make(chan DownloadProgress, 4),
 		out:               make(chan string, 32),
 		quit:              make(chan struct{}),
 		reconnect:         make(chan struct{}),
@@ -152,6 +157,13 @@ func (c *Client) Privmsg(target, msg string) {
 
 func (c *Client) Notice(target, msg string) {
 	c.Writef("NOTICE %s :%s", target, msg)
+}
+
+func (c *Client) ReplyCTCP(target, command, params string) {
+	c.Notice(target, EncodeCTCP(&CTCP{
+		Command: command,
+		Params:  params,
+	}))
 }
 
 func (c *Client) Whois(nick string) {

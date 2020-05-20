@@ -8,6 +8,7 @@ import (
 
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
+	"github.com/khlieng/dispatch/version"
 )
 
 func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
@@ -33,6 +34,8 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 	i := irc.NewClient(server.Nick, server.Username)
 	i.TLS = server.TLS
 	i.Realname = server.Realname
+	i.Version = fmt.Sprintf("Dispatch %s (git: %s)", version.Tag, version.Commit)
+	i.Source = "https://github.com/khlieng/dispatch"
 	i.HandleNickInUse = createNickInUseHandler(i, state)
 
 	address := server.Host
