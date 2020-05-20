@@ -58,6 +58,7 @@ func NewClient(nick, username string) *Client {
 		out:               make(chan string, 32),
 		quit:              make(chan struct{}),
 		reconnect:         make(chan struct{}),
+		dialer:            &net.Dialer{Timeout: 10 * time.Second},
 		recvBuf:           make([]byte, 0, 4096),
 		backoff: &backoff.Backoff{
 			Min:    500 * time.Millisecond,

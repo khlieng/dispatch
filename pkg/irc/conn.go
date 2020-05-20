@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"net"
 	"strings"
 	"time"
 )
@@ -29,7 +28,6 @@ func (c *Client) Connect(address string) {
 		c.Host = address[:idx]
 	}
 	c.Server = address
-	c.dialer = &net.Dialer{Timeout: 10 * time.Second}
 
 	c.connChange(false, nil)
 	go c.run()
@@ -244,7 +242,6 @@ func (c *Client) recv() {
 			if c.HandleNickInUse != nil {
 				go c.writeNick(c.HandleNickInUse(msg.Params[1]))
 			}
-
 		}
 
 		c.Messages <- msg

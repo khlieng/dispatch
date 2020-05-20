@@ -56,7 +56,7 @@ func DownloadDCC(w io.Writer, pack *DCCSend, progress chan DownloadProgress) err
 		}
 	}
 
-	conn, err := net.Dial("tcp", net.JoinHostPort(pack.IP, pack.Port))
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(pack.IP, pack.Port), 10*time.Second)
 	if err != nil {
 		return err
 	}
@@ -70,6 +70,7 @@ func DownloadDCC(w io.Writer, pack *DCCSend, progress chan DownloadProgress) err
 	prevUpdate := start
 
 	for {
+		conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 		n, err := conn.Read(buf)
 		if err != nil {
 			if err != io.EOF {
