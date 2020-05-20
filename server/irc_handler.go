@@ -3,8 +3,10 @@ package server
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/kjk/betterguid"
@@ -26,6 +28,7 @@ type ircHandler struct {
 	userBuffers map[string][]string
 	motdBuffer  MOTD
 	listBuffer  storage.ChannelListIndex
+	dccProgress chan irc.DownloadProgress
 
 	handlers map[string]func(*irc.Message)
 }
@@ -35,6 +38,7 @@ func newIRCHandler(client *irc.Client, state *State) *ircHandler {
 		client:      client,
 		state:       state,
 		userBuffers: make(map[string][]string),
+		dccProgress: make(chan irc.DownloadProgress, 4),
 	}
 	i.initHandlers()
 	return i
@@ -64,7 +68,7 @@ func (i *ircHandler) run() {
 				i.log("Connected")
 			}
 
-		case progress := <-i.client.Progress:
+		case progress := <-i.dccProgress:
 			if progress.Error != nil {
 				i.sendDCCInfo("%s: Download failed (%s)", true, progress.File, progress.Error)
 			} else if progress.PercCompletion == 100 {
@@ -175,9 +179,45 @@ func (i *ircHandler) mode(msg *irc.Message) {
 	}
 }
 
+func (i *ircHandler) receiveDCCSend(pack *irc.DCCSend, msg *irc.Message) {
+	cfg := i.state.srv.Config()
+
+	if cfg.DCC.Enabled {
+		if cfg.DCC.Autoget.Enabled {
+			file, err := os.OpenFile(storage.Path.DownloadedFile(i.state.user.Username, pack.File), os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				return
+			}
+			defer file.Close()
+
+			irc.DownloadDCC(file, pack, i.dccProgress)
+		} else {
+			i.state.setPendingDCC(pack.File, pack)
+
+			i.state.sendJSON("dcc_send", DCCSend{
+				Server:   i.client.Host,
+				From:     msg.Nick,
+				Filename: pack.File,
+				URL: fmt.Sprintf("%s://%s/downloads/%s/%s",
+					i.state.String("scheme"), i.state.String("host"), i.state.user.Username, pack.File),
+			})
+
+			time.Sleep(150 * time.Second)
+			i.state.deletePendingDCC(pack.File)
+		}
+	}
+}
+
 func (i *ircHandler) message(msg *irc.Message) {
-	if ctcp := msg.ToCTCP(); ctcp != nil && ctcp.Command != "ACTION" {
-		return
+	if ctcp := msg.ToCTCP(); ctcp != nil {
+		if ctcp.Command == "DCC" && strings.HasPrefix(ctcp.Params, "SEND") {
+			if pack := irc.ParseDCCSend(ctcp); pack != nil {
+				go i.receiveDCCSend(pack, msg)
+				return
+			}
+		} else if ctcp.Command != "ACTION" {
+			return
+		}
 	}
 
 	message := Message{
@@ -431,8 +471,7 @@ func (i *ircHandler) initHandlers() {
 }
 
 func (i *ircHandler) log(v ...interface{}) {
-	s := fmt.Sprintln(v...)
-	log.Println("[IRC]", i.state.user.ID, i.client.Host, s[:len(s)-1])
+	log.Println("[IRC]", i.state.user.ID, i.client.Host, fmt.Sprint(v...))
 }
 
 func (i *ircHandler) sendDCCInfo(message string, log bool, a ...interface{}) {

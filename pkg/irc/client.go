@@ -26,12 +26,8 @@ type Client struct {
 	// Source is the reply to SOURCE CTCP messages
 	Source string
 
-	DownloadFolder string
-	Autoget        bool
-
 	Messages          chan *Message
 	ConnectionChanged chan ConnectionState
-	Progress          chan DownloadProgress
 	Features          *Features
 	nick              string
 	channels          []string
@@ -59,7 +55,6 @@ func NewClient(nick, username string) *Client {
 		Realname:          nick,
 		Messages:          make(chan *Message, 32),
 		ConnectionChanged: make(chan ConnectionState, 4),
-		Progress:          make(chan DownloadProgress, 4),
 		out:               make(chan string, 32),
 		quit:              make(chan struct{}),
 		reconnect:         make(chan struct{}),

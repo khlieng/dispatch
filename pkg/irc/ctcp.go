@@ -47,13 +47,6 @@ func (c *Client) handleCTCP(ctcp *CTCP, msg *Message) {
 	case "CLIENTINFO":
 		c.ReplyCTCP(msg.Nick, ctcp.Command, ClientInfo)
 
-	case "DCC":
-		if strings.HasPrefix(ctcp.Params, "SEND") {
-			if dccSend := ParseDCCSend(ctcp); dccSend != nil {
-				go c.Download(dccSend)
-			}
-		}
-
 	case "FINGER", "VERSION":
 		if c.Version != "" {
 			c.ReplyCTCP(msg.Nick, ctcp.Command, c.Version)

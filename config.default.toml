@@ -4,8 +4,6 @@ port = 80
 # Hex encode the users IP and use it as the ident
 hexIP = false
 verify_certificates = true
-# Automatically download files from DCC SENDs
-autoget = false
 
 # Defaults for the client connect form
 [defaults]
@@ -62,6 +60,20 @@ secret = ""
 [auth.providers.twitter]
 key = ""
 secret = ""
+
+[dcc]
+# Receive files through DCC, the user gets to choose if they want to accept the file,
+# the file then gets streamed to the user
+enabled = true
+
+[dcc.autoget]
+# Instead of streaming the file to the user, dispatch automatically downloads
+# DCC files and sends a download link to the user once its done
+enabled = false
+# Delete the file after the user has downloaded it once
+delete = true
+# Delete the file after a certain time period of inactivity, not implemented yet
+delete_after = "30m"
 
 # Strict-Transport-Security
 [https.hsts]

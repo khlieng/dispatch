@@ -222,6 +222,13 @@ type ChannelForward struct {
 	New    string
 }
 
+type DCCSend struct {
+	Server   string
+	From     string
+	Filename string
+	URL      string
+}
+
 type Tab struct {
 	storage.Tab
 }

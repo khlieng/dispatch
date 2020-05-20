@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -10,6 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/khlieng/dispatch/config"
 	"github.com/khlieng/dispatch/pkg/https"
+	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
 )
@@ -202,9 +204,21 @@ func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 
 			filename := params[2]
-
 			w.Header().Set("Content-Disposition", "attachment; filename="+filename)
-			http.ServeFile(w, r, storage.Path.DownloadedFile(state.user.Username, filename))
+
+			if pack, ok := state.getPendingDCC(filename); ok {
+				state.deletePendingDCC(filename)
+
+				w.Header().Set("Content-Length", strconv.FormatUint(pack.Length, 10))
+				irc.DownloadDCC(w, pack, nil)
+			} else {
+				file := storage.Path.DownloadedFile(state.user.Username, filename)
+				http.ServeFile(w, r, file)
+
+				if d.Config().DCC.Autoget.Delete {
+					os.Remove(file)
+				}
+			}
 		} else {
 			fail(w, http.StatusNotFound)
 		}

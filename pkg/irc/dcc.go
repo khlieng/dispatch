@@ -2,14 +2,11 @@ package irc
 
 import (
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"io"
 	"math"
 	"net"
-	"os"
 	"path"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -52,27 +49,16 @@ func ParseDCCSend(ctcp *CTCP) *DCCSend {
 	return nil
 }
 
-func (c *Client) Download(pack *DCCSend) {
-	if !c.Autoget {
-		// TODO: ask user if he/she wants to download the file
-		return
+func DownloadDCC(w io.Writer, pack *DCCSend, progress chan DownloadProgress) error {
+	if progress != nil {
+		progress <- DownloadProgress{
+			File: pack.File,
+		}
 	}
-
-	c.Progress <- DownloadProgress{
-		File: pack.File,
-	}
-
-	file, err := os.OpenFile(filepath.Join(c.DownloadFolder, pack.File), os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		c.downloadFailed(pack, err)
-		return
-	}
-	defer file.Close()
 
 	conn, err := net.Dial("tcp", net.JoinHostPort(pack.IP, pack.Port))
 	if err != nil {
-		c.downloadFailed(pack, err)
-		return
+		return err
 	}
 	defer conn.Close()
 
@@ -87,64 +73,63 @@ func (c *Client) Download(pack *DCCSend) {
 		n, err := conn.Read(buf)
 		if err != nil {
 			if err != io.EOF {
-				c.downloadFailed(pack, err)
-				return
+				return err
 			}
 			if n == 0 {
 				break
 			}
 		}
 
-		if _, err := file.Write(buf[:n]); err != nil {
-			c.downloadFailed(pack, err)
-			return
+		if _, err := w.Write(buf[:n]); err != nil {
+			return err
 		}
 
 		accBytes += uint64(n)
 		totalBytes += uint64(n)
 
-		conn.Write(uint64Bytes(totalBytes))
+		_, err = conn.Write(uint64Bytes(totalBytes))
+		if err != nil {
+			return err
+		}
 
-		if dt := time.Since(prevUpdate); dt >= time.Second {
-			prevUpdate = time.Now()
+		if progress != nil {
+			if dt := time.Since(prevUpdate); dt >= time.Second {
+				prevUpdate = time.Now()
 
-			speed := float64(accBytes) / dt.Seconds()
-			if averageSpeed == 0 {
-				averageSpeed = speed
-			} else {
-				averageSpeed = 0.2*speed + 0.8*averageSpeed
-			}
-			accBytes = 0
+				speed := float64(accBytes) / dt.Seconds()
+				if averageSpeed == 0 {
+					averageSpeed = speed
+				} else {
+					averageSpeed = 0.2*speed + 0.8*averageSpeed
+				}
+				accBytes = 0
 
-			bytesRemaining := float64(pack.Length - totalBytes)
-			percentage := 100 * (float64(totalBytes) / float64(pack.Length))
+				bytesRemaining := float64(pack.Length - totalBytes)
+				percentage := 100 * (float64(totalBytes) / float64(pack.Length))
 
-			c.Progress <- DownloadProgress{
-				Speed:          humanReadableByteCount(averageSpeed, true),
-				PercCompletion: percentage,
-				BytesRemaining: humanReadableByteCount(bytesRemaining, false),
-				BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
-				SecondsElapsed: secondsSince(start),
-				SecondsToGo:    bytesRemaining / averageSpeed,
-				File:           pack.File,
+				progress <- DownloadProgress{
+					Speed:          humanReadableByteCount(averageSpeed, true),
+					PercCompletion: percentage,
+					BytesRemaining: humanReadableByteCount(bytesRemaining, false),
+					BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
+					SecondsElapsed: secondsSince(start),
+					SecondsToGo:    bytesRemaining / averageSpeed,
+					File:           pack.File,
+				}
 			}
 		}
 	}
 
-	c.Progress <- DownloadProgress{
-		PercCompletion: 100,
-		BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
-		SecondsElapsed: secondsSince(start),
-		File:           pack.File,
+	if progress != nil {
+		progress <- DownloadProgress{
+			PercCompletion: 100,
+			BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
+			SecondsElapsed: secondsSince(start),
+			File:           pack.File,
+		}
 	}
-}
 
-func (c *Client) downloadFailed(pack *DCCSend, err error) {
-	c.Progress <- DownloadProgress{
-		PercCompletion: -1,
-		File:           pack.File,
-		Error:          err,
-	}
+	return nil
 }
 
 type DownloadProgress struct {
@@ -156,14 +141,6 @@ type DownloadProgress struct {
 	Speed          string  `json:"speed"`
 	SecondsElapsed int64   `json:"elapsed"`
 	SecondsToGo    float64 `json:"eta"`
-}
-
-func (p DownloadProgress) ToJSON() string {
-	progress, err := json.Marshal(p)
-	if err != nil {
-		return ""
-	}
-	return string(progress)
 }
 
 func intToIP(n int) string {

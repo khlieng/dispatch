@@ -39,11 +39,10 @@ func Serve(handler http.Handler, cfg Config) error {
 		httpSrv.WriteTimeout = 5 * time.Second
 
 		httpsSrv := &http.Server{
-			Addr:         net.JoinHostPort(cfg.Addr, cfg.PortHTTPS),
-			ReadTimeout:  5 * time.Second,
-			WriteTimeout: 10 * time.Second,
-			IdleTimeout:  120 * time.Second,
-			Handler:      handler,
+			Addr:        net.JoinHostPort(cfg.Addr, cfg.PortHTTPS),
+			ReadTimeout: 5 * time.Second,
+			IdleTimeout: 120 * time.Second,
+			Handler:     handler,
 		}
 
 		redirect := HTTPSRedirect(cfg.PortHTTPS, handler)
@@ -101,7 +100,6 @@ func Serve(handler http.Handler, cfg Config) error {
 		}
 	} else {
 		httpSrv.ReadTimeout = 5 * time.Second
-		httpSrv.WriteTimeout = 10 * time.Second
 		httpSrv.IdleTimeout = 120 * time.Second
 		httpSrv.Handler = handler
 

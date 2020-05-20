@@ -73,9 +73,6 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 		}
 	}
 
-	i.DownloadFolder = storage.Path.Downloads(state.user.Username)
-	i.Autoget = cfg.Autoget
-
 	state.setIRC(server.Host, i)
 	i.Connect(address)
 	go newIRCHandler(i, state).run()

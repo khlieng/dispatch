@@ -22,6 +22,7 @@ type State struct {
 
 	irc             map[string]*irc.Client
 	connectionState map[string]irc.ConnectionState
+	pendingDCCSends map[string]*irc.DCCSend
 	ircLock         sync.Mutex
 
 	ws        map[string]*wsConn
@@ -39,6 +40,7 @@ func NewState(user *storage.User, srv *Dispatch) *State {
 		stateData:       stateData{m: map[string]interface{}{}},
 		irc:             make(map[string]*irc.Client),
 		connectionState: make(map[string]irc.ConnectionState),
+		pendingDCCSends: make(map[string]*irc.DCCSend),
 		ws:              make(map[string]*wsConn),
 		broadcast:       make(chan WSResponse, 32),
 		srv:             srv,
@@ -99,6 +101,25 @@ func (s *State) getConnectionStates() map[string]irc.ConnectionState {
 func (s *State) setConnectionState(server string, state irc.ConnectionState) {
 	s.ircLock.Lock()
 	s.connectionState[server] = state
+	s.ircLock.Unlock()
+}
+
+func (s *State) getPendingDCC(filename string) (*irc.DCCSend, bool) {
+	s.ircLock.Lock()
+	pack, ok := s.pendingDCCSends[filename]
+	s.ircLock.Unlock()
+	return pack, ok
+}
+
+func (s *State) setPendingDCC(filename string, pack *irc.DCCSend) {
+	s.ircLock.Lock()
+	s.pendingDCCSends[filename] = pack
+	s.ircLock.Unlock()
+}
+
+func (s *State) deletePendingDCC(filename string) {
+	s.ircLock.Lock()
+	delete(s.pendingDCCSends, filename)
 	s.ircLock.Unlock()
 }
 

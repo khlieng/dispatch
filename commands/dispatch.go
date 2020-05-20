@@ -109,8 +109,14 @@ func init() {
 	viper.BindPFlags(rootCmd.PersistentFlags())
 	viper.BindPFlags(rootCmd.Flags())
 
-	viper.SetDefault("hexIP", false)
 	viper.SetDefault("verify_certificates", true)
+	viper.SetDefault("https.enabled", true)
+	viper.SetDefault("https.port", 443)
+	viper.SetDefault("auth.anonymous", true)
+	viper.SetDefault("auth.login", true)
+	viper.SetDefault("auth.registration", true)
+	viper.SetDefault("dcc.enabled", true)
+	viper.SetDefault("dcc.autoget.delete", true)
 }
 
 func initConfig(configPath string, overwrite bool) {

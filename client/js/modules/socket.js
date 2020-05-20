@@ -134,6 +134,22 @@ export default function handleSocket({
       }
     },
 
+    dcc_send({ server, from, filename, url }) {
+      const serverName = getState().servers[server]?.name || server;
+
+      dispatch(
+        openModal('confirm', {
+          question: `${from} on ${serverName} is sending you: ${filename}`,
+          confirmation: 'Download',
+          onConfirm: () => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.click();
+          }
+        })
+      );
+    },
+
     _connected(connected) {
       dispatch(setConnected(connected));
     }

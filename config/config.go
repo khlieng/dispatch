@@ -14,12 +14,12 @@ type Config struct {
 	Dev                bool
 	HexIP              bool
 	VerifyCertificates bool `mapstructure:"verify_certificates"`
-	Autoget            bool
 	Headers            map[string]string
 	Defaults           Defaults
 	HTTPS              HTTPS
 	LetsEncrypt        LetsEncrypt
 	Auth               Auth
+	DCC                DCC
 }
 
 type Defaults struct {
@@ -63,6 +63,17 @@ type Auth struct {
 type Provider struct {
 	Key    string
 	Secret string
+}
+
+type DCC struct {
+	Enabled bool
+	Autoget Autoget
+}
+
+type Autoget struct {
+	Enabled     bool
+	Delete      bool
+	DeleteAfter time.Duration `mapstructure:"delete_after"`
 }
 
 func LoadConfig() (*Config, chan *Config) {
