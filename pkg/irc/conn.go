@@ -242,6 +242,13 @@ func (c *Client) recv() {
 			if c.HandleNickInUse != nil {
 				go c.writeNick(c.HandleNickInUse(msg.Params[1]))
 			}
+
+		case Error:
+			c.Messages <- msg
+			c.connChange(false, nil)
+			time.Sleep(5 * time.Second)
+			close(c.quit)
+			return
 		}
 
 		c.Messages <- msg
