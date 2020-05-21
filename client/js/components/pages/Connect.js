@@ -168,11 +168,11 @@ export default withFormik({
       name: query.name || defaults.name,
       host: query.host || defaults.host,
       port,
-      nick: query.nick || '',
+      nick: query.nick || localStorage.lastNick || '',
       channels: channels || defaults.channels.join(','),
       username: query.username || '',
       password: defaults.password ? '      ' : '',
-      realname: query.realname || '',
+      realname: query.realname || localStorage.lastRealname || '',
       tls: ssl
     };
   },
@@ -227,6 +227,11 @@ export default withFormik({
 
     if (channels.length > 0) {
       join(channels, values.host);
+    }
+
+    localStorage.lastNick = values.nick;
+    if (values.realname) {
+      localStorage.lastRealname = values.realname;
     }
   }
 })(Connect);
