@@ -75,6 +75,10 @@ func (c *Client) GetNick() string {
 	return nick
 }
 
+func (c *Client) Is(nick string) bool {
+	return c.EqualFold(nick, c.GetNick())
+}
+
 func (c *Client) setNick(nick string) {
 	c.lock.Lock()
 	c.nick = nick

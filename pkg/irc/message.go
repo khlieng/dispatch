@@ -19,6 +19,10 @@ func (m *Message) LastParam() string {
 	return ""
 }
 
+func (m *Message) IsFromServer() bool {
+	return m.Nick == "" || strings.Contains(m.Nick, ".")
+}
+
 func (m *Message) ToCTCP() *CTCP {
 	return DecodeCTCP(m.LastParam())
 }

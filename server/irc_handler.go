@@ -117,7 +117,7 @@ func (i *ircHandler) nick(msg *irc.Message) {
 
 	channelStore.RenameUser(msg.Nick, msg.LastParam(), i.client.Host)
 
-	if msg.LastParam() == i.client.GetNick() {
+	if i.client.Is(msg.LastParam()) {
 		go i.state.user.SetNick(msg.LastParam(), i.client.Host)
 	}
 }
@@ -132,7 +132,7 @@ func (i *ircHandler) join(msg *irc.Message) {
 	channel := msg.Params[0]
 	channelStore.AddUser(msg.Nick, i.client.Host, channel)
 
-	if msg.Nick == i.client.GetNick() {
+	if i.client.Is(msg.Nick) {
 		// In case no topic is set and there's a cached one that needs to be cleared
 		i.client.Topic(channel)
 
@@ -160,7 +160,7 @@ func (i *ircHandler) part(msg *irc.Message) {
 
 	channelStore.RemoveUser(msg.Nick, i.client.Host, part.Channel)
 
-	if msg.Nick == i.client.GetNick() {
+	if i.client.Is(msg.Nick) {
 		go i.state.user.RemoveChannel(i.client.Host, part.Channel)
 	}
 }
@@ -176,35 +176,6 @@ func (i *ircHandler) mode(msg *irc.Message) {
 		i.state.sendJSON("mode", mode)
 
 		channelStore.SetMode(i.client.Host, target, msg.Params[2], mode.Add, mode.Remove)
-	}
-}
-
-func (i *ircHandler) receiveDCCSend(pack *irc.DCCSend, msg *irc.Message) {
-	cfg := i.state.srv.Config()
-
-	if cfg.DCC.Enabled {
-		if cfg.DCC.Autoget.Enabled {
-			file, err := os.OpenFile(storage.Path.DownloadedFile(i.state.user.Username, pack.File), os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				return
-			}
-			defer file.Close()
-
-			irc.DownloadDCC(file, pack, i.dccProgress)
-		} else {
-			i.state.setPendingDCC(pack.File, pack)
-
-			i.state.sendJSON("dcc_send", DCCSend{
-				Server:   i.client.Host,
-				From:     msg.Nick,
-				Filename: pack.File,
-				URL: fmt.Sprintf("%s://%s/downloads/%s/%s",
-					i.state.String("scheme"), i.state.String("host"), i.state.user.Username, pack.File),
-			})
-
-			time.Sleep(150 * time.Second)
-			i.state.deletePendingDCC(pack.File)
-		}
 	}
 }
 
@@ -228,9 +199,12 @@ func (i *ircHandler) message(msg *irc.Message) {
 	}
 	target := msg.Params[0]
 
-	if target == i.client.GetNick() {
+	if i.client.Is(target) {
 		i.state.sendJSON("pm", message)
-		i.state.user.AddOpenDM(i.client.Host, message.From)
+
+		if !msg.IsFromServer() {
+			i.state.user.AddOpenDM(i.client.Host, message.From)
+		}
 
 		target = message.From
 	} else {
@@ -238,7 +212,7 @@ func (i *ircHandler) message(msg *irc.Message) {
 		i.state.sendJSON("message", message)
 	}
 
-	if target != "*" {
+	if target != "*" && !msg.IsFromServer() {
 		go i.state.user.LogMessage(message.ID,
 			i.client.Host, msg.Nick, target, msg.LastParam())
 	}
@@ -430,6 +404,35 @@ func (i *ircHandler) error(msg *irc.Message) {
 		Server:  i.client.Host,
 		Message: msg.LastParam(),
 	})
+}
+
+func (i *ircHandler) receiveDCCSend(pack *irc.DCCSend, msg *irc.Message) {
+	cfg := i.state.srv.Config()
+
+	if cfg.DCC.Enabled {
+		if cfg.DCC.Autoget.Enabled {
+			file, err := os.OpenFile(storage.Path.DownloadedFile(i.state.user.Username, pack.File), os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				return
+			}
+			defer file.Close()
+
+			irc.DownloadDCC(file, pack, i.dccProgress)
+		} else {
+			i.state.setPendingDCC(pack.File, pack)
+
+			i.state.sendJSON("dcc_send", DCCSend{
+				Server:   i.client.Host,
+				From:     msg.Nick,
+				Filename: pack.File,
+				URL: fmt.Sprintf("%s://%s/downloads/%s/%s",
+					i.state.String("scheme"), i.state.String("host"), i.state.user.Username, pack.File),
+			})
+
+			time.Sleep(150 * time.Second)
+			i.state.deletePendingDCC(pack.File)
+		}
+	}
 }
 
 func (i *ircHandler) initHandlers() {
