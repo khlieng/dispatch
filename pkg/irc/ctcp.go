@@ -48,22 +48,22 @@ func (c *Client) handleCTCP(ctcp *CTCP, msg *Message) {
 		c.ReplyCTCP(msg.Nick, ctcp.Command, ClientInfo)
 
 	case "FINGER", "VERSION":
-		if c.Version != "" {
-			c.ReplyCTCP(msg.Nick, ctcp.Command, c.Version)
+		if c.Config.Version != "" {
+			c.ReplyCTCP(msg.Nick, ctcp.Command, c.Config.Version)
 		}
 
 	case "PING":
 		c.ReplyCTCP(msg.Nick, ctcp.Command, ctcp.Params)
 
 	case "SOURCE":
-		if c.Source != "" {
-			c.ReplyCTCP(msg.Nick, ctcp.Command, c.Source)
+		if c.Config.Source != "" {
+			c.ReplyCTCP(msg.Nick, ctcp.Command, c.Config.Source)
 		}
 
 	case "TIME":
 		c.ReplyCTCP(msg.Nick, ctcp.Command, time.Now().UTC().Format(time.RFC3339))
 
 	case "USERINFO":
-		c.ReplyCTCP(msg.Nick, ctcp.Command, fmt.Sprintf("%s (%s)", c.GetNick(), c.Realname))
+		c.ReplyCTCP(msg.Nick, ctcp.Command, fmt.Sprintf("%s (%s)", c.GetNick(), c.Config.Realname))
 	}
 }

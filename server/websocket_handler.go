@@ -132,8 +132,8 @@ func (h *wsHandler) reconnect(b []byte) {
 	data.UnmarshalJSON(b)
 
 	if i, ok := h.state.getIRC(data.Server); ok && !i.Connected() {
-		if i.TLS {
-			i.TLSConfig.InsecureSkipVerify = data.SkipVerify
+		if i.Config.TLS {
+			i.Config.TLSConfig.InsecureSkipVerify = data.SkipVerify
 		}
 		i.Reconnect()
 	}

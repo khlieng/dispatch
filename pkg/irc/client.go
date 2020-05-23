@@ -11,21 +11,26 @@ import (
 	"github.com/jpillora/backoff"
 )
 
-type Client struct {
-	Server          string
-	Host            string
-	TLS             bool
-	TLSConfig       *tls.Config
-	Password        string
-	Username        string
-	Realname        string
-	SASL            SASL
-	HandleNickInUse func(string) string
-
+type Config struct {
+	Host      string
+	Port      string
+	TLS       bool
+	TLSConfig *tls.Config
+	Nick      string
+	Password  string
+	Username  string
+	Realname  string
+	SASL      SASL
 	// Version is the reply to VERSION and FINGER CTCP messages
 	Version string
 	// Source is the reply to SOURCE CTCP messages
 	Source string
+
+	HandleNickInUse func(string) string
+}
+
+type Client struct {
+	Config Config
 
 	Messages          chan *Message
 	ConnectionChanged chan ConnectionState
@@ -52,20 +57,35 @@ type Client struct {
 	lock      sync.Mutex
 }
 
-func NewClient(nick, username string) *Client {
-	return &Client{
-		nick:                  nick,
+func NewClient(config Config) *Client {
+	if config.Port == "" {
+		if config.TLS {
+			config.Port = "6697"
+		} else {
+			config.Port = "6667"
+		}
+	}
+
+	if config.Username == "" {
+		config.Username = config.Nick
+	}
+
+	if config.Realname == "" {
+		config.Realname = config.Nick
+	}
+
+	c := Client{
+		Config:                config,
+		nick:                  config.Nick,
 		Features:              NewFeatures(),
-		Username:              username,
-		Realname:              nick,
 		Messages:              make(chan *Message, 32),
+		wantedCapabilities:    clientWantedCaps,
+		requestedCapabilities: map[string][]string{},
+		enabledCapabilities:   map[string][]string{},
 		ConnectionChanged:     make(chan ConnectionState, 4),
 		out:                   make(chan string, 32),
 		quit:                  make(chan struct{}),
 		reconnect:             make(chan struct{}),
-		wantedCapabilities:    clientWantedCaps,
-		enabledCapabilities:   map[string][]string{},
-		requestedCapabilities: map[string][]string{},
 		dialer:                &net.Dialer{Timeout: 10 * time.Second},
 		recvBuf:               make([]byte, 0, 4096),
 		backoff: &backoff.Backoff{
@@ -74,6 +94,12 @@ func NewClient(nick, username string) *Client {
 			Jitter: true,
 		},
 	}
+
+	if config.SASL != nil {
+		c.wantedCapabilities = append(c.wantedCapabilities, "sasl")
+	}
+
+	return &c
 }
 
 func (c *Client) GetNick() string {
@@ -111,6 +137,10 @@ func (c *Client) setRegistered(reg bool) {
 	c.lock.Lock()
 	c.registered = reg
 	c.lock.Unlock()
+}
+
+func (c *Client) Host() string {
+	return c.Config.Host
 }
 
 func (c *Client) Nick(nick string) {
@@ -199,16 +229,12 @@ func (c *Client) writeUser(username, realname string) {
 }
 
 func (c *Client) register() {
-	if c.SASL != nil {
-		c.wantedCapabilities = append(c.wantedCapabilities, "sasl")
-	}
-
 	c.writeCAP()
-	if c.Password != "" {
-		c.writePass(c.Password)
+	if c.Config.Password != "" {
+		c.writePass(c.Config.Password)
 	}
-	c.writeNick(c.nick)
-	c.writeUser(c.Username, c.Realname)
+	c.writeNick(c.Config.Nick)
+	c.writeUser(c.Config.Username, c.Config.Realname)
 }
 
 func (c *Client) addChannel(channel string) {

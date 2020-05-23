@@ -72,8 +72,8 @@ func (c *Client) handleCAP(msg *Message) {
 		}
 
 		if len(c.requestedCapabilities) == 0 {
-			if c.SASL != nil && c.HasCapability("sasl", c.SASL.Name()) {
-				c.write("AUTHENTICATE " + c.SASL.Name())
+			if c.Config.SASL != nil && c.HasCapability("sasl", c.Config.SASL.Name()) {
+				c.write("AUTHENTICATE " + c.Config.SASL.Name())
 			} else {
 				c.write("CAP END")
 			}

@@ -78,34 +78,38 @@ func (i *mockIrcd) handle(conn net.Conn) {
 }
 
 func TestConnect(t *testing.T) {
-	c := testClient()
-	c.Connect("127.0.0.1:45678")
-	assert.Equal(t, c.Host, "127.0.0.1")
-	assert.Equal(t, c.Server, "127.0.0.1:45678")
+	c := NewClient(Config{
+		Host: "127.0.0.1",
+		Port: "45678",
+	})
+	c.Connect()
 	waitConnAndClose(t, c)
 }
 
 func TestConnectTLS(t *testing.T) {
-	c := testClient()
-	c.TLS = true
-	c.TLSConfig = &tls.Config{
-		InsecureSkipVerify: true,
-	}
-	c.Connect("127.0.0.1:45679")
-	assert.Equal(t, c.Host, "127.0.0.1")
-	assert.Equal(t, c.Server, "127.0.0.1:45679")
+	c := NewClient(Config{
+		Host: "127.0.0.1",
+		Port: "45679",
+		TLS:  true,
+		TLSConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	})
+	c.Connect()
 	waitConnAndClose(t, c)
 }
 
 func TestConnectDefaultPorts(t *testing.T) {
-	c := testClient()
-	c.Connect("127.0.0.1")
-	assert.Equal(t, "127.0.0.1:6667", c.Server)
+	c := NewClient(Config{
+		Host: "127.0.0.1",
+	})
+	assert.Equal(t, "6667", c.Config.Port)
 
-	c = testClient()
-	c.TLS = true
-	c.Connect("127.0.0.1")
-	assert.Equal(t, "127.0.0.1:6697", c.Server)
+	c = NewClient(Config{
+		Host: "127.0.0.1",
+		TLS:  true,
+	})
+	assert.Equal(t, "6697", c.Config.Port)
 }
 
 func TestWrite(t *testing.T) {
@@ -121,7 +125,7 @@ func TestWrite(t *testing.T) {
 }
 
 func TestRecv(t *testing.T) {
-	c := testClient()
+	c := NewClient(Config{})
 	conn := &mockConn{hook: make(chan string, 16)}
 	c.conn = conn
 
@@ -141,7 +145,7 @@ func TestRecv(t *testing.T) {
 }
 
 func TestRecvTriggersReconnect(t *testing.T) {
-	c := testClient()
+	c := NewClient(Config{})
 	c.conn = &mockConn{}
 	c.scan = bufio.NewScanner(bytes.NewBufferString("001 bob\r\n"))
 	done := make(chan struct{})
@@ -164,7 +168,7 @@ func TestRecvTriggersReconnect(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	c := testClient()
+	c := NewClient(Config{})
 	close(c.quit)
 	ok := false
 	done := make(chan struct{})

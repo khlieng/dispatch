@@ -43,7 +43,7 @@ func (s *SASLExternal) Encode() string {
 func (c *Client) handleSASL(msg *Message) {
 	switch msg.Command {
 	case AUTHENTICATE:
-		auth := c.SASL.Encode()
+		auth := c.Config.SASL.Encode()
 
 		for len(auth) >= 400 {
 			c.write("AUTHENTICATE " + auth)

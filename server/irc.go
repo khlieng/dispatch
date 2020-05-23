@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"encoding/hex"
 	"fmt"
-	"net"
 
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
@@ -17,12 +16,12 @@ func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
 
 		if newNick == i.GetNick() {
 			state.sendJSON("nick_fail", NickFail{
-				Server: i.Host,
+				Server: i.Host(),
 			})
 		}
 
 		state.sendJSON("error", IRCError{
-			Server:  i.Host,
+			Server:  i.Host(),
 			Message: fmt.Sprintf("Nickname %s is unavailable, trying %s instead", nick, newNick),
 		})
 
@@ -31,57 +30,53 @@ func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
 }
 
 func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client {
-	i := irc.NewClient(server.Nick, server.Username)
-	i.TLS = server.TLS
-	i.Realname = server.Realname
-	i.Version = fmt.Sprintf("Dispatch %s (git: %s)", version.Tag, version.Commit)
-	i.Source = "https://github.com/khlieng/dispatch"
-	i.HandleNickInUse = createNickInUseHandler(i, state)
-
-	address := server.Host
-	if server.Port != "" {
-		address = net.JoinHostPort(server.Host, server.Port)
-	}
-
 	cfg := state.srv.Config()
 
+	ircCfg := irc.Config{
+		Host:     server.Host,
+		Port:     server.Port,
+		TLS:      server.TLS,
+		Nick:     server.Nick,
+		Username: server.Username,
+		Realname: server.Realname,
+		Version:  fmt.Sprintf("Dispatch %s (git: %s)", version.Tag, version.Commit),
+		Source:   "https://github.com/khlieng/dispatch",
+	}
+
+	if server.TLS {
+		ircCfg.TLSConfig = &tls.Config{
+			InsecureSkipVerify: !cfg.VerifyCertificates,
+		}
+
+		if cert := state.user.GetCertificate(); cert != nil {
+			ircCfg.TLSConfig.Certificates = []tls.Certificate{*cert}
+		}
+	}
+
 	if cfg.HexIP {
-		i.Username = hex.EncodeToString(srcIP)
-	} else if i.Username == "" {
-		i.Username = server.Nick
-	}
-
-	if i.Realname == "" {
-		i.Realname = server.Nick
-	}
-
-	if server.ServerPassword == "" &&
-		cfg.Defaults.ServerPassword != "" &&
-		address == cfg.Defaults.Host {
-		i.Password = cfg.Defaults.ServerPassword
-	} else {
-		i.Password = server.ServerPassword
+		ircCfg.Username = hex.EncodeToString(srcIP)
 	}
 
 	if server.Account != "" && server.Password != "" {
-		i.SASL = &irc.SASLPlain{
+		ircCfg.SASL = &irc.SASLPlain{
 			Username: server.Account,
 			Password: server.Password,
 		}
 	}
 
-	if i.TLS {
-		i.TLSConfig = &tls.Config{
-			InsecureSkipVerify: !cfg.VerifyCertificates,
-		}
-
-		if cert := state.user.GetCertificate(); cert != nil {
-			i.TLSConfig.Certificates = []tls.Certificate{*cert}
-		}
+	if server.ServerPassword == "" &&
+		cfg.Defaults.ServerPassword != "" &&
+		server.Host == cfg.Defaults.Host {
+		ircCfg.Password = cfg.Defaults.ServerPassword
+	} else {
+		ircCfg.Password = server.ServerPassword
 	}
 
+	i := irc.NewClient(ircCfg)
+	i.Config.HandleNickInUse = createNickInUseHandler(i, state)
+
 	state.setIRC(server.Host, i)
-	i.Connect(address)
+	i.Connect()
 	go newIRCHandler(i, state).run()
 
 	return i

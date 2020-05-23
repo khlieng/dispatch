@@ -7,12 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testClient() *Client {
-	return NewClient("test", "testing")
-}
-
 func testClientSend() (*Client, chan string) {
-	c := testClient()
+	c := NewClient(Config{})
 	conn := &mockConn{hook: make(chan string, 16)}
 	c.conn = conn
 	c.sendRecv.Add(1)
@@ -148,15 +144,16 @@ func TestAway(t *testing.T) {
 
 func TestRegister(t *testing.T) {
 	c, out := testClientSend()
-	c.nick = "nick"
-	c.Username = "user"
-	c.Realname = "rn"
+	c.Config.Nick = "nick"
+	c.Config.Username = "user"
+	c.Config.Realname = "rn"
+	t.Log(c.Config)
 	c.register()
 	assert.Equal(t, "CAP LS 302\r\n", <-out)
 	assert.Equal(t, "NICK nick\r\n", <-out)
 	assert.Equal(t, "USER user 0 * :rn\r\n", <-out)
 
-	c.Password = "pass"
+	c.Config.Password = "pass"
 	c.register()
 	assert.Equal(t, "CAP LS 302\r\n", <-out)
 	assert.Equal(t, "PASS pass\r\n", <-out)

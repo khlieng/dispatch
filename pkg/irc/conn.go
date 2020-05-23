@@ -7,7 +7,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"strings"
+	"net"
 	"time"
 )
 
@@ -15,20 +15,7 @@ var (
 	ErrBadProtocol = errors.New("This server does not speak IRC")
 )
 
-func (c *Client) Connect(address string) {
-	if idx := strings.Index(address, ":"); idx < 0 {
-		c.Host = address
-
-		if c.TLS {
-			address += ":6697"
-		} else {
-			address += ":6667"
-		}
-	} else {
-		c.Host = address[:idx]
-	}
-	c.Server = address
-
+func (c *Client) Connect() {
 	c.connChange(false, nil)
 	go c.run()
 }
@@ -130,15 +117,16 @@ func (c *Client) connect() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if c.TLS {
-		conn, err := tls.DialWithDialer(c.dialer, "tcp", c.Server, c.TLSConfig)
+	addr := net.JoinHostPort(c.Config.Host, c.Config.Port)
+	if c.Config.TLS {
+		conn, err := tls.DialWithDialer(c.dialer, "tcp", addr, c.Config.TLSConfig)
 		if err != nil {
 			return err
 		}
 
 		c.conn = conn
 	} else {
-		conn, err := c.dialer.Dial("tcp", c.Server)
+		conn, err := c.dialer.Dial("tcp", addr)
 		if err != nil {
 			return err
 		}
@@ -242,8 +230,8 @@ func (c *Client) recv() {
 			c.Features.Parse(msg.Params)
 
 		case ERR_NICKNAMEINUSE, ERR_NICKCOLLISION, ERR_UNAVAILRESOURCE:
-			if c.HandleNickInUse != nil {
-				go c.writeNick(c.HandleNickInUse(msg.Params[1]))
+			if c.Config.HandleNickInUse != nil {
+				go c.writeNick(c.Config.HandleNickInUse(msg.Params[1]))
 			}
 
 		case ERROR:
