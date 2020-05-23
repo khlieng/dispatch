@@ -408,6 +408,17 @@ i[class*=' icon-']:before {
   width: 100%;
 }
 
+.connect-section {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 15px;
+  margin: 15px 0;
+  margin-bottom: 10px;
+}
+
+.connect-section h2 {
+  margin-bottom: 10px;
+}
+
 input[type='number'] {
   appearance: textfield;
 }
@@ -806,7 +817,6 @@ input.message-input-nick.invalid {
 }
 
 .settings h2 {
-  font-weight: 700;
   color: #222;
 }
 

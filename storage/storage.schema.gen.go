@@ -286,7 +286,7 @@ func (d *Server) Size() (s uint64) {
 		s += l
 	}
 	{
-		l := uint64(len(d.Password))
+		l := uint64(len(d.ServerPassword))
 
 		{
 
@@ -332,6 +332,36 @@ func (d *Server) Size() (s uint64) {
 	}
 	{
 		l := uint64(len(d.Realname))
+
+		{
+
+			t := l
+			for t >= 0x80 {
+				t >>= 7
+				s++
+			}
+			s++
+
+		}
+		s += l
+	}
+	{
+		l := uint64(len(d.Account))
+
+		{
+
+			t := l
+			for t >= 0x80 {
+				t >>= 7
+				s++
+			}
+			s++
+
+		}
+		s += l
+	}
+	{
+		l := uint64(len(d.Password))
 
 		{
 
@@ -424,7 +454,7 @@ func (d *Server) Marshal(buf []byte) ([]byte, error) {
 		}
 	}
 	{
-		l := uint64(len(d.Password))
+		l := uint64(len(d.ServerPassword))
 
 		{
 
@@ -439,7 +469,7 @@ func (d *Server) Marshal(buf []byte) ([]byte, error) {
 			i++
 
 		}
-		copy(buf[i+1:], d.Password)
+		copy(buf[i+1:], d.ServerPassword)
 		i += l
 	}
 	{
@@ -497,6 +527,44 @@ func (d *Server) Marshal(buf []byte) ([]byte, error) {
 
 		}
 		copy(buf[i+1:], d.Realname)
+		i += l
+	}
+	{
+		l := uint64(len(d.Account))
+
+		{
+
+			t := uint64(l)
+
+			for t >= 0x80 {
+				buf[i+1] = byte(t) | 0x80
+				t >>= 7
+				i++
+			}
+			buf[i+1] = byte(t)
+			i++
+
+		}
+		copy(buf[i+1:], d.Account)
+		i += l
+	}
+	{
+		l := uint64(len(d.Password))
+
+		{
+
+			t := uint64(l)
+
+			for t >= 0x80 {
+				buf[i+1] = byte(t) | 0x80
+				t >>= 7
+				i++
+			}
+			buf[i+1] = byte(t)
+			i++
+
+		}
+		copy(buf[i+1:], d.Password)
 		i += l
 	}
 	return buf[:i+1], nil
@@ -585,7 +653,7 @@ func (d *Server) Unmarshal(buf []byte) (uint64, error) {
 			l = t
 
 		}
-		d.Password = string(buf[i+1 : i+1+l])
+		d.ServerPassword = string(buf[i+1 : i+1+l])
 		i += l
 	}
 	{
@@ -646,6 +714,46 @@ func (d *Server) Unmarshal(buf []byte) (uint64, error) {
 
 		}
 		d.Realname = string(buf[i+1 : i+1+l])
+		i += l
+	}
+	{
+		l := uint64(0)
+
+		{
+
+			bs := uint8(7)
+			t := uint64(buf[i+1] & 0x7F)
+			for buf[i+1]&0x80 == 0x80 {
+				i++
+				t |= uint64(buf[i+1]&0x7F) << bs
+				bs += 7
+			}
+			i++
+
+			l = t
+
+		}
+		d.Account = string(buf[i+1 : i+1+l])
+		i += l
+	}
+	{
+		l := uint64(0)
+
+		{
+
+			bs := uint8(7)
+			t := uint64(buf[i+1] & 0x7F)
+			for buf[i+1]&0x80 == 0x80 {
+				i++
+				t |= uint64(buf[i+1]&0x7F) << bs
+				bs += 7
+			}
+			i++
+
+			l = t
+
+		}
+		d.Password = string(buf[i+1 : i+1+l])
 		i += l
 	}
 	return i + 1, nil

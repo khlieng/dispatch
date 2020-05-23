@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { Form, withFormik } from 'formik';
+import { FiMoreHorizontal } from 'react-icons/fi';
 import Navicon from 'components/ui/Navicon';
 import Button from 'components/ui/Button';
 import Checkbox from 'components/ui/formik/Checkbox';
 import TextInput from 'components/ui/TextInput';
 import Error from 'components/ui/formik/Error';
 import { isValidNick, isValidChannel, isValidUsername, isInt } from 'utils';
-import { FiMoreHorizontal } from 'react-icons/fi';
 
 const getSortedDefaultChannels = createSelector(
   defaults => defaults.channels,
@@ -56,11 +56,21 @@ class Connect extends Component {
     const { hexIP } = this.props;
 
     return (
-      <div>
+      <>
+        <div className="connect-section">
+          <h2>SASL</h2>
+          <TextInput name="account" />
+          <TextInput name="password" type="password" />
+        </div>
         {!hexIP && <TextInput name="username" />}
-        <TextInput name="password" type="password" noTrim />
+        <TextInput
+          name="serverPassword"
+          label="Server Password"
+          type="password"
+          noTrim
+        />
         <TextInput name="realname" noTrim />
-      </div>
+      </>
     );
   };
 
@@ -170,8 +180,10 @@ export default withFormik({
       port,
       nick: query.nick || localStorage.lastNick || '',
       channels: channels || defaults.channels.join(','),
+      account: '',
+      password: '',
       username: query.username || '',
-      password: defaults.password ? '      ' : '',
+      serverPassword: defaults.serverPassword ? '      ' : '',
       realname: query.realname || localStorage.lastRealname || '',
       tls: ssl
     };
@@ -219,7 +231,7 @@ export default withFormik({
     const channels = values.channels ? values.channels.split(',') : [];
     delete values.channels;
 
-    values.password = values.password.trim();
+    values.serverPassword = values.serverPassword.trim();
 
     values.port = `${values.port}`;
     connect(values);

@@ -226,6 +226,9 @@ func (c *Client) recv() {
 				c.handleCTCP(ctcp, msg)
 			}
 
+		case CAP:
+			c.handleCAP(msg)
+
 		case RPL_WELCOME:
 			c.setNick(msg.Params[0])
 			c.setRegistered(true)
@@ -250,6 +253,8 @@ func (c *Client) recv() {
 			close(c.quit)
 			return
 		}
+
+		c.handleSASL(msg)
 
 		c.Messages <- msg
 	}

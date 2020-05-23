@@ -19,6 +19,7 @@ type Client struct {
 	Password        string
 	Username        string
 	Realname        string
+	SASL            SASL
 	HandleNickInUse func(string) string
 
 	// Version is the reply to VERSION and FINGER CTCP messages
@@ -31,6 +32,10 @@ type Client struct {
 	Features          *Features
 	nick              string
 	channels          []string
+
+	wantedCapabilities    []string
+	requestedCapabilities map[string][]string
+	enabledCapabilities   map[string][]string
 
 	conn       net.Conn
 	connected  bool
@@ -49,17 +54,20 @@ type Client struct {
 
 func NewClient(nick, username string) *Client {
 	return &Client{
-		nick:              nick,
-		Features:          NewFeatures(),
-		Username:          username,
-		Realname:          nick,
-		Messages:          make(chan *Message, 32),
-		ConnectionChanged: make(chan ConnectionState, 4),
-		out:               make(chan string, 32),
-		quit:              make(chan struct{}),
-		reconnect:         make(chan struct{}),
-		dialer:            &net.Dialer{Timeout: 10 * time.Second},
-		recvBuf:           make([]byte, 0, 4096),
+		nick:                  nick,
+		Features:              NewFeatures(),
+		Username:              username,
+		Realname:              nick,
+		Messages:              make(chan *Message, 32),
+		ConnectionChanged:     make(chan ConnectionState, 4),
+		out:                   make(chan string, 32),
+		quit:                  make(chan struct{}),
+		reconnect:             make(chan struct{}),
+		wantedCapabilities:    clientWantedCaps,
+		enabledCapabilities:   map[string][]string{},
+		requestedCapabilities: map[string][]string{},
+		dialer:                &net.Dialer{Timeout: 10 * time.Second},
+		recvBuf:               make([]byte, 0, 4096),
 		backoff: &backoff.Backoff{
 			Min:    500 * time.Millisecond,
 			Max:    30 * time.Second,
@@ -191,6 +199,11 @@ func (c *Client) writeUser(username, realname string) {
 }
 
 func (c *Client) register() {
+	if c.SASL != nil {
+		c.wantedCapabilities = append(c.wantedCapabilities, "sasl")
+	}
+
+	c.writeCAP()
 	if c.Password != "" {
 		c.writePass(c.Password)
 	}

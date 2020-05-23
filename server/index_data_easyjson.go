@@ -553,8 +553,8 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer2(in *jlexer.Lexer, out
 			continue
 		}
 		switch key {
-		case "password":
-			out.Password = bool(in.Bool())
+		case "serverPassword":
+			out.ServerPassword = bool(in.Bool())
 		case "name":
 			out.Name = string(in.String())
 		case "host":
@@ -604,11 +604,11 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer2(out *jwriter.Writer, 
 	out.RawByte('{')
 	first := true
 	_ = first
-	if in.Password {
-		const prefix string = ",\"password\":"
+	if in.ServerPassword {
+		const prefix string = ",\"serverPassword\":"
 		first = false
 		out.RawString(prefix[1:])
-		out.Bool(bool(in.Password))
+		out.Bool(bool(in.ServerPassword))
 	}
 	if in.Name != "" {
 		const prefix string = ",\"name\":"

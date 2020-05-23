@@ -23,14 +23,14 @@ type Config struct {
 }
 
 type Defaults struct {
-	Name        string
-	Host        string
-	Port        string
-	Channels    []string
-	Password    string
-	SSL         bool
-	ReadOnly    bool
-	ShowDetails bool `mapstructure:"show_details"`
+	Name           string
+	Host           string
+	Port           string
+	Channels       []string
+	ServerPassword string `mapstructure:"server_password"`
+	SSL            bool
+	ReadOnly       bool
+	ShowDetails    bool `mapstructure:"show_details"`
 }
 
 type HTTPS struct {

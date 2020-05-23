@@ -152,11 +152,13 @@ func TestRegister(t *testing.T) {
 	c.Username = "user"
 	c.Realname = "rn"
 	c.register()
+	assert.Equal(t, "CAP LS 302\r\n", <-out)
 	assert.Equal(t, "NICK nick\r\n", <-out)
 	assert.Equal(t, "USER user 0 * :rn\r\n", <-out)
 
 	c.Password = "pass"
 	c.register()
+	assert.Equal(t, "CAP LS 302\r\n", <-out)
 	assert.Equal(t, "PASS pass\r\n", <-out)
 	assert.Equal(t, "NICK nick\r\n", <-out)
 	assert.Equal(t, "USER user 0 * :rn\r\n", <-out)

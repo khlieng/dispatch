@@ -55,12 +55,19 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 		i.Realname = server.Nick
 	}
 
-	if server.Password == "" &&
-		cfg.Defaults.Password != "" &&
+	if server.ServerPassword == "" &&
+		cfg.Defaults.ServerPassword != "" &&
 		address == cfg.Defaults.Host {
-		i.Password = cfg.Defaults.Password
+		i.Password = cfg.Defaults.ServerPassword
 	} else {
-		i.Password = server.Password
+		i.Password = server.ServerPassword
+	}
+
+	if server.Account != "" && server.Password != "" {
+		i.SASL = &irc.SASLPlain{
+			Username: server.Account,
+			Password: server.Password,
+		}
 	}
 
 	if i.TLS {

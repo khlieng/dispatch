@@ -14,10 +14,12 @@ struct Server {
   Host     string
   Port     string
   TLS      bool
-  Password string
+  ServerPassword string
   Nick     string
   Username string
   Realname string
+  Account string
+  Password string
 }
 
 struct Channel {

@@ -132,14 +132,16 @@ func (u *User) UnmarshalClientSettingsJSON(b []byte) error {
 }
 
 type Server struct {
-	Name     string
-	Host     string
-	Port     string
-	TLS      bool
-	Password string
-	Nick     string
-	Username string
-	Realname string
+	Name           string
+	Host           string
+	Port           string
+	TLS            bool
+	ServerPassword string
+	Nick           string
+	Username       string
+	Realname       string
+	Account        string
+	Password       string
 }
 
 func (u *User) GetServer(address string) (*Server, error) {

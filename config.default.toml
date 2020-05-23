@@ -13,7 +13,7 @@ port = 6697
 channels = [
   "#dispatch"
 ]
-password = ""
+server_password = ""
 ssl = true
 # Only allow a nick to be filled in
 readonly = false

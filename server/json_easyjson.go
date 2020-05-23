@@ -866,14 +866,18 @@ func easyjson42239ddeDecodeGithubComKhliengDispatchServer8(in *jlexer.Lexer, out
 			out.Port = string(in.String())
 		case "tls":
 			out.TLS = bool(in.Bool())
-		case "password":
-			out.Password = string(in.String())
+		case "serverPassword":
+			out.ServerPassword = string(in.String())
 		case "nick":
 			out.Nick = string(in.String())
 		case "username":
 			out.Username = string(in.String())
 		case "realname":
 			out.Realname = string(in.String())
+		case "account":
+			out.Account = string(in.String())
+		case "password":
+			out.Password = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -964,15 +968,15 @@ func easyjson42239ddeEncodeGithubComKhliengDispatchServer8(out *jwriter.Writer, 
 		}
 		out.Bool(bool(in.TLS))
 	}
-	if in.Password != "" {
-		const prefix string = ",\"password\":"
+	if in.ServerPassword != "" {
+		const prefix string = ",\"serverPassword\":"
 		if first {
 			first = false
 			out.RawString(prefix[1:])
 		} else {
 			out.RawString(prefix)
 		}
-		out.String(string(in.Password))
+		out.String(string(in.ServerPassword))
 	}
 	if in.Nick != "" {
 		const prefix string = ",\"nick\":"
@@ -1003,6 +1007,26 @@ func easyjson42239ddeEncodeGithubComKhliengDispatchServer8(out *jwriter.Writer, 
 			out.RawString(prefix)
 		}
 		out.String(string(in.Realname))
+	}
+	if in.Account != "" {
+		const prefix string = ",\"account\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Account))
+	}
+	if in.Password != "" {
+		const prefix string = ",\"password\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Password))
 	}
 	out.RawByte('}')
 }

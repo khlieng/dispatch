@@ -12,7 +12,7 @@ import (
 
 type connectDefaults struct {
 	*config.Defaults
-	Password bool
+	ServerPassword bool
 }
 
 type dispatchVersion struct {
@@ -51,7 +51,7 @@ func (d *Dispatch) getIndexData(r *http.Request, state *State) *indexData {
 		},
 	}
 
-	data.Defaults.Password = cfg.Defaults.Password != ""
+	data.Defaults.ServerPassword = cfg.Defaults.ServerPassword != ""
 
 	if state == nil {
 		data.Settings = storage.DefaultClientSettings()
