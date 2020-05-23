@@ -23,7 +23,7 @@ func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
 
 		state.sendJSON("error", IRCError{
 			Server:  i.Host,
-			Message: fmt.Sprintf("Nickname %s is already in use, using %s instead", nick, newNick),
+			Message: fmt.Sprintf("Nickname %s is unavailable, trying %s instead", nick, newNick),
 		})
 
 		return newNick

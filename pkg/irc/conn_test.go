@@ -136,8 +136,8 @@ func TestRecv(t *testing.T) {
 
 	assert.Equal(t, "PONG :test\r\n", <-conn.hook)
 	assert.Equal(t, &Message{Command: "CMD"}, <-c.Messages)
-	assert.Equal(t, &Message{Command: Ping, Params: []string{"test"}}, <-c.Messages)
-	assert.Equal(t, &Message{Command: ReplyWelcome, Params: []string{"foo"}}, <-c.Messages)
+	assert.Equal(t, &Message{Command: PING, Params: []string{"test"}}, <-c.Messages)
+	assert.Equal(t, &Message{Command: RPL_WELCOME, Params: []string{"foo"}}, <-c.Messages)
 }
 
 func TestRecvTriggersReconnect(t *testing.T) {

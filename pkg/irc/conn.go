@@ -208,25 +208,25 @@ func (c *Client) recv() {
 		}
 
 		switch msg.Command {
-		case Ping:
+		case PING:
 			go c.write("PONG :" + msg.LastParam())
 
-		case Join:
+		case JOIN:
 			if c.EqualFold(msg.Nick, c.GetNick()) {
 				c.addChannel(msg.Params[0])
 			}
 
-		case Nick:
+		case NICK:
 			if c.EqualFold(msg.Nick, c.GetNick()) {
 				c.setNick(msg.LastParam())
 			}
 
-		case Privmsg:
+		case PRIVMSG:
 			if ctcp := msg.ToCTCP(); ctcp != nil {
 				c.handleCTCP(ctcp, msg)
 			}
 
-		case ReplyWelcome:
+		case RPL_WELCOME:
 			c.setNick(msg.Params[0])
 			c.setRegistered(true)
 			c.flushChannels()
@@ -235,15 +235,15 @@ func (c *Client) recv() {
 			c.sendRecv.Add(1)
 			go c.send()
 
-		case ReplyISupport:
+		case RPL_ISUPPORT:
 			c.Features.Parse(msg.Params)
 
-		case ErrNicknameInUse:
+		case ERR_NICKNAMEINUSE, ERR_NICKCOLLISION, ERR_UNAVAILRESOURCE:
 			if c.HandleNickInUse != nil {
 				go c.writeNick(c.HandleNickInUse(msg.Params[1]))
 			}
 
-		case Error:
+		case ERROR:
 			c.Messages <- msg
 			c.connChange(false, nil)
 			time.Sleep(5 * time.Second)

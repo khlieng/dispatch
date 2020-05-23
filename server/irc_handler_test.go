@@ -70,7 +70,7 @@ func checkResponse(t *testing.T, expectedType string, expectedData interface{}, 
 
 func TestHandleIRCNick(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command: irc.Nick,
+		Command: irc.NICK,
 		Nick:    "old",
 		Params:  []string{"new"},
 	})
@@ -84,7 +84,7 @@ func TestHandleIRCNick(t *testing.T) {
 
 func TestHandleIRCJoin(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command: irc.Join,
+		Command: irc.JOIN,
 		Nick:    "joining",
 		Params:  []string{"#chan"},
 	})
@@ -98,7 +98,7 @@ func TestHandleIRCJoin(t *testing.T) {
 
 func TestHandleIRCPart(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command: irc.Part,
+		Command: irc.PART,
 		Nick:    "parting",
 		Params:  []string{"#chan", "the reason"},
 	})
@@ -111,7 +111,7 @@ func TestHandleIRCPart(t *testing.T) {
 	}, res)
 
 	res = dispatchMessage(&irc.Message{
-		Command: irc.Part,
+		Command: irc.PART,
 		Nick:    "parting",
 		Params:  []string{"#chan"},
 	})
@@ -125,7 +125,7 @@ func TestHandleIRCPart(t *testing.T) {
 
 func TestHandleIRCMode(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command: irc.Mode,
+		Command: irc.MODE,
 		Params:  []string{"#chan", "+o-v", "nick"},
 	})
 
@@ -140,7 +140,7 @@ func TestHandleIRCMode(t *testing.T) {
 
 func TestHandleIRCMessage(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command: irc.Privmsg,
+		Command: irc.PRIVMSG,
 		Nick:    "nick",
 		Params:  []string{"#chan", "the message"},
 	})
@@ -153,7 +153,7 @@ func TestHandleIRCMessage(t *testing.T) {
 	assert.Equal(t, "the message", msg.Content)
 
 	res = dispatchMessage(&irc.Message{
-		Command: irc.Privmsg,
+		Command: irc.PRIVMSG,
 		Nick:    "someone",
 		Params:  []string{"nick", "the message"},
 	})
@@ -168,7 +168,7 @@ func TestHandleIRCMessage(t *testing.T) {
 
 func TestHandleIRCQuit(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command: irc.Quit,
+		Command: irc.QUIT,
 		Nick:    "nick",
 		Params:  []string{"the reason"},
 	})
@@ -182,7 +182,7 @@ func TestHandleIRCQuit(t *testing.T) {
 
 func TestHandleIRCWelcome(t *testing.T) {
 	res := dispatchMessageMulti(&irc.Message{
-		Command: irc.ReplyWelcome,
+		Command: irc.RPL_WELCOME,
 		Nick:    "nick",
 		Params:  []string{"nick", "some", "text"},
 	})
@@ -206,18 +206,18 @@ func TestHandleIRCWhois(t *testing.T) {
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ReplyWhoisUser,
+		Command: irc.RPL_WHOISUSER,
 		Params:  []string{"", "nick", "user", "host", "", "realname"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ReplyWhoisServer,
+		Command: irc.RPL_WHOISSERVER,
 		Params:  []string{"", "", "srv.com"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ReplyWhoisChannels,
+		Command: irc.RPL_WHOISCHANNELS,
 		Params:  []string{"#chan #chan1"},
 	})
-	i.dispatchMessage(&irc.Message{Command: irc.ReplyEndOfWhois})
+	i.dispatchMessage(&irc.Message{Command: irc.RPL_ENDOFWHOIS})
 
 	checkResponse(t, "whois", WhoisReply{
 		Nick:     "nick",
@@ -231,7 +231,7 @@ func TestHandleIRCWhois(t *testing.T) {
 
 func TestHandleIRCTopic(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command: irc.ReplyTopic,
+		Command: irc.RPL_TOPIC,
 		Params:  []string{"target", "#chan", "the topic"},
 	})
 
@@ -242,7 +242,7 @@ func TestHandleIRCTopic(t *testing.T) {
 	}, res)
 
 	res = dispatchMessage(&irc.Message{
-		Command: irc.Topic,
+		Command: irc.TOPIC,
 		Params:  []string{"#chan", "the topic"},
 		Nick:    "bob",
 	})
@@ -257,7 +257,7 @@ func TestHandleIRCTopic(t *testing.T) {
 
 func TestHandleIRCNoTopic(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
-		Command: irc.ReplyNoTopic,
+		Command: irc.RPL_NOTOPIC,
 		Params:  []string{"target", "#chan", "No topic set."},
 	})
 
@@ -274,15 +274,15 @@ func TestHandleIRCNames(t *testing.T) {
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ReplyNamReply,
+		Command: irc.RPL_NAMREPLY,
 		Params:  []string{"", "", "#chan", "a b c"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ReplyNamReply,
+		Command: irc.RPL_NAMREPLY,
 		Params:  []string{"", "", "#chan", "d"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ReplyEndOfNames,
+		Command: irc.RPL_ENDOFNAMES,
 		Params:  []string{"", "#chan"},
 	})
 
@@ -300,18 +300,18 @@ func TestHandleIRCMotd(t *testing.T) {
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ReplyMotdStart,
+		Command: irc.RPL_MOTDSTART,
 		Params:  []string{"motd title"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ReplyMotd,
+		Command: irc.RPL_MOTD,
 		Params:  []string{"line 1"},
 	})
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ReplyMotd,
+		Command: irc.RPL_MOTD,
 		Params:  []string{"line 2"},
 	})
-	i.dispatchMessage(&irc.Message{Command: irc.ReplyEndOfMotd})
+	i.dispatchMessage(&irc.Message{Command: irc.RPL_ENDOFMOTD})
 
 	checkResponse(t, "motd", MOTD{
 		Server:  "host.com",
@@ -327,7 +327,7 @@ func TestHandleIRCBadNick(t *testing.T) {
 	i := newIRCHandler(c, s)
 
 	i.dispatchMessage(&irc.Message{
-		Command: irc.ErrErroneousNickname,
+		Command: irc.ERR_ERRONEUSNICKNAME,
 	})
 
 	// It should print the error message first

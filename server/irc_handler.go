@@ -16,8 +16,10 @@ import (
 )
 
 var excludedErrors = []string{
-	irc.ErrNicknameInUse,
-	irc.ErrForward,
+	irc.ERR_NICKNAMEINUSE,
+	irc.ERR_NICKCOLLISION,
+	irc.ERR_UNAVAILRESOURCE,
+	irc.ERR_FORWARD,
 }
 
 type ircHandler struct {
@@ -229,7 +231,7 @@ func (i *ircHandler) quit(msg *irc.Message) {
 }
 
 func (i *ircHandler) info(msg *irc.Message) {
-	if msg.Command == irc.ReplyWelcome {
+	if msg.Command == irc.RPL_WELCOME {
 		i.state.sendJSON("nick", Nick{
 			Server: i.client.Host,
 			New:    msg.Params[0],
@@ -293,7 +295,7 @@ func (i *ircHandler) topic(msg *irc.Message) {
 	var channel string
 	var nick string
 
-	if msg.Command == irc.Topic {
+	if msg.Command == irc.TOPIC {
 		channel = msg.Params[0]
 		nick = msg.Nick
 	} else {
@@ -437,39 +439,39 @@ func (i *ircHandler) receiveDCCSend(pack *irc.DCCSend, msg *irc.Message) {
 
 func (i *ircHandler) initHandlers() {
 	i.handlers = map[string]func(*irc.Message){
-		irc.Nick:                 i.nick,
-		irc.Join:                 i.join,
-		irc.Part:                 i.part,
-		irc.Mode:                 i.mode,
-		irc.Privmsg:              i.message,
-		irc.Notice:               i.message,
-		irc.Quit:                 i.quit,
-		irc.Topic:                i.topic,
-		irc.Error:                i.error,
-		irc.ReplyWelcome:         i.info,
-		irc.ReplyYourHost:        i.info,
-		irc.ReplyCreated:         i.info,
-		irc.ReplyISupport:        i.features,
-		irc.ReplyLUserClient:     i.info,
-		irc.ReplyLUserOp:         i.info,
-		irc.ReplyLUserUnknown:    i.info,
-		irc.ReplyLUserChannels:   i.info,
-		irc.ReplyLUserMe:         i.info,
-		irc.ReplyWhoisUser:       i.whoisUser,
-		irc.ReplyWhoisServer:     i.whoisServer,
-		irc.ReplyWhoisChannels:   i.whoisChannels,
-		irc.ReplyEndOfWhois:      i.whoisEnd,
-		irc.ReplyNoTopic:         i.noTopic,
-		irc.ReplyTopic:           i.topic,
-		irc.ReplyNamReply:        i.names,
-		irc.ReplyEndOfNames:      i.namesEnd,
-		irc.ReplyMotdStart:       i.motdStart,
-		irc.ReplyMotd:            i.motd,
-		irc.ReplyEndOfMotd:       i.motdEnd,
-		irc.ReplyList:            i.list,
-		irc.ReplyListEnd:         i.listEnd,
-		irc.ErrErroneousNickname: i.badNick,
-		irc.ErrForward:           i.forward,
+		irc.NICK:                 i.nick,
+		irc.JOIN:                 i.join,
+		irc.PART:                 i.part,
+		irc.MODE:                 i.mode,
+		irc.PRIVMSG:              i.message,
+		irc.NOTICE:               i.message,
+		irc.QUIT:                 i.quit,
+		irc.TOPIC:                i.topic,
+		irc.ERROR:                i.error,
+		irc.RPL_WELCOME:          i.info,
+		irc.RPL_YOURHOST:         i.info,
+		irc.RPL_CREATED:          i.info,
+		irc.RPL_ISUPPORT:         i.features,
+		irc.RPL_LUSERCLIENT:      i.info,
+		irc.RPL_LUSEROP:          i.info,
+		irc.RPL_LUSERUNKNOWN:     i.info,
+		irc.RPL_LUSERCHANNELS:    i.info,
+		irc.RPL_LUSERME:          i.info,
+		irc.RPL_WHOISUSER:        i.whoisUser,
+		irc.RPL_WHOISSERVER:      i.whoisServer,
+		irc.RPL_WHOISCHANNELS:    i.whoisChannels,
+		irc.RPL_ENDOFWHOIS:       i.whoisEnd,
+		irc.RPL_NOTOPIC:          i.noTopic,
+		irc.RPL_TOPIC:            i.topic,
+		irc.RPL_NAMREPLY:         i.names,
+		irc.RPL_ENDOFNAMES:       i.namesEnd,
+		irc.RPL_MOTDSTART:        i.motdStart,
+		irc.RPL_MOTD:             i.motd,
+		irc.RPL_ENDOFMOTD:        i.motdEnd,
+		irc.RPL_LIST:             i.list,
+		irc.RPL_LISTEND:          i.listEnd,
+		irc.ERR_ERRONEUSNICKNAME: i.badNick,
+		irc.ERR_FORWARD:          i.forward,
 	}
 }
 
