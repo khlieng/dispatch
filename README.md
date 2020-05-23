@@ -12,6 +12,7 @@
 - Automatic HTTPS through Let's Encrypt
 - Single binary with no dependencies
 - DCC downloads
+- SASL
 - Client certificates
 
 ## Usage
