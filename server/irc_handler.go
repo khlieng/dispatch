@@ -113,11 +113,11 @@ func (i *ircHandler) dispatchMessage(msg *irc.Message) {
 func (i *ircHandler) nick(msg *irc.Message) {
 	i.state.sendJSON("nick", Nick{
 		Server: i.client.Host(),
-		Old:    msg.Nick,
+		Old:    msg.Sender,
 		New:    msg.LastParam(),
 	})
 
-	channelStore.RenameUser(msg.Nick, msg.LastParam(), i.client.Host())
+	channelStore.RenameUser(msg.Sender, msg.LastParam(), i.client.Host())
 
 	if i.client.Is(msg.LastParam()) {
 		go i.state.user.SetNick(msg.LastParam(), i.client.Host())
@@ -127,14 +127,14 @@ func (i *ircHandler) nick(msg *irc.Message) {
 func (i *ircHandler) join(msg *irc.Message) {
 	i.state.sendJSON("join", Join{
 		Server:   i.client.Host(),
-		User:     msg.Nick,
+		User:     msg.Sender,
 		Channels: msg.Params,
 	})
 
 	channel := msg.Params[0]
-	channelStore.AddUser(msg.Nick, i.client.Host(), channel)
+	channelStore.AddUser(msg.Sender, i.client.Host(), channel)
 
-	if i.client.Is(msg.Nick) {
+	if i.client.Is(msg.Sender) {
 		// In case no topic is set and there's a cached one that needs to be cleared
 		i.client.Topic(channel)
 
@@ -150,7 +150,7 @@ func (i *ircHandler) join(msg *irc.Message) {
 func (i *ircHandler) part(msg *irc.Message) {
 	part := Part{
 		Server:  i.client.Host(),
-		User:    msg.Nick,
+		User:    msg.Sender,
 		Channel: msg.Params[0],
 	}
 
@@ -160,9 +160,9 @@ func (i *ircHandler) part(msg *irc.Message) {
 
 	i.state.sendJSON("part", part)
 
-	channelStore.RemoveUser(msg.Nick, i.client.Host(), part.Channel)
+	channelStore.RemoveUser(msg.Sender, i.client.Host(), part.Channel)
 
-	if i.client.Is(msg.Nick) {
+	if i.client.Is(msg.Sender) {
 		go i.state.user.RemoveChannel(i.client.Host(), part.Channel)
 	}
 }
@@ -196,7 +196,7 @@ func (i *ircHandler) message(msg *irc.Message) {
 	message := Message{
 		ID:      betterguid.New(),
 		Server:  i.client.Host(),
-		From:    msg.Nick,
+		From:    msg.Sender,
 		Content: msg.LastParam(),
 	}
 	target := msg.Params[0]
@@ -216,18 +216,18 @@ func (i *ircHandler) message(msg *irc.Message) {
 
 	if target != "*" && !msg.IsFromServer() {
 		go i.state.user.LogMessage(message.ID,
-			i.client.Host(), msg.Nick, target, msg.LastParam())
+			i.client.Host(), msg.Sender, target, msg.LastParam())
 	}
 }
 
 func (i *ircHandler) quit(msg *irc.Message) {
 	i.state.sendJSON("quit", Quit{
 		Server: i.client.Host(),
-		User:   msg.Nick,
+		User:   msg.Sender,
 		Reason: msg.LastParam(),
 	})
 
-	channelStore.RemoveUserAll(msg.Nick, i.client.Host())
+	channelStore.RemoveUserAll(msg.Sender, i.client.Host())
 }
 
 func (i *ircHandler) info(msg *irc.Message) {
@@ -248,7 +248,7 @@ func (i *ircHandler) info(msg *irc.Message) {
 
 	i.state.sendJSON("pm", Message{
 		Server:  i.client.Host(),
-		From:    msg.Nick,
+		From:    msg.Sender,
 		Content: strings.Join(msg.Params[1:], " "),
 	})
 }
@@ -297,7 +297,7 @@ func (i *ircHandler) topic(msg *irc.Message) {
 
 	if msg.Command == irc.TOPIC {
 		channel = msg.Params[0]
-		nick = msg.Nick
+		nick = msg.Sender
 	} else {
 		channel = msg.Params[1]
 	}
@@ -425,7 +425,7 @@ func (i *ircHandler) receiveDCCSend(pack *irc.DCCSend, msg *irc.Message) {
 
 			i.state.sendJSON("dcc_send", DCCSend{
 				Server:   i.client.Host(),
-				From:     msg.Nick,
+				From:     msg.Sender,
 				Filename: pack.File,
 				URL: fmt.Sprintf("%s://%s/downloads/%s/%s",
 					i.state.String("scheme"), i.state.String("host"), i.state.user.Username, pack.File),
@@ -539,5 +539,5 @@ func formatIRCError(msg *irc.Message) string {
 }
 
 func printMessage(msg *irc.Message, i *irc.Client) {
-	log.Println(i.GetNick()+":", msg.Prefix, msg.Command, msg.Params)
+	log.Println(i.GetNick()+":", msg.Sender, msg.Command, msg.Params)
 }

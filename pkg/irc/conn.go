@@ -200,12 +200,12 @@ func (c *Client) recv() {
 			go c.write("PONG :" + msg.LastParam())
 
 		case JOIN:
-			if c.EqualFold(msg.Nick, c.GetNick()) {
+			if c.Is(msg.Sender) {
 				c.addChannel(msg.Params[0])
 			}
 
 		case NICK:
-			if c.EqualFold(msg.Nick, c.GetNick()) {
+			if c.Is(msg.Sender) {
 				c.setNick(msg.LastParam())
 			}
 

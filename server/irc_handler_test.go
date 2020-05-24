@@ -54,7 +54,7 @@ func dispatchMessage(msg *irc.Message) WSResponse {
 }
 
 func dispatchMessageMulti(msg *irc.Message) chan WSResponse {
-	c := irc.NewClient(irc.Config{
+	c := irc.NewClient(&irc.Config{
 		Nick:     "nick",
 		Username: "user",
 		Host:     "host.com",
@@ -74,7 +74,7 @@ func checkResponse(t *testing.T, expectedType string, expectedData interface{}, 
 func TestHandleIRCNick(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
 		Command: irc.NICK,
-		Nick:    "old",
+		Sender:  "old",
 		Params:  []string{"new"},
 	})
 
@@ -88,7 +88,7 @@ func TestHandleIRCNick(t *testing.T) {
 func TestHandleIRCJoin(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
 		Command: irc.JOIN,
-		Nick:    "joining",
+		Sender:  "joining",
 		Params:  []string{"#chan"},
 	})
 
@@ -102,7 +102,7 @@ func TestHandleIRCJoin(t *testing.T) {
 func TestHandleIRCPart(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
 		Command: irc.PART,
-		Nick:    "parting",
+		Sender:  "parting",
 		Params:  []string{"#chan", "the reason"},
 	})
 
@@ -115,7 +115,7 @@ func TestHandleIRCPart(t *testing.T) {
 
 	res = dispatchMessage(&irc.Message{
 		Command: irc.PART,
-		Nick:    "parting",
+		Sender:  "parting",
 		Params:  []string{"#chan"},
 	})
 
@@ -144,7 +144,7 @@ func TestHandleIRCMode(t *testing.T) {
 func TestHandleIRCMessage(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
 		Command: irc.PRIVMSG,
-		Nick:    "nick",
+		Sender:  "nick",
 		Params:  []string{"#chan", "the message"},
 	})
 
@@ -157,7 +157,7 @@ func TestHandleIRCMessage(t *testing.T) {
 
 	res = dispatchMessage(&irc.Message{
 		Command: irc.PRIVMSG,
-		Nick:    "someone",
+		Sender:  "someone",
 		Params:  []string{"nick", "the message"},
 	})
 
@@ -172,7 +172,7 @@ func TestHandleIRCMessage(t *testing.T) {
 func TestHandleIRCQuit(t *testing.T) {
 	res := dispatchMessage(&irc.Message{
 		Command: irc.QUIT,
-		Nick:    "nick",
+		Sender:  "nick",
 		Params:  []string{"the reason"},
 	})
 
@@ -186,7 +186,7 @@ func TestHandleIRCQuit(t *testing.T) {
 func TestHandleIRCWelcome(t *testing.T) {
 	res := dispatchMessageMulti(&irc.Message{
 		Command: irc.RPL_WELCOME,
-		Nick:    "nick",
+		Sender:  "nick",
 		Params:  []string{"nick", "some", "text"},
 	})
 
@@ -203,7 +203,7 @@ func TestHandleIRCWelcome(t *testing.T) {
 }
 
 func TestHandleIRCWhois(t *testing.T) {
-	c := irc.NewClient(irc.Config{
+	c := irc.NewClient(&irc.Config{
 		Nick:     "nick",
 		Username: "user",
 		Host:     "host.com",
@@ -250,7 +250,7 @@ func TestHandleIRCTopic(t *testing.T) {
 	res = dispatchMessage(&irc.Message{
 		Command: irc.TOPIC,
 		Params:  []string{"#chan", "the topic"},
-		Nick:    "bob",
+		Sender:  "bob",
 	})
 
 	checkResponse(t, "topic", Topic{
@@ -274,7 +274,7 @@ func TestHandleIRCNoTopic(t *testing.T) {
 }
 
 func TestHandleIRCNames(t *testing.T) {
-	c := irc.NewClient(irc.Config{
+	c := irc.NewClient(&irc.Config{
 		Nick:     "nick",
 		Username: "user",
 		Host:     "host.com",
@@ -303,7 +303,7 @@ func TestHandleIRCNames(t *testing.T) {
 }
 
 func TestHandleIRCMotd(t *testing.T) {
-	c := irc.NewClient(irc.Config{
+	c := irc.NewClient(&irc.Config{
 		Nick:     "nick",
 		Username: "user",
 		Host:     "host.com",
@@ -333,7 +333,7 @@ func TestHandleIRCMotd(t *testing.T) {
 }
 
 func TestHandleIRCBadNick(t *testing.T) {
-	c := irc.NewClient(irc.Config{
+	c := irc.NewClient(&irc.Config{
 		Nick:     "nick",
 		Username: "user",
 		Host:     "host.com",

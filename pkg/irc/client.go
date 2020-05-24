@@ -30,7 +30,7 @@ type Config struct {
 }
 
 type Client struct {
-	Config Config
+	Config *Config
 
 	Messages          chan *Message
 	ConnectionChanged chan ConnectionState
@@ -57,7 +57,7 @@ type Client struct {
 	lock      sync.Mutex
 }
 
-func NewClient(config Config) *Client {
+func NewClient(config *Config) *Client {
 	if config.Port == "" {
 		if config.TLS {
 			config.Port = "6697"
@@ -74,11 +74,18 @@ func NewClient(config Config) *Client {
 		config.Realname = config.Nick
 	}
 
-	c := Client{
+	wantedCapabilities := append([]string{}, clientWantedCaps...)
+
+	if config.SASL != nil {
+		wantedCapabilities = append(wantedCapabilities, "sasl")
+	}
+
+	return &Client{
 		Config:                config,
 		nick:                  config.Nick,
 		Features:              NewFeatures(),
 		Messages:              make(chan *Message, 32),
+		wantedCapabilities:    wantedCapabilities,
 		requestedCapabilities: map[string][]string{},
 		enabledCapabilities:   map[string][]string{},
 		ConnectionChanged:     make(chan ConnectionState, 4),
@@ -93,14 +100,6 @@ func NewClient(config Config) *Client {
 			Jitter: true,
 		},
 	}
-
-	c.wantedCapabilities = append(c.wantedCapabilities, clientWantedCaps...)
-
-	if config.SASL != nil {
-		c.wantedCapabilities = append(c.wantedCapabilities, "sasl")
-	}
-
-	return &c
 }
 
 func (c *Client) GetNick() string {

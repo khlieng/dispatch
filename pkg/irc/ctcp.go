@@ -45,25 +45,25 @@ func EncodeCTCP(ctcp *CTCP) string {
 func (c *Client) handleCTCP(ctcp *CTCP, msg *Message) {
 	switch ctcp.Command {
 	case "CLIENTINFO":
-		c.ReplyCTCP(msg.Nick, ctcp.Command, ClientInfo)
+		c.ReplyCTCP(msg.Sender, ctcp.Command, ClientInfo)
 
 	case "FINGER", "VERSION":
 		if c.Config.Version != "" {
-			c.ReplyCTCP(msg.Nick, ctcp.Command, c.Config.Version)
+			c.ReplyCTCP(msg.Sender, ctcp.Command, c.Config.Version)
 		}
 
 	case "PING":
-		c.ReplyCTCP(msg.Nick, ctcp.Command, ctcp.Params)
+		c.ReplyCTCP(msg.Sender, ctcp.Command, ctcp.Params)
 
 	case "SOURCE":
 		if c.Config.Source != "" {
-			c.ReplyCTCP(msg.Nick, ctcp.Command, c.Config.Source)
+			c.ReplyCTCP(msg.Sender, ctcp.Command, c.Config.Source)
 		}
 
 	case "TIME":
-		c.ReplyCTCP(msg.Nick, ctcp.Command, time.Now().UTC().Format(time.RFC3339))
+		c.ReplyCTCP(msg.Sender, ctcp.Command, time.Now().UTC().Format(time.RFC3339))
 
 	case "USERINFO":
-		c.ReplyCTCP(msg.Nick, ctcp.Command, fmt.Sprintf("%s (%s)", c.GetNick(), c.Config.Realname))
+		c.ReplyCTCP(msg.Sender, ctcp.Command, fmt.Sprintf("%s (%s)", c.GetNick(), c.Config.Realname))
 	}
 }

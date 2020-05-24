@@ -14,16 +14,16 @@ func TestParseMessage(t *testing.T) {
 		{
 			":user CMD #chan :some message",
 			&Message{
-				Prefix:  "user",
-				Nick:    "user",
+				Sender:  "user",
 				Command: "CMD",
 				Params:  []string{"#chan", "some message"},
 			},
 		}, {
 			":nick!user@host.com CMD a b",
 			&Message{
-				Prefix:  "nick!user@host.com",
-				Nick:    "nick",
+				Sender:  "nick",
+				Ident:   "user",
+				Host:    "host.com",
 				Command: "CMD",
 				Params:  []string{"a", "b"},
 			},
@@ -53,15 +53,16 @@ func TestParseMessage(t *testing.T) {
 		}, {
 			":nick@host.com CMD",
 			&Message{
-				Prefix:  "nick@host.com",
-				Nick:    "nick",
+				Sender:  "nick",
+				Host:    "host.com",
 				Command: "CMD",
 			},
 		}, {
 			":ni@ck!user!name@host!.com  CMD",
 			&Message{
-				Prefix:  "ni@ck!user!name@host!.com",
-				Nick:    "ni@ck",
+				Sender:  "ni@ck",
+				Ident:   "user!name",
+				Host:    "host!.com",
 				Command: "CMD",
 			},
 		}, {
@@ -114,18 +115,20 @@ func TestParseMessage(t *testing.T) {
 				Tags: map[string]string{
 					"x": "y",
 				},
-				Prefix:  "nick!user@host.com",
-				Nick:    "nick",
+				Sender:  "nick",
+				Ident:   "user",
+				Host:    "host.com",
 				Command: "CMD",
 			},
 		}, {
-			"@x=y  :nick!user@host.com    CMD :pie and cake",
+			"@x=y  :nick!user@host.com    CMD     :pie and cake",
 			&Message{
 				Tags: map[string]string{
 					"x": "y",
 				},
-				Prefix:  "nick!user@host.com",
-				Nick:    "nick",
+				Sender:  "nick",
+				Ident:   "user",
+				Host:    "host.com",
 				Command: "CMD",
 				Params:  []string{"pie and cake"},
 			},
@@ -135,8 +138,9 @@ func TestParseMessage(t *testing.T) {
 				Tags: map[string]string{
 					"x": "y",
 				},
-				Prefix:  "nick!user@host.com",
-				Nick:    "nick",
+				Sender:  "nick",
+				Ident:   "user",
+				Host:    "host.com",
 				Command: "CMD",
 				Params:  []string{"beans", "rainbows", "pie and cake"},
 			},

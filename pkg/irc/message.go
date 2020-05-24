@@ -6,8 +6,9 @@ import (
 
 type Message struct {
 	Tags    map[string]string
-	Prefix  string
-	Nick    string
+	Sender  string
+	Ident   string
+	Host    string
 	Command string
 	Params  []string
 }
@@ -20,7 +21,7 @@ func (m *Message) LastParam() string {
 }
 
 func (m *Message) IsFromServer() bool {
-	return m.Nick == "" || strings.Contains(m.Nick, ".")
+	return m.Sender == "" || strings.Contains(m.Sender, ".")
 }
 
 func (m *Message) ToCTCP() *CTCP {
@@ -65,14 +66,23 @@ func ParseMessage(line string) *Message {
 		if next == -1 {
 			return nil
 		}
-		msg.Prefix = line[1:next]
+		prefix := line[1:next]
 
-		if i := strings.Index(msg.Prefix, "!"); i > 0 {
-			msg.Nick = msg.Prefix[:i]
-		} else if i := strings.Index(msg.Prefix, "@"); i > 0 {
-			msg.Nick = msg.Prefix[:i]
+		if i := strings.Index(prefix, "!"); i > 0 {
+			msg.Sender = prefix[:i]
+			prefix = prefix[i+1:]
+
+			if i = strings.Index(prefix, "@"); i > 0 {
+				msg.Ident = prefix[:i]
+				msg.Host = prefix[i+1:]
+			} else {
+				msg.Ident = prefix
+			}
+		} else if i = strings.Index(prefix, "@"); i > 0 {
+			msg.Sender = prefix[:i]
+			msg.Host = prefix[i+1:]
 		} else {
-			msg.Nick = msg.Prefix
+			msg.Sender = prefix
 		}
 
 		line = line[next+1:]

@@ -72,7 +72,7 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 		ircCfg.Password = server.ServerPassword
 	}
 
-	i := irc.NewClient(ircCfg)
+	i := irc.NewClient(&ircCfg)
 	i.Config.HandleNickInUse = createNickInUseHandler(i, state)
 
 	state.setIRC(server.Host, i)

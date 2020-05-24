@@ -8,7 +8,7 @@ import (
 )
 
 func testClientSend() (*Client, chan string) {
-	c := NewClient(Config{})
+	c := NewClient(&Config{})
 	conn := &mockConn{hook: make(chan string, 16)}
 	c.conn = conn
 	c.sendRecv.Add(1)
@@ -147,7 +147,6 @@ func TestRegister(t *testing.T) {
 	c.Config.Nick = "nick"
 	c.Config.Username = "user"
 	c.Config.Realname = "rn"
-	t.Log(c.Config)
 	c.register()
 	assert.Equal(t, "CAP LS 302\r\n", <-out)
 	assert.Equal(t, "NICK nick\r\n", <-out)
