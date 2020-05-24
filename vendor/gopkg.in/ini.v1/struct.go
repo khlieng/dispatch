@@ -564,6 +564,10 @@ func (s *Section) reflectFrom(val reflect.Value) error {
 	typ := val.Type()
 
 	for i := 0; i < typ.NumField(); i++ {
+		if !val.Field(i).CanInterface() {
+			continue
+		}
+
 		field := val.Field(i)
 		tpField := typ.Field(i)
 
@@ -695,7 +699,6 @@ func (s *Section) ReflectFrom(v interface{}) error {
 	}
 
 	if typ.Kind() == reflect.Ptr {
-		typ = typ.Elem()
 		val = val.Elem()
 	} else {
 		return errors.New("not a pointer to a struct")

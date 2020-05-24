@@ -81,7 +81,9 @@ module.exports = {
       chunkFilename: '[name].[contenthash].css'
     }),
     new HashOutputPlugin(),
-    new CopyPlugin(['public']),
+    new CopyPlugin({
+      patterns: ['public']
+    }),
     new InjectManifest({
       swSrc: './js/sw.js',
       additionalManifestEntries: [

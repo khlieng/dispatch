@@ -21,6 +21,7 @@ import (
 
 	zapv11 "github.com/blevesearch/zap/v11"
 	zapv12 "github.com/blevesearch/zap/v12"
+	zapv13 "github.com/blevesearch/zap/v13"
 )
 
 var supportedSegmentPlugins map[string]map[uint32]segment.Plugin
@@ -28,6 +29,7 @@ var defaultSegmentPlugin segment.Plugin
 
 func init() {
 	ResetPlugins()
+	RegisterPlugin(zapv13.Plugin(), false)
 	RegisterPlugin(zapv12.Plugin(), false)
 	RegisterPlugin(zapv11.Plugin(), true)
 }
@@ -60,18 +62,28 @@ func SupportedSegmentTypeVersions(typ string) (rv []uint32) {
 	return rv
 }
 
-func (s *Scorch) loadSegmentPlugin(forcedSegmentType string,
-	forcedSegmentVersion uint32) error {
+func chooseSegmentPlugin(forcedSegmentType string,
+	forcedSegmentVersion uint32) (segment.Plugin, error) {
 	if versions, ok := supportedSegmentPlugins[forcedSegmentType]; ok {
 		if segPlugin, ok := versions[uint32(forcedSegmentVersion)]; ok {
-			s.segPlugin = segPlugin
-			return nil
+			return segPlugin, nil
 		}
-		return fmt.Errorf(
+		return nil, fmt.Errorf(
 			"unsupported version %d for segment type: %s, supported: %v",
 			forcedSegmentVersion, forcedSegmentType,
 			SupportedSegmentTypeVersions(forcedSegmentType))
 	}
-	return fmt.Errorf("unsupported segment type: %s, supported: %v",
+	return nil, fmt.Errorf("unsupported segment type: %s, supported: %v",
 		forcedSegmentType, SupportedSegmentTypes())
+}
+
+func (s *Scorch) loadSegmentPlugin(forcedSegmentType string,
+	forcedSegmentVersion uint32) error {
+		segPlugin, err := chooseSegmentPlugin(forcedSegmentType,
+			forcedSegmentVersion)
+		if err != nil {
+			return err
+		}
+		s.segPlugin = segPlugin
+		return nil
 }
