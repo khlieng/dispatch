@@ -79,7 +79,6 @@ func NewClient(config Config) *Client {
 		nick:                  config.Nick,
 		Features:              NewFeatures(),
 		Messages:              make(chan *Message, 32),
-		wantedCapabilities:    clientWantedCaps,
 		requestedCapabilities: map[string][]string{},
 		enabledCapabilities:   map[string][]string{},
 		ConnectionChanged:     make(chan ConnectionState, 4),
@@ -94,6 +93,8 @@ func NewClient(config Config) *Client {
 			Jitter: true,
 		},
 	}
+
+	c.wantedCapabilities = append(c.wantedCapabilities, clientWantedCaps...)
 
 	if config.SASL != nil {
 		c.wantedCapabilities = append(c.wantedCapabilities, "sasl")
