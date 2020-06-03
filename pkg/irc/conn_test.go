@@ -147,7 +147,7 @@ func TestRecv(t *testing.T) {
 func TestRecvTriggersReconnect(t *testing.T) {
 	c := NewClient(&Config{})
 	c.conn = &mockConn{}
-	c.scan = bufio.NewScanner(bytes.NewBufferString("001 bob\r\n"))
+	c.scan = bufio.NewScanner(bytes.NewBufferString(""))
 	done := make(chan struct{})
 	ok := false
 	go func() {

@@ -2,24 +2,23 @@ import React, { memo } from 'react';
 import classnames from 'classnames';
 import stringToRGB from 'utils/color';
 
-const Message = ({ message, coloredNick, style, onNickClick }) => {
+const Message = ({ message, coloredNick, onNickClick }) => {
   const className = classnames('message', {
     [`message-${message.type}`]: message.type
   });
 
   if (message.type === 'date') {
     return (
-      <div className={className} style={style}>
+      <div className={className}>
         {message.content}
         <hr />
       </div>
     );
   }
 
-  style = {
-    ...style,
-    paddingLeft: `${window.messageIndent + 15}px`,
-    textIndent: `-${window.messageIndent}px`
+  const style = {
+    paddingLeft: `${message.indent + 15}px`,
+    textIndent: `-${message.indent}px`
   };
 
   const senderStyle = {};

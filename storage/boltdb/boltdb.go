@@ -278,19 +278,36 @@ func (s *BoltStore) RemoveOpenDM(user *storage.User, server, nick string) error 
 	})
 }
 
+func (s *BoltStore) logMessage(tx *bolt.Tx, message *storage.Message) error {
+	b, err := tx.Bucket(bucketMessages).CreateBucketIfNotExists([]byte(message.Server + ":" + message.To))
+	if err != nil {
+		return err
+	}
+
+	data, err := message.Marshal(nil)
+	if err != nil {
+		return err
+	}
+
+	return b.Put([]byte(message.ID), data)
+}
+
 func (s *BoltStore) LogMessage(message *storage.Message) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
-		b, err := tx.Bucket(bucketMessages).CreateBucketIfNotExists([]byte(message.Server + ":" + message.To))
-		if err != nil {
-			return err
+		return s.logMessage(tx, message)
+	})
+}
+
+func (s *BoltStore) LogMessages(messages []*storage.Message) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
+		for _, message := range messages {
+			err := s.logMessage(tx, message)
+			if err != nil {
+				return err
+			}
 		}
 
-		data, err := message.Marshal(nil)
-		if err != nil {
-			return err
-		}
-
-		return b.Put([]byte(message.ID), data)
+		return nil
 	})
 }
 

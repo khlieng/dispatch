@@ -87,7 +87,9 @@ func (d *Dispatch) getIndexData(r *http.Request, state *State) *indexData {
 		return nil
 	}
 	for i, channel := range channels {
-		channels[i].Topic = channelStore.GetTopic(channel.Server, channel.Name)
+		if client, ok := state.getIRC(channel.Server); ok {
+			channels[i].Topic = client.ChannelTopic(channel.Name)
+		}
 	}
 	data.Channels = channels
 
@@ -106,9 +108,8 @@ func (d *Dispatch) getIndexData(r *http.Request, state *State) *indexData {
 }
 
 func (d *indexData) addUsersAndMessages(server, name string, state *State) {
-	if isChannel(name) {
-		users := channelStore.GetUsers(server, name)
-		if len(users) > 0 {
+	if i, ok := state.getIRC(server); ok && isChannel(name) {
+		if users := i.ChannelUsers(name); len(users) > 0 {
 			d.Users = &Userlist{
 				Server:  server,
 				Channel: name,

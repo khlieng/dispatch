@@ -10,7 +10,6 @@ const smallScreen = 600;
 
 export default function widthUpdates({ store }) {
   when(store, getCharWidth, charWidth => {
-    window.messageIndent = 6 * charWidth;
     const scrollBarWidth = measureScrollBarWidth();
     let prevWrapWidth;
 

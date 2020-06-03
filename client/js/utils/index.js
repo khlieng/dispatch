@@ -141,6 +141,13 @@ export function timestamp(date = new Date()) {
 const dateFmt = new Intl.DateTimeFormat(window.navigator.language);
 export const formatDate = dateFmt.format;
 
+export function unix(date) {
+  if (date) {
+    return Math.floor(date.getTime() / 1000);
+  }
+  return Math.floor(Date.now() / 1000);
+}
+
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 

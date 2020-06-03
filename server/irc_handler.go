@@ -27,7 +27,6 @@ type ircHandler struct {
 	state  *State
 
 	whois       WhoisReply
-	userBuffers map[string][]string
 	motdBuffer  MOTD
 	listBuffer  storage.ChannelListIndex
 	dccProgress chan irc.DownloadProgress
@@ -39,7 +38,6 @@ func newIRCHandler(client *irc.Client, state *State) *ircHandler {
 	i := &ircHandler{
 		client:      client,
 		state:       state,
-		userBuffers: make(map[string][]string),
 		dccProgress: make(chan irc.DownloadProgress, 4),
 	}
 	i.initHandlers()
@@ -117,41 +115,47 @@ func (i *ircHandler) nick(msg *irc.Message) {
 		New:    msg.LastParam(),
 	})
 
-	channelStore.RenameUser(msg.Sender, msg.LastParam(), i.client.Host())
-
 	if i.client.Is(msg.LastParam()) {
 		go i.state.user.SetNick(msg.LastParam(), i.client.Host())
 	}
+
+	channels := irc.GetNickChannels(msg)
+	go i.state.user.LogEvent(i.client.Host(), "nick", []string{msg.Sender, msg.LastParam()}, channels...)
 }
 
 func (i *ircHandler) join(msg *irc.Message) {
+	host := i.client.Host()
+
 	i.state.sendJSON("join", Join{
-		Server:   i.client.Host(),
+		Server:   host,
 		User:     msg.Sender,
 		Channels: msg.Params,
 	})
 
 	channel := msg.Params[0]
-	channelStore.AddUser(msg.Sender, i.client.Host(), channel)
 
 	if i.client.Is(msg.Sender) {
 		// In case no topic is set and there's a cached one that needs to be cleared
 		i.client.Topic(channel)
 
-		i.state.sendLastMessages(i.client.Host(), channel, 50)
+		i.state.sendLastMessages(host, channel, 50)
 
 		go i.state.user.AddChannel(&storage.Channel{
-			Server: i.client.Host(),
+			Server: host,
 			Name:   channel,
 		})
 	}
+
+	go i.state.user.LogEvent(host, "join", []string{msg.Sender}, channel)
 }
 
 func (i *ircHandler) part(msg *irc.Message) {
+	host := i.client.Host()
+	channel := msg.Params[0]
 	part := Part{
-		Server:  i.client.Host(),
+		Server:  host,
 		User:    msg.Sender,
-		Channel: msg.Params[0],
+		Channel: channel,
 	}
 
 	if len(msg.Params) == 2 {
@@ -160,24 +164,18 @@ func (i *ircHandler) part(msg *irc.Message) {
 
 	i.state.sendJSON("part", part)
 
-	channelStore.RemoveUser(msg.Sender, i.client.Host(), part.Channel)
-
 	if i.client.Is(msg.Sender) {
-		go i.state.user.RemoveChannel(i.client.Host(), part.Channel)
+		go i.state.user.RemoveChannel(host, part.Channel)
 	}
+
+	go i.state.user.LogEvent(host, "part", []string{msg.Sender}, channel)
 }
 
 func (i *ircHandler) mode(msg *irc.Message) {
-	target := msg.Params[0]
-	if len(msg.Params) > 2 && isChannel(target) {
-		mode := parseMode(msg.Params[1])
-		mode.Server = i.client.Host()
-		mode.Channel = target
-		mode.User = msg.Params[2]
-
-		i.state.sendJSON("mode", mode)
-
-		channelStore.SetMode(i.client.Host(), target, msg.Params[2], mode.Add, mode.Remove)
+	if mode := irc.GetMode(msg); mode != nil {
+		i.state.sendJSON("mode", Mode{
+			Mode: mode,
+		})
 	}
 }
 
@@ -215,8 +213,13 @@ func (i *ircHandler) message(msg *irc.Message) {
 	}
 
 	if target != "*" && !msg.IsFromServer() {
-		go i.state.user.LogMessage(message.ID,
-			i.client.Host(), msg.Sender, target, msg.LastParam())
+		go i.state.user.LogMessage(&storage.Message{
+			ID:      message.ID,
+			Server:  message.Server,
+			From:    message.From,
+			To:      target,
+			Content: message.Content,
+		})
 	}
 }
 
@@ -227,7 +230,9 @@ func (i *ircHandler) quit(msg *irc.Message) {
 		Reason: msg.LastParam(),
 	})
 
-	channelStore.RemoveUserAll(msg.Sender, i.client.Host())
+	channels := irc.GetQuitChannels(msg)
+
+	go i.state.user.LogEvent(i.client.Host(), "quit", []string{msg.Sender, msg.LastParam()}, channels...)
 }
 
 func (i *ircHandler) info(msg *irc.Message) {
@@ -298,6 +303,8 @@ func (i *ircHandler) topic(msg *irc.Message) {
 	if msg.Command == irc.TOPIC {
 		channel = msg.Params[0]
 		nick = msg.Sender
+
+		go i.state.user.LogEvent(i.client.Host(), "topic", []string{nick, msg.LastParam()}, channel)
 	} else {
 		channel = msg.Params[1]
 	}
@@ -308,39 +315,21 @@ func (i *ircHandler) topic(msg *irc.Message) {
 		Topic:   msg.LastParam(),
 		Nick:    nick,
 	})
-
-	channelStore.SetTopic(msg.LastParam(), i.client.Host(), channel)
 }
 
 func (i *ircHandler) noTopic(msg *irc.Message) {
-	channel := msg.Params[1]
-
 	i.state.sendJSON("topic", Topic{
 		Server:  i.client.Host(),
-		Channel: channel,
+		Channel: msg.Params[1],
 	})
-
-	channelStore.SetTopic("", i.client.Host(), channel)
-}
-
-func (i *ircHandler) names(msg *irc.Message) {
-	users := strings.Split(strings.TrimSuffix(msg.LastParam(), " "), " ")
-	userBuffer := i.userBuffers[msg.Params[2]]
-	i.userBuffers[msg.Params[2]] = append(userBuffer, users...)
 }
 
 func (i *ircHandler) namesEnd(msg *irc.Message) {
-	channel := msg.Params[1]
-	users := i.userBuffers[channel]
-
 	i.state.sendJSON("users", Userlist{
 		Server:  i.client.Host(),
-		Channel: channel,
-		Users:   users,
+		Channel: msg.Params[1],
+		Users:   irc.GetNamreplyUsers(msg),
 	})
-
-	channelStore.SetUsers(users, i.client.Host(), channel)
-	delete(i.userBuffers, channel)
 }
 
 func (i *ircHandler) motdStart(msg *irc.Message) {
@@ -363,10 +352,10 @@ func (i *ircHandler) list(msg *irc.Message) {
 	}
 
 	if i.listBuffer != nil {
-		c, _ := strconv.Atoi(msg.Params[2])
+		userCount, _ := strconv.Atoi(msg.Params[2])
 		i.listBuffer.Add(&storage.ChannelListItem{
 			Name:      msg.Params[1],
-			UserCount: c,
+			UserCount: userCount,
 			Topic:     msg.LastParam(),
 		})
 	}
@@ -463,7 +452,6 @@ func (i *ircHandler) initHandlers() {
 		irc.RPL_ENDOFWHOIS:       i.whoisEnd,
 		irc.RPL_NOTOPIC:          i.noTopic,
 		irc.RPL_TOPIC:            i.topic,
-		irc.RPL_NAMREPLY:         i.names,
 		irc.RPL_ENDOFNAMES:       i.namesEnd,
 		irc.RPL_MOTDSTART:        i.motdStart,
 		irc.RPL_MOTD:             i.motd,
@@ -489,27 +477,12 @@ func (i *ircHandler) sendDCCInfo(message string, log bool, a ...interface{}) {
 
 	if log {
 		i.state.user.AddOpenDM(msg.Server, msg.From)
-		i.state.user.LogMessage(betterguid.New(), msg.Server, msg.From, msg.From, msg.Content)
+		i.state.user.LogMessage(&storage.Message{
+			Server:  msg.Server,
+			From:    msg.From,
+			Content: msg.Content,
+		})
 	}
-}
-
-func parseMode(mode string) *Mode {
-	m := Mode{}
-	add := false
-
-	for _, c := range mode {
-		if c == '+' {
-			add = true
-		} else if c == '-' {
-			add = false
-		} else if add {
-			m.Add += string(c)
-		} else {
-			m.Remove += string(c)
-		}
-	}
-
-	return &m
 }
 
 func isChannel(s string) bool {

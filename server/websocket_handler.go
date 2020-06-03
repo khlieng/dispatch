@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
-	"github.com/kjk/betterguid"
+	"github.com/khlieng/dispatch/storage"
 )
 
 type wsHandler struct {
@@ -87,11 +87,13 @@ func (h *wsHandler) init(r *http.Request) {
 			continue
 		}
 
-		h.state.sendJSON("users", Userlist{
-			Server:  channel.Server,
-			Channel: channel.Name,
-			Users:   channelStore.GetUsers(channel.Server, channel.Name),
-		})
+		if i, ok := h.state.getIRC(channel.Server); ok {
+			h.state.sendJSON("users", Userlist{
+				Server:  channel.Server,
+				Channel: channel.Name,
+				Users:   i.ChannelUsers(channel.Name),
+			})
+		}
 
 		h.state.sendLastMessages(channel.Server, channel.Name, 50)
 	}
@@ -177,8 +179,12 @@ func (h *wsHandler) message(b []byte) {
 	if i, ok := h.state.getIRC(data.Server); ok {
 		i.Privmsg(data.To, data.Content)
 
-		go h.state.user.LogMessage(betterguid.New(),
-			data.Server, i.GetNick(), data.To, data.Content)
+		go h.state.user.LogMessage(&storage.Message{
+			Server:  data.Server,
+			From:    i.GetNick(),
+			To:      data.To,
+			Content: data.Content,
+		})
 	}
 }
 

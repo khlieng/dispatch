@@ -48,7 +48,10 @@ var rootCmd = &cobra.Command{
 
 		storage.Initialize(viper.GetString("dir"), viper.GetString("data"), viper.GetString("conf"))
 
-		initConfig(storage.Path.Config(), viper.GetBool("reset-config"))
+		err := initConfig(storage.Path.Config(), viper.GetBool("reset-config"))
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -63,6 +66,14 @@ var rootCmd = &cobra.Command{
 		}
 		defer db.Close()
 
+		storage.GetMessageStore = func(user *storage.User) (storage.MessageStore, error) {
+			return boltdb.New(storage.Path.Log(user.Username))
+		}
+
+		storage.GetMessageSearchProvider = func(user *storage.User) (storage.MessageSearchProvider, error) {
+			return bleve.New(storage.Path.Index(user.Username))
+		}
+
 		cfg, cfgUpdated := config.LoadConfig()
 		dispatch := server.New(cfg)
 
@@ -75,14 +86,6 @@ var rootCmd = &cobra.Command{
 
 		dispatch.Store = db
 		dispatch.SessionStore = db
-
-		dispatch.GetMessageStore = func(user *storage.User) (storage.MessageStore, error) {
-			return boltdb.New(storage.Path.Log(user.Username))
-		}
-
-		dispatch.GetMessageSearchProvider = func(user *storage.User) (storage.MessageSearchProvider, error) {
-			return bleve.New(storage.Path.Index(user.Username))
-		}
 
 		dispatch.Run()
 	},
@@ -119,19 +122,16 @@ func init() {
 	viper.SetDefault("dcc.autoget.delete", true)
 }
 
-func initConfig(configPath string, overwrite bool) {
+func initConfig(configPath string, overwrite bool) error {
 	if _, err := os.Stat(configPath); overwrite || os.IsNotExist(err) {
 		config, err := assets.Asset("config.default.toml")
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
 		log.Println("Writing default config to", configPath)
 
-		err = ioutil.WriteFile(configPath, config, 0600)
-		if err != nil {
-			log.Println(err)
-		}
+		return ioutil.WriteFile(configPath, config, 0600)
 	}
+	return nil
 }

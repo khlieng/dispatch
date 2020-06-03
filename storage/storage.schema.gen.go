@@ -791,21 +791,6 @@ func (d *Channel) Size() (s uint64) {
 		}
 		s += l
 	}
-	{
-		l := uint64(len(d.Topic))
-
-		{
-
-			t := l
-			for t >= 0x80 {
-				t >>= 7
-				s++
-			}
-			s++
-
-		}
-		s += l
-	}
 	return
 }
 func (d *Channel) Marshal(buf []byte) ([]byte, error) {
@@ -857,25 +842,6 @@ func (d *Channel) Marshal(buf []byte) ([]byte, error) {
 		copy(buf[i+0:], d.Name)
 		i += l
 	}
-	{
-		l := uint64(len(d.Topic))
-
-		{
-
-			t := uint64(l)
-
-			for t >= 0x80 {
-				buf[i+0] = byte(t) | 0x80
-				t >>= 7
-				i++
-			}
-			buf[i+0] = byte(t)
-			i++
-
-		}
-		copy(buf[i+0:], d.Topic)
-		i += l
-	}
 	return buf[:i+0], nil
 }
 
@@ -920,26 +886,6 @@ func (d *Channel) Unmarshal(buf []byte) (uint64, error) {
 
 		}
 		d.Name = string(buf[i+0 : i+0+l])
-		i += l
-	}
-	{
-		l := uint64(0)
-
-		{
-
-			bs := uint8(7)
-			t := uint64(buf[i+0] & 0x7F)
-			for buf[i+0]&0x80 == 0x80 {
-				i++
-				t |= uint64(buf[i+0]&0x7F) << bs
-				bs += 7
-			}
-			i++
-
-			l = t
-
-		}
-		d.Topic = string(buf[i+0 : i+0+l])
 		i += l
 	}
 	return i + 0, nil
@@ -991,6 +937,29 @@ func (d *Message) Size() (s uint64) {
 
 		}
 		s += l
+	}
+	{
+		l := uint64(len(d.Events))
+
+		{
+
+			t := l
+			for t >= 0x80 {
+				t >>= 7
+				s++
+			}
+			s++
+
+		}
+
+		for k0 := range d.Events {
+
+			{
+				s += d.Events[k0].Size()
+			}
+
+		}
+
 	}
 	s += 8
 	return
@@ -1068,6 +1037,34 @@ func (d *Message) Marshal(buf []byte) ([]byte, error) {
 		*(*int64)(unsafe.Pointer(&buf[i+0])) = d.Time
 
 	}
+	{
+		l := uint64(len(d.Events))
+
+		{
+
+			t := uint64(l)
+
+			for t >= 0x80 {
+				buf[i+8] = byte(t) | 0x80
+				t >>= 7
+				i++
+			}
+			buf[i+8] = byte(t)
+			i++
+
+		}
+		for k0 := range d.Events {
+
+			{
+				nbuf, err := d.Events[k0].Marshal(buf[i+8:])
+				if err != nil {
+					return nil, err
+				}
+				i += uint64(len(nbuf))
+			}
+
+		}
+	}
 	return buf[:i+8], nil
 }
 
@@ -1133,6 +1130,251 @@ func (d *Message) Unmarshal(buf []byte) (uint64, error) {
 		}
 		d.Content = string(buf[i+0 : i+0+l])
 		i += l
+	}
+	{
+
+		d.Time = *(*int64)(unsafe.Pointer(&buf[i+0]))
+
+	}
+	{
+		l := uint64(0)
+
+		{
+
+			bs := uint8(7)
+			t := uint64(buf[i+8] & 0x7F)
+			for buf[i+8]&0x80 == 0x80 {
+				i++
+				t |= uint64(buf[i+8]&0x7F) << bs
+				bs += 7
+			}
+			i++
+
+			l = t
+
+		}
+		if uint64(cap(d.Events)) >= l {
+			d.Events = d.Events[:l]
+		} else {
+			d.Events = make([]Event, l)
+		}
+		for k0 := range d.Events {
+
+			{
+				ni, err := d.Events[k0].Unmarshal(buf[i+8:])
+				if err != nil {
+					return 0, err
+				}
+				i += ni
+			}
+
+		}
+	}
+	return i + 8, nil
+}
+
+func (d *Event) Size() (s uint64) {
+
+	{
+		l := uint64(len(d.Type))
+
+		{
+
+			t := l
+			for t >= 0x80 {
+				t >>= 7
+				s++
+			}
+			s++
+
+		}
+		s += l
+	}
+	{
+		l := uint64(len(d.Params))
+
+		{
+
+			t := l
+			for t >= 0x80 {
+				t >>= 7
+				s++
+			}
+			s++
+
+		}
+
+		for k0 := range d.Params {
+
+			{
+				l := uint64(len(d.Params[k0]))
+
+				{
+
+					t := l
+					for t >= 0x80 {
+						t >>= 7
+						s++
+					}
+					s++
+
+				}
+				s += l
+			}
+
+		}
+
+	}
+	s += 8
+	return
+}
+func (d *Event) Marshal(buf []byte) ([]byte, error) {
+	size := d.Size()
+	{
+		if uint64(cap(buf)) >= size {
+			buf = buf[:size]
+		} else {
+			buf = make([]byte, size)
+		}
+	}
+	i := uint64(0)
+
+	{
+		l := uint64(len(d.Type))
+
+		{
+
+			t := uint64(l)
+
+			for t >= 0x80 {
+				buf[i+0] = byte(t) | 0x80
+				t >>= 7
+				i++
+			}
+			buf[i+0] = byte(t)
+			i++
+
+		}
+		copy(buf[i+0:], d.Type)
+		i += l
+	}
+	{
+		l := uint64(len(d.Params))
+
+		{
+
+			t := uint64(l)
+
+			for t >= 0x80 {
+				buf[i+0] = byte(t) | 0x80
+				t >>= 7
+				i++
+			}
+			buf[i+0] = byte(t)
+			i++
+
+		}
+		for k0 := range d.Params {
+
+			{
+				l := uint64(len(d.Params[k0]))
+
+				{
+
+					t := uint64(l)
+
+					for t >= 0x80 {
+						buf[i+0] = byte(t) | 0x80
+						t >>= 7
+						i++
+					}
+					buf[i+0] = byte(t)
+					i++
+
+				}
+				copy(buf[i+0:], d.Params[k0])
+				i += l
+			}
+
+		}
+	}
+	{
+
+		*(*int64)(unsafe.Pointer(&buf[i+0])) = d.Time
+
+	}
+	return buf[:i+8], nil
+}
+
+func (d *Event) Unmarshal(buf []byte) (uint64, error) {
+	i := uint64(0)
+
+	{
+		l := uint64(0)
+
+		{
+
+			bs := uint8(7)
+			t := uint64(buf[i+0] & 0x7F)
+			for buf[i+0]&0x80 == 0x80 {
+				i++
+				t |= uint64(buf[i+0]&0x7F) << bs
+				bs += 7
+			}
+			i++
+
+			l = t
+
+		}
+		d.Type = string(buf[i+0 : i+0+l])
+		i += l
+	}
+	{
+		l := uint64(0)
+
+		{
+
+			bs := uint8(7)
+			t := uint64(buf[i+0] & 0x7F)
+			for buf[i+0]&0x80 == 0x80 {
+				i++
+				t |= uint64(buf[i+0]&0x7F) << bs
+				bs += 7
+			}
+			i++
+
+			l = t
+
+		}
+		if uint64(cap(d.Params)) >= l {
+			d.Params = d.Params[:l]
+		} else {
+			d.Params = make([]string, l)
+		}
+		for k0 := range d.Params {
+
+			{
+				l := uint64(0)
+
+				{
+
+					bs := uint8(7)
+					t := uint64(buf[i+0] & 0x7F)
+					for buf[i+0]&0x80 == 0x80 {
+						i++
+						t |= uint64(buf[i+0]&0x7F) << bs
+						bs += 7
+					}
+					i++
+
+					l = t
+
+				}
+				d.Params[k0] = string(buf[i+0 : i+0+l])
+				i += l
+			}
+
+		}
 	}
 	{
 

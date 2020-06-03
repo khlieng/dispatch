@@ -1,6 +1,7 @@
 import reducer, { broadcast, getMessageTab } from '../messages';
 import * as actions from '../actions';
 import appReducer from '../app';
+import { unix } from 'utils';
 
 describe('message reducer', () => {
   it('adds the message on ADD_MESSAGE', () => {
@@ -98,7 +99,7 @@ describe('message reducer', () => {
   it('adds date markers when prepending messages', () => {
     let state = {
       srv: {
-        '#chan1': [{ id: 0, date: new Date(1999, 0, 1) }]
+        '#chan1': [{ id: 0, date: new Date(1990, 0, 3) }]
       }
     };
 
@@ -108,8 +109,8 @@ describe('message reducer', () => {
       tab: '#chan1',
       prepend: true,
       messages: [
-        { id: 1, date: new Date(1990, 0, 2) },
-        { id: 2, date: new Date(1990, 0, 3) }
+        { id: 1, time: unix(new Date(1990, 0, 1)) },
+        { id: 2, time: unix(new Date(1990, 0, 2)) }
       ]
     });
 
@@ -150,7 +151,7 @@ describe('message reducer', () => {
   it('adds date markers when adding messages', () => {
     let state = {
       srv: {
-        '#chan1': [{ id: 0, date: new Date(1999, 0, 1) }]
+        '#chan1': [{ id: 0, date: new Date(1990, 0, 1) }]
       }
     };
 
@@ -159,9 +160,9 @@ describe('message reducer', () => {
       server: 'srv',
       tab: '#chan1',
       messages: [
-        { id: 1, date: new Date(1990, 0, 2) },
-        { id: 2, date: new Date(1990, 0, 3) },
-        { id: 3, date: new Date(1990, 0, 3) }
+        { id: 1, time: unix(new Date(1990, 0, 2)) },
+        { id: 2, time: unix(new Date(1990, 0, 3)) },
+        { id: 3, time: unix(new Date(1990, 0, 3)) }
       ]
     });
 

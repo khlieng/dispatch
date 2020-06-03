@@ -5,6 +5,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/kjk/betterguid"
 )
 
 type User struct {
@@ -15,6 +17,7 @@ type User struct {
 	store          Store
 	messageLog     MessageStore
 	messageIndex   MessageSearchProvider
+	lastMessages   map[string]map[string]*Message
 	clientSettings *ClientSettings
 	lastIP         []byte
 	certificate    *tls.Certificate
@@ -25,9 +28,19 @@ func NewUser(store Store) (*User, error) {
 	user := &User{
 		store:          store,
 		clientSettings: DefaultClientSettings(),
+		lastMessages:   map[string]map[string]*Message{},
 	}
 
 	err := store.SaveUser(user)
+	if err != nil {
+		return nil, err
+	}
+
+	user.messageLog, err = GetMessageStore(user)
+	if err != nil {
+		return nil, err
+	}
+	user.messageIndex, err = GetMessageSearchProvider(user)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +49,6 @@ func NewUser(store Store) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	err = os.Mkdir(Path.Downloads(user.Username), 0700)
 	if err != nil {
 		return nil, err
@@ -53,18 +65,33 @@ func LoadUsers(store Store) ([]*User, error) {
 
 	for _, user := range users {
 		user.store = store
+		user.messageLog, err = GetMessageStore(user)
+		if err != nil {
+			return nil, err
+		}
+		user.messageIndex, err = GetMessageSearchProvider(user)
+		if err != nil {
+			return nil, err
+		}
+		user.lastMessages = map[string]map[string]*Message{}
 		user.loadCertificate()
+
+		channels, err := user.GetChannels()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, channel := range channels {
+			messages, _, err := user.GetLastMessages(channel.Server, channel.Name, 1)
+			if err == nil && len(messages) == 1 {
+				user.lastMessages[channel.Server] = map[string]*Message{
+					channel.Name: &messages[0],
+				}
+			}
+		}
 	}
 
 	return users, nil
-}
-
-func (u *User) SetMessageStore(store MessageStore) {
-	u.messageLog = store
-}
-
-func (u *User) SetMessageSearchProvider(search MessageSearchProvider) {
-	u.messageIndex = search
 }
 
 func (u *User) Remove() {
@@ -178,7 +205,6 @@ func (u *User) SetServerName(name, address string) error {
 	return u.AddServer(server)
 }
 
-// TODO: Remove topic from disk schema
 type Channel struct {
 	Server string
 	Name   string
@@ -215,33 +241,128 @@ func (u *User) RemoveOpenDM(server, nick string) error {
 }
 
 type Message struct {
-	ID      string `json:"-" bleve:"-"`
-	Server  string `json:"-" bleve:"server"`
-	From    string `bleve:"-"`
-	To      string `json:"-" bleve:"to"`
-	Content string `bleve:"content"`
-	Time    int64  `bleve:"-"`
+	ID      string  `json:"-" bleve:"-"`
+	Server  string  `json:"-" bleve:"server"`
+	From    string  `bleve:"-"`
+	To      string  `json:"-" bleve:"to"`
+	Content string  `bleve:"content"`
+	Time    int64   `bleve:"-"`
+	Events  []Event `bleve:"-"`
 }
 
 func (m Message) Type() string {
 	return "message"
 }
 
-func (u *User) LogMessage(id, server, from, to, content string) error {
-	message := &Message{
-		ID:      id,
-		Server:  server,
-		From:    from,
-		To:      to,
-		Content: content,
-		Time:    time.Now().Unix(),
+func (u *User) LogMessage(msg *Message) error {
+	if msg.Time == 0 {
+		msg.Time = time.Now().Unix()
 	}
 
-	err := u.messageLog.LogMessage(message)
+	if msg.ID == "" {
+		msg.ID = betterguid.New()
+	}
+
+	if msg.To == "" {
+		msg.To = msg.From
+	}
+
+	u.setLastMessage(msg.Server, msg.To, msg)
+
+	err := u.messageLog.LogMessage(msg)
 	if err != nil {
 		return err
 	}
-	return u.messageIndex.Index(id, message)
+	return u.messageIndex.Index(msg.ID, msg)
+}
+
+type Event struct {
+	Type   string
+	Params []string
+	Time   int64
+}
+
+func (u *User) LogEvent(server, name string, params []string, channels ...string) error {
+	now := time.Now().Unix()
+	event := Event{
+		Type:   name,
+		Params: params,
+		Time:   now,
+	}
+
+	for _, channel := range channels {
+		lastMessage := u.getLastMessage(server, channel)
+
+		if lastMessage != nil && shouldCollapse(lastMessage, event) {
+			lastMessage.Events = append(lastMessage.Events, event)
+			u.setLastMessage(server, channel, lastMessage)
+
+			err := u.messageLog.LogMessage(lastMessage)
+			if err != nil {
+				return err
+			}
+		} else {
+			msg := &Message{
+				ID:     betterguid.New(),
+				Server: server,
+				To:     channel,
+				Time:   now,
+				Events: []Event{event},
+			}
+			u.setLastMessage(server, channel, msg)
+
+			err := u.messageLog.LogMessage(msg)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+var collapsed = []string{"join", "part", "quit"}
+
+func shouldCollapse(msg *Message, event Event) bool {
+	matches := 0
+	if len(msg.Events) > 0 {
+		for _, collapseType := range collapsed {
+			if msg.Events[0].Type == collapseType {
+				matches++
+			}
+			if event.Type == collapseType {
+				matches++
+			}
+		}
+	}
+	return matches == 2
+}
+
+func (u *User) getLastMessage(server, channel string) *Message {
+	u.lock.Lock()
+	defer u.lock.Unlock()
+
+	if _, ok := u.lastMessages[server]; !ok {
+		return nil
+	}
+
+	last := u.lastMessages[server][channel]
+	if last != nil {
+		msg := *last
+		return &msg
+	}
+	return nil
+}
+
+func (u *User) setLastMessage(server, channel string, msg *Message) {
+	u.lock.Lock()
+
+	if _, ok := u.lastMessages[server]; !ok {
+		u.lastMessages[server] = map[string]*Message{}
+	}
+
+	u.lastMessages[server][channel] = msg
+	u.lock.Unlock()
 }
 
 func (u *User) GetMessages(server, channel string, count int, fromID string) ([]Message, bool, error) {

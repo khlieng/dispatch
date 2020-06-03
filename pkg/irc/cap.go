@@ -5,6 +5,9 @@ import (
 )
 
 func (c *Client) HasCapability(name string, values ...string) bool {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	if capValues, ok := c.enabledCapabilities[name]; ok {
 		if len(values) == 0 || capValues == nil {
 			return true

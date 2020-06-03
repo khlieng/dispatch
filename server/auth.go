@@ -63,18 +63,6 @@ func (d *Dispatch) newUser(w http.ResponseWriter, r *http.Request) (*State, erro
 		return nil, err
 	}
 
-	messageStore, err := d.GetMessageStore(user)
-	if err != nil {
-		return nil, err
-	}
-	user.SetMessageStore(messageStore)
-
-	search, err := d.GetMessageSearchProvider(user)
-	if err != nil {
-		return nil, err
-	}
-	user.SetMessageSearchProvider(search)
-
 	log.Println(r.RemoteAddr, "[Auth] New anonymous user | ID:", user.ID)
 
 	session, err := session.New(user.ID)

@@ -1,20 +1,16 @@
 import { socketAction } from 'state/actions';
 import { setConnected } from 'state/app';
 import {
-  broadcast,
-  inform,
   print,
   addMessage,
-  addMessages
+  addMessages,
+  addEvent,
+  broadcastEvent
 } from 'state/messages';
 import { openModal } from 'state/modals';
 import { reconnect } from 'state/servers';
 import { select } from 'state/tab';
 import { find } from 'utils';
-
-function withReason(message, reason) {
-  return message + (reason ? ` (${reason})` : '');
-}
 
 function findChannels(state, server, user) {
   const channels = [];
@@ -46,37 +42,34 @@ export default function handleSocket({
     },
 
     join({ user, server, channels }) {
-      dispatch(inform(`${user} joined the channel`, server, channels[0]));
+      dispatch(addEvent(server, channels[0], 'join', user));
     },
 
     part({ user, server, channel, reason }) {
-      dispatch(
-        inform(withReason(`${user} left the channel`, reason), server, channel)
-      );
+      dispatch(addEvent(server, channel, 'part', user, reason));
     },
 
     quit({ user, server, reason }) {
       const channels = findChannels(getState(), server, user);
-      dispatch(broadcast(withReason(`${user} quit`, reason), server, channels));
+      dispatch(broadcastEvent(server, channels, 'quit', user, reason));
     },
 
     nick({ server, oldNick, newNick }) {
       if (oldNick) {
         const channels = findChannels(getState(), server, oldNick);
-        dispatch(
-          broadcast(`${oldNick} changed nick to ${newNick}`, server, channels)
-        );
+        dispatch(broadcastEvent(server, channels, 'nick', oldNick, newNick));
       }
     },
 
     topic({ server, channel, topic, nick }) {
       if (nick) {
-        if (topic) {
+        dispatch(addEvent(server, channel, 'topic', nick, topic));
+        /* if (topic) {
           dispatch(inform(`${nick} changed the topic to:`, server, channel));
           dispatch(print(topic, server, channel));
         } else {
           dispatch(inform(`${nick} cleared the topic`, server, channel));
-        }
+        } */
       }
     },
 

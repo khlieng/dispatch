@@ -6,12 +6,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
 	"github.com/khlieng/dispatch/storage/bleve"
 	"github.com/khlieng/dispatch/storage/boltdb"
+	"github.com/stretchr/testify/assert"
 )
 
 var user *storage.User
@@ -29,19 +28,17 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
+	storage.GetMessageStore = func(_ *storage.User) (storage.MessageStore, error) {
+		return db, nil
+	}
+	storage.GetMessageSearchProvider = func(user *storage.User) (storage.MessageSearchProvider, error) {
+		return bleve.New(storage.Path.Index(user.Username))
+	}
+
 	user, err = storage.NewUser(db)
 	if err != nil {
 		log.Fatal(err)
 	}
-	user.SetMessageStore(db)
-
-	search, err := bleve.New(storage.Path.Index(user.Username))
-	if err != nil {
-		log.Fatal(err)
-	}
-	user.SetMessageSearchProvider(search)
-
-	channelStore = storage.NewChannelStore()
 
 	code := m.Run()
 
@@ -123,21 +120,6 @@ func TestHandleIRCPart(t *testing.T) {
 		Server:  "host.com",
 		User:    "parting",
 		Channel: "#chan",
-	}, res)
-}
-
-func TestHandleIRCMode(t *testing.T) {
-	res := dispatchMessage(&irc.Message{
-		Command: irc.MODE,
-		Params:  []string{"#chan", "+o-v", "nick"},
-	})
-
-	checkResponse(t, "mode", &Mode{
-		Server:  "host.com",
-		Channel: "#chan",
-		User:    "nick",
-		Add:     "o",
-		Remove:  "v",
 	}, res)
 }
 
@@ -271,35 +253,6 @@ func TestHandleIRCNoTopic(t *testing.T) {
 		Server:  "host.com",
 		Channel: "#chan",
 	}, res)
-}
-
-func TestHandleIRCNames(t *testing.T) {
-	c := irc.NewClient(&irc.Config{
-		Nick:     "nick",
-		Username: "user",
-		Host:     "host.com",
-	})
-	s := NewState(nil, nil)
-	i := newIRCHandler(c, s)
-
-	i.dispatchMessage(&irc.Message{
-		Command: irc.RPL_NAMREPLY,
-		Params:  []string{"", "", "#chan", "a b c"},
-	})
-	i.dispatchMessage(&irc.Message{
-		Command: irc.RPL_NAMREPLY,
-		Params:  []string{"", "", "#chan", "d"},
-	})
-	i.dispatchMessage(&irc.Message{
-		Command: irc.RPL_ENDOFNAMES,
-		Params:  []string{"", "#chan"},
-	})
-
-	checkResponse(t, "users", Userlist{
-		Server:  "host.com",
-		Channel: "#chan",
-		Users:   []string{"a", "b", "c", "d"},
-	}, <-s.broadcast)
 }
 
 func TestHandleIRCMotd(t *testing.T) {

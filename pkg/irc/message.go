@@ -11,6 +11,8 @@ type Message struct {
 	Host    string
 	Command string
 	Params  []string
+
+	meta interface{}
 }
 
 func (m *Message) LastParam() string {

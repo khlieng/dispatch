@@ -25,7 +25,6 @@ struct Server {
 struct Channel {
   Server string
   Name   string
-  Topic  string
 }
 
 struct Message {
@@ -33,4 +32,11 @@ struct Message {
   From    string
   Content string
   Time    int64
+  Events  []Event
+}
+
+struct Event {
+  Type   string
+  Params []string
+  Time   int64
 }

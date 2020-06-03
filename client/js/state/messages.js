@@ -1,3 +1,4 @@
+import React from 'react';
 import { createSelector } from 'reselect';
 import has from 'lodash/has';
 import {
@@ -6,8 +7,10 @@ import {
   linkify,
   timestamp,
   isChannel,
-  formatDate
+  formatDate,
+  unix
 } from 'utils';
+import stringToRGB from 'utils/color';
 import colorify from 'utils/colorify';
 import createReducer from 'utils/createReducer';
 import { getApp } from './app';
@@ -45,7 +48,213 @@ function init(state, server, tab) {
   }
 }
 
+const collapsedEvents = ['join', 'part', 'quit'];
+
+function shouldCollapse(msg1, msg2) {
+  return (
+    msg1.events &&
+    msg2.events &&
+    collapsedEvents.indexOf(msg1.events[0].type) !== -1 &&
+    collapsedEvents.indexOf(msg2.events[0].type) !== -1
+  );
+}
+
+const eventVerbs = {
+  join: 'joined the channel',
+  part: 'left the channel',
+  quit: 'quit'
+};
+
+function renderNick(nick, type = '') {
+  const style = {
+    color: stringToRGB(nick),
+    fontWeight: 400
+  };
+
+  return (
+    <span className="message-sender" style={style} key={`${nick} ${type}`}>
+      {nick}
+    </span>
+  );
+}
+
+function renderMore(count, type) {
+  return (
+    <span
+      className="message-events-more"
+      key={`more ${type}`}
+    >{`${count} more`}</span>
+  );
+}
+
+function renderEvent(event, type, nicks) {
+  const ending = eventVerbs[type];
+
+  if (nicks.length === 1) {
+    event.push(renderNick(nicks[0], type));
+    event.push(` ${ending}`);
+  }
+  if (nicks.length === 2) {
+    event.push(renderNick(nicks[0], type));
+    event.push(' and ');
+    event.push(renderNick(nicks[1], type));
+    event.push(` ${ending}`);
+  }
+  if (nicks.length > 2) {
+    event.push(renderNick(nicks[0], type));
+    event.push(', ');
+    event.push(renderNick(nicks[1], type));
+    event.push(' and ');
+    event.push(renderMore(nicks.length - 2, type));
+    event.push(` ${ending}`);
+  }
+}
+
+function renderEvents(events) {
+  const first = events[0];
+  if (first.type === 'nick') {
+    const [oldNick, newNick] = first.params;
+
+    return [renderNick(oldNick), ' changed nick to ', renderNick(newNick)];
+  }
+  if (first.type === 'topic') {
+    const [nick, newTopic] = first.params;
+    const topic = colorify(linkify(newTopic));
+
+    if (!topic) {
+      return [renderNick(nick), ' cleared the topic'];
+    }
+
+    const result = [renderNick(nick), ' changed the topic to: '];
+
+    if (Array.isArray(topic)) {
+      result.push(...topic);
+    } else {
+      result.push(topic);
+    }
+
+    return result;
+  }
+
+  const byType = {};
+  for (let i = events.length - 1; i >= 0; i--) {
+    const event = events[i];
+    const [nick] = event.params;
+
+    if (!byType[event.type]) {
+      byType[event.type] = [nick];
+    } else if (byType[event.type].indexOf(nick) === -1) {
+      byType[event.type].push(nick);
+    }
+  }
+
+  const result = [];
+
+  if (byType.join) {
+    renderEvent(result, 'join', byType.join);
+  }
+
+  if (byType.part) {
+    if (result.length > 1) {
+      result[result.length - 1] += ', ';
+    }
+    renderEvent(result, 'part', byType.part);
+  }
+
+  if (byType.quit) {
+    if (result.length > 1) {
+      result[result.length - 1] += ', ';
+    }
+    renderEvent(result, 'quit', byType.quit);
+  }
+
+  return result;
+}
+
 let nextID = 0;
+
+function initMessage(
+  state,
+  message,
+  server,
+  tab,
+  wrapWidth,
+  charWidth,
+  windowWidth,
+  prepend
+) {
+  const messages = state[server][tab];
+
+  if (messages.length > 0 && !prepend) {
+    const lastMessage = messages[messages.length - 1];
+    if (shouldCollapse(lastMessage, message)) {
+      lastMessage.events.push(message.events[0]);
+      lastMessage.content = renderEvents(lastMessage.events);
+
+      [lastMessage.breakpoints, lastMessage.length] = findBreakpoints(
+        lastMessage.content
+      );
+      lastMessage.height = messageHeight(
+        lastMessage,
+        wrapWidth,
+        charWidth,
+        6 * charWidth,
+        windowWidth
+      );
+
+      return false;
+    }
+  }
+
+  if (message.time) {
+    message.date = new Date(message.time * 1000);
+  } else {
+    message.date = new Date();
+  }
+
+  message.time = timestamp(message.date);
+
+  if (!message.id) {
+    message.id = nextID;
+    nextID++;
+  }
+
+  if (tab.charAt(0) === '#') {
+    message.channel = true;
+  }
+
+  if (message.events) {
+    message.type = 'info';
+    message.content = renderEvents(message.events);
+  } else {
+    message.content = message.content || '';
+    // Collapse multiple adjacent spaces into a single one
+    message.content = message.content.replace(/\s\s+/g, ' ');
+
+    if (message.content.indexOf('\x01ACTION') === 0) {
+      const { from } = message;
+      message.from = null;
+      message.type = 'action';
+      message.content = from + message.content.slice(7, -1);
+    }
+  }
+
+  if (!message.events) {
+    message.content = colorify(linkify(message.content));
+  }
+
+  [message.breakpoints, message.length] = findBreakpoints(message.content);
+  message.height = messageHeight(
+    message,
+    wrapWidth,
+    charWidth,
+    6 * charWidth,
+    windowWidth
+  );
+  message.indent = 6 * charWidth;
+
+  return true;
+}
 
 function createDateMessage(date) {
   const message = {
@@ -68,14 +277,34 @@ function isSameDay(d1, d2) {
   );
 }
 
-function reducerPrependMessages(messages, server, tab, state) {
+function reducerPrependMessages(
+  state,
+  messages,
+  server,
+  tab,
+  wrapWidth,
+  charWidth,
+  windowWidth
+) {
   const msgs = [];
 
   for (let i = 0; i < messages.length; i++) {
-    if (i > 0 && !isSameDay(messages[i - 1].date, messages[i].date)) {
-      msgs.push(createDateMessage(messages[i].date));
+    const message = messages[i];
+    initMessage(
+      state,
+      message,
+      server,
+      tab,
+      wrapWidth,
+      charWidth,
+      windowWidth,
+      true
+    );
+
+    if (i > 0 && !isSameDay(messages[i - 1].date, message.date)) {
+      msgs.push(createDateMessage(message.date));
     }
-    msgs.push(messages[i]);
+    msgs.push(message);
   }
 
   const m = state[server][tab];
@@ -110,15 +339,41 @@ function reducerAddMessage(message, server, tab, state) {
 export default createReducer(
   {},
   {
-    [actions.ADD_MESSAGE](state, { server, tab, message }) {
+    [actions.ADD_MESSAGE](
+      state,
+      { server, tab, message, wrapWidth, charWidth, windowWidth }
+    ) {
       init(state, server, tab);
-      reducerAddMessage(message, server, tab, state);
+
+      const shouldAdd = initMessage(
+        state,
+        message,
+        server,
+        tab,
+        wrapWidth,
+        charWidth,
+        windowWidth
+      );
+      if (shouldAdd) {
+        reducerAddMessage(message, server, tab, state);
+      }
     },
 
-    [actions.ADD_MESSAGES](state, { server, tab, messages, prepend }) {
+    [actions.ADD_MESSAGES](
+      state,
+      { server, tab, messages, prepend, wrapWidth, charWidth, windowWidth }
+    ) {
       if (prepend) {
         init(state, server, tab);
-        reducerPrependMessages(messages, server, tab, state);
+        reducerPrependMessages(
+          state,
+          messages,
+          server,
+          tab,
+          wrapWidth,
+          charWidth,
+          windowWidth
+        );
       } else {
         if (!messages[0].tab) {
           init(state, server, tab);
@@ -128,7 +383,19 @@ export default createReducer(
           if (message.tab) {
             init(state, server, message.tab);
           }
-          reducerAddMessage(message, server, message.tab || tab, state);
+
+          const shouldAdd = initMessage(
+            state,
+            message,
+            server,
+            message.tab || tab,
+            wrapWidth,
+            charWidth,
+            windowWidth
+          );
+          if (shouldAdd) {
+            reducerAddMessage(message, server, message.tab || tab, state);
+          }
         });
       }
     },
@@ -184,53 +451,6 @@ export default createReducer(
   }
 );
 
-function initMessage(message, tab, state) {
-  if (message.time) {
-    message.date = new Date(message.time * 1000);
-  } else {
-    message.date = new Date();
-  }
-
-  message.time = timestamp(message.date);
-
-  if (!message.id) {
-    message.id = nextID;
-    nextID++;
-  }
-
-  if (tab.charAt(0) === '#') {
-    message.channel = true;
-  }
-
-  message.content = message.content || '';
-
-  // Collapse multiple adjacent spaces into a single one
-  message.content = message.content.replace(/\s\s+/g, ' ');
-
-  if (message.content.indexOf('\x01ACTION') === 0) {
-    const { from } = message;
-    message.from = null;
-    message.type = 'action';
-    message.content = from + message.content.slice(7, -1);
-  }
-
-  const { wrapWidth, charWidth, windowWidth } = getApp(state);
-
-  message.length = message.content.length;
-  message.breakpoints = findBreakpoints(message.content);
-  message.height = messageHeight(
-    message,
-    wrapWidth,
-    charWidth,
-    6 * charWidth,
-    windowWidth
-  );
-
-  message.content = colorify(linkify(message.content));
-
-  return message;
-}
-
 export function getMessageTab(server, to) {
   if (!to || to === '*' || (!isChannel(to) && to.indexOf('.') !== -1)) {
     return server;
@@ -284,19 +504,19 @@ export function updateMessageHeight(wrapWidth, charWidth, windowWidth) {
 export function sendMessage(content, to, server) {
   return (dispatch, getState) => {
     const state = getState();
+    const { wrapWidth, charWidth, windowWidth } = getApp(state);
 
     dispatch({
       type: actions.ADD_MESSAGE,
       server,
       tab: to,
-      message: initMessage(
-        {
-          from: state.servers[server].nick,
-          content
-        },
-        to,
-        state
-      ),
+      message: {
+        from: state.servers[server].nick,
+        content
+      },
+      wrapWidth,
+      charWidth,
+      windowWidth,
       socket: {
         type: 'message',
         data: { content, to, server }
@@ -308,13 +528,19 @@ export function sendMessage(content, to, server) {
 export function addMessage(message, server, to) {
   const tab = getMessageTab(server, to);
 
-  return (dispatch, getState) =>
+  return (dispatch, getState) => {
+    const { wrapWidth, charWidth, windowWidth } = getApp(getState());
+
     dispatch({
       type: actions.ADD_MESSAGE,
       server,
       tab,
-      message: initMessage(message, tab, getState())
+      message,
+      wrapWidth,
+      charWidth,
+      windowWidth
     });
+  };
 }
 
 export function addMessages(messages, server, to, prepend, next) {
@@ -328,18 +554,55 @@ export function addMessages(messages, server, to, prepend, next) {
       messages[0].next = true;
     }
 
-    messages.forEach(message =>
-      initMessage(message, message.tab || tab, state)
-    );
+    const { wrapWidth, charWidth, windowWidth } = getApp(state);
 
     dispatch({
       type: actions.ADD_MESSAGES,
       server,
       tab,
       messages,
-      prepend
+      prepend,
+      wrapWidth,
+      charWidth,
+      windowWidth
     });
   };
+}
+
+export function addEvent(server, tab, type, ...params) {
+  return addMessage(
+    {
+      type: 'info',
+      events: [
+        {
+          type,
+          params,
+          time: unix()
+        }
+      ]
+    },
+    server,
+    tab
+  );
+}
+
+export function broadcastEvent(server, channels, type, ...params) {
+  const now = unix();
+
+  return addMessages(
+    channels.map(channel => ({
+      type: 'info',
+      tab: channel,
+      events: [
+        {
+          type,
+          params,
+          time: now
+        }
+      ]
+    })),
+    server
+  );
 }
 
 export function broadcast(message, server, channels) {

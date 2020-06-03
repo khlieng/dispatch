@@ -16,15 +16,11 @@ import (
 	"github.com/khlieng/dispatch/storage"
 )
 
-var channelStore = storage.NewChannelStore()
 var channelIndexes = storage.NewChannelIndexManager()
 
 type Dispatch struct {
 	Store        storage.Store
 	SessionStore storage.SessionStore
-
-	GetMessageStore          func(*storage.User) (storage.MessageStore, error)
-	GetMessageSearchProvider func(*storage.User) (storage.MessageSearchProvider, error)
 
 	cfg      *config.Config
 	upgrader websocket.Upgrader
@@ -87,18 +83,6 @@ func (d *Dispatch) loadUsers() {
 }
 
 func (d *Dispatch) loadUser(user *storage.User) {
-	messageStore, err := d.GetMessageStore(user)
-	if err != nil {
-		log.Fatal(err)
-	}
-	user.SetMessageStore(messageStore)
-
-	search, err := d.GetMessageSearchProvider(user)
-	if err != nil {
-		log.Fatal(err)
-	}
-	user.SetMessageSearchProvider(search)
-
 	state := NewState(user, d)
 	d.states.set(state)
 	go state.run()

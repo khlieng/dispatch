@@ -2,20 +2,40 @@ const lineHeight = 24;
 const userListWidth = 200;
 const smallScreen = 600;
 
-export function findBreakpoints(text) {
-  const breakpoints = [];
-
+function findBreakpointsString(text, breakpoints, index) {
   for (let i = 0; i < text.length; i++) {
     const char = text.charAt(i);
 
     if (char === ' ') {
-      breakpoints.push({ end: i, next: i + 1 });
-    } else if (char === '-' && i !== text.length - 1) {
-      breakpoints.push({ end: i + 1, next: i + 1 });
+      breakpoints.push({ end: i + index, next: i + 1 + index });
+    } else if (i !== text.length - 1 && (char === '-' || char === '?')) {
+      breakpoints.push({ end: i + 1 + index, next: i + 1 + index });
+    }
+  }
+}
+
+export function findBreakpoints(text) {
+  const breakpoints = [];
+  let length = 0;
+
+  if (typeof text === 'string') {
+    findBreakpointsString(text, breakpoints, length);
+    length = text.length;
+  } else if (Array.isArray(text)) {
+    for (let i = 0; i < text.length; i++) {
+      const node = text[i];
+
+      if (typeof node === 'string') {
+        findBreakpointsString(node, breakpoints, length);
+        length += node.length;
+      } else {
+        findBreakpointsString(node.props.children, breakpoints, length);
+        length += node.props.children.length;
+      }
     }
   }
 
-  return breakpoints;
+  return [breakpoints, length];
 }
 
 export function messageHeight(

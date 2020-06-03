@@ -35,8 +35,10 @@ type Client struct {
 	Messages          chan *Message
 	ConnectionChanged chan ConnectionState
 	Features          *Features
-	nick              string
-	channels          []string
+
+	state    *state
+	nick     string
+	channels []string
 
 	wantedCapabilities    []string
 	requestedCapabilities map[string][]string
@@ -80,18 +82,15 @@ func NewClient(config *Config) *Client {
 		wantedCapabilities = append(wantedCapabilities, "sasl")
 	}
 
-	return &Client{
+	client := &Client{
 		Config:                config,
-		nick:                  config.Nick,
-		Features:              NewFeatures(),
 		Messages:              make(chan *Message, 32),
+		ConnectionChanged:     make(chan ConnectionState, 4),
+		Features:              NewFeatures(),
+		nick:                  config.Nick,
 		wantedCapabilities:    wantedCapabilities,
 		requestedCapabilities: map[string][]string{},
 		enabledCapabilities:   map[string][]string{},
-		ConnectionChanged:     make(chan ConnectionState, 4),
-		out:                   make(chan string, 32),
-		quit:                  make(chan struct{}),
-		reconnect:             make(chan struct{}),
 		dialer:                &net.Dialer{Timeout: 10 * time.Second},
 		recvBuf:               make([]byte, 0, 4096),
 		backoff: &backoff.Backoff{
@@ -99,7 +98,13 @@ func NewClient(config *Config) *Client {
 			Max:    30 * time.Second,
 			Jitter: true,
 		},
+		out:       make(chan string, 32),
+		quit:      make(chan struct{}),
+		reconnect: make(chan struct{}),
 	}
+	client.state = newState(client)
+
+	return client
 }
 
 func (c *Client) GetNick() string {
@@ -141,6 +146,18 @@ func (c *Client) setRegistered(reg bool) {
 
 func (c *Client) Host() string {
 	return c.Config.Host
+}
+
+func (c *Client) MOTD() []string {
+	return c.state.getMOTD()
+}
+
+func (c *Client) ChannelUsers(channel string) []string {
+	return c.state.getUsers(channel)
+}
+
+func (c *Client) ChannelTopic(channel string) string {
+	return c.state.getTopic(channel)
 }
 
 func (c *Client) Nick(nick string) {

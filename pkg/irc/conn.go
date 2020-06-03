@@ -21,7 +21,7 @@ func (c *Client) Connect() {
 }
 
 func (c *Client) Reconnect() {
-	close(c.reconnect)
+	c.tryConnect()
 }
 
 func (c *Client) Write(data string) {
@@ -63,6 +63,7 @@ func (c *Client) run() {
 
 			c.sendRecv.Wait()
 			c.reconnect = make(chan struct{})
+			c.state.reset()
 
 			time.Sleep(c.backoff.Duration())
 			c.tryConnect()
@@ -178,7 +179,7 @@ func (c *Client) recv() {
 
 			default:
 				c.connChange(false, nil)
-				c.Reconnect()
+				close(c.reconnect)
 				return
 			}
 		}
@@ -195,54 +196,7 @@ func (c *Client) recv() {
 			return
 		}
 
-		switch msg.Command {
-		case PING:
-			go c.write("PONG :" + msg.LastParam())
-
-		case JOIN:
-			if c.Is(msg.Sender) {
-				c.addChannel(msg.Params[0])
-			}
-
-		case NICK:
-			if c.Is(msg.Sender) {
-				c.setNick(msg.LastParam())
-			}
-
-		case PRIVMSG:
-			if ctcp := msg.ToCTCP(); ctcp != nil {
-				c.handleCTCP(ctcp, msg)
-			}
-
-		case CAP:
-			c.handleCAP(msg)
-
-		case RPL_WELCOME:
-			c.setNick(msg.Params[0])
-			c.setRegistered(true)
-			c.flushChannels()
-
-			c.backoff.Reset()
-			c.sendRecv.Add(1)
-			go c.send()
-
-		case RPL_ISUPPORT:
-			c.Features.Parse(msg.Params)
-
-		case ERR_NICKNAMEINUSE, ERR_NICKCOLLISION, ERR_UNAVAILRESOURCE:
-			if c.Config.HandleNickInUse != nil {
-				go c.writeNick(c.Config.HandleNickInUse(msg.Params[1]))
-			}
-
-		case ERROR:
-			c.Messages <- msg
-			c.connChange(false, nil)
-			time.Sleep(5 * time.Second)
-			close(c.quit)
-			return
-		}
-
-		c.handleSASL(msg)
+		c.handleMessage(msg)
 
 		c.Messages <- msg
 	}

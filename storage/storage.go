@@ -7,7 +7,12 @@ import (
 	"github.com/khlieng/dispatch/pkg/session"
 )
 
-var Path directory
+var (
+	Path directory
+
+	GetMessageStore          MessageStoreCreator
+	GetMessageSearchProvider MessageSearchProviderCreator
+)
 
 func Initialize(root, dataRoot, configRoot string) {
 	if root != DefaultDirectory() {
@@ -52,13 +57,18 @@ type SessionStore interface {
 
 type MessageStore interface {
 	LogMessage(message *Message) error
+	LogMessages(messages []*Message) error
 	GetMessages(server, channel string, count int, fromID string) ([]Message, bool, error)
 	GetMessagesByID(server, channel string, ids []string) ([]Message, error)
 	Close()
 }
+
+type MessageStoreCreator func(*User) (MessageStore, error)
 
 type MessageSearchProvider interface {
 	SearchMessages(server, channel, q string) ([]string, error)
 	Index(id string, message *Message) error
 	Close()
 }
+
+type MessageSearchProviderCreator func(*User) (MessageSearchProvider, error)

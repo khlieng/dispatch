@@ -24,6 +24,13 @@ func TestUser(t *testing.T) {
 	db, err := boltdb.New(storage.Path.Database())
 	assert.Nil(t, err)
 
+	storage.GetMessageStore = func(_ *storage.User) (storage.MessageStore, error) {
+		return db, nil
+	}
+	storage.GetMessageSearchProvider = func(_ *storage.User) (storage.MessageSearchProvider, error) {
+		return nil, nil
+	}
+
 	user, err := storage.NewUser(db)
 	assert.Nil(t, err)
 
@@ -124,16 +131,17 @@ func TestMessages(t *testing.T) {
 	db, err := boltdb.New(storage.Path.Database())
 	assert.Nil(t, err)
 
+	storage.GetMessageStore = func(_ *storage.User) (storage.MessageStore, error) {
+		return db, nil
+	}
+	storage.GetMessageSearchProvider = func(user *storage.User) (storage.MessageSearchProvider, error) {
+		return bleve.New(storage.Path.Index(user.Username))
+	}
+
 	user, err := storage.NewUser(db)
 	assert.Nil(t, err)
 
 	os.MkdirAll(storage.Path.User(user.Username), 0700)
-
-	search, err := bleve.New(storage.Path.Index(user.Username))
-	assert.Nil(t, err)
-
-	user.SetMessageStore(db)
-	user.SetMessageSearchProvider(search)
 
 	messages, hasMore, err := user.GetMessages("irc.freenode.net", "#go-nuts", 10, "6")
 	assert.Nil(t, err)
@@ -153,7 +161,13 @@ func TestMessages(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		id := betterguid.New()
 		ids = append(ids, id)
-		err = user.LogMessage(id, "irc.freenode.net", "nick", "#go-nuts", "message"+strconv.Itoa(i))
+		err = user.LogMessage(&storage.Message{
+			ID:      id,
+			Server:  "irc.freenode.net",
+			From:    "nick",
+			To:      "#go-nuts",
+			Content: "message" + strconv.Itoa(i),
+		})
 		assert.Nil(t, err)
 	}
 
@@ -195,6 +209,43 @@ func TestMessages(t *testing.T) {
 	messages, err = user.SearchMessages("irc.freenode.net", "#go-nuts", "message")
 	assert.Nil(t, err)
 	assert.True(t, len(messages) > 0)
+
+	user.LogEvent("irc.freenode.net", "join", []string{"bob"}, "#go-nuts")
+	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 1)
+	assert.Zero(t, messages[0].Content)
+	assert.Nil(t, err)
+	assert.True(t, hasMore)
+	assert.Len(t, messages[0].Events, 1)
+	assert.Equal(t, "join", messages[0].Events[0].Type)
+	assert.NotZero(t, messages[0].Events[0].Time)
+
+	user.LogEvent("irc.freenode.net", "part", []string{"bob"}, "#go-nuts")
+	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 1)
+	assert.Zero(t, messages[0].Content)
+	assert.Nil(t, err)
+	assert.True(t, hasMore)
+	assert.Len(t, messages[0].Events, 2)
+	assert.Equal(t, "part", messages[0].Events[1].Type)
+	assert.NotZero(t, messages[0].Events[0].Time)
+
+	user.LogEvent("irc.freenode.net", "nick", []string{"bob", "rob"}, "#go-nuts")
+	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 1)
+	assert.Zero(t, messages[0].Content)
+	assert.Nil(t, err)
+	assert.True(t, hasMore)
+	assert.Len(t, messages[0].Events, 1)
+	assert.Equal(t, "nick", messages[0].Events[0].Type)
+	assert.NotZero(t, messages[0].Events[0].Time)
+
+	user.LogEvent("irc.freenode.net", "quit", []string{"rob", "bored"}, "#go-nuts")
+	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 1)
+	assert.Zero(t, messages[0].Content)
+	assert.Nil(t, err)
+	assert.True(t, hasMore)
+	assert.Len(t, messages[0].Events, 1)
+	assert.Equal(t, "quit", messages[0].Events[0].Type)
+	assert.Equal(t, []string{"rob", "bored"}, messages[0].Events[0].Params)
+	assert.NotZero(t, messages[0].Events[0].Time)
 
 	db.Close()
 }

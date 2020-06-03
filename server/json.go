@@ -86,11 +86,7 @@ type Part struct {
 }
 
 type Mode struct {
-	Server  string
-	Channel string
-	User    string
-	Add     string
-	Remove  string
+	*irc.Mode
 }
 
 type Quit struct {

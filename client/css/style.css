@@ -725,6 +725,11 @@ input.chat-title {
   cursor: pointer;
 }
 
+.message-events-more {
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .message-input-wrap {
   position: absolute;
   left: 0;
