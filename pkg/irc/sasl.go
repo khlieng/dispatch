@@ -112,24 +112,41 @@ func (s *SASLScram) Step(response string) (string, error) {
 	}
 }
 
-func (c *Client) currentSASL() SASL {
-	return c.saslMechanisms[c.currentSASLIndex]
+func (c *Client) tryNextSASL() {
+	if len(c.saslMechanisms) > 0 {
+		c.currentSASL, c.saslMechanisms = c.saslMechanisms[0], c.saslMechanisms[1:]
+		c.authenticate(c.currentSASL.Name())
+	} else {
+		c.finishCAP()
+	}
 }
 
-func (c *Client) nextSASL() SASL {
-	if c.currentSASLIndex < len(c.saslMechanisms)-1 {
-		c.currentSASLIndex++
-		return c.saslMechanisms[c.currentSASLIndex]
+func (c *Client) filterSASLMechanisms(supportedMechs []string) {
+	saslMechanisms := []SASL{}
+
+	for _, mech := range c.saslMechanisms {
+		for _, supported := range supportedMechs {
+			if mech.Name() == supported {
+				saslMechanisms = append(saslMechanisms, mech)
+				break
+			}
+		}
 	}
-	return nil
+
+	c.saslMechanisms = saslMechanisms
 }
 
 func (c *Client) handleSASL(msg *Message) {
 	switch msg.Command {
 	case AUTHENTICATE:
-		auth, err := c.currentSASL().Step(msg.LastParam())
+		if c.currentSASL == nil {
+			return
+		}
+
+		// TODO: handle 400 chunking on incoming messages
+		auth, err := c.currentSASL.Step(msg.LastParam())
 		if err != nil {
-			c.finishCAP()
+			c.tryNextSASL()
 			return
 		}
 
@@ -143,33 +160,20 @@ func (c *Client) handleSASL(msg *Message) {
 			c.authenticate("+")
 		}
 
+	case ERR_SASLFAIL, ERR_SASLTOOLONG, ERR_SASLABORTED:
+		c.tryNextSASL()
+
 	case RPL_SASLMECHS:
 		if len(msg.Params) > 1 {
 			supportedMechs := strings.Split(msg.Params[1], ",")
-
-			for i, mech := range c.saslMechanisms {
-				for _, supported := range supportedMechs {
-					if mech.Name() == supported && i > c.currentSASLIndex {
-						c.currentSASLIndex = i
-						c.authenticate(mech.Name())
-						return
-					}
-				}
-			}
+			c.filterSASLMechanisms(supportedMechs)
 		}
-		c.finishCAP()
 
-	case ERR_SASLFAIL:
-		if next := c.nextSASL(); next != nil {
-			c.authenticate(next.Name())
-		} else {
+		if len(c.saslMechanisms) == 0 {
 			c.finishCAP()
 		}
 
-	case RPL_SASLSUCCESS, RPL_LOGGEDIN:
-		c.finishCAP()
-
-	case ERR_NICKLOCKED, ERR_SASLTOOLONG, ERR_SASLABORTED:
+	case RPL_SASLSUCCESS, RPL_LOGGEDIN, ERR_NICKLOCKED:
 		c.finishCAP()
 	}
 }

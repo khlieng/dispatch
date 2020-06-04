@@ -4,11 +4,17 @@ import (
 	"strings"
 )
 
-func (c *Client) HasCapability(name string, values ...string) bool {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+var clientWantedCaps = []string{"cap-notify"}
 
-	if capValues, ok := c.enabledCapabilities[name]; ok {
+func (c *Client) GetCapability(name string) ([]string, bool) {
+	c.lock.Lock()
+	values, ok := c.enabledCapabilities[name]
+	c.lock.Unlock()
+	return values, ok
+}
+
+func (c *Client) HasCapability(name string, values ...string) bool {
+	if capValues, ok := c.GetCapability(name); ok {
 		if len(values) == 0 || capValues == nil {
 			return true
 		}
@@ -25,20 +31,18 @@ func (c *Client) HasCapability(name string, values ...string) bool {
 	return false
 }
 
-var clientWantedCaps = []string{"cap-notify"}
-
 func (c *Client) beginCAP() {
 	c.write("CAP LS 302")
 }
 
 func (c *Client) beginSASL() bool {
 	if c.negotiating {
-		for i, mech := range c.saslMechanisms {
-			if c.HasCapability("sasl", mech.Name()) {
-				c.currentSASLIndex = i
-				c.authenticate(mech.Name())
-				return true
+		if mechs, ok := c.GetCapability("sasl"); ok {
+			if mechs != nil {
+				c.filterSASLMechanisms(mechs)
 			}
+			c.tryNextSASL()
+			return true
 		}
 	}
 	return false

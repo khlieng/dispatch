@@ -49,7 +49,7 @@ type Client struct {
 	enabledCapabilities   map[string][]string
 	negotiating           bool
 	saslMechanisms        []SASL
-	currentSASLIndex      int
+	currentSASL           SASL
 
 	conn       net.Conn
 	connected  bool
@@ -137,11 +137,12 @@ func (c *Client) initSASL() {
 	}
 
 	c.wantedCapabilities = append([]string{}, clientWantedCaps...)
+	c.negotiating = false
+	c.currentSASL = nil
 
 	if len(saslMechanisms) > 0 {
 		c.wantedCapabilities = append(c.wantedCapabilities, "sasl")
 		c.saslMechanisms = saslMechanisms
-		c.currentSASLIndex = 0
 	}
 }
 
