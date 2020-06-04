@@ -25,10 +25,30 @@ func (c *Client) HasCapability(name string, values ...string) bool {
 	return false
 }
 
-var clientWantedCaps = []string{}
+var clientWantedCaps = []string{"cap-notify"}
 
-func (c *Client) writeCAP() {
+func (c *Client) beginCAP() {
 	c.write("CAP LS 302")
+}
+
+func (c *Client) beginSASL() bool {
+	if c.negotiating {
+		for i, mech := range c.saslMechanisms {
+			if c.HasCapability("sasl", mech.Name()) {
+				c.currentSASLIndex = i
+				c.authenticate(mech.Name())
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (c *Client) finishCAP() {
+	if c.negotiating {
+		c.negotiating = false
+		c.write("CAP END")
+	}
 }
 
 func (c *Client) handleCAP(msg *Message) {
@@ -38,9 +58,6 @@ func (c *Client) handleCAP(msg *Message) {
 	}
 
 	caps := parseCaps(msg.LastParam())
-
-	c.lock.Lock()
-	defer c.lock.Unlock()
 
 	switch msg.Params[1] {
 	case "LS":
@@ -58,6 +75,8 @@ func (c *Client) handleCAP(msg *Message) {
 				return
 			}
 
+			c.negotiating = true
+
 			reqCaps := []string{}
 			for cap := range c.requestedCapabilities {
 				reqCaps = append(reqCaps, cap)
@@ -67,19 +86,17 @@ func (c *Client) handleCAP(msg *Message) {
 		}
 
 	case "ACK":
+		c.lock.Lock()
 		for cap := range caps {
 			if v, ok := c.requestedCapabilities[cap]; ok {
 				c.enabledCapabilities[cap] = v
 				delete(c.requestedCapabilities, cap)
 			}
 		}
+		c.lock.Unlock()
 
-		if len(c.requestedCapabilities) == 0 {
-			if c.Config.SASL != nil && c.HasCapability("sasl", c.Config.SASL.Name()) {
-				c.write("AUTHENTICATE " + c.Config.SASL.Name())
-			} else {
-				c.write("CAP END")
-			}
+		if len(c.requestedCapabilities) == 0 && !c.beginSASL() {
+			c.finishCAP()
 		}
 
 	case "NAK":
@@ -87,8 +104,8 @@ func (c *Client) handleCAP(msg *Message) {
 			delete(c.requestedCapabilities, cap)
 		}
 
-		if len(c.requestedCapabilities) == 0 {
-			c.write("CAP END")
+		if len(c.requestedCapabilities) == 0 && !c.beginSASL() {
+			c.finishCAP()
 		}
 
 	case "NEW":
@@ -107,9 +124,11 @@ func (c *Client) handleCAP(msg *Message) {
 		}
 
 	case "DEL":
+		c.lock.Lock()
 		for cap := range caps {
 			delete(c.enabledCapabilities, cap)
 		}
+		c.lock.Unlock()
 	}
 }
 

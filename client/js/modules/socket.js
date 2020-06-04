@@ -64,12 +64,6 @@ export default function handleSocket({
     topic({ server, channel, topic, nick }) {
       if (nick) {
         dispatch(addEvent(server, channel, 'topic', nick, topic));
-        /* if (topic) {
-          dispatch(inform(`${nick} changed the topic to:`, server, channel));
-          dispatch(print(topic, server, channel));
-        } else {
-          dispatch(inform(`${nick} cleared the topic`, server, channel));
-        } */
       }
     },
 

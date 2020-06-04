@@ -40,8 +40,11 @@ require (
 	github.com/tdewolff/minify/v2 v2.7.4
 	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
+	github.com/xdg-go/scram v0.0.0-20180814205039-7eeb5667e42c
+	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
+	github.com/xdg/stringprep v1.0.0 // indirect
 	go.etcd.io/bbolt v1.3.4
-	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
+	golang.org/x/crypto v0.0.0-20200602180216-279210d13fed // indirect
 	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
 	gopkg.in/ini.v1 v1.56.0 // indirect

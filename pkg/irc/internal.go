@@ -85,6 +85,7 @@ func (c *Client) handleMessage(msg *Message) {
 		if len(msg.Params) > 0 {
 			c.setNick(msg.Params[0])
 		}
+		c.negotiating = false
 		c.setRegistered(true)
 		c.flushChannels()
 

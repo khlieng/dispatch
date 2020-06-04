@@ -12,15 +12,19 @@ import (
 )
 
 type Config struct {
-	Host      string
-	Port      string
-	TLS       bool
-	TLSConfig *tls.Config
-	Nick      string
-	Password  string
-	Username  string
-	Realname  string
-	SASL      SASL
+	Host           string
+	Port           string
+	TLS            bool
+	TLSConfig      *tls.Config
+	ServerPassword string
+	Nick           string
+	Username       string
+	Realname       string
+
+	SASLMechanisms []string
+	Account        string
+	Password       string
+
 	// Version is the reply to VERSION and FINGER CTCP messages
 	Version string
 	// Source is the reply to SOURCE CTCP messages
@@ -43,6 +47,9 @@ type Client struct {
 	wantedCapabilities    []string
 	requestedCapabilities map[string][]string
 	enabledCapabilities   map[string][]string
+	negotiating           bool
+	saslMechanisms        []SASL
+	currentSASLIndex      int
 
 	conn       net.Conn
 	connected  bool
@@ -76,10 +83,8 @@ func NewClient(config *Config) *Client {
 		config.Realname = config.Nick
 	}
 
-	wantedCapabilities := append([]string{}, clientWantedCaps...)
-
-	if config.SASL != nil {
-		wantedCapabilities = append(wantedCapabilities, "sasl")
+	if config.SASLMechanisms == nil {
+		config.SASLMechanisms = DefaultSASLMechanisms
 	}
 
 	client := &Client{
@@ -88,7 +93,6 @@ func NewClient(config *Config) *Client {
 		ConnectionChanged:     make(chan ConnectionState, 4),
 		Features:              NewFeatures(),
 		nick:                  config.Nick,
-		wantedCapabilities:    wantedCapabilities,
 		requestedCapabilities: map[string][]string{},
 		enabledCapabilities:   map[string][]string{},
 		dialer:                &net.Dialer{Timeout: 10 * time.Second},
@@ -103,8 +107,42 @@ func NewClient(config *Config) *Client {
 		reconnect: make(chan struct{}),
 	}
 	client.state = newState(client)
+	client.initSASL()
 
 	return client
+}
+
+func (c *Client) initSASL() {
+	saslMechanisms := []SASL{}
+
+	for _, mech := range c.Config.SASLMechanisms {
+		if mech == "EXTERNAL" {
+			if c.Config.TLSConfig != nil && len(c.Config.TLSConfig.Certificates) > 0 {
+				saslMechanisms = append(saslMechanisms, &SASLExternal{})
+			}
+		} else if c.Config.Account != "" && c.Config.Password != "" {
+			if mech == "PLAIN" {
+				saslMechanisms = append(saslMechanisms, &SASLPlain{
+					Username: c.Config.Account,
+					Password: c.Config.Password,
+				})
+			} else if strings.HasPrefix(mech, "SCRAM-") {
+				saslMechanisms = append(saslMechanisms, &SASLScram{
+					Username: c.Config.Account,
+					Password: c.Config.Password,
+					Hash:     mech[6:],
+				})
+			}
+		}
+	}
+
+	c.wantedCapabilities = append([]string{}, clientWantedCaps...)
+
+	if len(saslMechanisms) > 0 {
+		c.wantedCapabilities = append(c.wantedCapabilities, "sasl")
+		c.saslMechanisms = saslMechanisms
+		c.currentSASLIndex = 0
+	}
 }
 
 func (c *Client) GetNick() string {
@@ -245,10 +283,14 @@ func (c *Client) writeUser(username, realname string) {
 	c.writef("USER %s 0 * :%s", username, realname)
 }
 
+func (c *Client) authenticate(response string) {
+	c.write("AUTHENTICATE " + response)
+}
+
 func (c *Client) register() {
-	c.writeCAP()
-	if c.Config.Password != "" {
-		c.writePass(c.Config.Password)
+	c.beginCAP()
+	if c.Config.ServerPassword != "" {
+		c.writePass(c.Config.ServerPassword)
 	}
 	c.writeNick(c.Config.Nick)
 	c.writeUser(c.Config.Username, c.Config.Realname)

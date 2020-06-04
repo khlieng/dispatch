@@ -39,6 +39,8 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 		Nick:     server.Nick,
 		Username: server.Username,
 		Realname: server.Realname,
+		Account:  server.Account,
+		Password: server.Password,
 		Version:  fmt.Sprintf("Dispatch %s (git: %s)", version.Tag, version.Commit),
 		Source:   "https://github.com/khlieng/dispatch",
 	}
@@ -57,19 +59,12 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 		ircCfg.Username = hex.EncodeToString(srcIP)
 	}
 
-	if server.Account != "" && server.Password != "" {
-		ircCfg.SASL = &irc.SASLPlain{
-			Username: server.Account,
-			Password: server.Password,
-		}
-	}
-
 	if server.ServerPassword == "" &&
 		cfg.Defaults.ServerPassword != "" &&
 		server.Host == cfg.Defaults.Host {
-		ircCfg.Password = cfg.Defaults.ServerPassword
+		ircCfg.ServerPassword = cfg.Defaults.ServerPassword
 	} else {
-		ircCfg.Password = server.ServerPassword
+		ircCfg.ServerPassword = server.ServerPassword
 	}
 
 	i := irc.NewClient(&ircCfg)

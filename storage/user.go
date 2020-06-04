@@ -36,20 +36,20 @@ func NewUser(store Store) (*User, error) {
 		return nil, err
 	}
 
-	user.messageLog, err = GetMessageStore(user)
-	if err != nil {
-		return nil, err
-	}
-	user.messageIndex, err = GetMessageSearchProvider(user)
-	if err != nil {
-		return nil, err
-	}
-
 	err = os.MkdirAll(Path.User(user.Username), 0700)
 	if err != nil {
 		return nil, err
 	}
 	err = os.Mkdir(Path.Downloads(user.Username), 0700)
+	if err != nil {
+		return nil, err
+	}
+
+	user.messageLog, err = GetMessageStore(user)
+	if err != nil {
+		return nil, err
+	}
+	user.messageIndex, err = GetMessageSearchProvider(user)
 	if err != nil {
 		return nil, err
 	}

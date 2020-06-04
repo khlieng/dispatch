@@ -64,6 +64,7 @@ func (c *Client) run() {
 			c.sendRecv.Wait()
 			c.reconnect = make(chan struct{})
 			c.state.reset()
+			c.initSASL()
 
 			time.Sleep(c.backoff.Duration())
 			c.tryConnect()

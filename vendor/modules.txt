@@ -216,10 +216,18 @@ github.com/tdewolff/parse/v2/strconv
 github.com/tinylib/msgp/msgp
 # github.com/willf/bitset v1.1.10
 github.com/willf/bitset
+# github.com/xdg-go/scram v0.0.0-20180814205039-7eeb5667e42c
+## explicit
+github.com/xdg-go/scram
+# github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c
+## explicit
+# github.com/xdg/stringprep v1.0.0
+## explicit
+github.com/xdg/stringprep
 # go.etcd.io/bbolt v1.3.4
 ## explicit
 go.etcd.io/bbolt
-# golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
+# golang.org/x/crypto v0.0.0-20200602180216-279210d13fed
 ## explicit
 golang.org/x/crypto/ed25519
 golang.org/x/crypto/ed25519/internal/edwards25519
