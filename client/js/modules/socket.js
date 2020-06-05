@@ -1,5 +1,4 @@
 import { socketAction } from 'state/actions';
-import { setConnected } from 'state/app';
 import {
   print,
   addMessage,
@@ -31,14 +30,17 @@ export default function handleSocket({
   const handlers = {
     message(message) {
       dispatch(addMessage(message, message.server, message.to));
+      return false;
     },
 
     pm(message) {
       dispatch(addMessage(message, message.server, message.from));
+      return false;
     },
 
     messages({ messages, server, to, prepend, next }) {
       dispatch(addMessages(messages, server, to, prepend, next));
+      return false;
     },
 
     join({ user, server, channels }) {
@@ -74,6 +76,7 @@ export default function handleSocket({
           server
         )
       );
+      return false;
     },
 
     whois(data) {
@@ -93,15 +96,18 @@ export default function handleSocket({
           tab.name
         )
       );
+      return false;
     },
 
     print(message) {
       const tab = getState().tab.selected;
       dispatch(addMessage(message, tab.server, tab.name));
+      return false;
     },
 
     error({ server, target, message }) {
       dispatch(addMessage({ content: message, type: 'error' }, server, target));
+      return false;
     },
 
     connection_update({ server, errorType }) {
@@ -135,10 +141,6 @@ export default function handleSocket({
           }
         })
       );
-    },
-
-    _connected(connected) {
-      dispatch(setConnected(connected));
     }
   };
 
@@ -160,18 +162,12 @@ export default function handleSocket({
       action = { ...data, type: socketAction(type) };
     }
 
-    if (type in handlers) {
-      handlers[type](data);
-    }
-
-    if (type.charAt(0) === '_') {
+    if (handlers[type]?.(data) === false) {
       return;
     }
 
     dispatch(action);
 
-    if (type in afterHandlers) {
-      afterHandlers[type](data);
-    }
+    afterHandlers[type]?.(data);
   });
 }

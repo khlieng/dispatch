@@ -37,6 +37,10 @@ export default createReducer(initialState, {
     }
   },
 
+  [actions.socket.CONNECTED](state, { connected }) {
+    state.connected = connected;
+  },
+
   [actions.UPDATE_MESSAGE_HEIGHT](state, action) {
     state.wrapWidth = action.wrapWidth;
     state.charWidth = action.charWidth;
@@ -50,10 +54,6 @@ export function appSet(key, value) {
     key,
     value
   };
-}
-
-export function setConnected(connected) {
-  return appSet('connected', connected);
 }
 
 export function setCharWidth(width) {

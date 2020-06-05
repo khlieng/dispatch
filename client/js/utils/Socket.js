@@ -26,7 +26,7 @@ export default class Socket {
 
     this.ws.onopen = () => {
       this.connected = true;
-      this.emit('_connected', true);
+      this.emit('connected', { connected: true });
       clearTimeout(this.timeoutConnect);
       this.backoff.reset();
       this.setTimeoutPing();
@@ -35,7 +35,7 @@ export default class Socket {
     this.ws.onclose = () => {
       if (this.connected) {
         this.connected = false;
-        this.emit('_connected', false);
+        this.emit('connected', { connected: false });
       }
       clearTimeout(this.timeoutConnect);
       clearTimeout(this.timeoutPing);
