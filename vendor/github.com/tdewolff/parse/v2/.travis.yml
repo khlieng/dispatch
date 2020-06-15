@@ -6,5 +6,5 @@ env:
 before_install:
   - go get github.com/mattn/goveralls
 script:
-  - go test -covermode=count -coverprofile=profile.cov . ./buffer ./css ./html ./js ./json ./strconv ./svg ./xml
+  - go test -covermode=count -coverprofile=profile.cov . ./buffer ./css ./html ./js ./json ./strconv ./xml
   - goveralls -coverprofile=profile.cov -service travis-ci

@@ -95,18 +95,18 @@ func Mediatype(b []byte) ([]byte, map[string]string) {
 		if b[i] == ';' || b[i] == ' ' {
 			mimetype = b[:i]
 			if b[i] == ' ' {
-				i++
+				i++ // space
 				for i < n && b[i] == ' ' {
 					i++
 				}
-				if i < n && b[i] != ';' {
+				if n <= i || b[i] != ';' {
 					break
 				}
 			}
 			params = map[string]string{}
 			s := string(b)
 		PARAM:
-			i++
+			i++ // semicolon
 			for i < n && s[i] == ' ' {
 				i++
 			}

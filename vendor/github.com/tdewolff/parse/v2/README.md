@@ -1,10 +1,4 @@
-# Parse [![Build Status](https://travis-ci.org/tdewolff/parse.svg?branch=master)](https://travis-ci.org/tdewolff/parse) [![GoDoc](http://godoc.org/github.com/tdewolff/parse?status.svg)](http://godoc.org/github.com/tdewolff/parse) [![Coverage Status](https://coveralls.io/repos/github/tdewolff/parse/badge.svg?branch=master)](https://coveralls.io/github/tdewolff/parse?branch=master)
-
-***BE AWARE: YOU NEED GO 1.9.7+, 1.10.3+, 1.11 to run the latest release!!!***
-
-If you cannot upgrade Go, please pin to **parse@v2.3.4**
-
----
+# Parse [![Build Status](https://travis-ci.org/tdewolff/parse.svg?branch=master)](https://travis-ci.org/tdewolff/parse) [![API reference](https://img.shields.io/badge/godoc-reference-5272B4)](https://pkg.go.dev/github.com/tdewolff/parse/v2?tab=doc) [![Coverage Status](https://coveralls.io/repos/github/tdewolff/parse/badge.svg?branch=master)](https://coveralls.io/github/tdewolff/parse?branch=master)
 
 This package contains several lexers and parsers written in [Go][1]. All subpackages are built to be streaming, high performance and to be in accordance with the official (latest) specifications.
 

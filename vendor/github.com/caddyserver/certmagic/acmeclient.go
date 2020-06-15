@@ -17,7 +17,6 @@ package certmagic
 import (
 	"context"
 	"crypto/tls"
-	"encoding/base64"
 	"fmt"
 	"log"
 	weakrand "math/rand"
@@ -96,13 +95,6 @@ func (am *ACMEManager) newACMEClient(useTestCA, interactive bool) (*acmeClient, 
 	var caURL string
 	if useTestCA {
 		caURL = am.TestCA
-		// only use the default test CA if the CA is also
-		// the default CA; no point in testing against
-		// Let's Encrypt's staging server if we are not
-		// using their production server too
-		if caURL == "" && am.CA == DefaultACME.CA {
-			caURL = DefaultACME.TestCA
-		}
 	}
 	if caURL == "" {
 		caURL = am.CA
@@ -175,7 +167,7 @@ func (am *ACMEManager) newACMEClient(useTestCA, interactive bool) (*acmeClient, 
 			reg, err = client.Registration.RegisterWithExternalAccountBinding(registration.RegisterEABOptions{
 				TermsOfServiceAgreed: am.Agreed,
 				Kid:                  am.ExternalAccount.KeyID,
-				HmacEncoded:          base64.StdEncoding.EncodeToString(am.ExternalAccount.HMAC),
+				HmacEncoded:          am.ExternalAccount.HMAC,
 			})
 		} else {
 			reg, err = client.Registration.Register(registration.RegisterOptions{

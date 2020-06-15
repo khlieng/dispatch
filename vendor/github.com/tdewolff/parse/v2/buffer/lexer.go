@@ -33,7 +33,7 @@ func NewLexer(r io.Reader) *Lexer {
 			b, err = ioutil.ReadAll(r)
 			if err != nil {
 				return &Lexer{
-					buf: []byte{0},
+					buf: nullBuffer,
 					err: err,
 				}
 			}
@@ -132,7 +132,7 @@ func (z *Lexer) Rewind(pos int) {
 
 // Lexeme returns the bytes of the current selection.
 func (z *Lexer) Lexeme() []byte {
-	return z.buf[z.start:z.pos]
+	return z.buf[z.start:z.pos:z.pos]
 }
 
 // Skip collapses the position to the end of the selection.
@@ -142,7 +142,7 @@ func (z *Lexer) Skip() {
 
 // Shift returns the bytes of the current selection and collapses the position to the end of the selection.
 func (z *Lexer) Shift() []byte {
-	b := z.buf[z.start:z.pos]
+	b := z.buf[z.start:z.pos:z.pos]
 	z.start = z.pos
 	return b
 }
@@ -154,5 +154,5 @@ func (z *Lexer) Offset() int {
 
 // Bytes returns the underlying buffer.
 func (z *Lexer) Bytes() []byte {
-	return z.buf[:len(z.buf)-1]
+	return z.buf[: len(z.buf)-1 : len(z.buf)-1]
 }

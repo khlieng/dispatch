@@ -19,7 +19,7 @@ func ParseFloat(b []byte) (float64, int) {
 		neg = b[i] == '-'
 		i++
 	}
-
+	start := i
 	dot := -1
 	trunk := -1
 	n := uint64(0)
@@ -40,6 +40,9 @@ func ParseFloat(b []byte) (float64, int) {
 			break
 		}
 	}
+	if i == start || i == start+1 && dot == start {
+		return 0.0, 0
+	}
 
 	f := float64(n)
 	if neg {
@@ -57,10 +60,13 @@ func ParseFloat(b []byte) (float64, int) {
 	}
 	expExp := int64(0)
 	if i < len(b) && (b[i] == 'e' || b[i] == 'E') {
+		startExp := i
 		i++
 		if e, expLen := ParseInt(b[i:]); expLen > 0 {
 			expExp = e
 			i += expLen
+		} else {
+			i = startExp
 		}
 	}
 	exp := expExp - mantExp

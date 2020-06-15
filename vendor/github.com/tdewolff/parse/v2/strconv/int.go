@@ -13,6 +13,7 @@ func ParseInt(b []byte) (int64, int) {
 		neg = b[0] == '-'
 		i++
 	}
+	start := i
 	n := uint64(0)
 	for i < len(b) {
 		c := b[i]
@@ -25,6 +26,9 @@ func ParseInt(b []byte) (int64, int) {
 			break
 		}
 		i++
+	}
+	if i == start {
+		return 0, 0
 	}
 	if !neg && n > uint64(math.MaxInt64) || n > uint64(math.MaxInt64)+1 {
 		return 0, 0
