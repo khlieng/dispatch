@@ -3,6 +3,10 @@ address = ""
 port = 80
 # Hex encode the users IP and use it as the ident
 hexIP = false
+# Automatically reply to common CTCP messages
+auto_ctcp = true
+# Verify the certificate chain presented by the IRC server, if this check fails
+# the user will be able to choose to still connect
 verify_certificates = true
 
 # Defaults for the client connect form
@@ -63,11 +67,11 @@ secret = ""
 
 [dcc]
 # Receive files through DCC, the user gets to choose if they want to accept the file,
-# the file then gets streamed to the user
+# the file download then gets proxied to the user
 enabled = true
 
 [dcc.autoget]
-# Instead of streaming the file to the user, dispatch automatically downloads
+# Instead of proxying the file download directly to the user, dispatch automatically downloads
 # DCC files and sends a download link to the user once its done
 enabled = false
 # Delete the file after the user has downloaded it once
@@ -75,7 +79,7 @@ delete = true
 # Delete the file after a certain time period of inactivity, not implemented yet
 delete_after = "30m"
 
-# Strict-Transport-Security
+# HTTP Strict-Transport-Security
 [https.hsts]
 enabled = false
 max_age = 31536000

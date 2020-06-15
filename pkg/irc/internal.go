@@ -58,8 +58,10 @@ func (c *Client) handleMessage(msg *Message) {
 		msg.meta = c.state.renameUser(msg.Sender, msg.LastParam())
 
 	case PRIVMSG:
-		if ctcp := msg.ToCTCP(); ctcp != nil {
-			c.handleCTCP(ctcp, msg)
+		if c.Config.AutoCTCP {
+			if ctcp := msg.ToCTCP(); ctcp != nil {
+				c.handleCTCP(ctcp, msg)
+			}
 		}
 
 	case MODE:

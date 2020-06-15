@@ -112,6 +112,7 @@ func init() {
 	viper.BindPFlags(rootCmd.PersistentFlags())
 	viper.BindPFlags(rootCmd.Flags())
 
+	viper.SetDefault("auto_ctcp", true)
 	viper.SetDefault("verify_certificates", true)
 	viper.SetDefault("https.enabled", true)
 	viper.SetDefault("https.port", 443)

@@ -25,6 +25,8 @@ type Config struct {
 	Account        string
 	Password       string
 
+	// Automatically reply to common CTCP messages
+	AutoCTCP bool
 	// Version is the reply to VERSION and FINGER CTCP messages
 	Version string
 	// Source is the reply to SOURCE CTCP messages

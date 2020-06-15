@@ -13,6 +13,7 @@ type Config struct {
 	Port               string
 	Dev                bool
 	HexIP              bool
+	AutoCTCP           bool `mapstructure:"auto_ctcp"`
 	VerifyCertificates bool `mapstructure:"verify_certificates"`
 	Headers            map[string]string
 	Defaults           Defaults

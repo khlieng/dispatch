@@ -30,7 +30,9 @@ func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
 
 func connectIRC(network *storage.Network, state *State, srcIP []byte) *irc.Client {
 	cfg := state.srv.Config()
+
 	ircCfg := network.IRCConfig()
+	ircCfg.AutoCTCP = cfg.AutoCTCP
 
 	if ircCfg.TLS {
 		ircCfg.TLSConfig = &tls.Config{
