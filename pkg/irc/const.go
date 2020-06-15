@@ -10,6 +10,7 @@ const (
 	QUIT         = "QUIT"
 	JOIN         = "JOIN"
 	PART         = "PART"
+	KICK         = "KICK"
 	TOPIC        = "TOPIC"
 	NAMES        = "NAMES"
 	LIST         = "LIST"

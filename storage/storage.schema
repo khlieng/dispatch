@@ -9,7 +9,7 @@ struct ClientSettings {
   ColoredNicks bool
 }
 
-struct Server {
+struct Network {
   Name     string
   Host     string
   Port     string
@@ -23,7 +23,7 @@ struct Server {
 }
 
 struct Channel {
-  Server string
+  Network string
   Name   string
 }
 

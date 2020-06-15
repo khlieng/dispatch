@@ -48,8 +48,8 @@ func (b *Bleve) Index(id string, message *storage.Message) error {
 	return b.index.Index(id, message)
 }
 
-func (b *Bleve) SearchMessages(server, channel, q string) ([]string, error) {
-	serverQuery := bleve.NewMatchQuery(server)
+func (b *Bleve) SearchMessages(network, channel, q string) ([]string, error) {
+	serverQuery := bleve.NewMatchQuery(network)
 	serverQuery.SetField("server")
 	channelQuery := bleve.NewMatchQuery(channel)
 	channelQuery.SetField("to")

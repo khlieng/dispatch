@@ -95,7 +95,7 @@
     "test:watch": "jest --watch",
     "gen:install": "cross-env GO111MODULE=off go get -u github.com/andyleap/gencode github.com/mailru/easyjson/...",
     "gen:binary": "gencode go -package storage -schema ../storage/storage.schema -unsafe",
-    "gen:json": "cross-env GO111MODULE=off easyjson -all -lower_camel_case -omit_empty ../server/json.go ../server/index_data.go && cross-env GO111MODULE=off easyjson -lower_camel_case -omit_empty ../storage/user.go"
+    "gen:json": "cross-env GO111MODULE=off easyjson -all -lower_camel_case -omit_empty ../server/json.go ../server/index_data.go ../storage/network.go && cross-env GO111MODULE=off easyjson -lower_camel_case -omit_empty ../storage/user.go"
   },
   "jest": {
     "moduleNameMapper": {

@@ -10,7 +10,7 @@ const message = store => next => {
 
   return action => {
     if (action.type === ADD_MESSAGES && action.prepend) {
-      const key = `${action.server} ${action.channel}`;
+      const key = `${action.network} ${action.channel}`;
 
       if (ready[key]) {
         ready[key] = false;
@@ -19,7 +19,7 @@ const message = store => next => {
 
       cache[key] = action;
     } else if (action.type === ADD_FETCHED_MESSAGES) {
-      const key = `${action.server} ${action.channel}`;
+      const key = `${action.network} ${action.channel}`;
       ready[key] = true;
 
       if (cache[key]) {

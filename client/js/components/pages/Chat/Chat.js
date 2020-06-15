@@ -11,40 +11,40 @@ export default class Chat extends Component {
     const { tab, part, closePrivateChat, disconnect } = this.props;
 
     if (isChannel(tab)) {
-      part([tab.name], tab.server);
+      part([tab.name], tab.network);
     } else if (tab.name) {
-      closePrivateChat(tab.server, tab.name);
+      closePrivateChat(tab.network, tab.name);
     } else {
-      disconnect(tab.server);
+      disconnect(tab.network);
     }
   };
 
   handleSearch = phrase => {
     const { tab, searchMessages } = this.props;
     if (isChannel(tab)) {
-      searchMessages(tab.server, tab.name, phrase);
+      searchMessages(tab.network, tab.name, phrase);
     }
   };
 
   handleNickClick = nick => {
     const { tab, openPrivateChat, select } = this.props;
-    openPrivateChat(tab.server, nick);
-    select(tab.server, nick);
+    openPrivateChat(tab.network, nick);
+    select(tab.network, nick);
   };
 
   handleTitleChange = title => {
-    const { setServerName, tab } = this.props;
-    setServerName(title, tab.server);
+    const { setNetworkName, tab } = this.props;
+    setNetworkName(title, tab.network);
   };
 
   handleNickChange = nick => {
     const { setNick, tab } = this.props;
-    setNick(nick, tab.server, true);
+    setNick(nick, tab.network, true);
   };
 
   handleNickEditDone = nick => {
     const { setNick, tab } = this.props;
-    setNick(nick, tab.server);
+    setNick(nick, tab.network);
   };
 
   render() {
@@ -57,7 +57,7 @@ export default class Chat extends Component {
       nick,
       search,
       showUserList,
-      status,
+      error,
       tab,
       title,
       users,
@@ -77,14 +77,14 @@ export default class Chat extends Component {
     } else if (tab.name) {
       chatClass = 'chat-private';
     } else {
-      chatClass = 'chat-server';
+      chatClass = 'chat-network';
     }
 
     return (
       <div className={chatClass}>
         <ChatTitle
           channel={channel}
-          status={status}
+          error={error}
           tab={tab}
           title={title}
           openModal={openModal}

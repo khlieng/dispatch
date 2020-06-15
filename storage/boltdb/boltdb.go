@@ -13,7 +13,7 @@ import (
 
 var (
 	bucketUsers    = []byte("Users")
-	bucketServers  = []byte("Servers")
+	bucketNetworks = []byte("Networks")
 	bucketChannels = []byte("Channels")
 	bucketOpenDMs  = []byte("OpenDMs")
 	bucketMessages = []byte("Messages")
@@ -33,7 +33,7 @@ func New(path string) (*BoltStore, error) {
 
 	db.Update(func(tx *bolt.Tx) error {
 		tx.CreateBucketIfNotExists(bucketUsers)
-		tx.CreateBucketIfNotExists(bucketServers)
+		tx.CreateBucketIfNotExists(bucketNetworks)
 		tx.CreateBucketIfNotExists(bucketChannels)
 		tx.CreateBucketIfNotExists(bucketOpenDMs)
 		tx.CreateBucketIfNotExists(bucketMessages)
@@ -50,7 +50,7 @@ func (s *BoltStore) Close() {
 	s.db.Close()
 }
 
-func (s *BoltStore) GetUsers() ([]*storage.User, error) {
+func (s *BoltStore) Users() ([]*storage.User, error) {
 	var users []*storage.User
 
 	s.db.View(func(tx *bolt.Tx) error {
@@ -99,69 +99,69 @@ func (s *BoltStore) DeleteUser(user *storage.User) error {
 		}
 
 		return deletePrefix(user.IDBytes,
-			tx.Bucket(bucketServers),
+			tx.Bucket(bucketNetworks),
 			tx.Bucket(bucketChannels),
 			tx.Bucket(bucketOpenDMs),
 		)
 	})
 }
 
-func (s *BoltStore) GetServer(user *storage.User, address string) (*storage.Server, error) {
-	var server *storage.Server
+func (s *BoltStore) Network(user *storage.User, address string) (*storage.Network, error) {
+	var network *storage.Network
 
 	err := s.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketServers)
-		id := serverID(user, address)
+		b := tx.Bucket(bucketNetworks)
+		id := networkID(user, address)
 
 		v := b.Get(id)
 		if v == nil {
 			return storage.ErrNotFound
 		} else {
-			server = &storage.Server{}
-			server.Unmarshal(v)
+			network = &storage.Network{}
+			network.Unmarshal(v)
 			return nil
 		}
 	})
 
-	return server, err
+	return network, err
 }
 
-func (s *BoltStore) GetServers(user *storage.User) ([]*storage.Server, error) {
-	var servers []*storage.Server
+func (s *BoltStore) Networks(user *storage.User) ([]*storage.Network, error) {
+	var networks []*storage.Network
 
 	s.db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket(bucketServers).Cursor()
+		c := tx.Bucket(bucketNetworks).Cursor()
 
 		for k, v := c.Seek(user.IDBytes); bytes.HasPrefix(k, user.IDBytes); k, v = c.Next() {
-			server := storage.Server{}
-			server.Unmarshal(v)
-			servers = append(servers, &server)
+			network := storage.Network{}
+			network.Unmarshal(v)
+			networks = append(networks, &network)
 		}
 
 		return nil
 	})
 
-	return servers, nil
+	return networks, nil
 }
 
-func (s *BoltStore) SaveServer(user *storage.User, server *storage.Server) error {
+func (s *BoltStore) SaveNetwork(user *storage.User, network *storage.Network) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketServers)
-		data, _ := server.Marshal(nil)
+		b := tx.Bucket(bucketNetworks)
+		data, _ := network.Marshal(nil)
 
-		return b.Put(serverID(user, server.Host), data)
+		return b.Put(networkID(user, network.Host), data)
 	})
 }
 
-func (s *BoltStore) RemoveServer(user *storage.User, address string) error {
+func (s *BoltStore) RemoveNetwork(user *storage.User, address string) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
-		serverID := serverID(user, address)
-		err := tx.Bucket(bucketServers).Delete(serverID)
+		networkID := networkID(user, address)
+		err := tx.Bucket(bucketNetworks).Delete(networkID)
 		if err != nil {
 			return err
 		}
 
-		return deletePrefix(serverID,
+		return deletePrefix(networkID,
 			tx.Bucket(bucketChannels),
 			tx.Bucket(bucketOpenDMs),
 		)
@@ -170,16 +170,16 @@ func (s *BoltStore) RemoveServer(user *storage.User, address string) error {
 
 func (s *BoltStore) SetNick(user *storage.User, nick, address string) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketServers)
-		id := serverID(user, address)
+		b := tx.Bucket(bucketNetworks)
+		id := networkID(user, address)
 
-		server := storage.Server{}
+		network := storage.Network{}
 		v := b.Get(id)
 		if v != nil {
-			server.Unmarshal(v)
-			server.Nick = nick
+			network.Unmarshal(v)
+			network.Nick = nick
 
-			data, _ := server.Marshal(nil)
+			data, _ := network.Marshal(nil)
 			return b.Put(id, data)
 		}
 
@@ -187,18 +187,18 @@ func (s *BoltStore) SetNick(user *storage.User, nick, address string) error {
 	})
 }
 
-func (s *BoltStore) SetServerName(user *storage.User, name, address string) error {
+func (s *BoltStore) SetNetworkName(user *storage.User, name, address string) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketServers)
-		id := serverID(user, address)
+		b := tx.Bucket(bucketNetworks)
+		id := networkID(user, address)
 
-		server := storage.Server{}
+		network := storage.Network{}
 		v := b.Get(id)
 		if v != nil {
-			server.Unmarshal(v)
-			server.Name = name
+			network.Unmarshal(v)
+			network.Name = name
 
-			data, _ := server.Marshal(nil)
+			data, _ := network.Marshal(nil)
 			return b.Put(id, data)
 		}
 
@@ -206,7 +206,7 @@ func (s *BoltStore) SetServerName(user *storage.User, name, address string) erro
 	})
 }
 
-func (s *BoltStore) GetChannels(user *storage.User) ([]*storage.Channel, error) {
+func (s *BoltStore) Channels(user *storage.User) ([]*storage.Channel, error) {
 	var channels []*storage.Channel
 
 	s.db.View(func(tx *bolt.Tx) error {
@@ -224,25 +224,36 @@ func (s *BoltStore) GetChannels(user *storage.User) ([]*storage.Channel, error) 
 	return channels, nil
 }
 
-func (s *BoltStore) AddChannel(user *storage.User, channel *storage.Channel) error {
+func (s *BoltStore) SaveChannel(user *storage.User, channel *storage.Channel) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketChannels)
 		data, _ := channel.Marshal(nil)
 
-		return b.Put(channelID(user, channel.Server, channel.Name), data)
+		return b.Put(channelID(user, channel.Network, channel.Name), data)
 	})
 }
 
-func (s *BoltStore) RemoveChannel(user *storage.User, server, channel string) error {
+func (s *BoltStore) RemoveChannel(user *storage.User, network, channel string) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketChannels)
-		id := channelID(user, server, channel)
+		id := channelID(user, network, channel)
 
 		return b.Delete(id)
 	})
 }
 
-func (s *BoltStore) GetOpenDMs(user *storage.User) ([]storage.Tab, error) {
+func (s *BoltStore) HasChannel(user *storage.User, network, channel string) bool {
+	has := false
+	s.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketChannels)
+		has = b.Get(channelID(user, network, channel)) != nil
+
+		return nil
+	})
+	return has
+}
+
+func (s *BoltStore) OpenDMs(user *storage.User) ([]storage.Tab, error) {
 	var openDMs []storage.Tab
 
 	s.db.View(func(tx *bolt.Tx) error {
@@ -251,8 +262,8 @@ func (s *BoltStore) GetOpenDMs(user *storage.User) ([]storage.Tab, error) {
 		for k, _ := c.Seek(user.IDBytes); bytes.HasPrefix(k, user.IDBytes); k, _ = c.Next() {
 			tab := bytes.Split(k[8:], []byte{0})
 			openDMs = append(openDMs, storage.Tab{
-				Server: string(tab[0]),
-				Name:   string(tab[1]),
+				Network: string(tab[0]),
+				Name:    string(tab[1]),
 			})
 		}
 
@@ -262,24 +273,24 @@ func (s *BoltStore) GetOpenDMs(user *storage.User) ([]storage.Tab, error) {
 	return openDMs, nil
 }
 
-func (s *BoltStore) AddOpenDM(user *storage.User, server, nick string) error {
+func (s *BoltStore) AddOpenDM(user *storage.User, network, nick string) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketOpenDMs)
 
-		return b.Put(channelID(user, server, nick), nil)
+		return b.Put(channelID(user, network, nick), nil)
 	})
 }
 
-func (s *BoltStore) RemoveOpenDM(user *storage.User, server, nick string) error {
+func (s *BoltStore) RemoveOpenDM(user *storage.User, network, nick string) error {
 	return s.db.Batch(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketOpenDMs)
 
-		return b.Delete(channelID(user, server, nick))
+		return b.Delete(channelID(user, network, nick))
 	})
 }
 
 func (s *BoltStore) logMessage(tx *bolt.Tx, message *storage.Message) error {
-	b, err := tx.Bucket(bucketMessages).CreateBucketIfNotExists([]byte(message.Server + ":" + message.To))
+	b, err := tx.Bucket(bucketMessages).CreateBucketIfNotExists([]byte(message.Network + ":" + message.To))
 	if err != nil {
 		return err
 	}
@@ -311,12 +322,12 @@ func (s *BoltStore) LogMessages(messages []*storage.Message) error {
 	})
 }
 
-func (s *BoltStore) GetMessages(server, channel string, count int, fromID string) ([]storage.Message, bool, error) {
+func (s *BoltStore) Messages(network, channel string, count int, fromID string) ([]storage.Message, bool, error) {
 	messages := make([]storage.Message, count)
 	hasMore := false
 
 	s.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketMessages).Bucket([]byte(server + ":" + channel))
+		b := tx.Bucket(bucketMessages).Bucket([]byte(network + ":" + channel))
 		if b == nil {
 			return nil
 		}
@@ -353,11 +364,11 @@ func (s *BoltStore) GetMessages(server, channel string, count int, fromID string
 	return nil, false, nil
 }
 
-func (s *BoltStore) GetMessagesByID(server, channel string, ids []string) ([]storage.Message, error) {
+func (s *BoltStore) MessagesByID(network, channel string, ids []string) ([]storage.Message, error) {
 	messages := make([]storage.Message, len(ids))
 
 	err := s.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucketMessages).Bucket([]byte(server + ":" + channel))
+		b := tx.Bucket(bucketMessages).Bucket([]byte(network + ":" + channel))
 
 		for i, id := range ids {
 			messages[i].Unmarshal(b.Get([]byte(id)))
@@ -367,7 +378,7 @@ func (s *BoltStore) GetMessagesByID(server, channel string, ids []string) ([]sto
 	return messages, err
 }
 
-func (s *BoltStore) GetSessions() ([]*session.Session, error) {
+func (s *BoltStore) Sessions() ([]*session.Session, error) {
 	var sessions []*session.Session
 
 	err := s.db.View(func(tx *bolt.Tx) error {
@@ -422,18 +433,18 @@ func deletePrefix(prefix []byte, buckets ...*bolt.Bucket) error {
 	return nil
 }
 
-func serverID(user *storage.User, address string) []byte {
+func networkID(user *storage.User, address string) []byte {
 	id := make([]byte, 8+len(address))
 	copy(id, user.IDBytes)
 	copy(id[8:], address)
 	return id
 }
 
-func channelID(user *storage.User, server, channel string) []byte {
-	id := make([]byte, 8+len(server)+1+len(channel))
+func channelID(user *storage.User, network, channel string) []byte {
+	id := make([]byte, 8+len(network)+1+len(channel))
 	copy(id, user.IDBytes)
-	copy(id[8:], server)
-	copy(id[8+len(server)+1:], channel)
+	copy(id[8:], network)
+	copy(id[8+len(network)+1:], channel)
 	return id
 }
 

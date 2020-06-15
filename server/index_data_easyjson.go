@@ -42,27 +42,35 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.Defaults).UnmarshalJSON(data))
 			}
-		case "servers":
+		case "networks":
 			if in.IsNull() {
 				in.Skip()
-				out.Servers = nil
+				out.Networks = nil
 			} else {
 				in.Delim('[')
-				if out.Servers == nil {
+				if out.Networks == nil {
 					if !in.IsDelim(']') {
-						out.Servers = make([]Server, 0, 0)
+						out.Networks = make([]*storage.Network, 0, 8)
 					} else {
-						out.Servers = []Server{}
+						out.Networks = []*storage.Network{}
 					}
 				} else {
-					out.Servers = (out.Servers)[:0]
+					out.Networks = (out.Networks)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v1 Server
-					if data := in.Raw(); in.Ok() {
-						in.AddError((v1).UnmarshalJSON(data))
+					var v1 *storage.Network
+					if in.IsNull() {
+						in.Skip()
+						v1 = nil
+					} else {
+						if v1 == nil {
+							v1 = new(storage.Network)
+						}
+						if data := in.Raw(); in.Ok() {
+							in.AddError((*v1).UnmarshalJSON(data))
+						}
 					}
-					out.Servers = append(out.Servers, v1)
+					out.Networks = append(out.Networks, v1)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -91,7 +99,9 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 						if v2 == nil {
 							v2 = new(storage.Channel)
 						}
-						easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in, v2)
+						if data := in.Raw(); in.Ok() {
+							in.AddError((*v2).UnmarshalJSON(data))
+						}
 					}
 					out.Channels = append(out.Channels, v2)
 					in.WantComma()
@@ -115,7 +125,7 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchServer(in *jlexer.Lexer, out 
 				}
 				for !in.IsDelim(']') {
 					var v3 storage.Tab
-					easyjson7e607aefDecodeGithubComKhliengDispatchStorage1(in, &v3)
+					easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in, &v3)
 					out.OpenDMs = append(out.OpenDMs, v3)
 					in.WantComma()
 				}
@@ -183,8 +193,8 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 		out.RawString(prefix[1:])
 		out.Raw((in.Defaults).MarshalJSON())
 	}
-	if len(in.Servers) != 0 {
-		const prefix string = ",\"servers\":"
+	if len(in.Networks) != 0 {
+		const prefix string = ",\"networks\":"
 		if first {
 			first = false
 			out.RawString(prefix[1:])
@@ -193,11 +203,15 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 		}
 		{
 			out.RawByte('[')
-			for v4, v5 := range in.Servers {
+			for v4, v5 := range in.Networks {
 				if v4 > 0 {
 					out.RawByte(',')
 				}
-				out.Raw((v5).MarshalJSON())
+				if v5 == nil {
+					out.RawString("null")
+				} else {
+					out.Raw((*v5).MarshalJSON())
+				}
 			}
 			out.RawByte(']')
 		}
@@ -219,7 +233,7 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 				if v7 == nil {
 					out.RawString("null")
 				} else {
-					easyjson7e607aefEncodeGithubComKhliengDispatchStorage(out, *v7)
+					out.Raw((*v7).MarshalJSON())
 				}
 			}
 			out.RawByte(']')
@@ -239,7 +253,7 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchServer(out *jwriter.Writer, i
 				if v8 > 0 {
 					out.RawByte(',')
 				}
-				easyjson7e607aefEncodeGithubComKhliengDispatchStorage1(out, v9)
+				easyjson7e607aefEncodeGithubComKhliengDispatchStorage(out, v9)
 			}
 			out.RawByte(']')
 		}
@@ -320,7 +334,7 @@ func (v *indexData) UnmarshalJSON(data []byte) error {
 func (v *indexData) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson7e607aefDecodeGithubComKhliengDispatchServer(l, v)
 }
-func easyjson7e607aefDecodeGithubComKhliengDispatchStorage1(in *jlexer.Lexer, out *storage.Tab) {
+func easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in *jlexer.Lexer, out *storage.Tab) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -339,8 +353,8 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchStorage1(in *jlexer.Lexer, ou
 			continue
 		}
 		switch key {
-		case "server":
-			out.Server = string(in.String())
+		case "network":
+			out.Network = string(in.String())
 		case "name":
 			out.Name = string(in.String())
 		default:
@@ -353,15 +367,15 @@ func easyjson7e607aefDecodeGithubComKhliengDispatchStorage1(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjson7e607aefEncodeGithubComKhliengDispatchStorage1(out *jwriter.Writer, in storage.Tab) {
+func easyjson7e607aefEncodeGithubComKhliengDispatchStorage(out *jwriter.Writer, in storage.Tab) {
 	out.RawByte('{')
 	first := true
 	_ = first
-	if in.Server != "" {
-		const prefix string = ",\"server\":"
+	if in.Network != "" {
+		const prefix string = ",\"network\":"
 		first = false
 		out.RawString(prefix[1:])
-		out.String(string(in.Server))
+		out.String(string(in.Network))
 	}
 	if in.Name != "" {
 		const prefix string = ",\"name\":"
@@ -372,73 +386,6 @@ func easyjson7e607aefEncodeGithubComKhliengDispatchStorage1(out *jwriter.Writer,
 			out.RawString(prefix)
 		}
 		out.String(string(in.Name))
-	}
-	out.RawByte('}')
-}
-func easyjson7e607aefDecodeGithubComKhliengDispatchStorage(in *jlexer.Lexer, out *storage.Channel) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "server":
-			out.Server = string(in.String())
-		case "name":
-			out.Name = string(in.String())
-		case "topic":
-			out.Topic = string(in.String())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson7e607aefEncodeGithubComKhliengDispatchStorage(out *jwriter.Writer, in storage.Channel) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	if in.Server != "" {
-		const prefix string = ",\"server\":"
-		first = false
-		out.RawString(prefix[1:])
-		out.String(string(in.Server))
-	}
-	if in.Name != "" {
-		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.Name))
-	}
-	if in.Topic != "" {
-		const prefix string = ",\"topic\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.String(string(in.Topic))
 	}
 	out.RawByte('}')
 }

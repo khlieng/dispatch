@@ -19,17 +19,17 @@ export function isChannel(name) {
   return typeof name === 'string' && name[0] === '#';
 }
 
-export function stringifyTab(server, name) {
-  if (typeof server === 'object') {
-    if (server.name) {
-      return `${server.server};${server.name}`;
+export function stringifyTab(network, name) {
+  if (typeof network === 'object') {
+    if (network.name) {
+      return `${network.network};${network.name}`;
     }
-    return server.server;
+    return network.network;
   }
   if (name) {
-    return `${server};${name}`;
+    return `${network};${name}`;
   }
-  return server;
+  return network;
 }
 
 function isString(s, maxLength) {

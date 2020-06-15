@@ -4,22 +4,28 @@ import { isChannel } from 'utils';
 export const beforeHandler = '_before';
 export const notFoundHandler = 'commandNotFound';
 
-function createContext({ dispatch, getState }, { server, channel }) {
-  return { dispatch, getState, server, channel, inChannel: isChannel(channel) };
+function createContext({ dispatch, getState }, { network, channel }) {
+  return {
+    dispatch,
+    getState,
+    network,
+    channel,
+    inChannel: isChannel(channel)
+  };
 }
 
 // TODO: Pull this out as convenience action
-function process({ dispatch, server, channel }, result) {
+function process({ dispatch, network, channel }, result) {
   if (typeof result === 'string') {
-    dispatch(inform(result, server, channel));
+    dispatch(inform(result, network, channel));
   } else if (Array.isArray(result)) {
     if (typeof result[0] === 'string') {
-      dispatch(inform(result, server, channel));
+      dispatch(inform(result, network, channel));
     } else if (typeof result[0] === 'object') {
-      dispatch(addMessages(result, server, channel));
+      dispatch(addMessages(result, network, channel));
     }
   } else if (typeof result === 'object' && result) {
-    dispatch(print(result.content, server, channel, result.type));
+    dispatch(print(result.content, network, channel, result.type));
   }
 }
 

@@ -23,7 +23,7 @@ type dispatchVersion struct {
 
 type indexData struct {
 	Defaults connectDefaults
-	Servers  []Server
+	Networks []*storage.Network
 	Channels []*storage.Channel
 	OpenDMs  []storage.Tab
 	HexIP    bool
@@ -42,8 +42,11 @@ func (d *Dispatch) getIndexData(r *http.Request, state *State) *indexData {
 	cfg := d.Config()
 
 	data := indexData{
-		Defaults: connectDefaults{Defaults: &cfg.Defaults},
-		HexIP:    cfg.HexIP,
+		Defaults: connectDefaults{
+			Defaults:       &cfg.Defaults,
+			ServerPassword: cfg.Defaults.ServerPassword != "",
+		},
+		HexIP: cfg.HexIP,
 		Version: dispatchVersion{
 			Tag:    version.Tag,
 			Commit: version.Commit,
@@ -51,77 +54,53 @@ func (d *Dispatch) getIndexData(r *http.Request, state *State) *indexData {
 		},
 	}
 
-	data.Defaults.ServerPassword = cfg.Defaults.ServerPassword != ""
-
 	if state == nil {
 		data.Settings = storage.DefaultClientSettings()
 		return &data
 	}
 
-	data.Settings = state.user.GetClientSettings()
+	data.Settings = state.user.ClientSettings()
 
-	servers, err := state.user.GetServers()
-	if err != nil {
-		return nil
+	state.lock.Lock()
+	for _, network := range state.networks {
+		network = network.Copy()
+		network.Password = ""
+		network.Username = ""
+		network.Realname = ""
+
+		data.Networks = append(data.Networks, network)
+		data.Channels = append(data.Channels, network.Channels()...)
 	}
-	connections := state.getConnectionStates()
-	for _, server := range servers {
-		server.Password = ""
-		server.Username = ""
-		server.Realname = ""
+	state.lock.Unlock()
 
-		s := Server{
-			Server: server,
-			Status: newConnectionUpdate(server.Host, connections[server.Host]),
-		}
-
-		if i, ok := state.irc[server.Host]; ok {
-			s.Features = i.Features.Map()
-		}
-
-		data.Servers = append(data.Servers, s)
+	openDMs, err := state.user.OpenDMs()
+	if err == nil {
+		data.OpenDMs = openDMs
 	}
-
-	channels, err := state.user.GetChannels()
-	if err != nil {
-		return nil
-	}
-	for i, channel := range channels {
-		if client, ok := state.getIRC(channel.Server); ok {
-			channels[i].Topic = client.ChannelTopic(channel.Name)
-		}
-	}
-	data.Channels = channels
-
-	openDMs, err := state.user.GetOpenDMs()
-	if err != nil {
-		return nil
-	}
-	data.OpenDMs = openDMs
 
 	tab, err := tabFromRequest(r)
-	if err == nil && hasTab(channels, openDMs, tab.Server, tab.Name) {
-		data.addUsersAndMessages(tab.Server, tab.Name, state)
+	if err == nil && hasTab(data.Channels, openDMs, tab.Network, tab.Name) {
+		data.addUsersAndMessages(tab.Network, tab.Name, state)
 	}
 
 	return &data
 }
 
-func (d *indexData) addUsersAndMessages(server, name string, state *State) {
-	if i, ok := state.getIRC(server); ok && isChannel(name) {
+func (d *indexData) addUsersAndMessages(network, name string, state *State) {
+	if i, ok := state.client(network); ok && isChannel(name) {
 		if users := i.ChannelUsers(name); len(users) > 0 {
 			d.Users = &Userlist{
-				Server:  server,
+				Network: network,
 				Channel: name,
 				Users:   users,
 			}
 		}
 	}
 
-	messages, hasMore, err := state.user.GetLastMessages(server, name, 50)
+	messages, hasMore, err := state.user.LastMessages(network, name, 50)
 	if err == nil && len(messages) > 0 {
 		m := Messages{
-			Server:   server,
+			Network:  network,
 			To:       name,
 			Messages: messages,
 		}
@@ -134,16 +113,16 @@ func (d *indexData) addUsersAndMessages(server, name string, state *State) {
 	}
 }
 
-func hasTab(channels []*storage.Channel, openDMs []storage.Tab, server, name string) bool {
+func hasTab(channels []*storage.Channel, openDMs []storage.Tab, network, name string) bool {
 	if name != "" {
 		for _, ch := range channels {
-			if server == ch.Server && name == ch.Name {
+			if network == ch.Network && name == ch.Name {
 				return true
 			}
 		}
 
 		for _, tab := range openDMs {
-			if server == tab.Server && name == tab.Name {
+			if network == tab.Network && name == tab.Name {
 				return true
 			}
 		}
@@ -179,7 +158,7 @@ func tabFromRequest(r *http.Request) (Tab, error) {
 
 		parts := strings.SplitN(v, ";", 2)
 		if len(parts) == 2 {
-			tab.Server = parts[0]
+			tab.Network = parts[0]
 			tab.Name = parts[1]
 		}
 	} else {
@@ -194,7 +173,7 @@ func tabFromRequest(r *http.Request) (Tab, error) {
 				tab.Name = name
 			}
 
-			tab.Server = parts[0]
+			tab.Network = parts[0]
 		}
 	}
 

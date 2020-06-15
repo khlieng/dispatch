@@ -1,4 +1,5 @@
 import { socketAction } from 'state/actions';
+import { kicked } from 'state/channels';
 import {
   print,
   addMessage,
@@ -7,15 +8,15 @@ import {
   broadcastEvent
 } from 'state/messages';
 import { openModal } from 'state/modals';
-import { reconnect } from 'state/servers';
+import { reconnect } from 'state/networks';
 import { select } from 'state/tab';
 import { find } from 'utils';
 
-function findChannels(state, server, user) {
+function findChannels(state, network, user) {
   const channels = [];
 
-  Object.keys(state.channels[server]).forEach(channel => {
-    if (find(state.channels[server][channel].users, u => u.nick === user)) {
+  Object.keys(state.channels[network]).forEach(channel => {
+    if (find(state.channels[network][channel].users, u => u.nick === user)) {
       channels.push(channel);
     }
   });
@@ -29,51 +30,56 @@ export default function handleSocket({
 }) {
   const handlers = {
     message(message) {
-      dispatch(addMessage(message, message.server, message.to));
+      dispatch(addMessage(message, message.network, message.to));
       return false;
     },
 
     pm(message) {
-      dispatch(addMessage(message, message.server, message.from));
+      dispatch(addMessage(message, message.network, message.from));
       return false;
     },
 
-    messages({ messages, server, to, prepend, next }) {
-      dispatch(addMessages(messages, server, to, prepend, next));
+    messages({ messages, network, to, prepend, next }) {
+      dispatch(addMessages(messages, network, to, prepend, next));
       return false;
     },
 
-    join({ user, server, channels }) {
-      dispatch(addEvent(server, channels[0], 'join', user));
+    join({ user, network, channels }) {
+      dispatch(addEvent(network, channels[0], 'join', user));
     },
 
-    part({ user, server, channel, reason }) {
-      dispatch(addEvent(server, channel, 'part', user, reason));
+    part({ user, network, channel, reason }) {
+      dispatch(addEvent(network, channel, 'part', user, reason));
     },
 
-    quit({ user, server, reason }) {
-      const channels = findChannels(getState(), server, user);
-      dispatch(broadcastEvent(server, channels, 'quit', user, reason));
+    quit({ user, network, reason }) {
+      const channels = findChannels(getState(), network, user);
+      dispatch(broadcastEvent(network, channels, 'quit', user, reason));
     },
 
-    nick({ server, oldNick, newNick }) {
+    kick({ network, channel, sender, user, reason }) {
+      dispatch(kicked(network, channel, user));
+      dispatch(addEvent(network, channel, 'kick', user, sender, reason));
+    },
+
+    nick({ network, oldNick, newNick }) {
       if (oldNick) {
-        const channels = findChannels(getState(), server, oldNick);
-        dispatch(broadcastEvent(server, channels, 'nick', oldNick, newNick));
+        const channels = findChannels(getState(), network, oldNick);
+        dispatch(broadcastEvent(network, channels, 'nick', oldNick, newNick));
       }
     },
 
-    topic({ server, channel, topic, nick }) {
+    topic({ network, channel, topic, nick }) {
       if (nick) {
-        dispatch(addEvent(server, channel, 'topic', nick, topic));
+        dispatch(addEvent(network, channel, 'topic', nick, topic));
       }
     },
 
-    motd({ content, server }) {
+    motd({ content, network }) {
       dispatch(
         addMessages(
           content.map(line => ({ content: line })),
-          server
+          network
         )
       );
       return false;
@@ -92,7 +98,7 @@ export default function handleSocket({
             `Server: ${data.server}`,
             `Channels: ${data.channels}`
           ],
-          tab.server,
+          tab.network,
           tab.name
         )
       );
@@ -101,24 +107,26 @@ export default function handleSocket({
 
     print(message) {
       const tab = getState().tab.selected;
-      dispatch(addMessage(message, tab.server, tab.name));
+      dispatch(addMessage(message, tab.network, tab.name));
       return false;
     },
 
-    error({ server, target, message }) {
-      dispatch(addMessage({ content: message, type: 'error' }, server, target));
+    error({ network, target, message }) {
+      dispatch(
+        addMessage({ content: message, type: 'error' }, network, target)
+      );
       return false;
     },
 
-    connection_update({ server, errorType }) {
+    connection_update({ network, errorType }) {
       if (errorType === 'verify') {
         dispatch(
           openModal('confirm', {
             question:
-              'The server is using a self-signed certificate, continue anyway?',
+              'The network is using a self-signed certificate, continue anyway?',
             onConfirm: () =>
               dispatch(
-                reconnect(server, {
+                reconnect(network, {
                   skipVerify: true
                 })
               )
@@ -127,12 +135,12 @@ export default function handleSocket({
       }
     },
 
-    dcc_send({ server, from, filename, url }) {
-      const serverName = getState().servers[server]?.name || server;
+    dcc_send({ network, from, filename, url }) {
+      const networkName = getState().networks[network]?.name || network;
 
       dispatch(
         openModal('confirm', {
-          question: `${from} on ${serverName} is sending you: ${filename}`,
+          question: `${from} on ${networkName} is sending you: ${filename}`,
           confirmation: 'Download',
           onConfirm: () => {
             const a = document.createElement('a');
@@ -148,8 +156,11 @@ export default function handleSocket({
     channel_forward(forward) {
       const { selected } = getState().tab;
 
-      if (selected.server === forward.server && selected.name === forward.old) {
-        dispatch(select(forward.server, forward.new, true));
+      if (
+        selected.network === forward.network &&
+        selected.name === forward.old
+      ) {
+        dispatch(select(forward.network, forward.new, true));
       }
     }
   };

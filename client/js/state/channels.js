@@ -56,13 +56,18 @@ function removeUser(users, nick) {
   }
 }
 
-function init(state, server, channel) {
-  if (!state[server]) {
-    state[server] = {};
+function init(state, network, channel) {
+  if (!state[network]) {
+    state[network] = {};
   }
-  if (channel && !state[server][channel]) {
-    state[server][channel] = { name: channel, users: [], joined: false };
+  if (channel && !state[network][channel]) {
+    state[network][channel] = {
+      name: channel,
+      users: [],
+      joined: false
+    };
   }
+  return state[network][channel];
 }
 
 export function compareUsers(a, b) {
@@ -93,18 +98,18 @@ export const getChannels = state => state.channels;
 
 export const getSortedChannels = createSelector(getChannels, channels =>
   sortBy(
-    Object.keys(channels).map(server => ({
-      address: server,
-      channels: sortBy(channels[server], channel => channel.name.toLowerCase())
+    Object.keys(channels).map(network => ({
+      address: network,
+      channels: sortBy(channels[network], channel => channel.name.toLowerCase())
     })),
-    server => server.address.toLowerCase()
+    network => network.address.toLowerCase()
   )
 );
 
 export const getSelectedChannel = createSelector(
   getSelectedTab,
   getChannels,
-  (tab, channels) => get(channels, [tab.server, tab.name])
+  (tab, channels) => get(channels, [tab.network, tab.name])
 );
 
 export const getSelectedChannelUsers = createSelector(
@@ -120,43 +125,53 @@ export const getSelectedChannelUsers = createSelector(
 export default createReducer(
   {},
   {
-    [actions.JOIN](state, { server, channels }) {
-      channels.forEach(channel => init(state, server, channel));
+    [actions.JOIN](state, { network, channels }) {
+      channels.forEach(channel => init(state, network, channel));
     },
 
-    [actions.PART](state, { server, channels }) {
-      channels.forEach(channel => delete state[server][channel]);
+    [actions.PART](state, { network, channels }) {
+      channels.forEach(channel => delete state[network][channel]);
     },
 
-    [actions.socket.JOIN](state, { server, channels, user }) {
+    [actions.socket.JOIN](state, { network, channels, user }) {
       const channel = channels[0];
-      init(state, server, channel);
-      state[server][channel].name = channel;
-      state[server][channel].joined = true;
-      state[server][channel].users.push(createUser(user));
+      const chan = init(state, network, channel);
+      chan.name = channel;
+      chan.joined = true;
+      chan.users.push(createUser(user));
     },
 
     [actions.socket.CHANNEL_FORWARD](state, action) {
-      init(state, action.server, action.new);
-      delete state[action.server][action.old];
+      init(state, action.network, action.new);
+      delete state[action.network][action.old];
     },
 
-    [actions.socket.PART](state, { server, channel, user }) {
-      if (state[server][channel]) {
-        removeUser(state[server][channel].users, user);
+    [actions.socket.PART](state, { network, channel, user }) {
+      if (state[network][channel]) {
+        removeUser(state[network][channel].users, user);
       }
     },
 
-    [actions.socket.QUIT](state, { server, user }) {
-      Object.keys(state[server]).forEach(channel => {
-        removeUser(state[server][channel].users, user);
+    [actions.socket.QUIT](state, { network, user }) {
+      Object.keys(state[network]).forEach(channel => {
+        removeUser(state[network][channel].users, user);
       });
     },
 
-    [actions.socket.NICK](state, { server, oldNick, newNick }) {
-      Object.keys(state[server]).forEach(channel => {
+    [actions.KICKED](state, { network, channel, user, self }) {
+      const chan = state[network][channel];
+      if (self) {
+        chan.joined = false;
+        chan.users = [];
+      } else {
+        removeUser(chan.users, user);
+      }
+    },
+
+    [actions.socket.NICK](state, { network, oldNick, newNick }) {
+      Object.keys(state[network]).forEach(channel => {
         const user = find(
-          state[server][channel].users,
+          state[network][channel].users,
           u => u.nick === oldNick
         );
         if (user) {
@@ -166,16 +181,16 @@ export default createReducer(
       });
     },
 
-    [actions.socket.USERS](state, { server, channel, users }) {
-      state[server][channel].users = users.map(nick => loadUser(nick));
+    [actions.socket.USERS](state, { network, channel, users }) {
+      state[network][channel].users = users.map(nick => loadUser(nick));
     },
 
-    [actions.socket.TOPIC](state, { server, channel, topic }) {
-      state[server][channel].topic = topic;
+    [actions.socket.TOPIC](state, { network, channel, topic }) {
+      state[network][channel].topic = topic;
     },
 
-    [actions.socket.MODE](state, { server, channel, user, remove, add }) {
-      const u = find(state[server][channel].users, v => v.nick === user);
+    [actions.socket.MODE](state, { network, channel, user, remove, add }) {
+      const u = find(state[network][channel].users, v => v.nick === user);
       if (u) {
         if (remove) {
           let j = remove.length;
@@ -194,15 +209,15 @@ export default createReducer(
 
     [actions.socket.CHANNELS](state, { data }) {
       if (data) {
-        data.forEach(({ server, name, topic }) => {
-          init(state, server, name);
-          state[server][name].joined = true;
-          state[server][name].topic = topic;
+        data.forEach(({ network, name, topic }) => {
+          const chan = init(state, network, name);
+          chan.joined = true;
+          chan.topic = topic;
         });
       }
     },
 
-    [actions.socket.SERVERS](state, { data }) {
+    [actions.socket.NETWORKS](state, { data }) {
       if (data) {
         data.forEach(({ host }) => init(state, host));
       }
@@ -212,33 +227,33 @@ export default createReducer(
       init(state, host);
     },
 
-    [actions.DISCONNECT](state, { server }) {
-      delete state[server];
+    [actions.DISCONNECT](state, { network }) {
+      delete state[network];
     }
   }
 );
 
-export function join(channels, server) {
+export function join(channels, network) {
   return {
     type: actions.JOIN,
     channels,
-    server,
+    network,
     socket: {
       type: 'join',
-      data: { channels, server }
+      data: { channels, network }
     }
   };
 }
 
-export function part(channels, server) {
+export function part(channels, network) {
   return (dispatch, getState) => {
     const action = {
       type: actions.PART,
       channels,
-      server
+      network
     };
 
-    const state = getState().channels[server];
+    const state = getState().channels[network];
     const joined = channels.filter(c => state[c] && state[c].joined);
 
     if (joined.length > 0) {
@@ -246,7 +261,7 @@ export function part(channels, server) {
         type: 'part',
         data: {
           channels: joined,
-          server
+          network
         }
       };
     }
@@ -256,41 +271,55 @@ export function part(channels, server) {
   };
 }
 
-export function invite(user, channel, server) {
+export function invite(user, channel, network) {
   return {
     type: actions.INVITE,
     user,
     channel,
-    server,
+    network,
     socket: {
       type: 'invite',
-      data: { user, channel, server }
+      data: { user, channel, network }
     }
   };
 }
 
-export function kick(user, channel, server) {
+export function kick(user, channel, network) {
   return {
     type: actions.KICK,
     user,
     channel,
-    server,
+    network,
     socket: {
       type: 'kick',
-      data: { user, channel, server }
+      data: { user, channel, network }
     }
   };
 }
 
-export function setTopic(topic, channel, server) {
+export function kicked(network, channel, user) {
+  return (dispatch, getState) => {
+    const nick = getState().networks[network]?.nick;
+
+    dispatch({
+      type: actions.KICKED,
+      network,
+      channel,
+      user,
+      self: nick === user
+    });
+  };
+}
+
+export function setTopic(topic, channel, network) {
   return {
     type: actions.SET_TOPIC,
     topic,
     channel,
-    server,
+    network,
     socket: {
       type: 'topic',
-      data: { topic, channel, server }
+      data: { topic, channel, network }
     }
   };
 }

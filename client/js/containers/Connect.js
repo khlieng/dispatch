@@ -2,7 +2,7 @@ import { createStructuredSelector } from 'reselect';
 import Connect from 'components/pages/Connect';
 import { getConnectDefaults, getApp } from 'state/app';
 import { join } from 'state/channels';
-import { connect as connectServer } from 'state/servers';
+import { connect as connectNetwork } from 'state/networks';
 import { select } from 'state/tab';
 import connect from 'utils/connect';
 
@@ -14,7 +14,7 @@ const mapState = createStructuredSelector({
 
 const mapDispatch = {
   join,
-  connect: connectServer,
+  connect: connectNetwork,
   select
 };
 

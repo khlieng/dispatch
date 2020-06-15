@@ -4,7 +4,7 @@ import classnames from 'classnames';
 const TabListItem = ({
   target,
   content,
-  server,
+  network,
   selected,
   connected,
   joined,
@@ -12,7 +12,7 @@ const TabListItem = ({
   onClick
 }) => {
   const className = classnames({
-    'tab-server': !target,
+    'tab-network': !target,
     success: !target && connected,
     error: (!target && !connected) || (!joined && error),
     disabled: !!target && !error && joined === false,
@@ -20,7 +20,7 @@ const TabListItem = ({
   });
 
   return (
-    <p className={className} onClick={() => onClick(server, target)}>
+    <p className={className} onClick={() => onClick(network, target)}>
       <span className="tab-content">{content}</span>
     </p>
   );

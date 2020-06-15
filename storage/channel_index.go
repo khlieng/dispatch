@@ -124,32 +124,32 @@ type managedChannelIndex struct {
 	updating  bool
 }
 
-func (m *ChannelIndexManager) Get(server string) (ChannelListIndex, bool) {
+func (m *ChannelIndexManager) Get(network string) (ChannelListIndex, bool) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	idx, ok := m.indexes[server]
+	idx, ok := m.indexes[network]
 	if !ok {
-		m.indexes[server] = &managedChannelIndex{
+		m.indexes[network] = &managedChannelIndex{
 			updating: true,
 		}
-		go m.timeoutUpdate(server)
+		go m.timeoutUpdate(network)
 		return nil, true
 	}
 
 	if !idx.updating && time.Since(idx.updatedAt) > ChannelListUpdateInterval {
 		idx.updating = true
-		go m.timeoutUpdate(server)
+		go m.timeoutUpdate(network)
 		return idx.index, true
 	}
 
 	return idx.index, false
 }
 
-func (m *ChannelIndexManager) Set(server string, index ChannelListIndex) {
+func (m *ChannelIndexManager) Set(network string, index ChannelListIndex) {
 	if index.len() > 0 {
 		m.lock.Lock()
-		m.indexes[server] = &managedChannelIndex{
+		m.indexes[network] = &managedChannelIndex{
 			index:     index,
 			updatedAt: time.Now(),
 		}
@@ -157,12 +157,12 @@ func (m *ChannelIndexManager) Set(server string, index ChannelListIndex) {
 	}
 }
 
-func (m *ChannelIndexManager) timeoutUpdate(server string) {
+func (m *ChannelIndexManager) timeoutUpdate(network string) {
 	time.Sleep(ChannelListUpdateTimeout)
 
 	m.lock.Lock()
-	if m.indexes[server].updating {
-		m.indexes[server].updating = false
+	if m.indexes[network].updating {
+		m.indexes[network].updating = false
 	}
 	m.lock.Unlock()
 }

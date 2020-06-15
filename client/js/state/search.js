@@ -18,15 +18,15 @@ export default createReducer(initialState, {
   }
 });
 
-export function searchMessages(server, channel, phrase) {
+export function searchMessages(network, channel, phrase) {
   return {
     type: actions.SEARCH_MESSAGES,
-    server,
+    network,
     channel,
     phrase,
     socket: {
       type: 'search',
-      data: { server, channel, phrase }
+      data: { network, channel, phrase }
     }
   };
 }

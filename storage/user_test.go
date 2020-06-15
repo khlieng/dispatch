@@ -34,23 +34,23 @@ func TestUser(t *testing.T) {
 	user, err := storage.NewUser(db)
 	assert.Nil(t, err)
 
-	srv := &storage.Server{
+	srv := &storage.Network{
 		Name: "freenode",
 		Host: "irc.freenode.net",
 		Nick: "test",
 	}
 	chan1 := &storage.Channel{
-		Server: srv.Host,
-		Name:   "#test",
+		Network: srv.Host,
+		Name:    "#test",
 	}
 	chan2 := &storage.Channel{
-		Server: srv.Host,
-		Name:   "#testing",
+		Network: srv.Host,
+		Name:    "#testing",
 	}
 
-	user.AddServer(srv)
-	user.AddChannel(chan1)
-	user.AddChannel(chan2)
+	user.SaveNetwork(srv)
+	user.SaveChannel(chan1)
+	user.SaveChannel(chan2)
 
 	users, err := storage.LoadUsers(db)
 	assert.Nil(t, err)
@@ -59,52 +59,52 @@ func TestUser(t *testing.T) {
 	user = users[0]
 	assert.Equal(t, uint64(1), user.ID)
 
-	servers, err := user.GetServers()
+	servers, err := user.Networks()
 	assert.Len(t, servers, 1)
 	assert.Equal(t, srv, servers[0])
 
-	channels, err := user.GetChannels()
+	channels, err := user.Channels()
 	assert.Len(t, channels, 2)
 	assert.Equal(t, chan1, channels[0])
 	assert.Equal(t, chan2, channels[1])
 
 	user.SetNick("bob", srv.Host)
-	servers, err = user.GetServers()
+	servers, err = user.Networks()
 	assert.Equal(t, "bob", servers[0].Nick)
 
-	user.SetServerName("cake", srv.Host)
-	servers, err = user.GetServers()
+	user.SetNetworkName("cake", srv.Host)
+	servers, err = user.Networks()
 	assert.Equal(t, "cake", servers[0].Name)
 
 	user.RemoveChannel(srv.Host, chan1.Name)
-	channels, err = user.GetChannels()
+	channels, err = user.Channels()
 	assert.Len(t, channels, 1)
 	assert.Equal(t, chan2, channels[0])
 
-	user.RemoveServer(srv.Host)
-	servers, err = user.GetServers()
+	user.RemoveNetwork(srv.Host)
+	servers, err = user.Networks()
 	assert.Len(t, servers, 0)
-	channels, err = user.GetChannels()
+	channels, err = user.Channels()
 	assert.Len(t, channels, 0)
 
 	user.AddOpenDM(srv.Host, "cake")
-	openDMs, err := user.GetOpenDMs()
+	openDMs, err := user.OpenDMs()
 	assert.Nil(t, err)
 	assert.Len(t, openDMs, 1)
 	err = user.RemoveOpenDM(srv.Host, "cake")
 	assert.Nil(t, err)
-	openDMs, err = user.GetOpenDMs()
+	openDMs, err = user.OpenDMs()
 	assert.Nil(t, err)
 	assert.Len(t, openDMs, 0)
 
-	settings := user.GetClientSettings()
+	settings := user.ClientSettings()
 	assert.NotNil(t, settings)
 	assert.Equal(t, storage.DefaultClientSettings(), settings)
 
 	settings.ColoredNicks = !settings.ColoredNicks
 	err = user.SetClientSettings(settings)
 	assert.Nil(t, err)
-	assert.Equal(t, settings, user.GetClientSettings())
+	assert.Equal(t, settings, user.ClientSettings())
 	assert.NotEqual(t, settings, storage.DefaultClientSettings())
 
 	user.AddOpenDM(srv.Host, "cake")
@@ -113,7 +113,7 @@ func TestUser(t *testing.T) {
 	_, err = os.Stat(storage.Path.User(user.Username))
 	assert.True(t, os.IsNotExist(err))
 
-	openDMs, err = user.GetOpenDMs()
+	openDMs, err = user.OpenDMs()
 	assert.Nil(t, err)
 	assert.Len(t, openDMs, 0)
 
@@ -143,12 +143,12 @@ func TestMessages(t *testing.T) {
 
 	os.MkdirAll(storage.Path.User(user.Username), 0700)
 
-	messages, hasMore, err := user.GetMessages("irc.freenode.net", "#go-nuts", 10, "6")
+	messages, hasMore, err := user.Messages("irc.freenode.net", "#go-nuts", 10, "6")
 	assert.Nil(t, err)
 	assert.False(t, hasMore)
 	assert.Len(t, messages, 0)
 
-	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 10)
+	messages, hasMore, err = user.LastMessages("irc.freenode.net", "#go-nuts", 10)
 	assert.Nil(t, err)
 	assert.False(t, hasMore)
 	assert.Len(t, messages, 0)
@@ -163,7 +163,7 @@ func TestMessages(t *testing.T) {
 		ids = append(ids, id)
 		err = user.LogMessage(&storage.Message{
 			ID:      id,
-			Server:  "irc.freenode.net",
+			Network: "irc.freenode.net",
 			From:    "nick",
 			To:      "#go-nuts",
 			Content: "message" + strconv.Itoa(i),
@@ -171,35 +171,35 @@ func TestMessages(t *testing.T) {
 		assert.Nil(t, err)
 	}
 
-	messages, hasMore, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, ids[4])
+	messages, hasMore, err = user.Messages("irc.freenode.net", "#go-nuts", 10, ids[4])
 	assert.Equal(t, "message0", messages[0].Content)
 	assert.Equal(t, "message3", messages[3].Content)
 	assert.Nil(t, err)
 	assert.False(t, hasMore)
 	assert.Len(t, messages, 4)
 
-	messages, hasMore, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, betterguid.New())
+	messages, hasMore, err = user.Messages("irc.freenode.net", "#go-nuts", 10, betterguid.New())
 	assert.Equal(t, "message0", messages[0].Content)
 	assert.Equal(t, "message4", messages[4].Content)
 	assert.Nil(t, err)
 	assert.False(t, hasMore)
 	assert.Len(t, messages, 5)
 
-	messages, hasMore, err = user.GetMessages("irc.freenode.net", "#go-nuts", 10, ids[2])
+	messages, hasMore, err = user.Messages("irc.freenode.net", "#go-nuts", 10, ids[2])
 	assert.Equal(t, "message0", messages[0].Content)
 	assert.Equal(t, "message1", messages[1].Content)
 	assert.Nil(t, err)
 	assert.False(t, hasMore)
 	assert.Len(t, messages, 2)
 
-	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 10)
+	messages, hasMore, err = user.LastMessages("irc.freenode.net", "#go-nuts", 10)
 	assert.Equal(t, "message0", messages[0].Content)
 	assert.Equal(t, "message4", messages[4].Content)
 	assert.Nil(t, err)
 	assert.False(t, hasMore)
 	assert.Len(t, messages, 5)
 
-	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 4)
+	messages, hasMore, err = user.LastMessages("irc.freenode.net", "#go-nuts", 4)
 	assert.Equal(t, "message1", messages[0].Content)
 	assert.Equal(t, "message4", messages[3].Content)
 	assert.Nil(t, err)
@@ -211,7 +211,7 @@ func TestMessages(t *testing.T) {
 	assert.True(t, len(messages) > 0)
 
 	user.LogEvent("irc.freenode.net", "join", []string{"bob"}, "#go-nuts")
-	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 1)
+	messages, hasMore, err = user.LastMessages("irc.freenode.net", "#go-nuts", 1)
 	assert.Zero(t, messages[0].Content)
 	assert.Nil(t, err)
 	assert.True(t, hasMore)
@@ -220,7 +220,7 @@ func TestMessages(t *testing.T) {
 	assert.NotZero(t, messages[0].Events[0].Time)
 
 	user.LogEvent("irc.freenode.net", "part", []string{"bob"}, "#go-nuts")
-	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 1)
+	messages, hasMore, err = user.LastMessages("irc.freenode.net", "#go-nuts", 1)
 	assert.Zero(t, messages[0].Content)
 	assert.Nil(t, err)
 	assert.True(t, hasMore)
@@ -229,7 +229,7 @@ func TestMessages(t *testing.T) {
 	assert.NotZero(t, messages[0].Events[0].Time)
 
 	user.LogEvent("irc.freenode.net", "nick", []string{"bob", "rob"}, "#go-nuts")
-	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 1)
+	messages, hasMore, err = user.LastMessages("irc.freenode.net", "#go-nuts", 1)
 	assert.Zero(t, messages[0].Content)
 	assert.Nil(t, err)
 	assert.True(t, hasMore)
@@ -238,7 +238,7 @@ func TestMessages(t *testing.T) {
 	assert.NotZero(t, messages[0].Events[0].Time)
 
 	user.LogEvent("irc.freenode.net", "quit", []string{"rob", "bored"}, "#go-nuts")
-	messages, hasMore, err = user.GetLastMessages("irc.freenode.net", "#go-nuts", 1)
+	messages, hasMore, err = user.LastMessages("irc.freenode.net", "#go-nuts", 1)
 	assert.Zero(t, messages[0].Content)
 	assert.Nil(t, err)
 	assert.True(t, hasMore)

@@ -50,7 +50,7 @@ func (i *ircHandler) run() {
 		select {
 		case msg, ok := <-i.client.Messages:
 			if !ok {
-				i.state.deleteIRC(i.client.Host())
+				i.state.deleteNetwork(i.client.Host())
 				return
 			}
 
@@ -58,7 +58,14 @@ func (i *ircHandler) run() {
 
 		case state := <-i.client.ConnectionChanged:
 			i.state.sendJSON("connection_update", newConnectionUpdate(i.client.Host(), state))
-			i.state.setConnectionState(i.client.Host(), state)
+
+			if network, ok := i.state.network(i.client.Host()); ok {
+				var err string
+				if state.Error != nil {
+					err = state.Error.Error()
+				}
+				network.SetStatus(state.Connected, err)
+			}
 
 			if state.Error != nil && (lastConnErr == nil ||
 				state.Error.Error() != lastConnErr.Error()) {
@@ -87,7 +94,7 @@ func (i *ircHandler) run() {
 func (i *ircHandler) dispatchMessage(msg *irc.Message) {
 	if msg.Command[0] == '4' && !isExcludedError(msg.Command) {
 		err := IRCError{
-			Server:  i.client.Host(),
+			Network: i.client.Host(),
 			Message: msg.LastParam(),
 		}
 
@@ -109,25 +116,30 @@ func (i *ircHandler) dispatchMessage(msg *irc.Message) {
 }
 
 func (i *ircHandler) nick(msg *irc.Message) {
-	i.state.sendJSON("nick", Nick{
-		Server: i.client.Host(),
-		Old:    msg.Sender,
-		New:    msg.LastParam(),
-	})
+	nick := Nick{
+		Network: i.client.Host(),
+		Old:     msg.Sender,
+		New:     msg.LastParam(),
+	}
 
-	if i.client.Is(msg.LastParam()) {
-		go i.state.user.SetNick(msg.LastParam(), i.client.Host())
+	i.state.sendJSON("nick", nick)
+
+	if i.client.Is(nick.New) {
+		if network, ok := i.state.network(nick.Network); ok {
+			network.SetNick(nick.New)
+			go network.Save()
+		}
 	}
 
 	channels := irc.GetNickChannels(msg)
-	go i.state.user.LogEvent(i.client.Host(), "nick", []string{msg.Sender, msg.LastParam()}, channels...)
+	go i.state.user.LogEvent(nick.Network, "nick", []string{nick.Old, nick.New}, channels...)
 }
 
 func (i *ircHandler) join(msg *irc.Message) {
 	host := i.client.Host()
 
 	i.state.sendJSON("join", Join{
-		Server:   host,
+		Network:  host,
 		User:     msg.Sender,
 		Channels: msg.Params,
 	})
@@ -138,37 +150,74 @@ func (i *ircHandler) join(msg *irc.Message) {
 		// In case no topic is set and there's a cached one that needs to be cleared
 		i.client.Topic(channel)
 
-		i.state.sendLastMessages(host, channel, 50)
+		if network, ok := i.state.network(host); ok {
+			if ch := network.Channel(channel); ch != nil {
+				ch.SetJoined(true)
+			} else {
+				i.state.sendLastMessages(host, channel, 50)
 
-		go i.state.user.AddChannel(&storage.Channel{
-			Server: host,
-			Name:   channel,
-		})
+				ch = network.NewChannel(channel)
+				ch.SetJoined(true)
+				network.AddChannel(ch)
+				go ch.Save()
+			}
+		}
 	}
 
 	go i.state.user.LogEvent(host, "join", []string{msg.Sender}, channel)
 }
 
 func (i *ircHandler) part(msg *irc.Message) {
-	host := i.client.Host()
-	channel := msg.Params[0]
 	part := Part{
-		Server:  host,
+		Network: i.client.Host(),
 		User:    msg.Sender,
-		Channel: channel,
+		Channel: msg.Params[0],
 	}
+
+	params := []string{part.User}
 
 	if len(msg.Params) == 2 {
 		part.Reason = msg.Params[1]
+		params = append(params, part.Reason)
 	}
 
 	i.state.sendJSON("part", part)
 
 	if i.client.Is(msg.Sender) {
-		go i.state.user.RemoveChannel(host, part.Channel)
+		go i.state.user.RemoveChannel(part.Network, part.Channel)
 	}
 
-	go i.state.user.LogEvent(host, "part", []string{msg.Sender}, channel)
+	go i.state.user.LogEvent(part.Network, "part", params, part.Channel)
+}
+
+func (i *ircHandler) kick(msg *irc.Message) {
+	if len(msg.Params) < 2 {
+		return
+	}
+
+	kick := Kick{
+		Network: i.client.Host(),
+		Channel: msg.Params[0],
+		Sender:  msg.Sender,
+		User:    msg.Params[1],
+	}
+
+	params := []string{kick.User, kick.Sender}
+
+	if len(msg.Params) > 2 {
+		kick.Reason = msg.Params[2]
+		params = append(params, kick.Reason)
+	}
+
+	i.state.sendJSON("kick", kick)
+
+	go i.state.user.LogEvent(kick.Network, "kick", params, kick.Channel)
+
+	if i.client.Is(kick.User) {
+		if network, ok := i.state.network(kick.Network); ok {
+			network.Channel(kick.Channel).SetJoined(false)
+		}
+	}
 }
 
 func (i *ircHandler) mode(msg *irc.Message) {
@@ -193,7 +242,7 @@ func (i *ircHandler) message(msg *irc.Message) {
 
 	message := Message{
 		ID:      betterguid.New(),
-		Server:  i.client.Host(),
+		Network: i.client.Host(),
 		From:    msg.Sender,
 		Content: msg.LastParam(),
 	}
@@ -215,7 +264,7 @@ func (i *ircHandler) message(msg *irc.Message) {
 	if target != "*" && !msg.IsFromServer() {
 		go i.state.user.LogMessage(&storage.Message{
 			ID:      message.ID,
-			Server:  message.Server,
+			Network: message.Network,
 			From:    message.From,
 			To:      target,
 			Content: message.Content,
@@ -225,9 +274,9 @@ func (i *ircHandler) message(msg *irc.Message) {
 
 func (i *ircHandler) quit(msg *irc.Message) {
 	i.state.sendJSON("quit", Quit{
-		Server: i.client.Host(),
-		User:   msg.Sender,
-		Reason: msg.LastParam(),
+		Network: i.client.Host(),
+		User:    msg.Sender,
+		Reason:  msg.LastParam(),
 	})
 
 	channels := irc.GetQuitChannels(msg)
@@ -238,8 +287,8 @@ func (i *ircHandler) quit(msg *irc.Message) {
 func (i *ircHandler) info(msg *irc.Message) {
 	if msg.Command == irc.RPL_WELCOME {
 		i.state.sendJSON("nick", Nick{
-			Server: i.client.Host(),
-			New:    msg.Params[0],
+			Network: i.client.Host(),
+			New:     msg.Params[0],
 		})
 
 		_, needsUpdate := channelIndexes.Get(i.client.Host())
@@ -252,25 +301,27 @@ func (i *ircHandler) info(msg *irc.Message) {
 	}
 
 	i.state.sendJSON("pm", Message{
-		Server:  i.client.Host(),
+		Network: i.client.Host(),
 		From:    msg.Sender,
 		Content: strings.Join(msg.Params[1:], " "),
 	})
 }
 
 func (i *ircHandler) features(msg *irc.Message) {
+	features := i.client.Features.Map()
+
 	i.state.sendJSON("features", Features{
-		Server:   i.client.Host(),
-		Features: i.client.Features.Map(),
+		Network:  i.client.Host(),
+		Features: features,
 	})
 
-	if name := i.client.Features.String("NETWORK"); name != "" {
-		go func() {
-			server, err := i.state.user.GetServer(i.client.Host())
-			if err == nil && server.Name == "" {
-				i.state.user.SetServerName(name, server.Host)
-			}
-		}()
+	if network, ok := i.state.network(i.client.Host()); ok {
+		network.SetFeatures(features)
+
+		if name := i.client.Features.String("NETWORK"); name != "" {
+			network.SetName(name)
+			go network.Save()
+		}
 	}
 }
 
@@ -310,30 +361,41 @@ func (i *ircHandler) topic(msg *irc.Message) {
 	}
 
 	i.state.sendJSON("topic", Topic{
-		Server:  i.client.Host(),
+		Network: i.client.Host(),
 		Channel: channel,
 		Topic:   msg.LastParam(),
 		Nick:    nick,
 	})
+
+	if network, ok := i.state.network(i.client.Host()); ok {
+		network.Channel(channel).SetTopic(msg.LastParam())
+	}
 }
 
 func (i *ircHandler) noTopic(msg *irc.Message) {
+	channel := msg.Params[1]
+
 	i.state.sendJSON("topic", Topic{
-		Server:  i.client.Host(),
-		Channel: msg.Params[1],
+		Network: i.client.Host(),
+		Channel: channel,
 	})
+
+	if network, ok := i.state.network(i.client.Host()); ok {
+		network.Channel(channel).SetTopic("")
+	}
+
 }
 
 func (i *ircHandler) namesEnd(msg *irc.Message) {
 	i.state.sendJSON("users", Userlist{
-		Server:  i.client.Host(),
+		Network: i.client.Host(),
 		Channel: msg.Params[1],
 		Users:   irc.GetNamreplyUsers(msg),
 	})
 }
 
 func (i *ircHandler) motdStart(msg *irc.Message) {
-	i.motdBuffer.Server = i.client.Host()
+	i.motdBuffer.Network = i.client.Host()
 	i.motdBuffer.Title = msg.LastParam()
 }
 
@@ -376,23 +438,23 @@ func (i *ircHandler) listEnd(msg *irc.Message) {
 
 func (i *ircHandler) badNick(msg *irc.Message) {
 	i.state.sendJSON("nick_fail", NickFail{
-		Server: i.client.Host(),
+		Network: i.client.Host(),
 	})
 }
 
 func (i *ircHandler) forward(msg *irc.Message) {
 	if len(msg.Params) > 2 {
 		i.state.sendJSON("channel_forward", ChannelForward{
-			Server: i.client.Host(),
-			Old:    msg.Params[1],
-			New:    msg.Params[2],
+			Network: i.client.Host(),
+			Old:     msg.Params[1],
+			New:     msg.Params[2],
 		})
 	}
 }
 
 func (i *ircHandler) error(msg *irc.Message) {
 	i.state.sendJSON("error", IRCError{
-		Server:  i.client.Host(),
+		Network: i.client.Host(),
 		Message: msg.LastParam(),
 	})
 }
@@ -413,7 +475,7 @@ func (i *ircHandler) receiveDCCSend(pack *irc.DCCSend, msg *irc.Message) {
 			i.state.setPendingDCC(pack.File, pack)
 
 			i.state.sendJSON("dcc_send", DCCSend{
-				Server:   i.client.Host(),
+				Network:  i.client.Host(),
 				From:     msg.Sender,
 				Filename: pack.File,
 				URL: fmt.Sprintf("%s://%s/downloads/%s/%s",
@@ -431,6 +493,7 @@ func (i *ircHandler) initHandlers() {
 		irc.NICK:                 i.nick,
 		irc.JOIN:                 i.join,
 		irc.PART:                 i.part,
+		irc.KICK:                 i.kick,
 		irc.MODE:                 i.mode,
 		irc.PRIVMSG:              i.message,
 		irc.NOTICE:               i.message,
@@ -469,16 +532,16 @@ func (i *ircHandler) log(v ...interface{}) {
 
 func (i *ircHandler) sendDCCInfo(message string, log bool, a ...interface{}) {
 	msg := Message{
-		Server:  i.client.Host(),
+		Network: i.client.Host(),
 		From:    "@dcc",
 		Content: fmt.Sprintf(message, a...),
 	}
 	i.state.sendJSON("pm", msg)
 
 	if log {
-		i.state.user.AddOpenDM(msg.Server, msg.From)
+		i.state.user.AddOpenDM(msg.Network, msg.From)
 		i.state.user.LogMessage(&storage.Message{
-			Server:  msg.Server,
+			Network: msg.Network,
 			From:    msg.From,
 			Content: msg.Content,
 		})

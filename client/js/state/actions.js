@@ -3,6 +3,7 @@ export const APP_SET = 'APP_SET';
 export const INVITE = 'INVITE';
 export const JOIN = 'JOIN';
 export const KICK = 'KICK';
+export const KICKED = 'KICKED';
 export const PART = 'PART';
 export const SET_TOPIC = 'SET_TOPIC';
 
@@ -36,7 +37,7 @@ export const CONNECT = 'CONNECT';
 export const DISCONNECT = 'DISCONNECT';
 export const RECONNECT = 'RECONNECT';
 export const SET_NICK = 'SET_NICK';
-export const SET_SERVER_NAME = 'SET_SERVER_NAME';
+export const SET_NETWORK_NAME = 'SET_NETWORK_NAME';
 export const WHOIS = 'WHOIS';
 
 export const SET_CERT = 'SET_CERT';
@@ -83,7 +84,7 @@ export const socket = createSocketActions([
   'pm',
   'quit',
   'search',
-  'servers',
+  'networks',
   'topic',
   'users'
 ]);

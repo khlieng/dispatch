@@ -4,8 +4,8 @@ import TabListItem from 'components/TabListItem';
 import connect from 'utils/connect';
 
 const mapState = createStructuredSelector({
-  error: (state, { server, target }) => {
-    const messages = get(state, ['messages', server, target]);
+  error: (state, { network, target }) => {
+    const messages = get(state, ['messages', network, target]);
 
     if (messages && messages.length > 0) {
       return messages[messages.length - 1].type === 'error';

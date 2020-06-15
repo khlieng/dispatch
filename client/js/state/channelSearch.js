@@ -8,7 +8,7 @@ const initialState = {
 };
 
 export default createReducer(initialState, {
-  [actions.socket.CHANNEL_SEARCH](state, { results, start, server, q }) {
+  [actions.socket.CHANNEL_SEARCH](state, { results, start, network, q }) {
     if (results) {
       state.end = false;
 
@@ -18,7 +18,7 @@ export default createReducer(initialState, {
         state.results = results;
 
         if (!q) {
-          state.topCache[server] = results;
+          state.topCache[network] = results;
         }
       }
     } else {
@@ -34,14 +34,14 @@ export default createReducer(initialState, {
   }
 });
 
-export function searchChannels(server, q, start) {
+export function searchChannels(network, q, start) {
   return {
     type: actions.CHANNEL_SEARCH,
-    server,
+    network,
     q,
     socket: {
       type: 'channel_search',
-      data: { server, q, start }
+      data: { network, q, start }
     }
   };
 }

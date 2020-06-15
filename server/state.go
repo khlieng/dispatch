@@ -20,26 +20,23 @@ const (
 type State struct {
 	stateData
 
-	irc             map[string]*irc.Client
-	connectionState map[string]irc.ConnectionState
+	networks        map[string]*storage.Network
 	pendingDCCSends map[string]*irc.DCCSend
-	ircLock         sync.Mutex
 
 	ws        map[string]*wsConn
-	wsLock    sync.Mutex
 	broadcast chan WSResponse
 
 	srv        *Dispatch
 	user       *storage.User
 	expiration *time.Timer
 	reset      chan time.Duration
+	lock       sync.Mutex
 }
 
 func NewState(user *storage.User, srv *Dispatch) *State {
 	return &State{
 		stateData:       stateData{m: map[string]interface{}{}},
-		irc:             make(map[string]*irc.Client),
-		connectionState: make(map[string]irc.ConnectionState),
+		networks:        make(map[string]*storage.Network),
 		pendingDCCSends: make(map[string]*irc.DCCSend),
 		ws:              make(map[string]*wsConn),
 		broadcast:       make(chan WSResponse, 32),
@@ -50,99 +47,84 @@ func NewState(user *storage.User, srv *Dispatch) *State {
 	}
 }
 
-func (s *State) getIRC(server string) (*irc.Client, bool) {
-	s.ircLock.Lock()
-	i, ok := s.irc[server]
-	s.ircLock.Unlock()
+func (s *State) network(host string) (*storage.Network, bool) {
+	s.lock.Lock()
+	n, ok := s.networks[host]
+	s.lock.Unlock()
 
-	return i, ok
+	return n, ok
 }
 
-func (s *State) setIRC(server string, i *irc.Client) {
-	s.ircLock.Lock()
-	s.irc[server] = i
-	s.connectionState[server] = irc.ConnectionState{
-		Connected: false,
+func (s *State) client(host string) (*irc.Client, bool) {
+	if network, ok := s.network(host); ok {
+		return network.Client(), true
 	}
-	s.ircLock.Unlock()
+	return nil, false
+}
+
+func (s *State) setNetwork(host string, network *storage.Network) {
+	s.lock.Lock()
+	s.networks[host] = network
+	s.lock.Unlock()
 
 	s.reset <- 0
 }
 
-func (s *State) deleteIRC(server string) {
-	s.ircLock.Lock()
-	delete(s.irc, server)
-	delete(s.connectionState, server)
-	s.ircLock.Unlock()
+func (s *State) deleteNetwork(host string) {
+	s.lock.Lock()
+	delete(s.networks, host)
+	s.lock.Unlock()
 
 	s.resetExpirationIfEmpty()
 }
 
 func (s *State) numIRC() int {
-	s.ircLock.Lock()
-	n := len(s.irc)
-	s.ircLock.Unlock()
+	s.lock.Lock()
+	n := len(s.networks)
+	s.lock.Unlock()
 
 	return n
 }
 
-func (s *State) getConnectionStates() map[string]irc.ConnectionState {
-	s.ircLock.Lock()
-	state := make(map[string]irc.ConnectionState, len(s.connectionState))
-
-	for k, v := range s.connectionState {
-		state[k] = v
-	}
-	s.ircLock.Unlock()
-
-	return state
-}
-
-func (s *State) setConnectionState(server string, state irc.ConnectionState) {
-	s.ircLock.Lock()
-	s.connectionState[server] = state
-	s.ircLock.Unlock()
-}
-
-func (s *State) getPendingDCC(filename string) (*irc.DCCSend, bool) {
-	s.ircLock.Lock()
+func (s *State) pendingDCC(filename string) (*irc.DCCSend, bool) {
+	s.lock.Lock()
 	pack, ok := s.pendingDCCSends[filename]
-	s.ircLock.Unlock()
+	s.lock.Unlock()
 	return pack, ok
 }
 
 func (s *State) setPendingDCC(filename string, pack *irc.DCCSend) {
-	s.ircLock.Lock()
+	s.lock.Lock()
 	s.pendingDCCSends[filename] = pack
-	s.ircLock.Unlock()
+	s.lock.Unlock()
 }
 
 func (s *State) deletePendingDCC(filename string) {
-	s.ircLock.Lock()
+	s.lock.Lock()
 	delete(s.pendingDCCSends, filename)
-	s.ircLock.Unlock()
+	s.lock.Unlock()
 }
 
 func (s *State) setWS(addr string, w *wsConn) {
-	s.wsLock.Lock()
+	s.lock.Lock()
 	s.ws[addr] = w
-	s.wsLock.Unlock()
+	s.lock.Unlock()
 
 	s.reset <- 0
 }
 
 func (s *State) deleteWS(addr string) {
-	s.wsLock.Lock()
+	s.lock.Lock()
 	delete(s.ws, addr)
-	s.wsLock.Unlock()
+	s.lock.Unlock()
 
 	s.resetExpirationIfEmpty()
 }
 
 func (s *State) numWS() int {
-	s.ircLock.Lock()
+	s.lock.Lock()
 	n := len(s.ws)
-	s.ircLock.Unlock()
+	s.lock.Unlock()
 
 	return n
 }
@@ -151,11 +133,11 @@ func (s *State) sendJSON(t string, v interface{}) {
 	s.broadcast <- WSResponse{t, v}
 }
 
-func (s *State) sendLastMessages(server, channel string, count int) {
-	messages, hasMore, err := s.user.GetLastMessages(server, channel, count)
+func (s *State) sendLastMessages(network, channel string, count int) {
+	messages, hasMore, err := s.user.LastMessages(network, channel, count)
 	if err == nil && len(messages) > 0 {
 		res := Messages{
-			Server:   server,
+			Network:  network,
 			To:       channel,
 			Messages: messages,
 		}
@@ -168,11 +150,11 @@ func (s *State) sendLastMessages(server, channel string, count int) {
 	}
 }
 
-func (s *State) sendMessages(server, channel string, count int, fromID string) {
-	messages, hasMore, err := s.user.GetMessages(server, channel, count, fromID)
+func (s *State) sendMessages(network, channel string, count int, fromID string) {
+	messages, hasMore, err := s.user.Messages(network, channel, count, fromID)
 	if err == nil && len(messages) > 0 {
 		res := Messages{
-			Server:   server,
+			Network:  network,
 			To:       channel,
 			Messages: messages,
 			Prepend:  true,
@@ -193,27 +175,25 @@ func (s *State) resetExpirationIfEmpty() {
 }
 
 func (s *State) kill() {
-	s.wsLock.Lock()
+	s.lock.Lock()
 	for _, ws := range s.ws {
 		ws.conn.Close()
 	}
-	s.wsLock.Unlock()
-	s.ircLock.Lock()
-	for _, i := range s.irc {
-		i.Quit()
+	for _, network := range s.networks {
+		network.Client().Quit()
 	}
-	s.ircLock.Unlock()
+	s.lock.Unlock()
 }
 
 func (s *State) run() {
 	for {
 		select {
 		case res := <-s.broadcast:
-			s.wsLock.Lock()
+			s.lock.Lock()
 			for _, ws := range s.ws {
 				ws.out <- res
 			}
-			s.wsLock.Unlock()
+			s.lock.Unlock()
 
 		case <-s.expiration.C:
 			s.srv.states.delete(s.user.ID)
@@ -283,7 +263,7 @@ func newStateStore(sessionStore storage.SessionStore) *stateStore {
 		sessionStore: sessionStore,
 	}
 
-	sessions, err := sessionStore.GetSessions()
+	sessions, err := sessionStore.Sessions()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/kjk/betterguid"
 )
 
@@ -58,7 +59,7 @@ func NewUser(store Store) (*User, error) {
 }
 
 func LoadUsers(store Store) ([]*User, error) {
-	users, err := store.GetUsers()
+	users, err := store.Users()
 	if err != nil {
 		return nil, err
 	}
@@ -76,15 +77,15 @@ func LoadUsers(store Store) ([]*User, error) {
 		user.lastMessages = map[string]map[string]*Message{}
 		user.loadCertificate()
 
-		channels, err := user.GetChannels()
+		channels, err := user.Channels()
 		if err != nil {
 			return nil, err
 		}
 
 		for _, channel := range channels {
-			messages, _, err := user.GetLastMessages(channel.Server, channel.Name, 1)
+			messages, _, err := user.LastMessages(channel.Network, channel.Name, 1)
 			if err == nil && len(messages) == 1 {
-				user.lastMessages[channel.Server] = map[string]*Message{
+				user.lastMessages[channel.Network] = map[string]*Message{
 					channel.Name: &messages[0],
 				}
 			}
@@ -131,7 +132,7 @@ func DefaultClientSettings() *ClientSettings {
 	}
 }
 
-func (u *User) GetClientSettings() *ClientSettings {
+func (u *User) ClientSettings() *ClientSettings {
 	u.lock.Lock()
 	settings := *u.clientSettings
 	u.lock.Unlock()
@@ -158,91 +159,88 @@ func (u *User) UnmarshalClientSettingsJSON(b []byte) error {
 	return u.store.SaveUser(u)
 }
 
-type Server struct {
-	Name           string
-	Host           string
-	Port           string
-	TLS            bool
-	ServerPassword string
-	Nick           string
-	Username       string
-	Realname       string
-	Account        string
-	Password       string
+func (u *User) NewNetwork(template *Network, client *irc.Client) *Network {
+	if template == nil {
+		template = &Network{}
+	}
+
+	template.user = u
+	template.client = client
+	template.channels = map[string]*Channel{}
+
+	return template
 }
 
-func (u *User) GetServer(address string) (*Server, error) {
-	return u.store.GetServer(u, address)
+func (u *User) Network(address string) (*Network, error) {
+	return u.store.Network(u, address)
 }
 
-func (u *User) GetServers() ([]*Server, error) {
-	return u.store.GetServers(u)
+func (u *User) Networks() ([]*Network, error) {
+	return u.store.Networks(u)
 }
 
-func (u *User) AddServer(server *Server) error {
-	return u.store.SaveServer(u, server)
+func (u *User) SaveNetwork(network *Network) error {
+	return u.store.SaveNetwork(u, network)
 }
 
-func (u *User) RemoveServer(address string) error {
-	return u.store.RemoveServer(u, address)
+func (u *User) RemoveNetwork(address string) error {
+	return u.store.RemoveNetwork(u, address)
 }
 
 func (u *User) SetNick(nick, address string) error {
-	server, err := u.GetServer(address)
+	network, err := u.Network(address)
 	if err != nil {
 		return err
 	}
-	server.Nick = nick
-	return u.AddServer(server)
+	network.Nick = nick
+	return u.SaveNetwork(network)
 }
 
-func (u *User) SetServerName(name, address string) error {
-	server, err := u.GetServer(address)
+func (u *User) SetNetworkName(name, address string) error {
+	network, err := u.Network(address)
 	if err != nil {
 		return err
 	}
-	server.Name = name
-	return u.AddServer(server)
+	network.Name = name
+	return u.SaveNetwork(network)
 }
 
-type Channel struct {
-	Server string
-	Name   string
-	Topic  string
+func (u *User) Channels() ([]*Channel, error) {
+	return u.store.Channels(u)
 }
 
-func (u *User) GetChannels() ([]*Channel, error) {
-	return u.store.GetChannels(u)
+func (u *User) SaveChannel(channel *Channel) error {
+	return u.store.SaveChannel(u, channel)
 }
 
-func (u *User) AddChannel(channel *Channel) error {
-	return u.store.AddChannel(u, channel)
+func (u *User) RemoveChannel(network, channel string) error {
+	return u.store.RemoveChannel(u, network, channel)
 }
 
-func (u *User) RemoveChannel(server, channel string) error {
-	return u.store.RemoveChannel(u, server, channel)
+func (u *User) HasChannel(network, channel string) bool {
+	return u.store.HasChannel(u, network, channel)
 }
 
 type Tab struct {
-	Server string
-	Name   string
+	Network string
+	Name    string
 }
 
-func (u *User) GetOpenDMs() ([]Tab, error) {
-	return u.store.GetOpenDMs(u)
+func (u *User) OpenDMs() ([]Tab, error) {
+	return u.store.OpenDMs(u)
 }
 
-func (u *User) AddOpenDM(server, nick string) error {
-	return u.store.AddOpenDM(u, server, nick)
+func (u *User) AddOpenDM(network, nick string) error {
+	return u.store.AddOpenDM(u, network, nick)
 }
 
-func (u *User) RemoveOpenDM(server, nick string) error {
-	return u.store.RemoveOpenDM(u, server, nick)
+func (u *User) RemoveOpenDM(network, nick string) error {
+	return u.store.RemoveOpenDM(u, network, nick)
 }
 
 type Message struct {
 	ID      string  `json:"-" bleve:"-"`
-	Server  string  `json:"-" bleve:"server"`
+	Network string  `json:"-" bleve:"server"`
 	From    string  `bleve:"-"`
 	To      string  `json:"-" bleve:"to"`
 	Content string  `bleve:"content"`
@@ -267,7 +265,7 @@ func (u *User) LogMessage(msg *Message) error {
 		msg.To = msg.From
 	}
 
-	u.setLastMessage(msg.Server, msg.To, msg)
+	u.setLastMessage(msg.Network, msg.To, msg)
 
 	err := u.messageLog.LogMessage(msg)
 	if err != nil {
@@ -282,7 +280,7 @@ type Event struct {
 	Time   int64
 }
 
-func (u *User) LogEvent(server, name string, params []string, channels ...string) error {
+func (u *User) LogEvent(network, name string, params []string, channels ...string) error {
 	now := time.Now().Unix()
 	event := Event{
 		Type:   name,
@@ -291,11 +289,11 @@ func (u *User) LogEvent(server, name string, params []string, channels ...string
 	}
 
 	for _, channel := range channels {
-		lastMessage := u.getLastMessage(server, channel)
+		lastMessage := u.getLastMessage(network, channel)
 
 		if lastMessage != nil && shouldCollapse(lastMessage, event) {
 			lastMessage.Events = append(lastMessage.Events, event)
-			u.setLastMessage(server, channel, lastMessage)
+			u.setLastMessage(network, channel, lastMessage)
 
 			err := u.messageLog.LogMessage(lastMessage)
 			if err != nil {
@@ -303,13 +301,13 @@ func (u *User) LogEvent(server, name string, params []string, channels ...string
 			}
 		} else {
 			msg := &Message{
-				ID:     betterguid.New(),
-				Server: server,
-				To:     channel,
-				Time:   now,
-				Events: []Event{event},
+				ID:      betterguid.New(),
+				Network: network,
+				To:      channel,
+				Time:    now,
+				Events:  []Event{event},
 			}
-			u.setLastMessage(server, channel, msg)
+			u.setLastMessage(network, channel, msg)
 
 			err := u.messageLog.LogMessage(msg)
 			if err != nil {
@@ -338,15 +336,15 @@ func shouldCollapse(msg *Message, event Event) bool {
 	return matches == 2
 }
 
-func (u *User) getLastMessage(server, channel string) *Message {
+func (u *User) getLastMessage(network, channel string) *Message {
 	u.lock.Lock()
 	defer u.lock.Unlock()
 
-	if _, ok := u.lastMessages[server]; !ok {
+	if _, ok := u.lastMessages[network]; !ok {
 		return nil
 	}
 
-	last := u.lastMessages[server][channel]
+	last := u.lastMessages[network][channel]
 	if last != nil {
 		msg := *last
 		return &msg
@@ -354,30 +352,30 @@ func (u *User) getLastMessage(server, channel string) *Message {
 	return nil
 }
 
-func (u *User) setLastMessage(server, channel string, msg *Message) {
+func (u *User) setLastMessage(network, channel string, msg *Message) {
 	u.lock.Lock()
 
-	if _, ok := u.lastMessages[server]; !ok {
-		u.lastMessages[server] = map[string]*Message{}
+	if _, ok := u.lastMessages[network]; !ok {
+		u.lastMessages[network] = map[string]*Message{}
 	}
 
-	u.lastMessages[server][channel] = msg
+	u.lastMessages[network][channel] = msg
 	u.lock.Unlock()
 }
 
-func (u *User) GetMessages(server, channel string, count int, fromID string) ([]Message, bool, error) {
-	return u.messageLog.GetMessages(server, channel, count, fromID)
+func (u *User) Messages(network, channel string, count int, fromID string) ([]Message, bool, error) {
+	return u.messageLog.Messages(network, channel, count, fromID)
 }
 
-func (u *User) GetLastMessages(server, channel string, count int) ([]Message, bool, error) {
-	return u.GetMessages(server, channel, count, "")
+func (u *User) LastMessages(network, channel string, count int) ([]Message, bool, error) {
+	return u.Messages(network, channel, count, "")
 }
 
-func (u *User) SearchMessages(server, channel, q string) ([]Message, error) {
-	ids, err := u.messageIndex.SearchMessages(server, channel, q)
+func (u *User) SearchMessages(network, channel, q string) ([]Message, error) {
+	ids, err := u.messageIndex.SearchMessages(network, channel, q)
 	if err != nil {
 		return nil, err
 	}
 
-	return u.messageLog.GetMessagesByID(server, channel, ids)
+	return u.messageLog.MessagesByID(network, channel, ids)
 }

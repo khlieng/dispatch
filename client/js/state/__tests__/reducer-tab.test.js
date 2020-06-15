@@ -7,17 +7,17 @@ describe('tab reducer', () => {
     let state = reducer(undefined, setSelectedTab('srv', '#chan'));
 
     expect(state).toEqual({
-      selected: { server: 'srv', name: '#chan' },
-      history: [{ server: 'srv', name: '#chan' }]
+      selected: { network: 'srv', name: '#chan' },
+      history: [{ network: 'srv', name: '#chan' }]
     });
 
     state = reducer(state, setSelectedTab('srv', 'user1'));
 
     expect(state).toEqual({
-      selected: { server: 'srv', name: 'user1' },
+      selected: { network: 'srv', name: 'user1' },
       history: [
-        { server: 'srv', name: '#chan' },
-        { server: 'srv', name: 'user1' }
+        { network: 'srv', name: '#chan' },
+        { network: 'srv', name: 'user1' }
       ]
     });
   });
@@ -30,15 +30,15 @@ describe('tab reducer', () => {
 
     state = reducer(state, {
       type: actions.PART,
-      server: 'srv',
+      network: 'srv',
       channels: ['#chan']
     });
 
     expect(state).toEqual({
-      selected: { server: 'srv', name: '#chan3' },
+      selected: { network: 'srv', name: '#chan3' },
       history: [
-        { server: 'srv1', name: 'bob' },
-        { server: 'srv', name: '#chan3' }
+        { network: 'srv1', name: 'bob' },
+        { network: 'srv', name: '#chan3' }
       ]
     });
   });
@@ -51,21 +51,21 @@ describe('tab reducer', () => {
 
     state = reducer(state, {
       type: actions.CLOSE_PRIVATE_CHAT,
-      server: 'srv1',
+      network: 'srv1',
       nick: 'bob'
     });
 
     expect(state).toEqual({
-      selected: { server: 'srv', name: '#chan3' },
+      selected: { network: 'srv', name: '#chan3' },
       history: [
-        { server: 'srv', name: '#chan' },
-        { server: 'srv', name: '#chan' },
-        { server: 'srv', name: '#chan3' }
+        { network: 'srv', name: '#chan' },
+        { network: 'srv', name: '#chan' },
+        { network: 'srv', name: '#chan3' }
       ]
     });
   });
 
-  it('removes all tabs related to server from history on DISCONNECT', () => {
+  it('removes all tabs related to network from history on DISCONNECT', () => {
     let state = reducer(undefined, setSelectedTab('srv', '#chan'));
     state = reducer(state, setSelectedTab('srv1', 'bob'));
     state = reducer(state, setSelectedTab('srv', '#chan'));
@@ -73,12 +73,12 @@ describe('tab reducer', () => {
 
     state = reducer(state, {
       type: actions.DISCONNECT,
-      server: 'srv'
+      network: 'srv'
     });
 
     expect(state).toEqual({
-      selected: { server: 'srv', name: '#chan3' },
-      history: [{ server: 'srv1', name: 'bob' }]
+      selected: { network: 'srv', name: '#chan3' },
+      history: [{ network: 'srv1', name: 'bob' }]
     });
   });
 
@@ -89,7 +89,7 @@ describe('tab reducer', () => {
 
     expect(state).toEqual({
       selected: {},
-      history: [{ server: 'srv', name: '#chan' }]
+      history: [{ network: 'srv', name: '#chan' }]
     });
   });
 
@@ -99,7 +99,7 @@ describe('tab reducer', () => {
       locationChanged(
         'chat',
         {
-          server: 'srv',
+          network: 'srv',
           name: '#chan'
         },
         {}
@@ -107,8 +107,8 @@ describe('tab reducer', () => {
     );
 
     expect(state).toEqual({
-      selected: { server: 'srv', name: '#chan' },
-      history: [{ server: 'srv', name: '#chan' }]
+      selected: { network: 'srv', name: '#chan' },
+      history: [{ network: 'srv', name: '#chan' }]
     });
   });
 });

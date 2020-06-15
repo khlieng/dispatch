@@ -3,11 +3,11 @@ import { FiUsers, FiSearch, FiX } from 'react-icons/fi';
 import Navicon from 'components/ui/Navicon';
 import Button from 'components/ui/Button';
 import Editable from 'components/ui/Editable';
-import { isValidServerName } from 'state/servers';
+import { isValidNetworkName } from 'state/networks';
 import { isChannel } from 'utils';
 
 const ChatTitle = ({
-  status,
+  error,
   title,
   tab,
   channel,
@@ -26,11 +26,9 @@ const ChatTitle = ({
     closeTitle = 'Disconnect';
   }
 
-  let serverError = null;
-  if (!tab.name && status.error) {
-    serverError = (
-      <span className="chat-topic error">Error: {status.error}</span>
-    );
+  let networkError = null;
+  if (!tab.name && error) {
+    networkError = <span className="chat-topic error">Error: {error}</span>;
   }
 
   return (
@@ -41,13 +39,13 @@ const ChatTitle = ({
           className="chat-title"
           editable={!tab.name}
           value={title}
-          validate={isValidServerName}
+          validate={isValidNetworkName}
           onChange={onTitleChange}
         >
           <span className="chat-title">{title}</span>
         </Editable>
         <div className="chat-topic-wrap">
-          {channel && channel.topic && (
+          {channel?.topic && (
             <span
               className="chat-topic"
               onClick={() => openModal('topic', channel.name)}
@@ -55,7 +53,7 @@ const ChatTitle = ({
               {channel.topic}
             </span>
           )}
-          {serverError}
+          {networkError}
         </div>
         {tab.name && (
           <Button
@@ -80,7 +78,7 @@ const ChatTitle = ({
       </div>
       <div className="userlist-bar">
         <FiUsers />
-        {channel && channel.users.length}
+        {channel?.users.length}
       </div>
     </div>
   );

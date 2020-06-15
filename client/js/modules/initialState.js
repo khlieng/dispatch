@@ -8,15 +8,15 @@ import { when } from 'utils/observe';
 function loadState({ store }, env) {
   store.dispatch(setSettings(env.settings, true));
 
-  if (env.servers) {
+  if (env.networks) {
     store.dispatch({
-      type: socketActions.SERVERS,
-      data: env.servers
+      type: socketActions.NETWORKS,
+      data: env.networks
     });
 
     when(store, getConnected, () =>
-      // Cache top channels for each server
-      env.servers.forEach(({ host }) =>
+      // Cache top channels for each network
+      env.networks.forEach(({ host }) =>
         store.dispatch(searchChannels(host, ''))
       )
     );
@@ -56,8 +56,8 @@ function loadState({ store }, env) {
     // Wait until wrapWidth gets initialized so that height calculations
     // only happen once for these messages
     when(store, getWrapWidth, () => {
-      const { messages, server, to, next } = env.messages;
-      store.dispatch(addMessages(messages, server, to, false, next));
+      const { messages, network, to, next } = env.messages;
+      store.dispatch(addMessages(messages, network, to, false, next));
     });
   }
 }

@@ -87,22 +87,23 @@ func (d *Dispatch) loadUser(user *storage.User) {
 	d.states.set(state)
 	go state.run()
 
-	channels, err := user.GetChannels()
+	networks, err := user.Networks()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	servers, err := user.GetServers()
+	channels, err := user.Channels()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, server := range servers {
-		i := connectIRC(server, state, user.GetLastIP())
+	for _, network := range networks {
+		i := connectIRC(network, state, user.GetLastIP())
 
 		var joining []string
 		for _, channel := range channels {
-			if channel.Server == server.Host {
+			if channel.Network == network.Host {
+				network.AddChannel(network.NewChannel(channel.Name))
 				joining = append(joining, channel.Name)
 			}
 		}
@@ -115,7 +116,7 @@ func (d *Dispatch) startHTTP() {
 
 	port := cfg.Port
 	if cfg.Dev {
-		// The node dev server will proxy index page requests and
+		// The node dev network will proxy index page requests and
 		// websocket connections to this port
 		port = "1337"
 	}
@@ -190,7 +191,7 @@ func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			filename := params[2]
 			w.Header().Set("Content-Disposition", "attachment; filename="+filename)
 
-			if pack, ok := state.getPendingDCC(filename); ok {
+			if pack, ok := state.pendingDCC(filename); ok {
 				state.deletePendingDCC(filename)
 
 				w.Header().Set("Content-Length", strconv.FormatUint(pack.Length, 10))

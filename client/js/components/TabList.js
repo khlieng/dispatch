@@ -7,7 +7,7 @@ import TabListItem from 'containers/TabListItem';
 import { count } from 'utils';
 
 export default class TabList extends PureComponent {
-  handleTabClick = (server, target) => this.props.select(server, target);
+  handleTabClick = (network, target) => this.props.select(network, target);
 
   handleConnectClick = () => this.props.push('/connect');
 
@@ -17,7 +17,7 @@ export default class TabList extends PureComponent {
     const {
       tab,
       channels,
-      servers,
+      networks,
       privateChats,
       showTabList,
       openModal
@@ -28,21 +28,21 @@ export default class TabList extends PureComponent {
       'off-canvas': showTabList
     });
 
-    channels.forEach(server => {
-      const { address } = server;
-      const srv = servers[address];
+    channels.forEach(network => {
+      const { address } = network;
+      const srv = networks[address];
       tabs.push(
         <TabListItem
           key={address}
-          server={address}
+          network={address}
           content={srv.name}
-          selected={tab.server === address && !tab.name}
-          connected={srv.status.connected}
+          selected={tab.network === address && !tab.name}
+          connected={srv.connected}
           onClick={this.handleTabClick}
         />
       );
 
-      const chanCount = count(server.channels, c => c.joined);
+      const chanCount = count(network.channels, c => c.joined);
       const chanLimit =
         get(srv.features, ['CHANLIMIT', '#'], 0) || srv.features.MAXCHANNELS;
 
@@ -68,15 +68,15 @@ export default class TabList extends PureComponent {
         </div>
       );
 
-      server.channels.forEach(({ name, joined }) =>
+      network.channels.forEach(({ name, joined }) =>
         tabs.push(
           <TabListItem
             key={address + name}
-            server={address}
+            network={address}
             target={name}
             content={name}
             joined={joined}
-            selected={tab.server === address && tab.name === name}
+            selected={tab.network === address && tab.name === name}
             onClick={this.handleTabClick}
           />
         )
@@ -99,10 +99,10 @@ export default class TabList extends PureComponent {
           tabs.push(
             <TabListItem
               key={address + nick}
-              server={address}
+              network={address}
               target={nick}
               content={nick}
-              selected={tab.server === address && tab.name === nick}
+              selected={tab.network === address && tab.name === nick}
               onClick={this.handleTabClick}
             />
           )

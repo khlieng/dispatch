@@ -24,13 +24,6 @@ func newWSHandler(conn *websocket.Conn, state *State, r *http.Request) *wsHandle
 		addr:  conn.RemoteAddr(),
 	}
 
-	if r.Header.Get("X-Forwarded-For") != "" {
-		ip := net.ParseIP(r.Header.Get("X-Forwarded-For"))
-		if ip != nil {
-			h.addr.(*net.TCPAddr).IP = ip
-		}
-	}
-
 	h.init(r)
 	h.initHandlers()
 	return h
@@ -61,6 +54,13 @@ func (h *wsHandler) dispatchRequest(req WSRequest) {
 }
 
 func (h *wsHandler) init(r *http.Request) {
+	if r.Header.Get("X-Forwarded-For") != "" {
+		ip := net.ParseIP(r.Header.Get("X-Forwarded-For"))
+		if ip != nil {
+			h.addr.(*net.TCPAddr).IP = ip
+		}
+	}
+
 	h.state.setWS(h.addr.String(), h.ws)
 	h.state.user.SetLastIP(addrToIPBytes(h.addr))
 	if r.TLS != nil {
@@ -74,58 +74,65 @@ func (h *wsHandler) init(r *http.Request) {
 		h.state.numIRC(), "IRC connections |",
 		h.state.numWS(), "WebSocket connections")
 
-	tab, err := tabFromRequest(r)
+	go h.sendData(r)
+}
 
-	channels, err := h.state.user.GetChannels()
+func (h *wsHandler) sendData(r *http.Request) {
+	tab, err := tabFromRequest(r)
 	if err != nil {
 		log.Println(err)
 	}
 
-	for _, channel := range channels {
-		if channel.Server == tab.Server && channel.Name == tab.Name {
-			// Userlist and messages for this channel gets embedded in the index page
-			continue
+	h.state.lock.Lock()
+	for _, network := range h.state.networks {
+		for _, channel := range network.ChannelNames() {
+			if network.Host == tab.Network && channel == tab.Name {
+				// Userlist and messages for this channel gets embedded in the index page
+				continue
+			}
+
+			if users := network.Client().ChannelUsers(channel); len(users) > 0 {
+				h.state.sendJSON("users", Userlist{
+					Network: network.Host,
+					Channel: channel,
+					Users:   users,
+				})
+			}
+
+			h.state.sendLastMessages(network.Host, channel, 50)
 		}
 
-		if i, ok := h.state.getIRC(channel.Server); ok {
-			h.state.sendJSON("users", Userlist{
-				Server:  channel.Server,
-				Channel: channel.Name,
-				Users:   i.ChannelUsers(channel.Name),
-			})
-		}
-
-		h.state.sendLastMessages(channel.Server, channel.Name, 50)
 	}
+	h.state.lock.Unlock()
 
-	openDMs, err := h.state.user.GetOpenDMs()
+	openDMs, err := h.state.user.OpenDMs()
 	if err != nil {
 		log.Println(err)
 	}
 
 	for _, openDM := range openDMs {
-		if openDM.Server == tab.Server && openDM.Name == tab.Name {
+		if openDM.Network == tab.Network && openDM.Name == tab.Name {
 			continue
 		}
 
-		h.state.sendLastMessages(openDM.Server, openDM.Name, 50)
+		h.state.sendLastMessages(openDM.Network, openDM.Name, 50)
 	}
 }
 
 func (h *wsHandler) connect(b []byte) {
-	var data Server
-	data.UnmarshalJSON(b)
+	var network storage.Network
+	network.UnmarshalJSON(b)
 
-	data.Host = strings.ToLower(data.Host)
+	network.Host = strings.ToLower(network.Host)
 
-	if _, ok := h.state.getIRC(data.Host); !ok {
-		log.Println(h.addr, "[IRC] Add server", data.Host)
+	if _, ok := h.state.network(network.Host); !ok {
+		log.Println(h.addr, "[IRC] Add server", network.Host)
 
-		connectIRC(data.Server, h.state, addrToIPBytes(h.addr))
+		connectIRC(&network, h.state, addrToIPBytes(h.addr))
 
-		go h.state.user.AddServer(data.Server)
+		go network.Save()
 	} else {
-		log.Println(h.addr, "[IRC]", data.Host, "already added")
+		log.Println(h.addr, "[IRC]", network.Host, "already added")
 	}
 }
 
@@ -133,7 +140,7 @@ func (h *wsHandler) reconnect(b []byte) {
 	var data ReconnectSettings
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok && !i.Connected() {
+	if i, ok := h.state.client(data.Network); ok && !i.Connected() {
 		if i.Config.TLS {
 			i.Config.TLSConfig.InsecureSkipVerify = data.SkipVerify
 		}
@@ -145,7 +152,7 @@ func (h *wsHandler) join(b []byte) {
 	var data Join
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Join(data.Channels...)
 	}
 }
@@ -154,33 +161,43 @@ func (h *wsHandler) part(b []byte) {
 	var data Part
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Part(data.Channels...)
 	}
+
+	go func() {
+		if network, ok := h.state.network(data.Network); ok {
+			network.RemoveChannels(data.Channels...)
+		}
+
+		for _, channel := range data.Channels {
+			h.state.user.RemoveChannel(data.Network, channel)
+		}
+	}()
 }
 
 func (h *wsHandler) quit(b []byte) {
 	var data Quit
 	data.UnmarshalJSON(b)
 
-	log.Println(h.addr, "[IRC] Remove server", data.Server)
-	if i, ok := h.state.getIRC(data.Server); ok {
-		h.state.deleteIRC(data.Server)
+	log.Println(h.addr, "[IRC] Remove server", data.Network)
+	if i, ok := h.state.client(data.Network); ok {
+		h.state.deleteNetwork(data.Network)
 		i.Quit()
 	}
 
-	go h.state.user.RemoveServer(data.Server)
+	go h.state.user.RemoveNetwork(data.Network)
 }
 
 func (h *wsHandler) message(b []byte) {
 	var data Message
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Privmsg(data.To, data.Content)
 
 		go h.state.user.LogMessage(&storage.Message{
-			Server:  data.Server,
+			Network: data.Network,
 			From:    i.GetNick(),
 			To:      data.To,
 			Content: data.Content,
@@ -192,7 +209,7 @@ func (h *wsHandler) nick(b []byte) {
 	var data Nick
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Nick(data.New)
 	}
 }
@@ -201,7 +218,7 @@ func (h *wsHandler) topic(b []byte) {
 	var data Topic
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Topic(data.Channel, data.Topic)
 	}
 }
@@ -210,7 +227,7 @@ func (h *wsHandler) invite(b []byte) {
 	var data Invite
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Invite(data.User, data.Channel)
 	}
 }
@@ -219,7 +236,7 @@ func (h *wsHandler) kick(b []byte) {
 	var data Invite
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Kick(data.Channel, data.User)
 	}
 }
@@ -228,7 +245,7 @@ func (h *wsHandler) whois(b []byte) {
 	var data Whois
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Whois(data.User)
 	}
 }
@@ -237,7 +254,7 @@ func (h *wsHandler) away(b []byte) {
 	var data Away
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Away(data.Message)
 	}
 }
@@ -246,7 +263,7 @@ func (h *wsHandler) raw(b []byte) {
 	var data Raw
 	data.UnmarshalJSON(b)
 
-	if i, ok := h.state.getIRC(data.Server); ok {
+	if i, ok := h.state.client(data.Network); ok {
 		i.Write(data.Message)
 	}
 }
@@ -256,14 +273,14 @@ func (h *wsHandler) search(b []byte) {
 		var data SearchRequest
 		data.UnmarshalJSON(b)
 
-		results, err := h.state.user.SearchMessages(data.Server, data.Channel, data.Phrase)
+		results, err := h.state.user.SearchMessages(data.Network, data.Channel, data.Phrase)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
 		h.state.sendJSON("search", SearchResult{
-			Server:  data.Server,
+			Network: data.Network,
 			Channel: data.Channel,
 			Results: results,
 		})
@@ -287,15 +304,18 @@ func (h *wsHandler) fetchMessages(b []byte) {
 	var data FetchMessages
 	data.UnmarshalJSON(b)
 
-	h.state.sendMessages(data.Server, data.Channel, 200, data.Next)
+	h.state.sendMessages(data.Network, data.Channel, 200, data.Next)
 }
 
-func (h *wsHandler) setServerName(b []byte) {
-	var data ServerName
+func (h *wsHandler) setNetworkName(b []byte) {
+	var data NetworkName
 	data.UnmarshalJSON(b)
 
-	if isValidServerName(data.Name) {
-		h.state.user.SetServerName(data.Name, data.Server)
+	if isValidNetworkName(data.Name) {
+		if network, ok := h.state.network(data.Network); ok {
+			network.SetName(data.Name)
+			go network.Save()
+		}
 	}
 }
 
@@ -310,7 +330,7 @@ func (h *wsHandler) channelSearch(b []byte) {
 	var data ChannelSearch
 	data.UnmarshalJSON(b)
 
-	index, needsUpdate := channelIndexes.Get(data.Server)
+	index, needsUpdate := channelIndexes.Get(data.Network)
 	if index != nil {
 		n := 10
 		if data.Start > 0 {
@@ -323,8 +343,8 @@ func (h *wsHandler) channelSearch(b []byte) {
 		})
 	}
 
-	if i, ok := h.state.getIRC(data.Server); ok && needsUpdate {
-		h.state.Set("update_chanlist_"+data.Server, true)
+	if i, ok := h.state.client(data.Network); ok && needsUpdate {
+		h.state.Set("update_chanlist_"+data.Network, true)
 		i.List()
 	}
 }
@@ -333,43 +353,43 @@ func (h *wsHandler) openDM(b []byte) {
 	var data Tab
 	data.UnmarshalJSON(b)
 
-	h.state.sendLastMessages(data.Server, data.Name, 50)
-	h.state.user.AddOpenDM(data.Server, data.Name)
+	h.state.sendLastMessages(data.Network, data.Name, 50)
+	h.state.user.AddOpenDM(data.Network, data.Name)
 }
 
 func (h *wsHandler) closeDM(b []byte) {
 	var data Tab
 	data.UnmarshalJSON(b)
 
-	h.state.user.RemoveOpenDM(data.Server, data.Name)
+	h.state.user.RemoveOpenDM(data.Network, data.Name)
 }
 
 func (h *wsHandler) initHandlers() {
 	h.handlers = map[string]func([]byte){
-		"connect":         h.connect,
-		"reconnect":       h.reconnect,
-		"join":            h.join,
-		"part":            h.part,
-		"quit":            h.quit,
-		"message":         h.message,
-		"nick":            h.nick,
-		"topic":           h.topic,
-		"invite":          h.invite,
-		"kick":            h.kick,
-		"whois":           h.whois,
-		"away":            h.away,
-		"raw":             h.raw,
-		"search":          h.search,
-		"cert":            h.cert,
-		"fetch_messages":  h.fetchMessages,
-		"set_server_name": h.setServerName,
-		"settings_set":    h.setSettings,
-		"channel_search":  h.channelSearch,
-		"open_dm":         h.openDM,
-		"close_dm":        h.closeDM,
+		"connect":          h.connect,
+		"reconnect":        h.reconnect,
+		"join":             h.join,
+		"part":             h.part,
+		"quit":             h.quit,
+		"message":          h.message,
+		"nick":             h.nick,
+		"topic":            h.topic,
+		"invite":           h.invite,
+		"kick":             h.kick,
+		"whois":            h.whois,
+		"away":             h.away,
+		"raw":              h.raw,
+		"search":           h.search,
+		"cert":             h.cert,
+		"fetch_messages":   h.fetchMessages,
+		"set_network_name": h.setNetworkName,
+		"settings_set":     h.setSettings,
+		"channel_search":   h.channelSearch,
+		"open_dm":          h.openDM,
+		"close_dm":         h.closeDM,
 	}
 }
 
-func isValidServerName(name string) bool {
+func isValidNetworkName(name string) bool {
 	return strings.TrimSpace(name) != ""
 }

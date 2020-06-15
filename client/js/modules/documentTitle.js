@@ -1,18 +1,18 @@
 import capitalize from 'lodash/capitalize';
 import { getRouter } from 'state';
-import { getCurrentServerName } from 'state/servers';
+import { getCurrentNetworkName } from 'state/networks';
 import { observe } from 'utils/observe';
 
 export default function documentTitle({ store }) {
-  observe(store, [getRouter, getCurrentServerName], (router, serverName) => {
+  observe(store, [getRouter, getCurrentNetworkName], (router, networkName) => {
     let title;
 
     if (router.route === 'chat') {
-      const { server, name } = router.params;
+      const { network, name } = router.params;
       if (name) {
-        title = `${name} @ ${serverName || server}`;
+        title = `${name} @ ${networkName || network}`;
       } else {
-        title = serverName || server;
+        title = networkName || network;
       }
     } else {
       title = capitalize(router.route);

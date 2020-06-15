@@ -19,37 +19,31 @@ type WSResponse struct {
 	Data interface{}
 }
 
-type Server struct {
-	*storage.Server
-	Status   ConnectionUpdate
-	Features map[string]interface{}
-}
-
 type Features struct {
-	Server   string
+	Network  string
 	Features map[string]interface{}
 }
 
-type ServerName struct {
-	Server string
-	Name   string
+type NetworkName struct {
+	Network string
+	Name    string
 }
 
 type ReconnectSettings struct {
-	Server     string
+	Network    string
 	SkipVerify bool
 }
 
 type ConnectionUpdate struct {
-	Server    string
+	Network   string
 	Connected bool
 	Error     string
 	ErrorType string
 }
 
-func newConnectionUpdate(server string, state irc.ConnectionState) ConnectionUpdate {
+func newConnectionUpdate(network string, state irc.ConnectionState) ConnectionUpdate {
 	status := ConnectionUpdate{
-		Server:    server,
+		Network:   network,
 		Connected: state.Connected,
 	}
 	if state.Error != nil {
@@ -62,23 +56,23 @@ func newConnectionUpdate(server string, state irc.ConnectionState) ConnectionUpd
 }
 
 type Nick struct {
-	Server string
-	Old    string `json:"oldNick,omitempty"`
-	New    string `json:"newNick,omitempty"`
+	Network string
+	Old     string `json:"oldNick,omitempty"`
+	New     string `json:"newNick,omitempty"`
 }
 
 type NickFail struct {
-	Server string
+	Network string
 }
 
 type Join struct {
-	Server   string
+	Network  string
 	User     string
 	Channels []string
 }
 
 type Part struct {
-	Server   string
+	Network  string
 	User     string
 	Channel  string
 	Channels []string
@@ -90,14 +84,14 @@ type Mode struct {
 }
 
 type Quit struct {
-	Server string
-	User   string
-	Reason string
+	Network string
+	User    string
+	Reason  string
 }
 
 type Message struct {
 	ID      string
-	Server  string
+	Network string
 	From    string
 	To      string
 	Content string
@@ -105,7 +99,7 @@ type Message struct {
 }
 
 type Messages struct {
-	Server   string
+	Network  string
 	To       string
 	Messages []storage.Message
 	Prepend  bool
@@ -113,39 +107,41 @@ type Messages struct {
 }
 
 type Topic struct {
-	Server  string
+	Network string
 	Channel string
 	Topic   string
 	Nick    string
 }
 
 type Userlist struct {
-	Server  string
+	Network string
 	Channel string
 	Users   []string
 }
 
 type MOTD struct {
-	Server  string
+	Network string
 	Title   string
 	Content []string
 }
 
 type Invite struct {
-	Server  string
+	Network string
 	Channel string
 	User    string
 }
 
 type Kick struct {
-	Server  string
+	Network string
 	Channel string
+	Sender  string
 	User    string
+	Reason  string
 }
 
 type Whois struct {
-	Server string
-	User   string
+	Network string
+	User    string
 }
 
 type WhoisReply struct {
@@ -158,23 +154,23 @@ type WhoisReply struct {
 }
 
 type Away struct {
-	Server  string
+	Network string
 	Message string
 }
 
 type Raw struct {
-	Server  string
+	Network string
 	Message string
 }
 
 type SearchRequest struct {
-	Server  string
+	Network string
 	Channel string
 	Phrase  string
 }
 
 type SearchResult struct {
-	Server  string
+	Network string
 	Channel string
 	Results []storage.Message
 }
@@ -185,26 +181,26 @@ type ClientCert struct {
 }
 
 type FetchMessages struct {
-	Server  string
+	Network string
 	Channel string
 	Next    string
 }
 
 type Error struct {
-	Server  string
+	Network string
 	Message string
 }
 
 type IRCError struct {
-	Server  string
+	Network string
 	Target  string
 	Message string
 }
 
 type ChannelSearch struct {
-	Server string
-	Q      string
-	Start  int
+	Network string
+	Q       string
+	Start   int
 }
 
 type ChannelSearchResult struct {
@@ -213,13 +209,13 @@ type ChannelSearchResult struct {
 }
 
 type ChannelForward struct {
-	Server string
-	Old    string
-	New    string
+	Network string
+	Old     string
+	New     string
 }
 
 type DCCSend struct {
-	Server   string
+	Network  string
 	From     string
 	Filename string
 	URL      string

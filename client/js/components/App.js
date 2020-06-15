@@ -15,7 +15,7 @@ const App = ({
   connected,
   tab,
   channels,
-  servers,
+  networks,
   privateChats,
   showTabList,
   select,
@@ -62,7 +62,7 @@ const App = ({
         <TabList
           tab={tab}
           channels={channels}
-          servers={servers}
+          networks={networks}
           privateChats={privateChats}
           showTabList={showTabList}
           select={select}

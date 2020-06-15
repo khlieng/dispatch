@@ -19,25 +19,25 @@ func TestGetTabFromPath(t *testing.T) {
 				URL:    &url.URL{Path: "/init"},
 				Header: http.Header{"Referer": []string{"/chat.freenode.net/%23r%2Fstuff%2F"}},
 			},
-			Tab{storage.Tab{Server: "chat.freenode.net", Name: "#r/stuff/"}},
+			Tab{storage.Tab{Network: "chat.freenode.net", Name: "#r/stuff/"}},
 		}, {
 			&http.Request{
 				URL:    &url.URL{Path: "/init"},
 				Header: http.Header{"Referer": []string{"/chat.freenode.net/%23r%2Fstuff"}},
 			},
-			Tab{storage.Tab{Server: "chat.freenode.net", Name: "#r/stuff"}},
+			Tab{storage.Tab{Network: "chat.freenode.net", Name: "#r/stuff"}},
 		}, {
 			&http.Request{
 				URL:    &url.URL{Path: "/init"},
 				Header: http.Header{"Referer": []string{"/chat.freenode.net/%23stuff"}},
 			},
-			Tab{storage.Tab{Server: "chat.freenode.net", Name: "#stuff"}},
+			Tab{storage.Tab{Network: "chat.freenode.net", Name: "#stuff"}},
 		}, {
 			&http.Request{
 				URL:    &url.URL{Path: "/init"},
 				Header: http.Header{"Referer": []string{"/chat.freenode.net/stuff"}},
 			},
-			Tab{storage.Tab{Server: "chat.freenode.net", Name: "stuff"}},
+			Tab{storage.Tab{Network: "chat.freenode.net", Name: "stuff"}},
 		}, {
 			&http.Request{
 				URL:    &url.URL{Path: "/init"},
@@ -48,7 +48,7 @@ func TestGetTabFromPath(t *testing.T) {
 			&http.Request{
 				URL: &url.URL{Path: "/ws/chat.freenode.net"},
 			},
-			Tab{storage.Tab{Server: "chat.freenode.net"}},
+			Tab{storage.Tab{Network: "chat.freenode.net"}},
 		},
 	}
 

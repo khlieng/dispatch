@@ -1,8 +1,8 @@
-import reducer, { connect, setServerName } from '../servers';
+import reducer, { connect, setNetworkName } from '../networks';
 import * as actions from '../actions';
 
-describe('server reducer', () => {
-  it('adds the server on CONNECT', () => {
+describe('network reducer', () => {
+  it('adds the network on CONNECT', () => {
     let state = reducer(
       undefined,
       connect({ host: '127.0.0.1', nick: 'nick' })
@@ -13,10 +13,8 @@ describe('server reducer', () => {
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: null,
-        status: {
-          connected: false,
-          error: null
-        },
+        connected: false,
+        error: null,
         features: {}
       }
     });
@@ -28,10 +26,8 @@ describe('server reducer', () => {
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: null,
-        status: {
-          connected: false,
-          error: null
-        },
+        connected: false,
+        error: null,
         features: {}
       }
     });
@@ -46,26 +42,22 @@ describe('server reducer', () => {
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: null,
-        status: {
-          connected: false,
-          error: null
-        },
+        connected: false,
+        error: null,
         features: {}
       },
       '127.0.0.2': {
         name: 'srv',
         nick: 'nick',
         editedNick: null,
-        status: {
-          connected: false,
-          error: null
-        },
+        connected: false,
+        error: null,
         features: {}
       }
     });
   });
 
-  it('removes the server on DISCONNECT', () => {
+  it('removes the network on DISCONNECT', () => {
     let state = {
       srv: {},
       srv2: {}
@@ -73,7 +65,7 @@ describe('server reducer', () => {
 
     state = reducer(state, {
       type: actions.DISCONNECT,
-      server: 'srv2'
+      network: 'srv2'
     });
 
     expect(state).toEqual({
@@ -81,14 +73,14 @@ describe('server reducer', () => {
     });
   });
 
-  it('handles SET_SERVER_NAME', () => {
+  it('handles SET_NETWORK_NAME', () => {
     let state = {
       srv: {
         name: 'cake'
       }
     };
 
-    state = reducer(state, setServerName('pie', 'srv'));
+    state = reducer(state, setNetworkName('pie', 'srv'));
 
     expect(state).toEqual({
       srv: {
@@ -104,7 +96,7 @@ describe('server reducer', () => {
     );
     state = reducer(state, {
       type: actions.SET_NICK,
-      server: '127.0.0.1',
+      network: '127.0.0.1',
       nick: 'nick2',
       editing: true
     });
@@ -125,13 +117,13 @@ describe('server reducer', () => {
     );
     state = reducer(state, {
       type: actions.SET_NICK,
-      server: '127.0.0.1',
+      network: '127.0.0.1',
       nick: 'nick2',
       editing: true
     });
     state = reducer(state, {
       type: actions.SET_NICK,
-      server: '127.0.0.1',
+      network: '127.0.0.1',
       nick: ''
     });
 
@@ -151,7 +143,7 @@ describe('server reducer', () => {
     );
     state = reducer(state, {
       type: actions.socket.NICK,
-      server: '127.0.0.1',
+      network: '127.0.0.1',
       oldNick: 'nick',
       newNick: 'nick2'
     });
@@ -172,13 +164,13 @@ describe('server reducer', () => {
     );
     state = reducer(state, {
       type: actions.SET_NICK,
-      server: '127.0.0.1',
+      network: '127.0.0.1',
       nick: 'nick2',
       editing: true
     });
     state = reducer(state, {
       type: actions.socket.NICK_FAIL,
-      server: '127.0.0.1'
+      network: '127.0.0.1'
     });
 
     expect(state).toMatchObject({
@@ -190,25 +182,21 @@ describe('server reducer', () => {
     });
   });
 
-  it('adds the servers on SOCKET_SERVERS', () => {
+  it('adds the networks on SOCKET_NETWORKS', () => {
     let state = reducer(undefined, {
-      type: actions.socket.SERVERS,
+      type: actions.socket.NETWORKS,
       data: [
         {
           host: '127.0.0.1',
           name: 'stuff',
           nick: 'nick',
-          status: {
-            connected: true
-          }
+          connected: true
         },
         {
           host: '127.0.0.2',
           name: 'stuffz',
           nick: 'nick2',
-          status: {
-            connected: false
-          }
+          connected: false
         }
       ]
     });
@@ -218,18 +206,14 @@ describe('server reducer', () => {
         name: 'stuff',
         nick: 'nick',
         editedNick: null,
-        status: {
-          connected: true
-        },
+        connected: true,
         features: {}
       },
       '127.0.0.2': {
         name: 'stuffz',
         nick: 'nick2',
         editedNick: null,
-        status: {
-          connected: false
-        },
+        connected: false,
         features: {}
       }
     });
@@ -242,7 +226,7 @@ describe('server reducer', () => {
     );
     state = reducer(state, {
       type: actions.socket.CONNECTION_UPDATE,
-      server: '127.0.0.1',
+      network: '127.0.0.1',
       connected: true
     });
 
@@ -251,16 +235,14 @@ describe('server reducer', () => {
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: null,
-        status: {
-          connected: true
-        },
+        connected: true,
         features: {}
       }
     });
 
     state = reducer(state, {
       type: actions.socket.CONNECTION_UPDATE,
-      server: '127.0.0.1',
+      network: '127.0.0.1',
       connected: false,
       error: 'Bad stuff happened'
     });
@@ -270,10 +252,8 @@ describe('server reducer', () => {
         name: '127.0.0.1',
         nick: 'nick',
         editedNick: null,
-        status: {
-          connected: false,
-          error: 'Bad stuff happened'
-        },
+        connected: false,
+        error: 'Bad stuff happened',
         features: {}
       }
     });

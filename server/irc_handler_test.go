@@ -76,9 +76,9 @@ func TestHandleIRCNick(t *testing.T) {
 	})
 
 	checkResponse(t, "nick", Nick{
-		Server: "host.com",
-		Old:    "old",
-		New:    "new",
+		Network: "host.com",
+		Old:     "old",
+		New:     "new",
 	}, res)
 }
 
@@ -90,7 +90,7 @@ func TestHandleIRCJoin(t *testing.T) {
 	})
 
 	checkResponse(t, "join", Join{
-		Server:   "host.com",
+		Network:  "host.com",
 		User:     "joining",
 		Channels: []string{"#chan"},
 	}, res)
@@ -104,7 +104,7 @@ func TestHandleIRCPart(t *testing.T) {
 	})
 
 	checkResponse(t, "part", Part{
-		Server:  "host.com",
+		Network: "host.com",
 		User:    "parting",
 		Channel: "#chan",
 		Reason:  "the reason",
@@ -117,7 +117,7 @@ func TestHandleIRCPart(t *testing.T) {
 	})
 
 	checkResponse(t, "part", Part{
-		Server:  "host.com",
+		Network: "host.com",
 		User:    "parting",
 		Channel: "#chan",
 	}, res)
@@ -159,9 +159,9 @@ func TestHandleIRCQuit(t *testing.T) {
 	})
 
 	checkResponse(t, "quit", Quit{
-		Server: "host.com",
-		User:   "nick",
-		Reason: "the reason",
+		Network: "host.com",
+		User:    "nick",
+		Reason:  "the reason",
 	}, res)
 }
 
@@ -173,12 +173,12 @@ func TestHandleIRCWelcome(t *testing.T) {
 	})
 
 	checkResponse(t, "nick", Nick{
-		Server: "host.com",
-		New:    "nick",
+		Network: "host.com",
+		New:     "nick",
 	}, <-res)
 
 	checkResponse(t, "pm", Message{
-		Server:  "host.com",
+		Network: "host.com",
 		From:    "nick",
 		Content: "some text",
 	}, <-res)
@@ -224,7 +224,7 @@ func TestHandleIRCTopic(t *testing.T) {
 	})
 
 	checkResponse(t, "topic", Topic{
-		Server:  "host.com",
+		Network: "host.com",
 		Channel: "#chan",
 		Topic:   "the topic",
 	}, res)
@@ -236,7 +236,7 @@ func TestHandleIRCTopic(t *testing.T) {
 	})
 
 	checkResponse(t, "topic", Topic{
-		Server:  "host.com",
+		Network: "host.com",
 		Channel: "#chan",
 		Topic:   "the topic",
 		Nick:    "bob",
@@ -250,7 +250,7 @@ func TestHandleIRCNoTopic(t *testing.T) {
 	})
 
 	checkResponse(t, "topic", Topic{
-		Server:  "host.com",
+		Network: "host.com",
 		Channel: "#chan",
 	}, res)
 }
@@ -279,7 +279,7 @@ func TestHandleIRCMotd(t *testing.T) {
 	i.dispatchMessage(&irc.Message{Command: irc.RPL_ENDOFMOTD})
 
 	checkResponse(t, "motd", MOTD{
-		Server:  "host.com",
+		Network: "host.com",
 		Title:   "motd title",
 		Content: []string{"line 1", "line 2"},
 	}, <-s.broadcast)
@@ -302,6 +302,6 @@ func TestHandleIRCBadNick(t *testing.T) {
 	<-s.broadcast
 
 	checkResponse(t, "nick_fail", NickFail{
-		Server: "host.com",
+		Network: "host.com",
 	}, <-s.broadcast)
 }

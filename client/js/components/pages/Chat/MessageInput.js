@@ -21,9 +21,9 @@ const MessageInput = ({
   const handleKey = e => {
     if (e.key === 'Enter' && e.target.value) {
       if (e.target.value[0] === '/') {
-        onCommand(e.target.value, tab.name, tab.server);
+        onCommand(e.target.value, tab.name, tab.network);
       } else if (tab.name) {
-        onMessage(e.target.value, tab.name, tab.server);
+        onMessage(e.target.value, tab.name, tab.network);
       }
 
       add(e.target.value);

@@ -295,14 +295,14 @@ i[class*=' icon-']:before {
   border-left: 5px solid #6bb758;
 }
 
-.tab-server {
+.tab-network {
   display: flex;
   align-items: center;
   color: #999;
   margin-top: 10px !important;
 }
 
-.tab-server .tab-content {
+.tab-network .tab-content {
   flex: 1;
   margin-right: 5px;
 }
@@ -498,12 +498,12 @@ input::-webkit-inner-spin-button {
   cursor: pointer;
 }
 
-.chat-server .userlist,
+.chat-network .userlist,
 .chat-private .userlist {
   display: none;
 }
 
-.chat-server .userlist-bar,
+.chat-network .userlist-bar,
 .chat-private .userlist-bar {
   display: none;
 }
@@ -520,7 +520,7 @@ input::-webkit-inner-spin-button {
   display: none;
 }
 
-.chat-server .button-userlist,
+.chat-network .button-userlist,
 .chat-private .button-userlist {
   display: none;
 }
@@ -596,7 +596,7 @@ input.chat-title {
   background: #f0f0f0;
 }
 
-.chat-server .search {
+.chat-network .search {
   display: none;
 }
 

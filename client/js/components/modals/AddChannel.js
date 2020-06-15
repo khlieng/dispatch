@@ -9,10 +9,10 @@ import { select } from 'state/tab';
 import { searchChannels } from 'state/channelSearch';
 import { linkify } from 'utils';
 
-const Channel = memo(({ server, name, topic, userCount, joined }) => {
+const Channel = memo(({ network, name, topic, userCount, joined }) => {
   const dispatch = useDispatch();
 
-  const handleClick = () => dispatch(join([name], server));
+  const handleClick = () => dispatch(join([name], network));
 
   return (
     <div className="modal-channel-result">
@@ -40,7 +40,7 @@ const Channel = memo(({ server, name, topic, userCount, joined }) => {
 });
 
 const AddChannel = () => {
-  const [modal, server, closeModal] = useModal('channel');
+  const [modal, network, closeModal] = useModal('channel');
 
   const channels = useSelector(state => state.channels);
   const search = useSelector(state => state.channelSearch);
@@ -53,7 +53,7 @@ const AddChannel = () => {
 
   useEffect(() => {
     if (modal.isOpen) {
-      dispatch(searchChannels(server, ''));
+      dispatch(searchChannels(network, ''));
       setTimeout(() => inputEl.current.focus(), 0);
     } else {
       prevSearch.current = '';
@@ -74,7 +74,7 @@ const AddChannel = () => {
 
       if (nextQ !== prevSearch.current) {
         prevSearch.current = nextQ;
-        dispatch(searchChannels(server, nextQ));
+        dispatch(searchChannels(network, nextQ));
       }
     }
   };
@@ -90,14 +90,14 @@ const AddChannel = () => {
           channel = `#${channel}`;
         }
 
-        dispatch(join([channel], server));
-        dispatch(select(server, channel));
+        dispatch(join([channel], network));
+        dispatch(select(network, channel));
       }
     }
   };
 
   const handleLoadMore = () =>
-    dispatch(searchChannels(server, q, search.results.length));
+    dispatch(searchChannels(network, q, search.results.length));
 
   let hasMore = !search.end;
   if (hasMore) {
@@ -131,9 +131,9 @@ const AddChannel = () => {
       <div ref={resultsEl} className="modal-channel-results">
         {search.results.map(channel => (
           <Channel
-            key={`${server} ${channel.name}`}
-            server={server}
-            joined={channels[server]?.[channel.name]?.joined}
+            key={`${network} ${channel.name}`}
+            network={network}
+            joined={channels[network]?.[channel.name]?.joined}
             {...channel}
           />
         ))}

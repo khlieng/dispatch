@@ -31,26 +31,27 @@ var (
 )
 
 type Store interface {
-	GetUsers() ([]*User, error)
+	Users() ([]*User, error)
 	SaveUser(user *User) error
 	DeleteUser(user *User) error
 
-	GetServer(user *User, host string) (*Server, error)
-	GetServers(user *User) ([]*Server, error)
-	SaveServer(user *User, server *Server) error
-	RemoveServer(user *User, host string) error
+	Network(user *User, host string) (*Network, error)
+	Networks(user *User) ([]*Network, error)
+	SaveNetwork(user *User, network *Network) error
+	RemoveNetwork(user *User, host string) error
 
-	GetChannels(user *User) ([]*Channel, error)
-	AddChannel(user *User, channel *Channel) error
-	RemoveChannel(user *User, server, channel string) error
+	Channels(user *User) ([]*Channel, error)
+	HasChannel(user *User, network, channel string) bool
+	SaveChannel(user *User, channel *Channel) error
+	RemoveChannel(user *User, network, channel string) error
 
-	GetOpenDMs(user *User) ([]Tab, error)
-	AddOpenDM(user *User, server, nick string) error
-	RemoveOpenDM(user *User, server, nick string) error
+	OpenDMs(user *User) ([]Tab, error)
+	AddOpenDM(user *User, network, nick string) error
+	RemoveOpenDM(user *User, network, nick string) error
 }
 
 type SessionStore interface {
-	GetSessions() ([]*session.Session, error)
+	Sessions() ([]*session.Session, error)
 	SaveSession(session *session.Session) error
 	DeleteSession(key string) error
 }
@@ -58,15 +59,15 @@ type SessionStore interface {
 type MessageStore interface {
 	LogMessage(message *Message) error
 	LogMessages(messages []*Message) error
-	GetMessages(server, channel string, count int, fromID string) ([]Message, bool, error)
-	GetMessagesByID(server, channel string, ids []string) ([]Message, error)
+	Messages(network, channel string, count int, fromID string) ([]Message, bool, error)
+	MessagesByID(network, channel string, ids []string) ([]Message, error)
 	Close()
 }
 
 type MessageStoreCreator func(*User) (MessageStore, error)
 
 type MessageSearchProvider interface {
-	SearchMessages(server, channel, q string) ([]string, error)
+	SearchMessages(network, channel, q string) ([]string, error)
 	Index(id string, message *Message) error
 	Close()
 }

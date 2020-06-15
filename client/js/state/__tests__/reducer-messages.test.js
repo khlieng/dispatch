@@ -7,7 +7,7 @@ describe('message reducer', () => {
   it('adds the message on ADD_MESSAGE', () => {
     const state = reducer(undefined, {
       type: actions.ADD_MESSAGE,
-      server: 'srv',
+      network: 'srv',
       tab: '#chan1',
       message: {
         from: 'foo',
@@ -30,7 +30,7 @@ describe('message reducer', () => {
   it('adds all the messages on ADD_MESSAGES', () => {
     const state = reducer(undefined, {
       type: actions.ADD_MESSAGES,
-      server: 'srv',
+      network: 'srv',
       tab: '#chan1',
       messages: [
         {
@@ -80,7 +80,7 @@ describe('message reducer', () => {
 
     state = reducer(state, {
       type: actions.ADD_MESSAGES,
-      server: 'srv',
+      network: 'srv',
       tab: '#chan1',
       prepend: true,
       messages: [
@@ -105,7 +105,7 @@ describe('message reducer', () => {
 
     state = reducer(state, {
       type: actions.ADD_MESSAGES,
-      server: 'srv',
+      network: 'srv',
       tab: '#chan1',
       prepend: true,
       messages: [
@@ -136,7 +136,7 @@ describe('message reducer', () => {
 
     state = reducer(state, {
       type: actions.ADD_MESSAGE,
-      server: 'srv',
+      network: 'srv',
       tab: '#chan1',
       message: { id: 1, date: new Date(1990, 0, 2) }
     });
@@ -157,7 +157,7 @@ describe('message reducer', () => {
 
     state = reducer(state, {
       type: actions.ADD_MESSAGES,
-      server: 'srv',
+      network: 'srv',
       tab: '#chan1',
       messages: [
         { id: 1, time: unix(new Date(1990, 0, 2)) },
@@ -202,7 +202,7 @@ describe('message reducer', () => {
     expect(messages.srv['#chan3'][0].content).toBe('test');
   });
 
-  it('deletes all messages related to server when disconnecting', () => {
+  it('deletes all messages related to network when disconnecting', () => {
     let state = {
       srv: {
         '#chan1': [{ content: 'msg1' }, { content: 'msg2' }],
@@ -215,7 +215,7 @@ describe('message reducer', () => {
 
     state = reducer(state, {
       type: actions.DISCONNECT,
-      server: 'srv'
+      network: 'srv'
     });
 
     expect(state).toEqual({
@@ -238,7 +238,7 @@ describe('message reducer', () => {
 
     state = reducer(state, {
       type: actions.PART,
-      server: 'srv',
+      network: 'srv',
       channels: ['#chan1']
     });
 
@@ -265,7 +265,7 @@ describe('message reducer', () => {
 
     state = reducer(state, {
       type: actions.CLOSE_PRIVATE_CHAT,
-      server: 'srv',
+      network: 'srv',
       nick: 'bob'
     });
 

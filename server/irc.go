@@ -7,7 +7,6 @@ import (
 
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
-	"github.com/khlieng/dispatch/version"
 )
 
 func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
@@ -16,12 +15,12 @@ func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
 
 		if newNick == i.GetNick() {
 			state.sendJSON("nick_fail", NickFail{
-				Server: i.Host(),
+				Network: i.Host(),
 			})
 		}
 
 		state.sendJSON("error", IRCError{
-			Server:  i.Host(),
+			Network: i.Host(),
 			Message: fmt.Sprintf("Nickname %s is unavailable, trying %s instead", nick, newNick),
 		})
 
@@ -29,23 +28,11 @@ func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
 	}
 }
 
-func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client {
+func connectIRC(network *storage.Network, state *State, srcIP []byte) *irc.Client {
 	cfg := state.srv.Config()
+	ircCfg := network.IRCConfig()
 
-	ircCfg := irc.Config{
-		Host:     server.Host,
-		Port:     server.Port,
-		TLS:      server.TLS,
-		Nick:     server.Nick,
-		Username: server.Username,
-		Realname: server.Realname,
-		Account:  server.Account,
-		Password: server.Password,
-		Version:  fmt.Sprintf("Dispatch %s (git: %s)", version.Tag, version.Commit),
-		Source:   "https://github.com/khlieng/dispatch",
-	}
-
-	if server.TLS {
+	if ircCfg.TLS {
 		ircCfg.TLSConfig = &tls.Config{
 			InsecureSkipVerify: !cfg.VerifyCertificates,
 		}
@@ -59,18 +46,16 @@ func connectIRC(server *storage.Server, state *State, srcIP []byte) *irc.Client 
 		ircCfg.Username = hex.EncodeToString(srcIP)
 	}
 
-	if server.ServerPassword == "" &&
+	if ircCfg.ServerPassword == "" &&
 		cfg.Defaults.ServerPassword != "" &&
-		server.Host == cfg.Defaults.Host {
+		ircCfg.Host == cfg.Defaults.Host {
 		ircCfg.ServerPassword = cfg.Defaults.ServerPassword
-	} else {
-		ircCfg.ServerPassword = server.ServerPassword
 	}
 
-	i := irc.NewClient(&ircCfg)
+	i := irc.NewClient(ircCfg)
 	i.Config.HandleNickInUse = createNickInUseHandler(i, state)
 
-	state.setIRC(server.Host, i)
+	state.setNetwork(network.Host, state.user.NewNetwork(network, i))
 	i.Connect()
 	go newIRCHandler(i, state).run()
 

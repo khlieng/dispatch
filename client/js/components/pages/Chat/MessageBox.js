@@ -36,7 +36,7 @@ export default class MessageBox extends PureComponent {
   addMore = debounce(() => {
     const { tab, onAddMore } = this.props;
     this.ready = true;
-    onAddMore(tab.server, tab.name);
+    onAddMore(tab.network, tab.name);
   }, scrollbackDebounce);
 
   constructor(props) {
@@ -130,7 +130,7 @@ export default class MessageBox extends PureComponent {
 
   updateScrollKey = () => {
     const { tab } = this.props;
-    this.scrollKey = `msg:${tab.server}:${tab.name}`;
+    this.scrollKey = `msg:${tab.network}:${tab.name}`;
     return this.scrollKey;
   };
 
@@ -222,7 +222,7 @@ export default class MessageBox extends PureComponent {
     if (this.shouldAdd) {
       const { tab, onAddMore } = this.props;
       this.shouldAdd = false;
-      onAddMore(tab.server, tab.name);
+      onAddMore(tab.network, tab.name);
     }
   };
 

@@ -38,6 +38,18 @@ func (c *Client) handleMessage(msg *Message) {
 	case QUIT:
 		msg.meta = c.state.removeUserAll(msg.Sender)
 
+	case KICK:
+		if len(msg.Params) > 1 {
+			channel, nick := msg.Params[0], msg.Params[1]
+
+			if c.Is(nick) {
+				c.removeChannels(channel)
+				c.state.removeChannel(channel)
+			} else {
+				c.state.removeUser(nick, channel)
+			}
+		}
+
 	case NICK:
 		if c.Is(msg.Sender) {
 			c.setNick(msg.LastParam())
@@ -55,7 +67,7 @@ func (c *Client) handleMessage(msg *Message) {
 			target := msg.Params[0]
 			if len(msg.Params) > 2 && isChannel(target) {
 				mode := ParseMode(msg.Params[1])
-				mode.Server = c.Host()
+				mode.Network = c.Host()
 				mode.Channel = target
 				mode.User = msg.Params[2]
 
@@ -102,19 +114,23 @@ func (c *Client) handleMessage(msg *Message) {
 		}
 
 	case RPL_NAMREPLY:
-		channel := msg.Params[2]
-		users := strings.Split(strings.TrimSuffix(msg.LastParam(), " "), " ")
+		if len(msg.Params) > 2 {
+			channel := msg.Params[2]
+			users := strings.Split(strings.TrimSuffix(msg.LastParam(), " "), " ")
 
-		userBuffer := c.state.userBuffers[channel]
-		c.state.userBuffers[channel] = append(userBuffer, users...)
+			userBuffer := c.state.userBuffers[channel]
+			c.state.userBuffers[channel] = append(userBuffer, users...)
+		}
 
 	case RPL_ENDOFNAMES:
-		channel := msg.Params[1]
-		users := c.state.userBuffers[channel]
+		if len(msg.Params) > 1 {
+			channel := msg.Params[1]
+			users := c.state.userBuffers[channel]
 
-		c.state.setUsers(users, channel)
-		delete(c.state.userBuffers, channel)
-		msg.meta = users
+			c.state.setUsers(users, channel)
+			delete(c.state.userBuffers, channel)
+			msg.meta = users
+		}
 
 	case ERROR:
 		c.Messages <- msg
@@ -128,7 +144,7 @@ func (c *Client) handleMessage(msg *Message) {
 }
 
 type Mode struct {
-	Server  string
+	Network string
 	Channel string
 	User    string
 	Add     string

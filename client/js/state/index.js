@@ -5,9 +5,9 @@ import channelSearch from './channelSearch';
 import input from './input';
 import messages from './messages';
 import modals from './modals';
+import networks from './networks';
 import privateChats from './privateChats';
 import search from './search';
-import servers from './servers';
 import settings from './settings';
 import tab from './tab';
 import ui from './ui';
@@ -24,9 +24,9 @@ export default function createReducer(router) {
     input,
     messages,
     modals,
+    networks,
     privateChats,
     search,
-    servers,
     settings,
     tab,
     ui

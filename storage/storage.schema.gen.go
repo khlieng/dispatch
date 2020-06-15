@@ -238,7 +238,7 @@ func (d *ClientSettings) Unmarshal(buf []byte) (uint64, error) {
 	return i + 1, nil
 }
 
-func (d *Server) Size() (s uint64) {
+func (d *Network) Size() (s uint64) {
 
 	{
 		l := uint64(len(d.Name))
@@ -378,7 +378,7 @@ func (d *Server) Size() (s uint64) {
 	s += 1
 	return
 }
-func (d *Server) Marshal(buf []byte) ([]byte, error) {
+func (d *Network) Marshal(buf []byte) ([]byte, error) {
 	size := d.Size()
 	{
 		if uint64(cap(buf)) >= size {
@@ -570,7 +570,7 @@ func (d *Server) Marshal(buf []byte) ([]byte, error) {
 	return buf[:i+1], nil
 }
 
-func (d *Server) Unmarshal(buf []byte) (uint64, error) {
+func (d *Network) Unmarshal(buf []byte) (uint64, error) {
 	i := uint64(0)
 
 	{
@@ -762,7 +762,7 @@ func (d *Server) Unmarshal(buf []byte) (uint64, error) {
 func (d *Channel) Size() (s uint64) {
 
 	{
-		l := uint64(len(d.Server))
+		l := uint64(len(d.Network))
 
 		{
 
@@ -805,7 +805,7 @@ func (d *Channel) Marshal(buf []byte) ([]byte, error) {
 	i := uint64(0)
 
 	{
-		l := uint64(len(d.Server))
+		l := uint64(len(d.Network))
 
 		{
 
@@ -820,7 +820,7 @@ func (d *Channel) Marshal(buf []byte) ([]byte, error) {
 			i++
 
 		}
-		copy(buf[i+0:], d.Server)
+		copy(buf[i+0:], d.Network)
 		i += l
 	}
 	{
@@ -865,7 +865,7 @@ func (d *Channel) Unmarshal(buf []byte) (uint64, error) {
 			l = t
 
 		}
-		d.Server = string(buf[i+0 : i+0+l])
+		d.Network = string(buf[i+0 : i+0+l])
 		i += l
 	}
 	{

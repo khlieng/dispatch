@@ -1,5 +1,5 @@
 import reducer, { compareUsers, getSortedChannels } from '../channels';
-import { connect } from '../servers';
+import { connect } from '../networks';
 import * as actions from '../actions';
 
 describe('channel reducer', () => {
@@ -17,7 +17,7 @@ describe('channel reducer', () => {
 
     state = reducer(state, {
       type: actions.PART,
-      server: 'srv1',
+      network: 'srv1',
       channels: ['chan1', 'chan3']
     });
 
@@ -38,7 +38,7 @@ describe('channel reducer', () => {
 
     state = reducer(state, {
       type: actions.socket.PART,
-      server: 'srv',
+      network: 'srv',
       channel: 'chan1',
       user: 'nick2'
     });
@@ -80,7 +80,7 @@ describe('channel reducer', () => {
 
     state = reducer(state, {
       type: actions.socket.QUIT,
-      server: 'srv',
+      network: 'srv',
       user: 'nick2'
     });
 
@@ -100,6 +100,67 @@ describe('channel reducer', () => {
     });
   });
 
+  it('handles KICKED', () => {
+    let state = reducer(
+      undefined,
+      connect({
+        host: 'srv',
+        nick: 'nick2'
+      })
+    );
+    state = reducer(state, socket_join('srv', 'chan1', 'nick1'));
+    state = reducer(state, socket_join('srv', 'chan1', 'nick2'));
+    state = reducer(state, socket_join('srv', 'chan2', 'nick2'));
+
+    state = reducer(state, {
+      type: actions.KICKED,
+      network: 'srv',
+      channel: 'chan2',
+      user: 'nick2',
+      self: true
+    });
+
+    expect(state).toEqual({
+      srv: {
+        chan1: {
+          name: 'chan1',
+          joined: true,
+          users: [
+            { mode: '', nick: 'nick1', renderName: 'nick1' },
+            { mode: '', nick: 'nick2', renderName: 'nick2' }
+          ]
+        },
+        chan2: {
+          name: 'chan2',
+          joined: false,
+          users: []
+        }
+      }
+    });
+
+    state = reducer(state, {
+      type: actions.KICKED,
+      network: 'srv',
+      channel: 'chan1',
+      user: 'nick1'
+    });
+
+    expect(state).toEqual({
+      srv: {
+        chan1: {
+          name: 'chan1',
+          joined: true,
+          users: [{ mode: '', nick: 'nick2', renderName: 'nick2' }]
+        },
+        chan2: {
+          name: 'chan2',
+          joined: false,
+          users: []
+        }
+      }
+    });
+  });
+
   it('handles SOCKET_NICK', () => {
     let state = reducer(undefined, socket_join('srv', 'chan1', 'nick1'));
     state = reducer(state, socket_join('srv', 'chan1', 'nick2'));
@@ -107,7 +168,7 @@ describe('channel reducer', () => {
 
     state = reducer(state, {
       type: actions.socket.NICK,
-      server: 'srv',
+      network: 'srv',
       oldNick: 'nick1',
       newNick: 'nick3'
     });
@@ -135,7 +196,7 @@ describe('channel reducer', () => {
     let state = reducer(undefined, socket_join('srv', 'chan1', 'nick1'));
     state = reducer(state, {
       type: actions.socket.USERS,
-      server: 'srv',
+      network: 'srv',
       channel: 'chan1',
       users: ['user3', 'user2', '@user4', 'user1', '+user5']
     });
@@ -161,7 +222,7 @@ describe('channel reducer', () => {
     let state = reducer(undefined, socket_join('srv', 'chan1', 'nick1'));
     state = reducer(state, {
       type: actions.socket.TOPIC,
-      server: 'srv',
+      network: 'srv',
       channel: 'chan1',
       topic: 'the topic'
     });
@@ -219,9 +280,9 @@ describe('channel reducer', () => {
     const state = reducer(undefined, {
       type: actions.socket.CHANNELS,
       data: [
-        { server: 'srv', name: 'chan1', topic: 'the topic' },
-        { server: 'srv', name: 'chan2' },
-        { server: 'srv2', name: 'chan1' }
+        { network: 'srv', name: 'chan1', topic: 'the topic' },
+        { network: 'srv', name: 'chan2' },
+        { network: 'srv2', name: 'chan1' }
       ]
     });
 
@@ -236,9 +297,9 @@ describe('channel reducer', () => {
     });
   });
 
-  it('handles SOCKET_SERVERS', () => {
+  it('handles SOCKET_NETWORKS', () => {
     const state = reducer(undefined, {
-      type: actions.socket.SERVERS,
+      type: actions.socket.NETWORKS,
       data: [{ host: '127.0.0.1' }, { host: 'thehost' }]
     });
 
@@ -248,7 +309,7 @@ describe('channel reducer', () => {
     });
   });
 
-  it('optimistically adds the server on CONNECT', () => {
+  it('optimistically adds the network on CONNECT', () => {
     const state = reducer(
       undefined,
       connect({ host: '127.0.0.1', nick: 'nick' })
@@ -259,7 +320,7 @@ describe('channel reducer', () => {
     });
   });
 
-  it('removes the server on DISCONNECT', () => {
+  it('removes the network on DISCONNECT', () => {
     let state = {
       srv: {},
       srv2: {}
@@ -267,7 +328,7 @@ describe('channel reducer', () => {
 
     state = reducer(state, {
       type: actions.DISCONNECT,
-      server: 'srv2'
+      network: 'srv2'
     });
 
     expect(state).toEqual({
@@ -276,19 +337,19 @@ describe('channel reducer', () => {
   });
 });
 
-function socket_join(server, channel, user) {
+function socket_join(network, channel, user) {
   return {
     type: actions.socket.JOIN,
-    server,
+    network,
     user,
     channels: [channel]
   };
 }
 
-function socket_mode(server, channel, user, add, remove) {
+function socket_mode(network, channel, user, add, remove) {
   return {
     type: actions.socket.MODE,
-    server,
+    network,
     channel,
     user,
     add,
@@ -323,7 +384,7 @@ describe('compareUsers()', () => {
 });
 
 describe('getSortedChannels', () => {
-  it('sorts servers and channels', () => {
+  it('sorts networks and channels', () => {
     expect(
       getSortedChannels({
         channels: {

@@ -309,6 +309,7 @@ func (c *Client) removeChannels(channels ...string) {
 		for i, ch := range c.channels {
 			if c.EqualFold(removeCh, ch) {
 				c.channels = append(c.channels[:i], c.channels[i+1:]...)
+				break
 			}
 		}
 	}

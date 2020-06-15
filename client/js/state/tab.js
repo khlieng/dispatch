@@ -12,7 +12,7 @@ const initialState = {
 
 function selectTab(state, action) {
   state.selected = {
-    server: action.server,
+    network: action.network,
     name: action.name
   };
   state.history.push(state.selected);
@@ -25,18 +25,19 @@ export default createReducer(initialState, {
 
   [actions.PART](state, action) {
     state.history = state.history.filter(
-      tab => !(tab.server === action.server && tab.name === action.channels[0])
+      tab =>
+        !(tab.network === action.network && tab.name === action.channels[0])
     );
   },
 
   [actions.CLOSE_PRIVATE_CHAT](state, action) {
     state.history = state.history.filter(
-      tab => !(tab.server === action.server && tab.name === action.nick)
+      tab => !(tab.network === action.network && tab.name === action.nick)
     );
   },
 
   [actions.DISCONNECT](state, action) {
-    state.history = state.history.filter(tab => tab.server !== action.server);
+    state.history = state.history.filter(tab => tab.network !== action.network);
   },
 
   [LOCATION_CHANGED](state, action) {
@@ -49,30 +50,30 @@ export default createReducer(initialState, {
   }
 });
 
-export function select(server, name, doReplace) {
+export function select(network, name, doReplace) {
   const navigate = doReplace ? replace : push;
   if (name) {
-    return navigate(`/${server}/${encodeURIComponent(name)}`);
+    return navigate(`/${network}/${encodeURIComponent(name)}`);
   }
-  return navigate(`/${server}`);
+  return navigate(`/${network}`);
 }
 
 export function tabExists(
-  { server, name },
-  { servers, channels, privateChats }
+  { network, name },
+  { networks, channels, privateChats }
 ) {
   return (
-    (name && get(channels, [server, name])) ||
-    (!name && server && servers[server]) ||
-    (name && find(privateChats[server], nick => nick === name))
+    (name && get(channels, [network, name])) ||
+    (!name && network && networks[network]) ||
+    (name && find(privateChats[network], nick => nick === name))
   );
 }
 
 function parseTabCookie() {
   const cookie = Cookie.get('tab');
   if (cookie) {
-    const [server, name = null] = cookie.split(/;(.+)/);
-    return { server, name };
+    const [network, name = null] = cookie.split(/;(.+)/);
+    return { network, name };
   }
   return null;
 }
@@ -88,35 +89,35 @@ export function updateSelection(tryCookie) {
     if (tryCookie) {
       const tab = parseTabCookie();
       if (tab && tabExists(tab, state)) {
-        return dispatch(select(tab.server, tab.name, true));
+        return dispatch(select(tab.network, tab.name, true));
       }
     }
 
-    const { servers } = state;
+    const { networks } = state;
     const { history } = state.tab;
-    const { server } = state.tab.selected;
-    const serverAddrs = Object.keys(servers);
+    const { network } = state.tab.selected;
+    const networkAddrs = Object.keys(networks);
 
-    if (serverAddrs.length === 0) {
+    if (networkAddrs.length === 0) {
       dispatch(replace('/connect'));
     } else if (
       history.length > 0 &&
       tabExists(history[history.length - 1], state)
     ) {
       const tab = history[history.length - 1];
-      dispatch(select(tab.server, tab.name, true));
-    } else if (servers[server]) {
-      dispatch(select(server, null, true));
+      dispatch(select(tab.network, tab.name, true));
+    } else if (networks[network]) {
+      dispatch(select(network, null, true));
     } else {
-      dispatch(select(serverAddrs.sort()[0], null, true));
+      dispatch(select(networkAddrs.sort()[0], null, true));
     }
   };
 }
 
-export function setSelectedTab(server, name = null) {
+export function setSelectedTab(network, name = null) {
   return {
     type: actions.SELECT_TAB,
-    server,
+    network,
     name
   };
 }

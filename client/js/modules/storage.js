@@ -11,7 +11,7 @@ const saveTab = debounce(
 
 export default function storage({ store }) {
   observe(store, getSelectedTab, tab => {
-    if (tab.server) {
+    if (tab.network) {
       saveTab(tab);
     }
   });

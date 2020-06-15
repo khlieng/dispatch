@@ -5,13 +5,13 @@ import * as actions from './actions';
 
 export const getPrivateChats = state => state.privateChats;
 
-function open(state, server, nick) {
-  if (!state[server]) {
-    state[server] = [];
+function open(state, network, nick) {
+  if (!state[network]) {
+    state[network] = [];
   }
-  if (!state[server].includes(nick)) {
-    state[server].push(nick);
-    state[server] = sortBy(state[server], v => v.toLowerCase());
+  if (!state[network].includes(nick)) {
+    state[network].push(nick);
+    state[network] = sortBy(state[network], v => v.toLowerCase());
   }
 }
 
@@ -19,63 +19,63 @@ export default createReducer(
   {},
   {
     [actions.OPEN_PRIVATE_CHAT](state, action) {
-      open(state, action.server, action.nick);
+      open(state, action.network, action.nick);
     },
 
-    [actions.CLOSE_PRIVATE_CHAT](state, { server, nick }) {
-      const i = state[server]?.findIndex(n => n === nick);
+    [actions.CLOSE_PRIVATE_CHAT](state, { network, nick }) {
+      const i = state[network]?.findIndex(n => n === nick);
       if (i !== -1) {
-        state[server].splice(i, 1);
+        state[network].splice(i, 1);
       }
     },
 
     [actions.PRIVATE_CHATS](state, { privateChats }) {
-      privateChats.forEach(({ server, name }) => {
-        if (!state[server]) {
-          state[server] = [];
+      privateChats.forEach(({ network, name }) => {
+        if (!state[network]) {
+          state[network] = [];
         }
 
-        state[server].push(name);
+        state[network].push(name);
       });
     },
 
     [actions.socket.PM](state, action) {
       if (action.from.indexOf('.') === -1) {
-        open(state, action.server, action.from);
+        open(state, action.network, action.from);
       }
     },
 
-    [actions.DISCONNECT](state, { server }) {
-      delete state[server];
+    [actions.DISCONNECT](state, { network }) {
+      delete state[network];
     }
   }
 );
 
-export function openPrivateChat(server, nick) {
+export function openPrivateChat(network, nick) {
   return (dispatch, getState) => {
-    if (!getState().privateChats[server]?.includes(nick)) {
+    if (!getState().privateChats[network]?.includes(nick)) {
       dispatch({
         type: actions.OPEN_PRIVATE_CHAT,
-        server,
+        network,
         nick,
         socket: {
           type: 'open_dm',
-          data: { server, name: nick }
+          data: { network, name: nick }
         }
       });
     }
   };
 }
 
-export function closePrivateChat(server, nick) {
+export function closePrivateChat(network, nick) {
   return dispatch => {
     dispatch({
       type: actions.CLOSE_PRIVATE_CHAT,
-      server,
+      network,
       nick,
       socket: {
         type: 'close_dm',
-        data: { server, name: nick }
+        data: { network, name: nick }
       }
     });
     dispatch(updateSelection());
