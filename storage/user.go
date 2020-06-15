@@ -167,6 +167,7 @@ func (u *User) NewNetwork(template *Network, client *irc.Client) *Network {
 	template.user = u
 	template.client = client
 	template.channels = map[string]*Channel{}
+	template.lock = &sync.Mutex{}
 
 	return template
 }

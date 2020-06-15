@@ -27,7 +27,7 @@ type Network struct {
 	user     *User
 	client   *irc.Client
 	channels map[string]*Channel
-	lock     sync.Mutex
+	lock     *sync.Mutex
 }
 
 func (n *Network) Save() error {
@@ -53,6 +53,7 @@ func (n *Network) Copy() *Network {
 		user:           n.user,
 		client:         n.client,
 		channels:       n.channels,
+		lock:           &sync.Mutex{},
 	}
 	n.lock.Unlock()
 
@@ -137,6 +138,7 @@ func (n *Network) NewChannel(name string) *Channel {
 		Network: n.Host,
 		Name:    name,
 		user:    n.user,
+		lock:    &sync.Mutex{},
 	}
 }
 
@@ -162,7 +164,7 @@ type Channel struct {
 	Joined bool
 
 	user *User
-	lock sync.Mutex
+	lock *sync.Mutex
 }
 
 func (c *Channel) Save() error {
@@ -177,6 +179,7 @@ func (c *Channel) Copy() *Channel {
 		Topic:   c.Topic,
 		Joined:  c.Joined,
 		user:    c.user,
+		lock:    &sync.Mutex{},
 	}
 	c.lock.Unlock()
 
