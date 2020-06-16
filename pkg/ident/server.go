@@ -70,6 +70,7 @@ func (s *Server) handle(conn net.Conn) {
 	defer conn.Close()
 
 	scan := bufio.NewScanner(conn)
+	scan.Buffer(make([]byte, 32), 32)
 	if !scan.Scan() {
 		return
 	}
