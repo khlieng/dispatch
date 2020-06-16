@@ -243,8 +243,10 @@ golang.org/x/net/html/atom
 golang.org/x/net/idna
 golang.org/x/net/internal/iana
 golang.org/x/net/internal/socket
+golang.org/x/net/internal/socks
 golang.org/x/net/ipv4
 golang.org/x/net/ipv6
+golang.org/x/net/proxy
 # golang.org/x/sys v0.0.0-20200610111108-226ff32320da
 ## explicit
 golang.org/x/sys/internal/unsafeheader

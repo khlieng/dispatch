@@ -17,9 +17,11 @@ type DCCSend struct {
 	IP     string `json:"ip"`
 	Port   string `json:"port"`
 	Length uint64 `json:"length"`
+
+	dialer Dialer
 }
 
-func ParseDCCSend(ctcp *CTCP) *DCCSend {
+func (c *Client) ParseDCCSend(ctcp *CTCP) *DCCSend {
 	params := strings.Split(ctcp.Params, " ")
 
 	if len(params) > 4 {
@@ -43,20 +45,21 @@ func ParseDCCSend(ctcp *CTCP) *DCCSend {
 			IP:     intToIP(ip),
 			Port:   params[3],
 			Length: length,
+			dialer: c.dialer,
 		}
 	}
 
 	return nil
 }
 
-func DownloadDCC(w io.Writer, pack *DCCSend, progress chan DownloadProgress) error {
+func (pack *DCCSend) Download(w io.Writer, progress chan DownloadProgress) error {
 	if progress != nil {
 		progress <- DownloadProgress{
 			File: pack.File,
 		}
 	}
 
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(pack.IP, pack.Port), 10*time.Second)
+	conn, err := pack.dialer.Dial("tcp", net.JoinHostPort(pack.IP, pack.Port))
 	if err != nil {
 		return err
 	}

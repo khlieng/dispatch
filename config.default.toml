@@ -79,6 +79,15 @@ delete = true
 # Delete the file after a certain time period of inactivity, not implemented yet
 delete_after = "30m"
 
+[proxy]
+# Dispatch will make all outgoing connections through the specified proxy when enabled
+enabled = false
+protocol = "socks5"
+host = "127.0.0.1"
+port = 1080
+username = ""
+password = ""
+
 # HTTP Strict-Transport-Security
 [https.hsts]
 enabled = false

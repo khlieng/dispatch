@@ -12,8 +12,14 @@ import (
 )
 
 var (
+	DefaultDialer = &net.Dialer{Timeout: 10 * time.Second}
+
 	ErrBadProtocol = errors.New("This server does not speak IRC")
 )
+
+type Dialer interface {
+	Dial(network, address string) (net.Conn, error)
+}
 
 func (c *Client) Connect() {
 	c.connChange(false, nil)
@@ -119,23 +125,23 @@ func (c *Client) connect() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	addr := net.JoinHostPort(c.Config.Host, c.Config.Port)
-	if c.Config.TLS {
-		conn, err := tls.DialWithDialer(c.dialer, "tcp", addr, c.Config.TLSConfig)
-		if err != nil {
-			return err
-		}
-
-		c.conn = conn
-	} else {
-		conn, err := c.dialer.Dial("tcp", addr)
-		if err != nil {
-			return err
-		}
-
-		c.conn = conn
+	conn, err := c.dialer.Dial("tcp", net.JoinHostPort(c.Config.Host, c.Config.Port))
+	if err != nil {
+		return err
 	}
 
+	if c.Config.TLS {
+		c.Config.TLSConfig.ServerName = c.Config.Host
+
+		tlsConn := tls.Client(conn, c.Config.TLSConfig)
+		err = tlsConn.Handshake()
+		if err != nil {
+			return err
+		}
+		conn = tlsConn
+	}
+
+	c.conn = conn
 	c.connected = true
 	c.connChange(true, nil)
 	c.scan = bufio.NewScanner(c.conn)

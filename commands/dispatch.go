@@ -114,13 +114,20 @@ func init() {
 
 	viper.SetDefault("auto_ctcp", true)
 	viper.SetDefault("verify_certificates", true)
+
 	viper.SetDefault("https.enabled", true)
 	viper.SetDefault("https.port", 443)
+
 	viper.SetDefault("auth.anonymous", true)
 	viper.SetDefault("auth.login", true)
 	viper.SetDefault("auth.registration", true)
+
 	viper.SetDefault("dcc.enabled", true)
 	viper.SetDefault("dcc.autoget.delete", true)
+
+	viper.SetDefault("proxy.protocol", "socks5")
+	viper.SetDefault("proxy.host", "127.0.0.1")
+	viper.SetDefault("proxy.port", 1080)
 }
 
 func initConfig(configPath string, overwrite bool) error {

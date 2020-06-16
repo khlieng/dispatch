@@ -231,7 +231,7 @@ func (i *ircHandler) mode(msg *irc.Message) {
 func (i *ircHandler) message(msg *irc.Message) {
 	if ctcp := msg.ToCTCP(); ctcp != nil {
 		if ctcp.Command == "DCC" && strings.HasPrefix(ctcp.Params, "SEND") {
-			if pack := irc.ParseDCCSend(ctcp); pack != nil {
+			if pack := i.client.ParseDCCSend(ctcp); pack != nil {
 				go i.receiveDCCSend(pack, msg)
 				return
 			}
@@ -470,7 +470,7 @@ func (i *ircHandler) receiveDCCSend(pack *irc.DCCSend, msg *irc.Message) {
 			}
 			defer file.Close()
 
-			irc.DownloadDCC(file, pack, i.dccProgress)
+			pack.Download(file, i.dccProgress)
 		} else {
 			i.state.setPendingDCC(pack.File, pack)
 

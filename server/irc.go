@@ -4,9 +4,13 @@ import (
 	"crypto/tls"
 	"encoding/hex"
 	"fmt"
+	"log"
+	"net"
+	"strings"
 
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
+	"golang.org/x/net/proxy"
 )
 
 func createNickInUseHandler(i *irc.Client, state *State) func(string) string {
@@ -52,6 +56,25 @@ func connectIRC(network *storage.Network, state *State, srcIP []byte) *irc.Clien
 		cfg.Defaults.ServerPassword != "" &&
 		ircCfg.Host == cfg.Defaults.Host {
 		ircCfg.ServerPassword = cfg.Defaults.ServerPassword
+	}
+
+	if cfg.Proxy.Enabled && strings.ToLower(cfg.Proxy.Protocol) == "socks5" {
+		addr := net.JoinHostPort(cfg.Proxy.Host, cfg.Proxy.Port)
+
+		var auth *proxy.Auth
+		if cfg.Proxy.Username != "" {
+			auth = &proxy.Auth{
+				User:     cfg.Proxy.Username,
+				Password: cfg.Proxy.Password,
+			}
+		}
+
+		dialer, err := proxy.SOCKS5("tcp", addr, auth, irc.DefaultDialer)
+		if err != nil {
+			log.Println(err)
+		} else {
+			ircCfg.Dialer = dialer
+		}
 	}
 
 	i := irc.NewClient(ircCfg)

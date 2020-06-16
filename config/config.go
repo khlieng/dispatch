@@ -21,6 +21,7 @@ type Config struct {
 	LetsEncrypt        LetsEncrypt
 	Auth               Auth
 	DCC                DCC
+	Proxy              Proxy
 }
 
 type Defaults struct {
@@ -75,6 +76,15 @@ type Autoget struct {
 	Enabled     bool
 	Delete      bool
 	DeleteAfter time.Duration `mapstructure:"delete_after"`
+}
+
+type Proxy struct {
+	Enabled  bool
+	Protocol string
+	Host     string
+	Port     string
+	Username string
+	Password string
 }
 
 func LoadConfig() (*Config, chan *Config) {

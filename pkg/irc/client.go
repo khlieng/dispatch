@@ -33,6 +33,8 @@ type Config struct {
 	Source string
 
 	HandleNickInUse func(string) string
+
+	Dialer Dialer
 }
 
 type Client struct {
@@ -56,7 +58,7 @@ type Client struct {
 	conn       net.Conn
 	connected  bool
 	registered bool
-	dialer     *net.Dialer
+	dialer     Dialer
 	recvBuf    []byte
 	scan       *bufio.Scanner
 	backoff    *backoff.Backoff
@@ -89,6 +91,10 @@ func NewClient(config *Config) *Client {
 		config.SASLMechanisms = DefaultSASLMechanisms
 	}
 
+	if config.Dialer == nil {
+		config.Dialer = DefaultDialer
+	}
+
 	client := &Client{
 		Config:                config,
 		Messages:              make(chan *Message, 32),
@@ -97,7 +103,7 @@ func NewClient(config *Config) *Client {
 		nick:                  config.Nick,
 		requestedCapabilities: map[string][]string{},
 		enabledCapabilities:   map[string][]string{},
-		dialer:                &net.Dialer{Timeout: 10 * time.Second},
+		dialer:                config.Dialer,
 		recvBuf:               make([]byte, 0, 4096),
 		backoff: &backoff.Backoff{
 			Min:    500 * time.Millisecond,

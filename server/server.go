@@ -11,7 +11,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/khlieng/dispatch/config"
 	"github.com/khlieng/dispatch/pkg/https"
-	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
 )
@@ -195,7 +194,7 @@ func (d *Dispatch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				state.deletePendingDCC(filename)
 
 				w.Header().Set("Content-Length", strconv.FormatUint(pack.Length, 10))
-				irc.DownloadDCC(w, pack, nil)
+				pack.Download(w, nil)
 			} else {
 				file := storage.Path.DownloadedFile(state.user.Username, filename)
 				http.ServeFile(w, r, file)
