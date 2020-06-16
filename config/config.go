@@ -12,6 +12,7 @@ type Config struct {
 	Address            string
 	Port               string
 	Dev                bool
+	Identd             bool
 	HexIP              bool
 	AutoCTCP           bool `mapstructure:"auto_ctcp"`
 	VerifyCertificates bool `mapstructure:"verify_certificates"`

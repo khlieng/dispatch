@@ -22,7 +22,6 @@ type Dialer interface {
 }
 
 func (c *Client) Connect() {
-	c.connChange(false, nil)
 	go c.run()
 }
 
@@ -147,7 +146,7 @@ func (c *Client) connect() error {
 	c.scan = bufio.NewScanner(c.conn)
 	c.scan.Buffer(c.recvBuf, cap(c.recvBuf))
 
-	c.register()
+	go c.register()
 
 	c.sendRecv.Add(1)
 	go c.recv()
@@ -185,7 +184,7 @@ func (c *Client) recv() {
 				return
 
 			default:
-				c.connChange(false, nil)
+				c.connChange(false, c.scan.Err())
 				close(c.reconnect)
 				return
 			}
@@ -198,8 +197,8 @@ func (c *Client) recv() {
 
 		msg := ParseMessage(string(b))
 		if msg == nil {
-			close(c.quit)
 			c.connChange(false, ErrBadProtocol)
+			close(c.quit)
 			return
 		}
 

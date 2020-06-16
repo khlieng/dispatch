@@ -195,6 +195,19 @@ func (c *Client) Host() string {
 	return c.Config.Host
 }
 
+func (c *Client) LocalPort() string {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if c.conn != nil {
+		_, local, err := net.SplitHostPort(c.conn.LocalAddr().String())
+		if err == nil {
+			return local
+		}
+	}
+	return ""
+}
+
 func (c *Client) MOTD() []string {
 	return c.state.getMOTD()
 }

@@ -46,6 +46,8 @@ func newIRCHandler(client *irc.Client, state *State) *ircHandler {
 
 func (i *ircHandler) run() {
 	var lastConnErr error
+	var localPort string
+
 	for {
 		select {
 		case msg, ok := <-i.client.Messages:
@@ -57,6 +59,16 @@ func (i *ircHandler) run() {
 			i.dispatchMessage(msg)
 
 		case state := <-i.client.ConnectionChanged:
+			if identd := i.state.srv.identd; identd != nil {
+				if state.Connected {
+					if localPort = i.client.LocalPort(); localPort != "" {
+						identd.Add(localPort, i.client.Config.Port, i.client.Config.Username)
+					}
+				} else {
+					identd.Remove(localPort, i.client.Config.Port)
+				}
+			}
+
 			i.state.sendJSON("connection_update", newConnectionUpdate(i.client.Host(), state))
 
 			if network, ok := i.state.network(i.client.Host()); ok {
@@ -295,6 +307,16 @@ func (i *ircHandler) info(msg *irc.Message) {
 		if needsUpdate {
 			i.listBuffer = storage.NewMapChannelListIndex()
 			i.client.List()
+		}
+
+		if identd := i.state.srv.identd; identd != nil {
+			if localPort := i.client.LocalPort(); localPort != "" {
+				identd.Remove(localPort, i.client.Config.Port)
+			}
+		}
+
+		if network, ok := i.state.network(i.client.Host()); ok {
+			network.SetNick(msg.Params[0])
 		}
 
 		go i.state.user.SetNick(msg.Params[0], i.client.Host())

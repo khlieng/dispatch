@@ -112,6 +112,7 @@ func init() {
 	viper.BindPFlags(rootCmd.PersistentFlags())
 	viper.BindPFlags(rootCmd.Flags())
 
+	viper.SetDefault("identd", true)
 	viper.SetDefault("auto_ctcp", true)
 	viper.SetDefault("verify_certificates", true)
 

@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/khlieng/dispatch/config"
 	"github.com/khlieng/dispatch/pkg/https"
+	"github.com/khlieng/dispatch/pkg/ident"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
 )
@@ -24,6 +25,7 @@ type Dispatch struct {
 	cfg      *config.Config
 	upgrader websocket.Upgrader
 	states   *stateStore
+	identd   *ident.Server
 	lock     sync.Mutex
 }
 
@@ -47,15 +49,22 @@ func (d *Dispatch) SetConfig(cfg *config.Config) {
 }
 
 func (d *Dispatch) Run() {
+	cfg := d.Config()
+
 	d.upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
 
-	if d.Config().Dev {
+	if cfg.Dev {
 		d.upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
+	}
+
+	if cfg.Identd {
+		d.identd = ident.NewServer()
+		go d.identd.Listen()
 	}
 
 	session.CookieName = "dispatch"

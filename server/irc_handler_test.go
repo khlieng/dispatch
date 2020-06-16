@@ -56,7 +56,7 @@ func dispatchMessageMulti(msg *irc.Message) chan WSResponse {
 		Username: "user",
 		Host:     "host.com",
 	})
-	s := NewState(user, nil)
+	s := NewState(user, &Dispatch{})
 
 	newIRCHandler(c, s).dispatchMessage(msg)
 

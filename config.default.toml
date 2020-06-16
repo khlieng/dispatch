@@ -1,6 +1,8 @@
 # IP address to listen on, leave empty to listen on anything
 address = ""
 port = 80
+# Run ident daemon on port 113
+identd = true
 # Hex encode the users IP and use it as the ident
 hexIP = false
 # Automatically reply to common CTCP messages
