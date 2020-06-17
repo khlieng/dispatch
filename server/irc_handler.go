@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -46,7 +47,8 @@ func newIRCHandler(client *irc.Client, state *State) *ircHandler {
 
 func (i *ircHandler) run() {
 	var lastConnErr error
-	var localPort string
+	var localAddr net.Addr
+	var remoteAddr net.Addr
 
 	for {
 		select {
@@ -61,11 +63,10 @@ func (i *ircHandler) run() {
 		case state := <-i.client.ConnectionChanged:
 			if identd := i.state.srv.identd; identd != nil {
 				if state.Connected {
-					if localPort = i.client.LocalPort(); localPort != "" {
-						identd.Add(localPort, i.client.Config.Port, i.client.Config.Username)
-					}
+					localAddr, remoteAddr = i.client.LocalAddr(), i.client.RemoteAddr()
+					identd.Add(localAddr, remoteAddr, i.client.Config.Username)
 				} else {
-					identd.Remove(localPort, i.client.Config.Port)
+					identd.Remove(localAddr, remoteAddr)
 				}
 			}
 
@@ -310,9 +311,7 @@ func (i *ircHandler) info(msg *irc.Message) {
 		}
 
 		if identd := i.state.srv.identd; identd != nil {
-			if localPort := i.client.LocalPort(); localPort != "" {
-				identd.Remove(localPort, i.client.Config.Port)
-			}
+			identd.Remove(i.client.LocalAddr(), i.client.RemoteAddr())
 		}
 
 		if network, ok := i.state.network(i.client.Host()); ok {

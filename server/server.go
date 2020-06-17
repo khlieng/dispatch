@@ -2,6 +2,7 @@ package server
 
 import (
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -64,6 +65,7 @@ func (d *Dispatch) Run() {
 
 	if cfg.Identd {
 		d.identd = ident.NewServer()
+		d.identd.Addr = net.JoinHostPort(cfg.Address, "113")
 		go d.identd.Listen()
 	}
 
@@ -74,7 +76,7 @@ func (d *Dispatch) Run() {
 
 	d.loadUsers()
 	d.initFileServer()
-	d.startHTTP()
+	d.serveHTTP()
 }
 
 func (d *Dispatch) loadUsers() {
@@ -119,12 +121,12 @@ func (d *Dispatch) loadUser(user *storage.User) {
 	}
 }
 
-func (d *Dispatch) startHTTP() {
+func (d *Dispatch) serveHTTP() {
 	cfg := d.Config()
 
 	port := cfg.Port
 	if cfg.Dev {
-		// The node dev network will proxy index page requests and
+		// The node dev server will proxy index page requests and
 		// websocket connections to this port
 		port = "1337"
 	}
