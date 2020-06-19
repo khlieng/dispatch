@@ -1,9 +1,23 @@
 import React from 'react';
 import TestRenderer from 'react-test-renderer';
-import { isChannel, isValidNick, isValidChannel, isValidUsername } from '..';
+import {
+  trimPrefixChar,
+  isChannel,
+  isValidNick,
+  isValidChannel,
+  isValidUsername
+} from '..';
 import linkify from '../linkify';
 
 const render = el => TestRenderer.create(el).toJSON();
+
+describe('trimPrefixChar()', () => {
+  it('trims prefix characters', () => {
+    expect(trimPrefixChar('##chan', '#')).toBe('chan');
+    expect(trimPrefixChar('#chan', '#')).toBe('chan');
+    expect(trimPrefixChar('chan', '#')).toBe('chan');
+  });
+});
 
 describe('isChannel()', () => {
   it('it handles strings', () => {

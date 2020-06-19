@@ -3,14 +3,6 @@ import padStart from 'lodash/padStart';
 export { findBreakpoints, messageHeight } from './messageHeight';
 export { default as linkify } from './linkify';
 
-export function normalizeChannel(channel) {
-  if (channel.indexOf('#') !== 0) {
-    return channel;
-  }
-
-  return channel.split('#').join('').toLowerCase();
-}
-
 export function isChannel(name) {
   // TODO: Handle other channel types
   if (typeof name === 'object') {
@@ -40,6 +32,22 @@ function isString(s, maxLength) {
     return false;
   }
   return true;
+}
+
+export function trimPrefixChar(str, char) {
+  if (!isString(str)) {
+    return str;
+  }
+
+  let start = 0;
+  while (str[start] === char) {
+    start++;
+  }
+
+  if (start > 0) {
+    return str.slice(start);
+  }
+  return str;
 }
 
 // RFC 2812
