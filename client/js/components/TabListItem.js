@@ -1,6 +1,18 @@
 import React from 'react';
 import classnames from 'classnames';
 
+function splitContent(content) {
+  let start = 0;
+  while (content[start] === '#') {
+    start++;
+  }
+
+  if (start > 0) {
+    return [content.slice(0, start), content.slice(start)];
+  }
+  return [null, content];
+}
+
 const TabListItem = ({
   target,
   content,
@@ -19,9 +31,14 @@ const TabListItem = ({
     selected
   });
 
+  const [prefix, name] = splitContent(content);
+
   return (
     <p className={className} onClick={() => onClick(network, target)}>
-      <span className="tab-content">{content}</span>
+      <span className="tab-content">
+        {prefix && <span className="tab-prefix">{prefix}</span>}
+        {name}
+      </span>
     </p>
   );
 };

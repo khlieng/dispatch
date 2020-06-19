@@ -307,14 +307,22 @@ i[class*=' icon-']:before {
   margin-right: 5px;
 }
 
+.tab-prefix {
+  color: #777;
+}
+
 .tab-label {
   margin: 5px;
   margin-left: 15px;
   font-size: 12px;
-  color: #999;
+  color: #777;
   display: flex;
   align-items: center;
   height: 25px;
+}
+
+.tab-label-channels {
+  cursor: pointer;
 }
 
 .tab-label span {
@@ -326,10 +334,10 @@ i[class*=' icon-']:before {
   height: 100%;
   font-size: 20px;
   background: none;
-  color: #999;
+  color: #777;
 }
 
-.tab-label button:hover {
+.tab-label:hover button {
   color: #ccc;
 }
 
@@ -345,7 +353,7 @@ i[class*=' icon-']:before {
 
 .side-buttons button {
   background: #222;
-  color: #999;
+  color: #777;
   flex: 1;
 }
 

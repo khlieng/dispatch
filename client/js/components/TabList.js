@@ -60,7 +60,7 @@ export default class TabList extends PureComponent {
       tabs.push(
         <div
           key={`${address}-chans}`}
-          className="tab-label"
+          className="tab-label tab-label-channels"
           onClick={() => openModal('channel', address)}
         >
           <span>CHANNELS {chanLabel}</span>
