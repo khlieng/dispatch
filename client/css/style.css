@@ -2,12 +2,34 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  scrollbar-width: thin;
 }
 
 body {
   font-family: Roboto Mono, monospace;
   background: #f0f0f0;
   color: #222;
+  scrollbar-color: #ccc rgba(0, 0, 0, 0);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #666;
 }
 
 h1,
@@ -261,6 +283,19 @@ i[class*=' icon-']:before {
   font-family: Montserrat, sans-serif;
   transition: transform 0.2s;
   user-select: none;
+  scrollbar-color: #333 rgba(0, 0, 0, 0);
+}
+
+.tablist ::-webkit-scrollbar-thumb {
+  background: #333;
+}
+
+.tablist ::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+.tablist ::-webkit-scrollbar-thumb:active {
+  background: #555;
 }
 
 .tab-container {
