@@ -296,6 +296,7 @@ func TestHandleIRCBadNick(t *testing.T) {
 
 	i.dispatchMessage(&irc.Message{
 		Command: irc.ERR_ERRONEUSNICKNAME,
+		Params:  []string{"nick", "Terrible nick"},
 	})
 
 	// It should print the error message first
