@@ -40,7 +40,6 @@ export default createCommandMiddleware(COMMAND, {
         return error('Bad channel name');
       }
       dispatch(join([channel], network));
-      dispatch(select(network, channel));
     } else {
       return error('Missing channel');
     }

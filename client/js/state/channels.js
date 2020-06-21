@@ -235,11 +235,12 @@ export default createReducer(
   }
 );
 
-export function join(channels, network) {
+export function join(channels, network, selectFirst = true) {
   return {
     type: actions.JOIN,
     channels,
     network,
+    selectFirst,
     socket: {
       type: 'join',
       data: { channels, network }

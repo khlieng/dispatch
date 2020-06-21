@@ -41,8 +41,8 @@ export default createReducer(
     },
 
     [actions.ADD_MESSAGE](state, { message }) {
-      const { network, from } = message;
-      if (from !== network && !isChannel(from)) {
+      const { network, from, to } = message;
+      if (!to && from.indexOf('.') === -1 && !isChannel(from)) {
         open(state, network, from);
       }
     },

@@ -238,7 +238,7 @@ export default withFormik({
     select(values.host);
 
     if (channels.length > 0) {
-      join(channels, values.host);
+      join(channels, values.host, false);
     }
 
     localStorage.lastNick = values.nick;

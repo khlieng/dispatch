@@ -23,6 +23,16 @@ export const getSelectedTab = state => state.tab.selected;
 export default createReducer(initialState, {
   [actions.SELECT_TAB]: selectTab,
 
+  [actions.JOIN](state, { network, channels, selectFirst }) {
+    if (selectFirst) {
+      state.selected = {
+        network,
+        name: channels[0]
+      };
+      state.history.push(state.selected);
+    }
+  },
+
   [actions.PART](state, action) {
     state.history = state.history.filter(
       tab =>

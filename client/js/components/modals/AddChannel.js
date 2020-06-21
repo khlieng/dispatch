@@ -5,7 +5,6 @@ import { FiUsers, FiX } from 'react-icons/fi';
 import useModal from 'components/modals/useModal';
 import Button from 'components/ui/Button';
 import { join } from 'state/channels';
-import { select } from 'state/tab';
 import { searchChannels } from 'state/channelSearch';
 import { linkify } from 'utils';
 
@@ -91,7 +90,6 @@ const AddChannel = () => {
         }
 
         dispatch(join([channel], network));
-        dispatch(select(network, channel));
       }
     }
   };
