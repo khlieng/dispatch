@@ -1,4 +1,5 @@
 import sortBy from 'lodash/sortBy';
+import { isChannel } from 'utils';
 import createReducer from 'utils/createReducer';
 import { updateSelection } from './tab';
 import * as actions from './actions';
@@ -39,9 +40,10 @@ export default createReducer(
       });
     },
 
-    [actions.socket.PM](state, action) {
-      if (action.from.indexOf('.') === -1) {
-        open(state, action.network, action.from);
+    [actions.ADD_MESSAGE](state, { message }) {
+      const { network, from } = message;
+      if (from !== network && !isChannel(from)) {
+        open(state, network, from);
       }
     },
 

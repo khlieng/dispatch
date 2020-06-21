@@ -112,6 +112,18 @@ export default function handleSocket({
     },
 
     error({ network, target, message }) {
+      const state = getState();
+      const tab = state.tab.selected;
+
+      if (network === tab.network) {
+        // Print it in the current channel if the error happened on
+        // the current network
+        target = tab.name;
+      } else if (!state.channels[network]?.[target]) {
+        // Print it the network tab if the target does not exist
+        target = null;
+      }
+
       dispatch(
         addMessage({ content: message, type: 'error' }, network, target)
       );

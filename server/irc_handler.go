@@ -105,19 +105,16 @@ func (i *ircHandler) run() {
 }
 
 func (i *ircHandler) dispatchMessage(msg *irc.Message) {
-	if msg.Command[0] == '4' && !isExcludedError(msg.Command) {
+	if (msg.Command[0] == '4' || msg.Command[0] == '5') &&
+		len(msg.Params) > 1 &&
+		!isExcludedError(msg.Command) {
 		err := IRCError{
 			Network: i.client.Host(),
-			Message: msg.LastParam(),
+			Message: strings.Join(msg.Params[1:], " "),
 		}
 
-		if len(msg.Params) > 2 {
-			for i := 1; i < len(msg.Params); i++ {
-				if isChannel(msg.Params[i]) {
-					err.Target = msg.Params[i]
-					break
-				}
-			}
+		if isChannel(msg.Params[1]) {
+			err.Target = msg.Params[1]
 		}
 
 		i.state.sendJSON("error", err)
