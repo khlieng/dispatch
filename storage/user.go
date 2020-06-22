@@ -85,9 +85,11 @@ func LoadUsers(store Store) ([]*User, error) {
 		for _, channel := range channels {
 			messages, _, err := user.LastMessages(channel.Network, channel.Name, 1)
 			if err == nil && len(messages) == 1 {
-				user.lastMessages[channel.Network] = map[string]*Message{
-					channel.Name: &messages[0],
+				if _, ok := user.lastMessages[channel.Network]; !ok {
+					user.lastMessages[channel.Network] = map[string]*Message{}
 				}
+
+				user.lastMessages[channel.Network][channel.Name] = &messages[0]
 			}
 		}
 	}
