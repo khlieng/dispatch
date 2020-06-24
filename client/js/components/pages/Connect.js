@@ -60,7 +60,7 @@ class Connect extends Component {
         <div className="connect-section">
           <h2>SASL</h2>
           <TextInput name="account" />
-          <TextInput name="password" type="password" />
+          <TextInput name="password" type="password" noTrim />
         </div>
         {!hexIP && <TextInput name="username" />}
         <TextInput
@@ -230,8 +230,6 @@ export default withFormik({
     const { connect, select, join } = props;
     const channels = values.channels ? values.channels.split(',') : [];
     delete values.channels;
-
-    values.serverPassword = values.serverPassword.trim();
 
     values.port = `${values.port}`;
     connect(values);
