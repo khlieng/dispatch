@@ -112,10 +112,10 @@ func (pack *DCCSend) Download(w io.Writer, progress chan DownloadProgress) error
 				percentage := 100 * (float64(totalBytes) / float64(pack.Length))
 
 				progress <- DownloadProgress{
-					Speed:          humanReadableByteCount(averageSpeed, true),
+					Speed:          formatByteCount(averageSpeed, true),
 					PercCompletion: percentage,
-					BytesRemaining: humanReadableByteCount(bytesRemaining, false),
-					BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
+					BytesRemaining: formatByteCount(bytesRemaining, false),
+					BytesCompleted: formatByteCount(float64(totalBytes), false),
 					SecondsElapsed: secondsSince(start),
 					SecondsToGo:    bytesRemaining / averageSpeed,
 					File:           pack.File,
@@ -127,13 +127,17 @@ func (pack *DCCSend) Download(w io.Writer, progress chan DownloadProgress) error
 	if progress != nil {
 		progress <- DownloadProgress{
 			PercCompletion: 100,
-			BytesCompleted: humanReadableByteCount(float64(totalBytes), false),
+			BytesCompleted: formatByteCount(float64(totalBytes), false),
 			SecondsElapsed: secondsSince(start),
 			File:           pack.File,
 		}
 	}
 
 	return nil
+}
+
+func (pack *DCCSend) Size() string {
+	return formatByteCount(float64(pack.Length), false)
 }
 
 type DownloadProgress struct {
@@ -172,7 +176,7 @@ const (
 	gibibyte
 )
 
-func humanReadableByteCount(b float64, speed bool) string {
+func formatByteCount(b float64, speed bool) string {
 	unit := ""
 	value := b
 

@@ -147,12 +147,12 @@ export default function handleSocket({
       }
     },
 
-    dcc_send({ network, from, filename, url }) {
+    dcc_send({ network, from, filename, size, url }) {
       const networkName = getState().networks[network]?.name || network;
 
       dispatch(
         openModal('confirm', {
-          question: `${from} on ${networkName} is sending you: ${filename}`,
+          question: `${from} on ${networkName} is sending you (${size}): ${filename}`,
           confirmation: 'Download',
           onConfirm: () => {
             const a = document.createElement('a');

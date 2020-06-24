@@ -496,6 +496,7 @@ func (i *ircHandler) receiveDCCSend(pack *irc.DCCSend, msg *irc.Message) {
 				Network:  i.client.Host(),
 				From:     msg.Sender,
 				Filename: pack.File,
+				Size:     pack.Size(),
 				URL: fmt.Sprintf("%s://%s/downloads/%s/%s",
 					i.state.String("scheme"), i.state.String("host"), i.state.user.Username, pack.File),
 			})

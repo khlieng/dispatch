@@ -218,6 +218,7 @@ type DCCSend struct {
 	Network  string
 	From     string
 	Filename string
+	Size     string
 	URL      string
 }
 
