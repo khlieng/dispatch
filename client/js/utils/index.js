@@ -34,6 +34,10 @@ function isString(s, maxLength) {
   return true;
 }
 
+export function isDM({ from, to }) {
+  return !to && from?.indexOf('.') === -1 && !isChannel(from);
+}
+
 export function trimPrefixChar(str, char) {
   if (!isString(str)) {
     return str;

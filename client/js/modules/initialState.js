@@ -1,56 +1,24 @@
-import { socket as socketActions } from 'state/actions';
-import { getConnected, getWrapWidth, appSet } from 'state/app';
+import { INIT } from 'state/actions';
+import { getConnected, getWrapWidth } from 'state/app';
 import { searchChannels } from 'state/channelSearch';
 import { addMessages } from 'state/messages';
-import { setSettings } from 'state/settings';
 import { when } from 'utils/observe';
 
 function loadState({ store }, env) {
-  store.dispatch(setSettings(env.settings, true));
-
-  if (env.networks) {
-    store.dispatch({
-      type: socketActions.NETWORKS,
-      data: env.networks
-    });
-
-    when(store, getConnected, () =>
-      // Cache top channels for each network
-      env.networks.forEach(({ host }) =>
-        store.dispatch(searchChannels(host, ''))
-      )
-    );
-  }
-
-  if (env.channels) {
-    store.dispatch({
-      type: socketActions.CHANNELS,
-      data: env.channels
-    });
-  }
-
-  if (env.openDMs) {
-    store.dispatch({
-      type: 'PRIVATE_CHATS',
-      privateChats: env.openDMs
-    });
-  }
-
-  if (env.users) {
-    store.dispatch({
-      type: socketActions.USERS,
-      ...env.users
-    });
-  }
-
-  store.dispatch(
-    appSet({
+  store.dispatch({
+    type: INIT,
+    settings: env.settings,
+    networks: env.networks,
+    channels: env.channels,
+    openDMs: env.openDMs,
+    users: env.users,
+    app: {
       connectDefaults: env.defaults,
       initialized: true,
       hexIP: env.hexIP,
       version: env.version
-    })
-  );
+    }
+  });
 
   if (env.messages) {
     // Wait until wrapWidth gets initialized so that height calculations
@@ -59,6 +27,15 @@ function loadState({ store }, env) {
       const { messages, network, to, next } = env.messages;
       store.dispatch(addMessages(messages, network, to, false, next));
     });
+  }
+
+  if (env.networks) {
+    when(store, getConnected, () =>
+      // Cache top channels for each network
+      env.networks.forEach(({ host }) =>
+        store.dispatch(searchChannels(host, ''))
+      )
+    );
   }
 }
 

@@ -76,9 +76,9 @@ export default createReducer(
       state[network].editedNick = null;
     },
 
-    [actions.socket.NETWORKS](state, { data }) {
-      if (data) {
-        data.forEach(
+    [actions.INIT](state, { networks }) {
+      if (networks) {
+        networks.forEach(
           ({ host, name = host, nick, connected, error, features = {} }) => {
             state[host] = {
               name,

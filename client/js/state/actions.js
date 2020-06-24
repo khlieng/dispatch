@@ -1,3 +1,4 @@
+export const INIT = 'INIT';
 export const APP_SET = 'APP_SET';
 
 export const INVITE = 'INVITE';
@@ -27,7 +28,6 @@ export const CLOSE_MODAL = 'CLOSE_MODAL';
 
 export const CLOSE_PRIVATE_CHAT = 'CLOSE_PRIVATE_CHAT';
 export const OPEN_PRIVATE_CHAT = 'OPEN_PRIVATE_CHAT';
-export const PRIVATE_CHATS = 'PRIVATE_CHATS';
 
 export const SEARCH_MESSAGES = 'SEARCH_MESSAGES';
 export const TOGGLE_SEARCH = 'TOGGLE_SEARCH';
@@ -67,7 +67,6 @@ function createSocketActions(types) {
 export const socket = createSocketActions([
   'cert_fail',
   'cert_success',
-  'channels',
   'channel_forward',
   'channel_search',
   'connected',
@@ -84,7 +83,6 @@ export const socket = createSocketActions([
   'pm',
   'quit',
   'search',
-  'networks',
   'topic',
   'users'
 ]);

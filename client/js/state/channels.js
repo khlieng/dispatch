@@ -183,14 +183,6 @@ export default createReducer(
       });
     },
 
-    [actions.socket.USERS](state, { network, channel, users }) {
-      state[network][channel].users = users.map(nick => loadUser(nick));
-    },
-
-    [actions.socket.TOPIC](state, { network, channel, topic }) {
-      state[network][channel].topic = topic;
-    },
-
     [actions.socket.MODE](state, { network, channel, user, remove, add }) {
       const u = find(state[network][channel].users, v => v.nick === user);
       if (u) {
@@ -209,19 +201,31 @@ export default createReducer(
       }
     },
 
-    [actions.socket.CHANNELS](state, { data }) {
-      if (data) {
-        data.forEach(({ network, name, topic }) => {
+    [actions.socket.TOPIC](state, { network, channel, topic }) {
+      state[network][channel].topic = topic;
+    },
+
+    [actions.socket.USERS](state, { network, channel, users }) {
+      state[network][channel].users = users.map(nick => loadUser(nick));
+    },
+
+    [actions.INIT](state, { networks, channels, users }) {
+      if (networks) {
+        networks.forEach(({ host }) => init(state, host));
+      }
+
+      if (channels) {
+        channels.forEach(({ network, name, topic, joined }) => {
           const chan = init(state, network, name);
-          chan.joined = true;
+          chan.joined = joined;
           chan.topic = topic;
         });
       }
-    },
 
-    [actions.socket.NETWORKS](state, { data }) {
-      if (data) {
-        data.forEach(({ host }) => init(state, host));
+      if (users) {
+        state[users.network][users.channel].users = users.users.map(nick =>
+          loadUser(nick)
+        );
       }
     },
 

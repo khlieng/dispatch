@@ -182,10 +182,10 @@ describe('network reducer', () => {
     });
   });
 
-  it('adds the networks on SOCKET_NETWORKS', () => {
+  it('adds the networks on INIT', () => {
     let state = reducer(undefined, {
-      type: actions.socket.NETWORKS,
-      data: [
+      type: actions.INIT,
+      networks: [
         {
           host: '127.0.0.1',
           name: 'stuff',

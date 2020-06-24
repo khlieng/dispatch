@@ -41,7 +41,7 @@ const Settings = ({
           <Checkbox
             name="coloredNicks"
             label="Colored nicks"
-            checked={settings.coloredNicks}
+            checked={!!settings.coloredNicks}
             onChange={e => setSetting('coloredNicks', e.target.checked)}
           />
         </div>

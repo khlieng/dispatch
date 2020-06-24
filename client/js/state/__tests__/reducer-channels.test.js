@@ -276,31 +276,31 @@ describe('channel reducer', () => {
     });
   });
 
-  it('handles SOCKET_CHANNELS', () => {
+  it('handles channels from INIT', () => {
     const state = reducer(undefined, {
-      type: actions.socket.CHANNELS,
-      data: [
+      type: actions.INIT,
+      channels: [
         { network: 'srv', name: 'chan1', topic: 'the topic' },
-        { network: 'srv', name: 'chan2' },
+        { network: 'srv', name: 'chan2', joined: true },
         { network: 'srv2', name: 'chan1' }
       ]
     });
 
     expect(state).toEqual({
       srv: {
-        chan1: { name: 'chan1', joined: true, topic: 'the topic', users: [] },
+        chan1: { name: 'chan1', topic: 'the topic', users: [] },
         chan2: { name: 'chan2', joined: true, users: [] }
       },
       srv2: {
-        chan1: { name: 'chan1', joined: true, users: [] }
+        chan1: { name: 'chan1', users: [] }
       }
     });
   });
 
-  it('handles SOCKET_NETWORKS', () => {
+  it('handles networks from INIT', () => {
     const state = reducer(undefined, {
-      type: actions.socket.NETWORKS,
-      data: [{ host: '127.0.0.1' }, { host: 'thehost' }]
+      type: actions.INIT,
+      networks: [{ host: '127.0.0.1' }, { host: 'thehost' }]
     });
 
     expect(state).toEqual({

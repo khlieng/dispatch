@@ -1,5 +1,5 @@
 import sortBy from 'lodash/sortBy';
-import { isChannel } from 'utils';
+import { isDM } from 'utils';
 import createReducer from 'utils/createReducer';
 import { updateSelection } from './tab';
 import * as actions from './actions';
@@ -30,20 +30,21 @@ export default createReducer(
       }
     },
 
-    [actions.PRIVATE_CHATS](state, { privateChats }) {
-      privateChats.forEach(({ network, name }) => {
-        if (!state[network]) {
-          state[network] = [];
-        }
+    [actions.INIT](state, { openDMs }) {
+      if (openDMs) {
+        openDMs.forEach(({ network, name }) => {
+          if (!state[network]) {
+            state[network] = [];
+          }
 
-        state[network].push(name);
-      });
+          state[network].push(name);
+        });
+      }
     },
 
     [actions.ADD_MESSAGE](state, { message }) {
-      const { network, from, to } = message;
-      if (!to && from.indexOf('.') === -1 && !isChannel(from)) {
-        open(state, network, from);
+      if (isDM(message)) {
+        open(state, message.network, message.from);
       }
     },
 

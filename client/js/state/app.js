@@ -45,6 +45,10 @@ export default createReducer(initialState, {
     state.wrapWidth = action.wrapWidth;
     state.charWidth = action.charWidth;
     state.windowWidth = action.windowWidth;
+  },
+
+  [actions.INIT](state, { app }) {
+    Object.assign(state, app);
   }
 });
 

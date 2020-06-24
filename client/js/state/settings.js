@@ -44,6 +44,10 @@ export default createReducer(
       } else {
         state[key] = value;
       }
+    },
+
+    [actions.INIT](state, { settings }) {
+      return settings;
     }
   }
 );
