@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/khlieng/dispatch/pkg/cookie"
 	"github.com/khlieng/dispatch/pkg/session"
 	"github.com/khlieng/dispatch/storage"
 )
@@ -11,7 +12,7 @@ import (
 func (d *Dispatch) handleAuth(w http.ResponseWriter, r *http.Request, createUser, refresh bool) *State {
 	var state *State
 
-	cookie, err := r.Cookie(session.CookieName)
+	cookie, err := r.Cookie(cookie.Name(r, session.CookieName))
 	if err != nil {
 		if createUser {
 			state, err = d.newUser(w, r)

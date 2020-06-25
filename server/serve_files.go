@@ -17,6 +17,7 @@ import (
 
 	"github.com/dsnet/compress/brotli"
 	"github.com/khlieng/dispatch/assets"
+	"github.com/khlieng/dispatch/pkg/cookie"
 	"github.com/tdewolff/minify/v2"
 	"github.com/tdewolff/minify/v2/html"
 )
@@ -261,7 +262,7 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		cookie, err := r.Cookie("push")
+		cookie, err := r.Cookie(cookie.Name(r, "push"))
 		if err != nil {
 			for _, asset := range h2PushAssets {
 				pusher.Push(asset.path, options)
@@ -313,7 +314,7 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", disabledCacheControl)
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("X-Frame-Options", "deny")
-	w.Header().Set("X-XSS-Protection", "1; mode=block")
+	w.Header().Set("X-XSS-Protection", "0")
 	w.Header().Set("Referrer-Policy", "same-origin")
 
 	if hstsHeader != "" {
@@ -334,13 +335,10 @@ func (d *Dispatch) serveIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func setPushCookie(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "push",
-		Value:    h2PushCookieValue,
-		Path:     "/",
-		Expires:  time.Now().AddDate(1, 0, 0),
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
+	cookie.Set(w, r, &http.Cookie{
+		Name:    "push",
+		Value:   h2PushCookieValue,
+		Expires: time.Now().AddDate(1, 0, 0),
 	})
 }
 

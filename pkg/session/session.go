@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/khlieng/dispatch/pkg/cookie"
 )
 
 var (
@@ -48,18 +50,11 @@ func (s *Session) SetCookie(w http.ResponseWriter, r *http.Request) {
 	created := time.Unix(s.createdAt, 0)
 	s.lock.Unlock()
 
-	cookie := &http.Cookie{
-		Name:     CookieName,
-		Value:    s.Key(),
-		Path:     "/",
-		Expires:  created.Add(Expiration),
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-	}
-
-	if v := cookie.String(); v != "" {
-		w.Header().Add("Set-Cookie", v+"; SameSite=Lax")
-	}
+	cookie.Set(w, r, &http.Cookie{
+		Name:    CookieName,
+		Value:   s.Key(),
+		Expires: created.Add(Expiration),
+	})
 }
 
 func (s *Session) Expired() bool {

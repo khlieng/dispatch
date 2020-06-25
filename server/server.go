@@ -69,7 +69,7 @@ func (d *Dispatch) Run() {
 		go d.identd.Listen()
 	}
 
-	session.CookieName = "dispatch"
+	session.CookieName = "sid"
 
 	d.states = newStateStore(d.SessionStore)
 	go d.states.run()

@@ -28,7 +28,7 @@ There is a few different ways of getting it:
 
 ### 2. Go
 
-This requires a [Go environment](http://golang.org/doc/install), version 1.10 or greater.
+This requires a [Go environment](http://golang.org/doc/install), version 1.11 or greater.
 
 Fetch, compile and run dispatch:
 
