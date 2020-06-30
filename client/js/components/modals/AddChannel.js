@@ -2,6 +2,7 @@ import React, { memo, useState, useEffect, useRef } from 'react';
 import Modal from 'react-modal';
 import { useSelector, useDispatch } from 'react-redux';
 import { FiUsers, FiX } from 'react-icons/fi';
+import Text from 'components/Text';
 import useModal from 'components/modals/useModal';
 import Button from 'components/ui/Button';
 import { join } from 'state/channels';
@@ -33,7 +34,9 @@ const Channel = memo(({ network, name, topic, userCount, joined }) => {
           </Button>
         )}
       </div>
-      <p className="modal-channel-topic">{linkify(topic)}</p>
+      <p className="modal-channel-topic">
+        <Text>{linkify(topic)}</Text>
+      </p>
     </div>
   );
 });

@@ -14,7 +14,6 @@ function createContext({ dispatch, getState }, { network, channel }) {
   };
 }
 
-// TODO: Pull this out as convenience action
 function process({ dispatch, network, channel }, result) {
   if (typeof result === 'string') {
     dispatch(inform(result, network, channel));

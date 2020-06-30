@@ -1,20 +1,44 @@
 import Autolinker from 'autolinker';
-import React from 'react';
 
 const autolinker = new Autolinker({
   stripPrefix: false,
   stripTrailingSlash: false
 });
 
+function pushText(arr, text) {
+  const last = arr[arr.length - 1];
+  if (last?.type === 'text') {
+    last.text += text;
+  } else {
+    arr.push({
+      type: 'text',
+      text
+    });
+  }
+}
+
+function pushLink(arr, url, text) {
+  arr.push({
+    type: 'link',
+    url,
+    text
+  });
+}
+
 export default function linkify(text) {
-  if (!text) {
+  if (typeof text !== 'string') {
     return text;
   }
 
   let matches = autolinker.parseText(text);
 
   if (matches.length === 0) {
-    return text;
+    return [
+      {
+        type: 'text',
+        text
+      }
+    ];
   }
 
   const result = [];
@@ -26,45 +50,26 @@ export default function linkify(text) {
 
     if (match.getType() === 'url') {
       if (match.offset > pos) {
-        if (typeof result[result.length - 1] === 'string') {
-          result[result.length - 1] += text.slice(pos, match.offset);
-        } else {
-          result.push(text.slice(pos, match.offset));
-        }
+        pushText(result, text.slice(pos, match.offset));
       }
 
-      result.push(
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href={match.getAnchorHref()}
-          key={i}
-        >
-          {match.matchedText}
-        </a>
-      );
-    } else if (typeof result[result.length - 1] === 'string') {
-      result[result.length - 1] += text.slice(
-        pos,
-        match.offset + match.matchedText.length
-      );
+      pushLink(result, match.getAnchorHref(), match.matchedText);
     } else {
-      result.push(text.slice(pos, match.offset + match.matchedText.length));
+      pushText(
+        result,
+        text.slice(pos, match.offset + match.matchedText.length)
+      );
     }
 
     pos = match.offset + match.matchedText.length;
   }
 
   if (pos < text.length) {
-    if (typeof result[result.length - 1] === 'string') {
-      result[result.length - 1] += text.slice(pos);
+    if (result[result.length - 1]?.type === 'text') {
+      result[result.length - 1].text += text.slice(pos);
     } else {
-      result.push(text.slice(pos));
+      pushText(result, text.slice(pos));
     }
-  }
-
-  if (result.length === 1) {
-    return result[0];
   }
 
   return result;

@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import classnames from 'classnames';
+import Text from 'components/Text';
 import stringToRGB from 'utils/color';
 
 const Message = ({ message, coloredNick, onNickClick }) => {
@@ -38,7 +39,10 @@ const Message = ({ message, coloredNick, onNickClick }) => {
           {message.from}
         </span>
       )}
-      <span> {message.content}</span>
+      <span>
+        {' '}
+        <Text coloredNick={coloredNick}>{message.content}</Text>
+      </span>
     </p>
   );
 };

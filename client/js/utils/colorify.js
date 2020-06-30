@@ -1,6 +1,4 @@
-import React from 'react';
-
-const formatChars = {
+export const formatChars = {
   bold: 0x02,
   italic: 0x1d,
   underline: 0x1f,
@@ -10,7 +8,7 @@ const formatChars = {
   reset: 0x0f
 };
 
-const colors = {
+export const colors = {
   0: 'white',
   1: 'black',
   2: 'blue',
@@ -234,7 +232,7 @@ function tokenize(str) {
 function colorifyString(str, state = {}) {
   const tokens = tokenize(str);
 
-  if (typeof tokens === 'string') {
+  if (tokens === str) {
     return [tokens, state];
   }
 
@@ -309,10 +307,17 @@ function colorifyString(str, state = {}) {
 
       case 'text':
         if (Object.keys(style).length > 0) {
-          result.push(<span style={style}>{token.content}</span>);
+          result.push({
+            type: 'format',
+            style,
+            text: token.content
+          });
           style = { ...style };
         } else {
-          result.push(token.content);
+          result.push({
+            type: 'text',
+            text: token.content
+          });
         }
         break;
 
@@ -323,34 +328,25 @@ function colorifyString(str, state = {}) {
   return [result, { style, reverse }];
 }
 
-export default function colorify(input) {
-  if (typeof input === 'string') {
-    const [colored] = colorifyString(input);
-    return colored;
-  }
+export default function colorify(blocks) {
+  const result = [];
+  let colored;
+  let state;
 
-  if (Array.isArray(input)) {
-    const result = [];
-    let state;
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
 
-    for (let i = 0; i < input.length; i++) {
-      if (typeof input[i] === 'string') {
-        const [colored, nextState] = colorifyString(input[i], state);
-
-        if (typeof colored === 'string') {
-          result.push(colored);
-        } else {
-          result.push(...colored);
-        }
-
-        state = nextState;
+    if (block.type === 'text') {
+      [colored, state] = colorifyString(block.text, state);
+      if (colored !== block.text) {
+        result.push(...colored);
       } else {
-        result.push(input[i]);
+        result.push(block);
       }
+    } else {
+      result.push(block);
     }
-
-    return result;
   }
 
-  return input;
+  return result;
 }

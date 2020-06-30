@@ -1,5 +1,3 @@
-import React from 'react';
-import TestRenderer from 'react-test-renderer';
 import {
   trimPrefixChar,
   isChannel,
@@ -8,8 +6,6 @@ import {
   isValidUsername
 } from '..';
 import linkify from '../linkify';
-
-const render = el => TestRenderer.create(el).toJSON();
 
 describe('trimPrefixChar()', () => {
   it('trims prefix characters', () => {
@@ -95,21 +91,31 @@ describe('isValidUsername()', () => {
 
 describe('linkify()', () => {
   const proto = href => (href.indexOf('http') !== 0 ? `http://${href}` : href);
-  const linkTo = href =>
-    render(
-      <a href={proto(href)} rel="noopener noreferrer" target="_blank">
-        {href}
-      </a>
-    );
+  const linkTo = href => ({
+    type: 'link',
+    url: proto(href),
+    text: href
+  });
+  const buildText = arr => {
+    for (let i = 0; i < arr.length; i++) {
+      if (typeof arr[i] === 'string') {
+        arr[i] = {
+          type: 'text',
+          text: arr[i]
+        };
+      }
+    }
+    return arr;
+  };
 
-  it('returns the arg when no matches are found', () =>
-    [null, undefined, 10, false, true, 'just some text', ''].forEach(input =>
-      expect(linkify(input)).toBe(input)
+  it('returns a text block when no matches are found', () =>
+    ['just some text', ''].forEach(input =>
+      expect(linkify(input)).toStrictEqual([{ type: 'text', text: input }])
     ));
 
   it('linkifies text', () =>
     Object.entries({
-      'google.com': linkTo('google.com'),
+      'google.com': [linkTo('google.com')],
       'google.com stuff': [linkTo('google.com'), ' stuff'],
       'cake google.com stuff': ['cake ', linkTo('google.com'), ' stuff'],
       'cake google.com stuff https://google.com': [
@@ -129,6 +135,6 @@ describe('linkify()', () => {
       'google.com ': [linkTo('google.com'), ' '],
       '/google.com?': ['/', linkTo('google.com'), '?']
     }).forEach(([input, expected]) =>
-      expect(render(linkify(input))).toEqual(expected)
+      expect(linkify(input)).toEqual(buildText(expected))
     ));
 });

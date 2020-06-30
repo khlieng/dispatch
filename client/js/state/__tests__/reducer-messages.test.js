@@ -20,7 +20,7 @@ describe('message reducer', () => {
         '#chan1': [
           {
             from: 'foo',
-            content: 'msg'
+            content: [{ type: 'text', text: 'msg' }]
           }
         ]
       }
@@ -54,17 +54,17 @@ describe('message reducer', () => {
         '#chan1': [
           {
             from: 'foo',
-            content: 'msg'
+            content: [{ type: 'text', text: 'msg' }]
           },
           {
             from: 'bar',
-            content: 'msg'
+            content: [{ type: 'text', text: 'msg' }]
           }
         ],
         '#chan2': [
           {
             from: 'foo',
-            content: 'msg'
+            content: [{ type: 'text', text: 'msg' }]
           }
         ]
       }
@@ -197,9 +197,13 @@ describe('message reducer', () => {
 
     expect(messages.srv).not.toHaveProperty('srv');
     expect(messages.srv['#chan1']).toHaveLength(1);
-    expect(messages.srv['#chan1'][0].content).toBe('test');
+    expect(messages.srv['#chan1'][0].content).toMatchObject([
+      { type: 'text', text: 'test' }
+    ]);
     expect(messages.srv['#chan3']).toHaveLength(1);
-    expect(messages.srv['#chan3'][0].content).toBe('test');
+    expect(messages.srv['#chan3'][0].content).toMatchObject([
+      { type: 'text', text: 'test' }
+    ]);
   });
 
   it('deletes all messages related to network when disconnecting', () => {

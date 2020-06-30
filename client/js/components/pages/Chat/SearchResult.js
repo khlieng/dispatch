@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import Text from 'components/Text';
 import { timestamp, linkify } from 'utils';
 
 const SearchResult = ({ result }) => {
@@ -16,7 +17,10 @@ const SearchResult = ({ result }) => {
         {' '}
         <span className="message-sender">{result.from}</span>
       </span>
-      <span> {linkify(result.content)}</span>
+      <span>
+        {' '}
+        <Text>{linkify(result.content)}</Text>
+      </span>
     </p>
   );
 };

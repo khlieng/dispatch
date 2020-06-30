@@ -1,4 +1,3 @@
-import React from 'react';
 import { createSelector } from 'reselect';
 import has from 'lodash/has';
 import {
@@ -10,7 +9,6 @@ import {
   formatDate,
   unix
 } from 'utils';
-import stringToRGB from 'utils/color';
 import colorify from 'utils/colorify';
 import createReducer from 'utils/createReducer';
 import { getApp } from './app';
@@ -48,6 +46,12 @@ function init(state, network, tab) {
   }
 }
 
+function initNetworks(state, networks = []) {
+  networks.forEach(({ host }) => {
+    state[host] = {};
+  });
+}
+
 const collapsedEvents = ['join', 'part', 'quit'];
 
 function shouldCollapse(msg1, msg2) {
@@ -59,54 +63,36 @@ function shouldCollapse(msg1, msg2) {
   );
 }
 
-const eventVerbs = {
-  join: 'joined the channel',
-  part: 'left the channel',
-  quit: 'quit'
+const blocks = {
+  nick: nick => ({ type: 'nick', text: nick }),
+  text: text => ({ type: 'text', text }),
+  events: count => ({ type: 'events', text: `${count} more` })
 };
 
-function renderNick(nick, type = '') {
-  const style = {
-    color: stringToRGB(nick),
-    fontWeight: 400
-  };
-
-  return (
-    <span className="message-sender" style={style} key={`${nick} ${type}`}>
-      {nick}
-    </span>
-  );
-}
-
-function renderMore(count, type) {
-  return (
-    <span
-      className="message-events-more"
-      key={`more ${type}`}
-    >{`${count} more`}</span>
-  );
-}
+const eventVerbs = {
+  join: 'joined',
+  part: 'left',
+  quit: 'quit'
+};
 
 function renderEvent(event, type, nicks) {
   const ending = eventVerbs[type];
 
   if (nicks.length === 1) {
-    event.push(renderNick(nicks[0], type));
-    event.push(` ${ending}`);
-  }
-  if (nicks.length === 2) {
-    event.push(renderNick(nicks[0], type));
-    event.push(' and ');
-    event.push(renderNick(nicks[1], type));
-    event.push(` ${ending}`);
-  }
-  if (nicks.length > 2) {
-    event.push(renderNick(nicks[0], type));
-    event.push(', ');
-    event.push(renderNick(nicks[1], type));
-    event.push(' and ');
-    event.push(renderMore(nicks.length - 2, type));
-    event.push(` ${ending}`);
+    event.push(blocks.nick(nicks[0]));
+    event.push(blocks.text(` ${ending}`));
+  } else if (nicks.length === 2) {
+    event.push(blocks.nick(nicks[0]));
+    event.push(blocks.text(' and '));
+    event.push(blocks.nick(nicks[1]));
+    event.push(blocks.text(` ${ending}`));
+  } else if (nicks.length > 2) {
+    event.push(blocks.nick(nicks[0]));
+    event.push(blocks.text(', '));
+    event.push(blocks.nick(nicks[1]));
+    event.push(blocks.text(' and '));
+    event.push(blocks.events(nicks.length - 2));
+    event.push(blocks.text(` ${ending}`));
   }
 }
 
@@ -115,32 +101,31 @@ function renderEvents(events) {
   if (first.type === 'nick') {
     const [oldNick, newNick] = first.params;
 
-    return [renderNick(oldNick), ' changed nick to ', renderNick(newNick)];
+    return [
+      blocks.nick(oldNick),
+      blocks.text(' changed nick to '),
+      blocks.nick(newNick)
+    ];
   }
 
   if (first.type === 'kick') {
     const [kicked, by] = first.params;
 
-    return [renderNick(by), ' kicked ', renderNick(kicked)];
+    return [blocks.nick(by), blocks.text(' kicked '), blocks.nick(kicked)];
   }
 
   if (first.type === 'topic') {
-    const [nick, newTopic] = first.params;
-    const topic = colorify(linkify(newTopic));
+    const [nick, topic] = first.params;
 
     if (!topic) {
-      return [renderNick(nick), ' cleared the topic'];
+      return [blocks.nick(nick), blocks.text(' cleared the topic')];
     }
 
-    const result = [renderNick(nick), ' changed the topic to: '];
-
-    if (Array.isArray(topic)) {
-      result.push(...topic);
-    } else {
-      result.push(topic);
-    }
-
-    return result;
+    return [
+      blocks.nick(nick),
+      blocks.text(' changed the topic to: '),
+      ...colorify(linkify(topic))
+    ];
   }
 
   const byType = {};
@@ -163,14 +148,14 @@ function renderEvents(events) {
 
   if (byType.part) {
     if (result.length > 1) {
-      result[result.length - 1] += ', ';
+      result[result.length - 1].text += ', ';
     }
     renderEvent(result, 'part', byType.part);
   }
 
   if (byType.quit) {
     if (result.length > 1) {
-      result[result.length - 1] += ', ';
+      result[result.length - 1].text += ', ';
     }
     renderEvent(result, 'quit', byType.quit);
   }
@@ -448,12 +433,12 @@ export default createReducer(
       );
     },
 
+    [actions.INIT](state, { networks }) {
+      initNetworks(state, networks);
+    },
+
     [actions.socket.NETWORKS](state, { data }) {
-      if (data) {
-        data.forEach(({ host }) => {
-          state[host] = {};
-        });
-      }
+      initNetworks(state, data);
     }
   }
 );
