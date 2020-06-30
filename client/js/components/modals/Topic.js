@@ -7,6 +7,7 @@ import Button from 'components/ui/Button';
 import useModal from 'components/modals/useModal';
 import { getSelectedChannel } from 'state/channels';
 import { linkify } from 'utils';
+import colorify from 'utils/colorify';
 
 const Topic = () => {
   const [modal, channel, closeModal] = useModal('topic');
@@ -20,7 +21,7 @@ const Topic = () => {
         <Button icon={FiX} className="modal-close" onClick={closeModal} />
       </div>
       <p className="modal-content">
-        <Text>{linkify(topic)}</Text>
+        <Text>{colorify(linkify(topic))}</Text>
       </p>
     </Modal>
   );

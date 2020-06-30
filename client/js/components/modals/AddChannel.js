@@ -8,6 +8,7 @@ import Button from 'components/ui/Button';
 import { join } from 'state/channels';
 import { searchChannels } from 'state/channelSearch';
 import { linkify } from 'utils';
+import colorify from 'utils/colorify';
 
 const Channel = memo(({ network, name, topic, userCount, joined }) => {
   const dispatch = useDispatch();
@@ -35,7 +36,7 @@ const Channel = memo(({ network, name, topic, userCount, joined }) => {
         )}
       </div>
       <p className="modal-channel-topic">
-        <Text>{linkify(topic)}</Text>
+        <Text>{colorify(linkify(topic))}</Text>
       </p>
     </div>
   );

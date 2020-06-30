@@ -329,6 +329,10 @@ function colorifyString(str, state = {}) {
 }
 
 export default function colorify(blocks) {
+  if (!blocks) {
+    return blocks;
+  }
+
   const result = [];
   let colored;
   let state;
