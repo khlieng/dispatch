@@ -52,7 +52,7 @@ function initNetworks(state, networks = []) {
   });
 }
 
-const collapsedEvents = ['join', 'part', 'quit'];
+const collapsedEvents = ['join', 'part', 'quit', 'nick'];
 
 function shouldCollapse(msg1, msg2) {
   return (
@@ -75,38 +75,33 @@ const eventVerbs = {
   quit: 'quit'
 };
 
-function renderEvent(event, type, nicks) {
+function renderEvent(result, type, events) {
   const ending = eventVerbs[type];
 
-  if (nicks.length === 1) {
-    event.push(blocks.nick(nicks[0]));
-    event.push(blocks.text(` ${ending}`));
-  } else if (nicks.length === 2) {
-    event.push(blocks.nick(nicks[0]));
-    event.push(blocks.text(' and '));
-    event.push(blocks.nick(nicks[1]));
-    event.push(blocks.text(` ${ending}`));
-  } else if (nicks.length > 2) {
-    event.push(blocks.nick(nicks[0]));
-    event.push(blocks.text(', '));
-    event.push(blocks.nick(nicks[1]));
-    event.push(blocks.text(' and '));
-    event.push(blocks.events(nicks.length - 2));
-    event.push(blocks.text(` ${ending}`));
+  if (result.length > 1) {
+    result[result.length - 1].text += ', ';
+  }
+
+  if (events.length === 1) {
+    result.push(blocks.nick(events[0][0]));
+    result.push(blocks.text(` ${ending}`));
+  } else if (events.length === 2) {
+    result.push(blocks.nick(events[0][0]));
+    result.push(blocks.text(' and '));
+    result.push(blocks.nick(events[1][0]));
+    result.push(blocks.text(` ${ending}`));
+  } else if (events.length > 2) {
+    result.push(blocks.nick(events[0][0]));
+    result.push(blocks.text(', '));
+    result.push(blocks.nick(events[1][0]));
+    result.push(blocks.text(' and '));
+    result.push(blocks.events(events.length - 2));
+    result.push(blocks.text(` ${ending}`));
   }
 }
 
 function renderEvents(events) {
   const first = events[0];
-  if (first.type === 'nick') {
-    const [oldNick, newNick] = first.params;
-
-    return [
-      blocks.nick(oldNick),
-      blocks.text(' changed nick to '),
-      blocks.nick(newNick)
-    ];
-  }
 
   if (first.type === 'kick') {
     const [kicked, by] = first.params;
@@ -134,9 +129,9 @@ function renderEvents(events) {
     const [nick] = event.params;
 
     if (!byType[event.type]) {
-      byType[event.type] = [nick];
+      byType[event.type] = [event.params];
     } else if (byType[event.type].indexOf(nick) === -1) {
-      byType[event.type].push(nick);
+      byType[event.type].push(event.params);
     }
   }
 
@@ -147,17 +142,29 @@ function renderEvents(events) {
   }
 
   if (byType.part) {
-    if (result.length > 1) {
-      result[result.length - 1].text += ', ';
-    }
     renderEvent(result, 'part', byType.part);
   }
 
   if (byType.quit) {
+    renderEvent(result, 'quit', byType.quit);
+  }
+
+  if (byType.nick) {
     if (result.length > 1) {
       result[result.length - 1].text += ', ';
     }
-    renderEvent(result, 'quit', byType.quit);
+
+    const [oldNick, newNick] = byType.nick[0];
+
+    result.push(blocks.nick(oldNick));
+    result.push(blocks.text(' changed nick to '));
+    result.push(blocks.nick(newNick));
+
+    if (byType.nick.length > 1) {
+      result.push(blocks.text(' and '));
+      result.push(blocks.events(byType.nick.length - 1));
+      result.push(blocks.text(' changed nick'));
+    }
   }
 
   return result;

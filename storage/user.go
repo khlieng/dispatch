@@ -322,7 +322,7 @@ func (u *User) LogEvent(network, name string, params []string, channels ...strin
 	return nil
 }
 
-var collapsed = []string{"join", "part", "quit"}
+var collapsed = []string{"join", "part", "quit", "nick"}
 
 func shouldCollapse(msg *Message, event Event) bool {
 	matches := 0
