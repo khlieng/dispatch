@@ -8,6 +8,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/eyedeekay/goSam"
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
 	"golang.org/x/net/proxy"
@@ -74,6 +75,17 @@ func connectIRC(network *storage.Network, state *State, srcIP []byte) *irc.Clien
 			log.Println(err)
 		} else {
 			ircCfg.Dialer = dialer
+		}
+	}
+
+	if cfg.Proxy.Enabled && strings.ToLower(cfg.Proxy.Protocol) == "i2p" {
+		addr := net.JoinHostPort(cfg.Proxy.Host, cfg.Proxy.Port)
+
+		client, err := goSam.NewClient(addr)
+		if err != nil {
+			log.Println(err)
+		} else {
+			ircCfg.Dialer = client
 		}
 	}
 
