@@ -80,7 +80,7 @@ func connectIRC(network *storage.Network, state *State, srcIP []byte) *irc.Clien
 
 	if cfg.Proxy.Enabled && strings.ToLower(cfg.Proxy.Protocol) == "i2p" {
 		addr := net.JoinHostPort(cfg.Proxy.Host, cfg.Proxy.Port)
-		log.Println("USING I2P!")
+
 		client, err := goSam.NewClient(addr)
 		if err != nil {
 			log.Println(err)
