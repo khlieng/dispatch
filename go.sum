@@ -142,6 +142,8 @@ github.com/eyedeekay/goSam v0.32.22 h1:SD0GEQ8MGJ1wZ4MepSa0mpZjiZAGMSTUhSwAZVrm2
 github.com/eyedeekay/goSam v0.32.22/go.mod h1:YIklxqKiJ3I5JNRgb5pM7VCQOSNDGnVulHnrKBbbECM=
 github.com/eyedeekay/goSam v0.32.27 h1:yYdL384sLPge4K0vK7l7v4vBakrK/kf6qW9hQ7uyW/E=
 github.com/eyedeekay/goSam v0.32.27/go.mod h1:YIklxqKiJ3I5JNRgb5pM7VCQOSNDGnVulHnrKBbbECM=
+github.com/eyedeekay/goSam v0.32.28 h1:8O9aDGr45EIS82TRm4x0xAnGnz6ZHW0/8oyqziYiN9U=
+github.com/eyedeekay/goSam v0.32.28/go.mod h1:YIklxqKiJ3I5JNRgb5pM7VCQOSNDGnVulHnrKBbbECM=
 github.com/eyedeekay/ramp v0.0.0-20190429201811-305b382042ab/go.mod h1:h7mvUAMgZ/rtRDUOkvKTK+8LnDMeUhJSoa5EPdB51fc=
 github.com/eyedeekay/sam3 v0.32.2/go.mod h1:Y3igFVzN4ybqkkpfUWULGhw7WRp8lieq0ORXbLBbcZM=
 github.com/eyedeekay/sam3 v0.32.3 h1:PW1vQoo2H7c3Q4l2DngJqpSdsdJprMCk9NOkUHtcdmM=

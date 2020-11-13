@@ -39,7 +39,6 @@ type Reply struct {
 }
 
 func parseReply(line string) (*Reply, error) {
-	fmt.Println("PARSER PARTS", line)
 	line = strings.TrimSpace(line)
 	parts := strings.Split(line, " ")
 	if len(parts) < 3 {
@@ -54,9 +53,13 @@ func parseReply(line string) (*Reply, error) {
 
 	for _, v := range parts[2:] {
 		if strings.Contains(v, "FROM_PORT") {
-			r.From = v
+			if v != "FROM_PORT=0" {
+				r.From = v
+			}
 		} else if strings.Contains(v, "TO_PORT") {
-			r.To = v
+			if v != "TO_PORT=0" {
+				r.To = v
+			}
 		} else {
 			kvPair := strings.SplitN(v, "=", 2)
 			if kvPair != nil {

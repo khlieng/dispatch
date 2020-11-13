@@ -15,7 +15,11 @@ func (c *Client) DialContext(ctx context.Context, network, addr string) (net.Con
 		if conn, err := c.Dial(network, addr); err != nil {
 			errCh <- err
 		} else if ctx.Err() != nil {
-			conn.Close()
+			var err error
+			c, err = c.NewClient()
+			if err != nil {
+				conn.Close()
+			}
 		} else {
 			connCh <- conn
 		}

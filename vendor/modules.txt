@@ -81,7 +81,7 @@ github.com/davecgh/go-spew/spew
 github.com/dsnet/compress/brotli
 github.com/dsnet/compress/internal
 github.com/dsnet/compress/internal/errors
-# github.com/eyedeekay/goSam v0.32.27
+# github.com/eyedeekay/goSam v0.32.28
 ## explicit
 github.com/eyedeekay/goSam
 # github.com/eyedeekay/sam3 v0.32.3

@@ -369,6 +369,12 @@ func SetSignatureType(s string) func(*Client) error {
 
 //return the from port as a string.
 func (c *Client) from() string {
+	if c.fromport == "FROM_PORT=0" {
+		return ""
+	}
+	if c.fromport == "0" {
+		return ""
+	}
 	if c.fromport == "" {
 		return ""
 	}
@@ -377,6 +383,12 @@ func (c *Client) from() string {
 
 //return the to port as a string.
 func (c *Client) to() string {
+	if c.fromport == "TO_PORT=0" {
+		return ""
+	}
+	if c.fromport == "0" {
+		return ""
+	}
 	if c.toport == "" {
 		return ""
 	}
