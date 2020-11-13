@@ -15,7 +15,11 @@ func (c *Client) DialContext(ctx context.Context, network, addr string) (net.Con
 		if conn, err := c.Dial(network, addr); err != nil {
 			errCh <- err
 		} else if ctx.Err() != nil {
-			conn.Close()
+			var err error
+			c, err = c.NewClient()
+			if err != nil {
+				conn.Close()
+			}
 		} else {
 			connCh <- conn
 		}
@@ -30,7 +34,7 @@ func (c *Client) DialContext(ctx context.Context, network, addr string) (net.Con
 	}
 }
 
-func (c Client) dialCheck(addr string) (int32, bool) {
+func (c *Client) dialCheck(addr string) (int32, bool) {
 	if c.lastaddr == "invalid" {
 		fmt.Println("Preparing to dial new address.")
 		return c.NewID(), true
@@ -43,6 +47,8 @@ func (c Client) dialCheck(addr string) (int32, bool) {
 
 // Dial implements the net.Dial function and can be used for http.Transport
 func (c *Client) Dial(network, addr string) (net.Conn, error) {
+	c.ml.Lock()
+	defer c.ml.Unlock()
 	portIdx := strings.Index(addr, ":")
 	if portIdx >= 0 {
 		addr = addr[:portIdx]

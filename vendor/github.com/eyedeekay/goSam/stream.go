@@ -6,14 +6,14 @@ import (
 
 // StreamConnect asks SAM for a TCP-Like connection to dest, has to be called on a new Client
 func (c *Client) StreamConnect(id int32, dest string) error {
-	r, err := c.sendCmd("STREAM CONNECT ID=%d %s %s DESTINATION=%s\n", id, c.from(), c.to(), dest)
+	r, err := c.sendCmd("STREAM CONNECT ID=%d DESTINATION=%s %s %s\n", id, dest, c.from(), c.to())
 	if err != nil {
 		return err
 	}
 
 	// TODO: move check into sendCmd()
 	if r.Topic != "STREAM" || r.Type != "STATUS" {
-		return fmt.Errorf("Unknown Reply: %+v\n", r)
+		return fmt.Errorf("Stream Connect Unknown Reply: %+v\n", r)
 	}
 
 	result := r.Pairs["RESULT"]
@@ -33,7 +33,7 @@ func (c *Client) StreamAccept(id int32) (*Reply, error) {
 
 	// TODO: move check into sendCmd()
 	if r.Topic != "STREAM" || r.Type != "STATUS" {
-		return nil, fmt.Errorf("Unknown Reply: %+v\n", r)
+		return nil, fmt.Errorf("Stream Accept Unknown Reply: %+v\n", r)
 	}
 
 	result := r.Pairs["RESULT"]

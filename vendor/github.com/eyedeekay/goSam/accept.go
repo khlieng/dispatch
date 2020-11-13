@@ -24,19 +24,19 @@ func (c *Client) Listen() (net.Listener, error) {
 // with Accept
 func (c *Client) ListenI2P(dest string) (net.Listener, error) {
 	var err error
-	var id int32
 	c.id = c.NewID()
-	c.destination, err = c.CreateStreamSession(id, dest)
+	c.destination, err = c.CreateStreamSession(c.id, dest)
+	d := c.destination
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("destination:", c.destination)
+	fmt.Println("Listening on destination:", c.Base32()+".b32.i2p")
 
 	c, err = c.NewClient()
 	if err != nil {
 		return nil, err
 	}
+	c.destination = d
 
 	if c.debug {
 		c.SamConn = WrapConn(c.SamConn)

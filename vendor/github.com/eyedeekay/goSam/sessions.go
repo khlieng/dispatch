@@ -19,11 +19,11 @@ func (c *Client) CreateStreamSession(id int32, dest string) (string, error) {
 	}
 	c.id = id
 	r, err := c.sendCmd(
-		"SESSION CREATE STYLE=STREAM ID=%d %s %s DESTINATION=%s %s %s\n",
+		"SESSION CREATE STYLE=STREAM ID=%d DESTINATION=%s %s %s %s %s \n",
 		c.id,
+		dest,
 		c.from(),
 		c.to(),
-		dest,
 		c.sigtype(),
 		c.allOptions(),
 	)
@@ -33,7 +33,7 @@ func (c *Client) CreateStreamSession(id int32, dest string) (string, error) {
 
 	// TODO: move check into sendCmd()
 	if r.Topic != "SESSION" || r.Type != "STATUS" {
-		return "", fmt.Errorf("Unknown Reply: %+v\n", r)
+		return "", fmt.Errorf("Session Unknown Reply: %+v\n", r)
 	}
 
 	result := r.Pairs["RESULT"]

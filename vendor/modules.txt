@@ -81,9 +81,12 @@ github.com/davecgh/go-spew/spew
 github.com/dsnet/compress/brotli
 github.com/dsnet/compress/internal
 github.com/dsnet/compress/internal/errors
-# github.com/eyedeekay/goSam v0.32.22
+# github.com/eyedeekay/goSam v0.32.28
 ## explicit
 github.com/eyedeekay/goSam
+# github.com/eyedeekay/sam3 v0.32.3
+## explicit
+github.com/eyedeekay/sam3/i2pkeys
 # github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51
 ## explicit
 # github.com/facebookgo/stack v0.0.0-20160209184415-751773369052

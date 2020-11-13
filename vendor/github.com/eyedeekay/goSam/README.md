@@ -85,7 +85,10 @@ to produce an unsigned deb for personal use only. For packagers,
 
 will produce a viable source package for use with Launchpad PPA's and other
 similar systems.
+
 ### TODO
 
-* Implement `STREAM ACCEPT` and `STREAM FORWARD`
+* Improve recovery on failed sockets
+* Implement `STREAM FORWARD`
 * Implement datagrams (Repliable and Anon)
+

@@ -1,9 +1,9 @@
 
 USER_GH=eyedeekay
-VERSION=0.32.22
+VERSION=0.32.28
 packagename=gosam
 
-echo:
+echo: fmt
 	@echo "type make version to do release $(VERSION)"
 
 version:
@@ -22,3 +22,6 @@ tar:
 link:
 	rm -f ../goSam
 	ln -sf . ../goSam
+
+fmt:
+	gofmt -w -s *.go */*.go

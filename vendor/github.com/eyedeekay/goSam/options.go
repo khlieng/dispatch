@@ -275,6 +275,15 @@ func SetEncrypt(b bool) func(*Client) error {
 	}
 }
 
+//SetLeaseSetEncType tells the router to use an encrypted leaseset of a specific type.
+//defaults to 4,0
+func SetLeaseSetEncType(b string) func(*Client) error {
+	return func(c *Client) error {
+		c.leaseSetEncType = b
+		return nil
+	}
+}
+
 //SetReduceIdle sets the created tunnels to be reduced during extended idle time to avoid excessive resource usage
 func SetReduceIdle(b bool) func(*Client) error {
 	return func(c *Client) error {
@@ -360,6 +369,12 @@ func SetSignatureType(s string) func(*Client) error {
 
 //return the from port as a string.
 func (c *Client) from() string {
+	if c.fromport == "FROM_PORT=0" {
+		return ""
+	}
+	if c.fromport == "0" {
+		return ""
+	}
 	if c.fromport == "" {
 		return ""
 	}
@@ -368,6 +383,12 @@ func (c *Client) from() string {
 
 //return the to port as a string.
 func (c *Client) to() string {
+	if c.fromport == "TO_PORT=0" {
+		return ""
+	}
+	if c.fromport == "0" {
+		return ""
+	}
 	if c.toport == "" {
 		return ""
 	}
@@ -426,6 +447,13 @@ func (c *Client) encryptlease() string {
 	return " i2cp.encryptLeaseSet=false "
 }
 
+func (c *Client) leasesetenctype() string {
+	if c.encryptLease {
+		return fmt.Sprintf(" i2cp.leaseSetEncType=%s ", c.leaseSetEncType)
+	}
+	return " i2cp.leaseSetEncType=4,0 "
+}
+
 func (c *Client) dontpublishlease() string {
 	if c.dontPublishLease {
 		return " i2cp.dontPublishLeaseSet=true "
@@ -478,6 +506,7 @@ func (c *Client) allOptions() string {
 		c.outbackups() +
 		c.dontpublishlease() +
 		c.encryptlease() +
+		c.leasesetenctype() +
 		c.reduceonidle() +
 		c.reduceidletime() +
 		c.reduceidlecount() +
@@ -498,6 +527,7 @@ func (c *Client) Print() string {
 		c.outbackups() +
 		c.dontpublishlease() +
 		c.encryptlease() +
+		c.leasesetenctype() +
 		c.reduceonidle() +
 		c.reduceidletime() +
 		c.reduceidlecount() +

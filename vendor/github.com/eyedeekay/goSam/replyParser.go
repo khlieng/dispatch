@@ -32,6 +32,8 @@ func (r ReplyError) Error() string {
 type Reply struct {
 	Topic string
 	Type  string
+	From  string
+	To    string
 
 	Pairs map[string]string
 }
@@ -50,14 +52,23 @@ func parseReply(line string) (*Reply, error) {
 	}
 
 	for _, v := range parts[2:] {
-		kvPair := strings.SplitN(v, "=", 2)
-		if kvPair != nil {
-			if len(kvPair) != 2 {
-				return nil, fmt.Errorf("Malformed key-value-pair.\n%s\n", kvPair)
+		if strings.Contains(v, "FROM_PORT") {
+			if v != "FROM_PORT=0" {
+				r.From = v
 			}
+		} else if strings.Contains(v, "TO_PORT") {
+			if v != "TO_PORT=0" {
+				r.To = v
+			}
+		} else {
+			kvPair := strings.SplitN(v, "=", 2)
+			if kvPair != nil {
+				if len(kvPair) != 2 {
+					return nil, fmt.Errorf("Malformed key-value-pair.\n%s\n", kvPair)
+				}
+			}
+			r.Pairs[kvPair[0]] = kvPair[len(kvPair)-1]
 		}
-
-		r.Pairs[kvPair[0]] = kvPair[len(kvPair)-1]
 	}
 
 	return r, nil
