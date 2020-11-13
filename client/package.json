@@ -62,7 +62,7 @@
     "workbox-webpack-plugin": "^5.1.3"
   },
   "dependencies": {
-    "@sindresorhus/fnv1a": "^2.0.1",
+    "@sindresorhus/fnv1a": "^1.2.0",
     "autolinker": "^3.14.1",
     "backo": "^1.1.0",
     "classnames": "^2.2.6",
