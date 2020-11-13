@@ -11,7 +11,7 @@ require (
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/cznic/strutil v0.0.0-20181122101858-275e90344537 // indirect
 	github.com/dsnet/compress v0.0.1
-	github.com/eyedeekay/goSam v0.32.22
+	github.com/eyedeekay/goSam v0.32.27
 	github.com/eyedeekay/sam3 v0.32.3 // indirect
 	github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51 // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect

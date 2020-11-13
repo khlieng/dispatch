@@ -140,8 +140,11 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/exoscale/egoscale v0.18.1/go.mod h1:Z7OOdzzTOz1Q1PjQXumlz9Wn/CddH0zSYdCF3rnBKXE=
 github.com/eyedeekay/goSam v0.32.22 h1:SD0GEQ8MGJ1wZ4MepSa0mpZjiZAGMSTUhSwAZVrm2kg=
 github.com/eyedeekay/goSam v0.32.22/go.mod h1:YIklxqKiJ3I5JNRgb5pM7VCQOSNDGnVulHnrKBbbECM=
+github.com/eyedeekay/goSam v0.32.27 h1:yYdL384sLPge4K0vK7l7v4vBakrK/kf6qW9hQ7uyW/E=
+github.com/eyedeekay/goSam v0.32.27/go.mod h1:YIklxqKiJ3I5JNRgb5pM7VCQOSNDGnVulHnrKBbbECM=
 github.com/eyedeekay/ramp v0.0.0-20190429201811-305b382042ab/go.mod h1:h7mvUAMgZ/rtRDUOkvKTK+8LnDMeUhJSoa5EPdB51fc=
 github.com/eyedeekay/sam3 v0.32.2/go.mod h1:Y3igFVzN4ybqkkpfUWULGhw7WRp8lieq0ORXbLBbcZM=
+github.com/eyedeekay/sam3 v0.32.3 h1:PW1vQoo2H7c3Q4l2DngJqpSdsdJprMCk9NOkUHtcdmM=
 github.com/eyedeekay/sam3 v0.32.3/go.mod h1:qRA9KIIVxbrHlkj+ZB+OoxFGFgdKeGp1vSgPw26eOVU=
 github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51 h1:0JZ+dUmQeA8IIVUMzysrX4/AKuQwWhV2dYQuPZdvdSQ=
 github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51/go.mod h1:Yg+htXGokKKdzcwhuNDwVvN+uBxDGXJ7G/VN1d8fa64=
