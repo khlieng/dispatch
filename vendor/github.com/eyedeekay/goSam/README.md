@@ -3,10 +3,10 @@ goSam
 
 A go library for using the [I2P](https://geti2p.net/en/) Simple Anonymous
 Messaging ([SAM version 3.0](https://geti2p.net/en/docs/api/samv3)) bridge. It
-has support for SAM version 3.1 signature types.
+has support for all streaming features SAM version 3.2.
 
-This is in an **early development stage**. I would love to hear about any
-issues or ideas for improvement.
+This is widely used and easy to use, but thusfar, mostly by me. It sees a lot of
+testing and no breaking changes to the API are expected.
 
 ## Installation
 ```
@@ -15,7 +15,7 @@ go get github.com/eyedeekay/goSam
 
 ## Using it for HTTP Transport
 
-I implemented `Client.Dial` like `net.Dial` so you can use go's library packages like http.
+`Client.Dial` implements `net.Dial` so you can use go's library packages like http.
 
 ```go
 package main
@@ -66,6 +66,52 @@ func main() {
 func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+```
+
+## Using it as a SOCKS proxy
+
+`client` also implements a resolver compatible with
+[`getlantern/go-socks5`](https://github.com/getlantern/go-socks5),
+making it very easy to implement a SOCKS5 server.
+
+```go
+package main
+
+import (
+  "flag"
+
+	"github.com/eyedeekay/goSam"
+	"github.com/getlantern/go-socks5"
+	"log"
+)
+
+var (
+  samaddr = flag.String("sam", "127.0.0.1:7656", "SAM API address to use")
+  socksaddr = flag.String("socks", "127.0.0.1:7675", "SOCKS address to use")
+)
+
+func main() {
+	sam, err := goSam.NewClient(*samaddr)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("Client Created")
+
+	// create a transport that uses SAM to dial TCP Connections
+	conf := &socks5.Config{
+		Dial:     sam.DialContext,
+		Resolver: sam,
+	}
+	server, err := socks5.New(conf)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create SOCKS5 proxy on localhost port 8000
+	if err := server.ListenAndServe("tcp", *socksaddr); err != nil {
+		panic(err)
 	}
 }
 ```

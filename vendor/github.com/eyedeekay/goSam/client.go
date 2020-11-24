@@ -55,6 +55,7 @@ type Client struct {
 	lastaddr string
 	id       int32
 	ml       sync.Mutex
+	oml      sync.Mutex
 }
 
 var SAMsigTypes = []string{

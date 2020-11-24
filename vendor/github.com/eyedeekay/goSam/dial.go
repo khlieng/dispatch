@@ -9,6 +9,8 @@ import (
 
 // DialContext implements the net.DialContext function and can be used for http.Transport
 func (c *Client) DialContext(ctx context.Context, network, addr string) (net.Conn, error) {
+	c.oml.Lock()
+	defer c.oml.Unlock()
 	errCh := make(chan error, 1)
 	connCh := make(chan net.Conn, 1)
 	go func() {
@@ -26,7 +28,9 @@ func (c *Client) DialContext(ctx context.Context, network, addr string) (net.Con
 	}()
 	select {
 	case err := <-errCh:
-		return nil, err
+		//		var err error
+		c, err = c.NewClient()
+		return c.SamConn, err
 	case conn := <-connCh:
 		return conn, nil
 	case <-ctx.Done():
@@ -40,7 +44,6 @@ func (c *Client) dialCheck(addr string) (int32, bool) {
 		return c.NewID(), true
 	} else if c.lastaddr != addr {
 		fmt.Println("Preparing to dial next new address.")
-		return c.NewID(), true
 	}
 	return c.id, false
 }
