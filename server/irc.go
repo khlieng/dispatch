@@ -8,6 +8,7 @@ import (
 	"net"
 	"strings"
 
+	//	"github.com/cryptix/goSam"
 	"github.com/eyedeekay/goSam"
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
@@ -80,8 +81,24 @@ func connectIRC(network *storage.Network, state *State, srcIP []byte) *irc.Clien
 
 	if cfg.Proxy.Enabled && strings.ToLower(cfg.Proxy.Protocol) == "i2p" {
 		addr := net.JoinHostPort(cfg.Proxy.Host, cfg.Proxy.Port)
-
-		client, err := goSam.NewClient(addr)
+		client, err := goSam.NewClientFromOptions(
+			goSam.SetAddr(addr),
+			goSam.SetUnpublished(false),
+			goSam.SetInQuantity(3),
+			goSam.SetOutQuantity(3),
+			goSam.SetInBackups(2),
+			goSam.SetOutBackups(2),
+			goSam.SetInLength(2),
+			goSam.SetOutLength(2),
+			goSam.SetInVariance(-1),
+			goSam.SetOutVariance(-1),
+			goSam.SetCloseIdle(false),
+			goSam.SetDebug(false),
+			goSam.SetLeaseSetEncType("4"),
+			goSam.SetMinSAMVersion(0),
+			goSam.SetMaxSAMVersion(1),
+		)
+		//client, err := goSam.NewClient(addr)
 		if err != nil {
 			log.Println(err)
 		} else {

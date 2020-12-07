@@ -11,7 +11,8 @@ import (
 	"math/rand"
 	"net"
 	"strings"
-	"sync"
+	//	"sync"
+	"time"
 )
 
 // A Client represents a single Connection to the SAM bridge
@@ -52,10 +53,9 @@ type Client struct {
 
 	debug bool
 	//NEVER, EVER modify lastaddr or id yourself. They are used internally only.
-	lastaddr string
-	id       int32
-	ml       sync.Mutex
-	oml      sync.Mutex
+	id     int32
+	sammin int
+	sammax int
 }
 
 var SAMsigTypes = []string{
@@ -64,6 +64,12 @@ var SAMsigTypes = []string{
 	"SIGNATURE_TYPE=ECDSA_SHA384_P384",
 	"SIGNATURE_TYPE=ECDSA_SHA512_P521",
 	"SIGNATURE_TYPE=EdDSA_SHA512_Ed25519",
+}
+
+var ValidSAMCommands = []string{
+	"HELLO",
+	"SESSION",
+	"STREAM",
 }
 
 var (
@@ -83,7 +89,10 @@ func NewClient(addr string) (*Client, error) {
 
 // NewID generates a random number to use as an tunnel name
 func (c *Client) NewID() int32 {
-	return rand.Int31n(math.MaxInt32)
+	if c.id == 0 {
+		c.id = rand.Int31n(math.MaxInt32)
+	}
+	return c.id
 }
 
 // Destination returns the full destination of the local tunnel
@@ -127,11 +136,11 @@ func NewClientFromOptions(opts ...func(*Client) error) (*Client, error) {
 	c.port = "7656"
 	c.inLength = 3
 	c.inVariance = 0
-	c.inQuantity = 1
+	c.inQuantity = 3
 	c.inBackups = 1
 	c.outLength = 3
 	c.outVariance = 0
-	c.outQuantity = 1
+	c.outQuantity = 3
 	c.outBackups = 1
 	c.dontPublishLease = true
 	c.encryptLease = false
@@ -140,20 +149,22 @@ func NewClientFromOptions(opts ...func(*Client) error) (*Client, error) {
 	c.reduceIdleQuantity = 1
 	c.closeIdle = true
 	c.closeIdleTime = 600000
-	c.debug = true
+	c.debug = false
 	c.sigType = SAMsigTypes[4]
 	c.id = 0
-	c.lastaddr = "invalid"
 	c.destination = ""
 	c.leaseSetEncType = "4,0"
 	c.fromport = ""
 	c.toport = ""
+	c.sammin = 0
+	c.sammax = 1
 	for _, o := range opts {
 		if err := o(&c); err != nil {
 			return nil, err
 		}
 	}
-	conn, err := net.Dial("tcp", c.samaddr())
+	c.id = c.NewID()
+	conn, err := net.DialTimeout("tcp", c.samaddr(), 15*time.Minute)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +191,7 @@ func (c *Client) samaddr() string {
 
 // send the initial handshake command and check that the reply is ok
 func (c *Client) hello() error {
-	r, err := c.sendCmd("HELLO VERSION MIN=3.0 MAX=3.2\n")
+	r, err := c.sendCmd("HELLO VERSION MIN=3.%d MAX=3.%d\n", c.sammin, c.sammax)
 	if err != nil {
 		return err
 	}
@@ -216,8 +227,10 @@ func (c *Client) Close() error {
 	return c.SamConn.Close()
 }
 
-// NewClient generates an exact copy of the client with the same options
-func (c *Client) NewClient() (*Client, error) {
+// NewClient generates an exact copy of the client with the same options, but
+// re-does all the handshaky business so that Dial can pick up right where it
+// left off, should the need arise.
+func (c *Client) NewClient(id int32) (*Client, error) {
 	return NewClientFromOptions(
 		SetHost(c.host),
 		SetPort(c.port),
@@ -238,7 +251,6 @@ func (c *Client) NewClient() (*Client, error) {
 		SetCloseIdle(c.closeIdle),
 		SetCloseIdleTime(c.closeIdleTime),
 		SetCompression(c.compression),
-		setlastaddr(c.lastaddr),
-		setid(c.id),
+		setid(id),
 	)
 }

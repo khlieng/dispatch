@@ -68,6 +68,8 @@ github.com/couchbase/vellum
 github.com/couchbase/vellum/levenshtein
 github.com/couchbase/vellum/regexp
 github.com/couchbase/vellum/utf8
+# github.com/cryptix/goSam v0.1.0
+## explicit
 # github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d
 ## explicit
 # github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548
@@ -81,10 +83,10 @@ github.com/davecgh/go-spew/spew
 github.com/dsnet/compress/brotli
 github.com/dsnet/compress/internal
 github.com/dsnet/compress/internal/errors
-# github.com/eyedeekay/goSam v0.32.29
+# github.com/eyedeekay/goSam v0.32.29 => ../goSam
 ## explicit
 github.com/eyedeekay/goSam
-# github.com/eyedeekay/sam3 v0.32.32-0.20201122050855-f464873c9350
+# github.com/eyedeekay/sam3 v0.32.32
 github.com/eyedeekay/sam3/i2pkeys
 # github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51
 ## explicit
