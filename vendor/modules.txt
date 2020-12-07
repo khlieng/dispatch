@@ -68,8 +68,6 @@ github.com/couchbase/vellum
 github.com/couchbase/vellum/levenshtein
 github.com/couchbase/vellum/regexp
 github.com/couchbase/vellum/utf8
-# github.com/cryptix/goSam v0.1.0
-## explicit
 # github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d
 ## explicit
 # github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548
