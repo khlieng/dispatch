@@ -95,8 +95,8 @@ func connectIRC(network *storage.Network, state *State, srcIP []byte) *irc.Clien
 			goSam.SetCloseIdle(false),
 			goSam.SetDebug(false),
 			goSam.SetLeaseSetEncType("4"),
-			goSam.SetMinSAMVersion(0),
-			goSam.SetMaxSAMVersion(1),
+			goSam.SetSAMMinVersion(0),
+			goSam.SetSAMMaxVersion(1),
 		)
 		//client, err := goSam.NewClient(addr)
 		if err != nil {
