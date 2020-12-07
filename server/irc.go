@@ -8,7 +8,6 @@ import (
 	"net"
 	"strings"
 
-	//	"github.com/cryptix/goSam"
 	"github.com/eyedeekay/goSam"
 	"github.com/khlieng/dispatch/pkg/irc"
 	"github.com/khlieng/dispatch/storage"
