@@ -80,8 +80,24 @@ func connectIRC(network *storage.Network, state *State, srcIP []byte) *irc.Clien
 
 	if cfg.Proxy.Enabled && strings.ToLower(cfg.Proxy.Protocol) == "i2p" {
 		addr := net.JoinHostPort(cfg.Proxy.Host, cfg.Proxy.Port)
-
-		client, err := goSam.NewClient(addr)
+		client, err := goSam.NewClientFromOptions(
+			goSam.SetAddr(addr),
+			goSam.SetUnpublished(false),
+			goSam.SetInQuantity(3),
+			goSam.SetOutQuantity(3),
+			goSam.SetInBackups(2),
+			goSam.SetOutBackups(2),
+			goSam.SetInLength(3),
+			goSam.SetOutLength(3),
+			goSam.SetInVariance(-1),
+			goSam.SetOutVariance(-1),
+			goSam.SetCloseIdle(false),
+			goSam.SetDebug(false),
+			goSam.SetLeaseSetEncType("4"),
+			goSam.SetSAMMinVersion(0),
+			goSam.SetSAMMaxVersion(1),
+		)
+		//client, err := goSam.NewClient(addr)
 		if err != nil {
 			log.Println(err)
 		} else {

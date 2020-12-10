@@ -62,18 +62,37 @@ func SetHost(s string) func(*Client) error {
 	}
 }
 
+func SetSAMMinVersion(i int) func(*Client) error {
+	return func(c *Client) error {
+		if i < 0 {
+			return fmt.Errorf("SAM version must be greater than or equal to 0")
+		}
+		if i > 3 {
+			return fmt.Errorf("SAM version must be less than or equal to 3")
+		}
+		c.sammin = i
+		return nil
+	}
+}
+
+func SetSAMMaxVersion(i int) func(*Client) error {
+	return func(c *Client) error {
+		if i < 0 {
+			return fmt.Errorf("SAM version must be greater than or equal to 0")
+		}
+		if i > 3 {
+			return fmt.Errorf("SAM version must be less than or equal to 3")
+		}
+		c.sammin = i
+		return nil
+	}
+}
+
 //SetLocalDestination sets the local destination of the tunnel from a private
 //key
 func SetLocalDestination(s string) func(*Client) error {
 	return func(c *Client) error {
 		c.destination = s
-		return nil
-	}
-}
-
-func setlastaddr(s string) func(*Client) error {
-	return func(c *Client) error {
-		c.lastaddr = s
 		return nil
 	}
 }

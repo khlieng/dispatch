@@ -32,7 +32,7 @@ func (c *Client) ListenI2P(dest string) (net.Listener, error) {
 	}
 	fmt.Println("Listening on destination:", c.Base32()+".b32.i2p")
 
-	c, err = c.NewClient()
+	c, err = c.NewClient(c.id)
 	if err != nil {
 		return nil, err
 	}

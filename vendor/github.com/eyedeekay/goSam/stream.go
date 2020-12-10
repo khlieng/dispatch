@@ -6,6 +6,9 @@ import (
 
 // StreamConnect asks SAM for a TCP-Like connection to dest, has to be called on a new Client
 func (c *Client) StreamConnect(id int32, dest string) error {
+	if dest == "" {
+		return nil
+	}
 	r, err := c.sendCmd("STREAM CONNECT ID=%d DESTINATION=%s %s %s\n", id, dest, c.from(), c.to())
 	if err != nil {
 		return err

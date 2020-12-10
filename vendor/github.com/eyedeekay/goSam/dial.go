@@ -2,35 +2,28 @@ package goSam
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net"
 	"strings"
 )
 
 // DialContext implements the net.DialContext function and can be used for http.Transport
 func (c *Client) DialContext(ctx context.Context, network, addr string) (net.Conn, error) {
-	c.oml.Lock()
-	defer c.oml.Unlock()
 	errCh := make(chan error, 1)
 	connCh := make(chan net.Conn, 1)
 	go func() {
-		if conn, err := c.Dial(network, addr); err != nil {
+		if conn, err := c.DialContextFree(network, addr); err != nil {
 			errCh <- err
 		} else if ctx.Err() != nil {
-			var err error
-			c, err = c.NewClient()
-			if err != nil {
-				conn.Close()
-			}
+			log.Println(ctx)
+			errCh <- ctx.Err()
 		} else {
 			connCh <- conn
 		}
 	}()
 	select {
 	case err := <-errCh:
-		//		var err error
-		c, err = c.NewClient()
-		return c.SamConn, err
+		return nil, err
 	case conn := <-connCh:
 		return conn, nil
 	case <-ctx.Done():
@@ -38,42 +31,49 @@ func (c *Client) DialContext(ctx context.Context, network, addr string) (net.Con
 	}
 }
 
-func (c *Client) dialCheck(addr string) (int32, bool) {
-	if c.lastaddr == "invalid" {
-		fmt.Println("Preparing to dial new address.")
-		return c.NewID(), true
-	} else if c.lastaddr != addr {
-		fmt.Println("Preparing to dial next new address.")
-	}
-	return c.id, false
+func (c *Client) Dial(network, addr string) (net.Conn, error) {
+	return c.DialContext(context.TODO(), network, addr)
 }
 
 // Dial implements the net.Dial function and can be used for http.Transport
-func (c *Client) Dial(network, addr string) (net.Conn, error) {
-	c.ml.Lock()
-	defer c.ml.Unlock()
+func (c *Client) DialContextFree(network, addr string) (net.Conn, error) {
 	portIdx := strings.Index(addr, ":")
 	if portIdx >= 0 {
 		addr = addr[:portIdx]
 	}
 	addr, err := c.Lookup(addr)
 	if err != nil {
+		log.Printf("LOOKUP DIALER ERROR %s %s", addr, err)
 		return nil, err
 	}
 
-	var test bool
-	if c.id, test = c.dialCheck(addr); test == true {
-		c.destination, err = c.CreateStreamSession(c.id, c.destination)
+	c.destination, err = c.CreateStreamSession(c.id, c.destination)
+	if err != nil {
+		c.Close()
+		d, err := c.NewClient(c.id + 1) /**/
 		if err != nil {
 			return nil, err
 		}
-		c.lastaddr = addr
+		d.destination, err = d.CreateStreamSession(d.id, c.destination)
+		if err != nil {
+			return nil, err
+		}
+		d, err = d.NewClient(d.id)
+		if err != nil {
+			return nil, err
+		}
+		//	  d.lastaddr = addr
+		err = d.StreamConnect(d.id, addr)
+		if err != nil {
+			return nil, err
+		}
+		c = d
+		return d.SamConn, nil
 	}
-	c, err = c.NewClient()
+	c, err = c.NewClient(c.id)
 	if err != nil {
 		return nil, err
 	}
-
 	err = c.StreamConnect(c.id, addr)
 	if err != nil {
 		return nil, err

@@ -44,6 +44,25 @@ func parseReply(line string) (*Reply, error) {
 	if len(parts) < 3 {
 		return nil, fmt.Errorf("Malformed Reply.\n%s\n", line)
 	}
+	preParseReply := func() []string {
+		val := ""
+		quote := false
+		for _, v := range parts {
+			if strings.Contains(v, "=\"") {
+				quote = true
+			}
+			if strings.Contains(v, "\"\n") || strings.Contains(v, "\" ") {
+				quote = false
+			}
+			if quote {
+				val += v + "_"
+			} else {
+				val += v + " "
+			}
+		}
+		return strings.Split(strings.TrimSuffix(strings.TrimSpace(val), "_"), " ")
+	}
+	parts = preParseReply()
 
 	r := &Reply{
 		Topic: parts[0],
@@ -63,9 +82,8 @@ func parseReply(line string) (*Reply, error) {
 		} else {
 			kvPair := strings.SplitN(v, "=", 2)
 			if kvPair != nil {
-				if len(kvPair) == 1 {
-				} else if len(kvPair) != 2 {
-					return nil, fmt.Errorf("Malformed key-value-pair.\n%s\n", kvPair)
+				if len(kvPair) != 2 {
+					return nil, fmt.Errorf("Malformed key-value-pair len != 2.\n%s\n", kvPair)
 				}
 			}
 			r.Pairs[kvPair[0]] = kvPair[len(kvPair)-1]

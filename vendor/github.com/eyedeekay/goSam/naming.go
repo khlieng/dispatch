@@ -37,37 +37,39 @@ func (c *Client) Lookup(name string) (string, error) {
 }
 
 func (c *Client) forward(client, conn net.Conn) {
+	defer client.Close()
+	defer conn.Close()
 	go func() {
-		defer client.Close()
-		defer conn.Close()
+		//		defer client.Close()
+		//		defer conn.Close()
 		io.Copy(client, conn)
 	}()
 	go func() {
-		defer client.Close()
-		defer conn.Close()
+		//		defer client.Close()
+		//		defer conn.Close()
 		io.Copy(conn, client)
 	}()
 }
 
 func (c *Client) Resolve(ctx context.Context, name string) (context.Context, net.IP, error) {
-	if c.lastaddr == "invalid" || c.lastaddr != name {
-		client, err := c.DialContext(ctx, "", name)
-		if err != nil {
-			return ctx, nil, err
-		}
-		ln, err := net.Listen("tcp", "127.0.0.1:")
-		if err != nil {
-			return ctx, nil, err
-		}
-		go func() {
-			for {
-				conn, err := ln.Accept()
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-				go c.forward(client, conn)
-			}
-		}()
+	//	if c.lastaddr == "invalid" || c.lastaddr != name {
+	client, err := c.DialContext(ctx, "", name)
+	if err != nil {
+		return ctx, nil, err
 	}
+	ln, err := net.Listen("tcp", "127.0.0.1:")
+	if err != nil {
+		return ctx, nil, err
+	}
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			go c.forward(client, conn)
+		}
+	}()
+	//	}
 	return ctx, nil, nil
 }
