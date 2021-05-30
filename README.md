@@ -46,7 +46,12 @@ dispatch help
 ### 3. Docker
 
 ```bash
-docker run -p <http port>:80 -p <https port>:443 -v <path>:/data khlieng/dispatch
+docker run \
+  -p <http port>:80 \
+  -p <https port>:443 \
+  -v <path>:/data \
+  --restart unless-stopped \
+  -d khlieng/dispatch
 ```
 
 ## Build
