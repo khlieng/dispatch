@@ -1,5 +1,4 @@
 import {
-  trimPrefixChar,
   isChannel,
   isValidNick,
   isValidChannel,
@@ -7,22 +6,16 @@ import {
 } from '..';
 import linkify from '../linkify';
 
-describe('trimPrefixChar()', () => {
-  it('trims prefix characters', () => {
-    expect(trimPrefixChar('##chan', '#')).toBe('chan');
-    expect(trimPrefixChar('#chan', '#')).toBe('chan');
-    expect(trimPrefixChar('chan', '#')).toBe('chan');
-  });
-});
-
 describe('isChannel()', () => {
   it('it handles strings', () => {
     expect(isChannel('#cake')).toBe(true);
+    expect(isChannel('&snake')).toBe(true);
     expect(isChannel('cake')).toBe(false);
   });
 
   it('handles tab objects', () => {
     expect(isChannel({ name: '#cake' })).toBe(true);
+    expect(isChannel({ name: '&snake' })).toBe(true);
     expect(isChannel({ name: 'cake' })).toBe(false);
   });
 });
@@ -48,6 +41,7 @@ describe('isValidChannel()', () => {
   it('validates channels', () =>
     Object.entries({
       '#chan': true,
+      '&snake': true,
       '#cak e': false,
       '#cake:': false,
       '#[cake]': true,
@@ -64,6 +58,7 @@ describe('isValidChannel()', () => {
       chan: true,
       'cak e': false,
       '#cake:': false,
+      '&snake': true,
       '#[cake]': true,
       '#ca,ke': false
     }).forEach(([input, expected]) =>

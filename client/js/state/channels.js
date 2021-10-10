@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import get from 'lodash/get';
 import sortBy from 'lodash/sortBy';
 import createReducer from 'utils/createReducer';
-import { trimPrefixChar, find, findIndex } from 'utils';
+import { find, findIndex } from 'utils';
 import { getSelectedTab, updateSelection } from './tab';
 import * as actions from './actions';
 
@@ -101,7 +101,7 @@ export const getSortedChannels = createSelector(getChannels, channels =>
     Object.keys(channels).map(network => ({
       address: network,
       channels: sortBy(channels[network], channel =>
-        trimPrefixChar(channel.name, '#').toLowerCase()
+        channel.name.replace(/^[#&]*/, '').toLowerCase()
       )
     })),
     network => network.address.toLowerCase()

@@ -8,7 +8,7 @@ export function isChannel(name) {
   if (typeof name === 'object') {
     ({ name } = name);
   }
-  return typeof name === 'string' && name[0] === '#';
+  return typeof name === 'string' && (name[0] === '#' || name[0] === '&');
 }
 
 export function stringifyTab(network, name) {
@@ -36,22 +36,6 @@ function isString(s, maxLength) {
 
 export function isDM({ from, to }) {
   return !to && from?.indexOf('.') === -1 && !isChannel(from);
-}
-
-export function trimPrefixChar(str, char) {
-  if (!isString(str)) {
-    return str;
-  }
-
-  let start = 0;
-  while (str[start] === char) {
-    start++;
-  }
-
-  if (start > 0) {
-    return str.slice(start);
-  }
-  return str;
 }
 
 // RFC 2812
@@ -88,7 +72,7 @@ export function isValidChannel(channel, requirePrefix = true) {
     return false;
   }
 
-  if (requirePrefix && channel[0] !== '#') {
+  if (requirePrefix && channel[0] !== '#' && channel[0] !== '&' ) {
     return false;
   }
 
