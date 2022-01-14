@@ -95,6 +95,10 @@ And then the backend in a separate terminal:
 dispatch --dev
 ```
 
+## IRC Channel
+
+#dispatch @ irc.libera.chat
+
 ## Libraries
 
 The libraries this project is built with.
