@@ -22,7 +22,7 @@ const transformChannels = channels => {
     .map(channel => {
       channel = channel.trim();
       if (channel) {
-        if (isValidChannel(channel, false) && channel[0] !== '#') {
+        if (isValidChannel(channel, false) && channel[0] !== '#' && channel[0] !== '&') {
           channel = `#${channel}`;
         }
       }

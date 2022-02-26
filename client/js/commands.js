@@ -36,7 +36,7 @@ const findHelp = cmd =>
 export default createCommandMiddleware(COMMAND, {
   join({ dispatch, network }, channel) {
     if (channel) {
-      if (channel[0] !== '#') {
+      if (channel[0] !== '#' && channel[0] !== '&') {
         return error('Bad channel name');
       }
       dispatch(join([channel], network));
